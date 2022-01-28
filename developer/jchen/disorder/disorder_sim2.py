@@ -105,9 +105,57 @@ crystal_structure = crystal.CrystalStructure(pdb_id, tight_packing=True)
 # We want to make a hexagonal lattice with ABC stacking fault
 
 
-
+#------------
 # Turn the crystal into a P1 manually - this is just a label - does not affect anything
 crystal_structure.spacegroup.spacegroup_symbol = 'P 1'
+
+
+# Variables we have to play with
+# a = None  #: Lattice constant (float)
+# b = None  #: Lattice constant (float)
+# c = None  #: Lattice constant (float)
+# alpha = None  #: Lattice angle in radians (float)
+# beta = None  #: Lattice angle in radians (float)
+# gamma = None  #: Lattice angle in radians (float)
+# volume = None  #: Unit cell volume (float)
+# o_mat = None  #: Orthogonalization matrix (3x3 array).  Does the transform r = O.x on fractional coordinates x.
+# o_mat_inv = None  #: Inverse orthogonalization matrix (3x3 array)
+# a_mat = None  #: Orthogonalization matrix transpose (3x3 array). Does the transform q = A.h, with Miller indices h.
+# a_mat_inv = None  #: A inverse
+
+
+a = crystal_structure.unitcell.a
+b = crystal_structure.unitcell.b
+c = crystal_structure.unitcell.c
+
+al = crystal_structure.unitcell.alpha
+be = crystal_structure.unitcell.beta
+ga = np.pi/3
+
+# Set gamma to 60 degs
+crystal_structure.unitcell.gamma = ga
+
+# Re-calculate volume and o matrices
+vol = a * b * c * np.sqrt(1 - np.cos(al)**2 - np.cos(be) **
+              2 - np.cos(ga)**2 + 2 * np.cos(al) * np.cos(be) * np.cos(ga))
+crystal_structure.unitcell.volume = vol
+
+o_mat = np.array([
+        [a, b * np.cos(ga), c * np.cos(be)],
+        [0, b * np.sin(ga), c * (np.cos(al) - np.cos(be) * np.cos(ga)) / np.sin(ga)],
+        [0, 0, vol / (a * b * np.sin(ga))]
+        ])
+crystal_structure.unitcell.o_mat = o_mat
+
+o_inv = np.array([
+        [1 / a, -np.cos(ga) / (a * np.sin(ga)), 0],
+        [0, 1 / (b * np.sin(ga)), 0],
+        [0, 0, a * b * np.sin(ga) / vol]
+        ])
+crystal_structure.unitcell.o_inv = o_inv
+
+
+
 
 # Make rotations - all three rotations are the identity operator
 ok = []
@@ -116,17 +164,16 @@ for i in range(3):
 crystal_structure.spacegroup.sym_rotations = ok
 
 # Make translations
-a = crystal_structure.unitcell.a_vec
-b = crystal_structure.unitcell.b_vec
+a_vec = crystal_structure.unitcell.a_vec
+b_vec = crystal_structure.unitcell.b_vec
 
 crystal_structure.spacegroup.sym_translations = [0 for i in range(3)]
-crystal_structure.spacegroup.sym_translations[0] = np.array([0.0,0.0,0.0])
-crystal_structure.spacegroup.sym_translations[1] = (a+b)/3
-crystal_structure.spacegroup.sym_translations[2] = (2*b-a)/3
+crystal_structure.spacegroup.sym_translations[0] = crystal_structure.unitcell.r2x(np.array([0.0,0.0,0.0])) 
+crystal_structure.spacegroup.sym_translations[1] = crystal_structure.unitcell.r2x((a_vec+b_vec)/3)
+crystal_structure.spacegroup.sym_translations[2] = crystal_structure.unitcell.r2x((2*b_vec-a_vec)/3)
 
-# Set gamma to 60 degs
-crystal_structure.unitcell.gamma = np.pi/3
 
+#------------
 
 print('Number of symmetry operations: %d' % (crystal_structure.spacegroup.n_operations,))
 print(crystal_structure.unitcell)
@@ -135,7 +182,7 @@ print(crystal_structure.spacegroup)
 
 
 # Make the FiniteCrystal tool, which stores lattice coordinates + occupancies, helps create facets and more.
-finite_crystal = crystal.FiniteCrystal(crystal_structure, max_size=5)
+finite_crystal = crystal.FiniteCrystal(crystal_structure, max_size=10)
 
 
 
@@ -154,10 +201,37 @@ ax.scatter(l2[:,0], l2[:,1], l2[:,2])
 plt.show(block=False)
 
 
-finite_crystal.crystal_structure = finite_crystal.cryst
+# yay2
+
+
+A = finite_crystal.lattices[0].occupancies
+A[:,1,:] = 0
+# A[:,2,:] = 0
+# A[:,4,:] = 0
+# A[:,6,:] = 0
+finite_crystal.lattices[0].occupancies = A
+
+B = finite_crystal.lattices[1].occupancies
+# B[:,0,:] = 0
+# B[:,2,:] = 0
+# B[:,3,:] = 0
+# B[:,5,:] = 0
+finite_crystal.lattices[1].occupancies = B
+
+C = finite_crystal.lattices[2].occupancies
+# C[:,0,:] = 0
+# C[:,1,:] = 0
+# C[:,3,:] = 0
+# C[:,4,:] = 0
+# C[:,5,:] = 0
+# C[:,6,:] = 0
+finite_crystal.lattices[2].occupancies = C
+
 
 from reborn.viewers.qtviews import view_finite_crystal
 view_finite_crystal(finite_crystal)
+
+
 
 yay
 
