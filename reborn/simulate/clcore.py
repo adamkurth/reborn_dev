@@ -562,6 +562,10 @@ class ClCore(object):
             q_dev = self.to_device(q, dtype=self.real_t)
             R = self.vec16(R, dtype=self.real_t)
             U = self.vec4(U, dtype=self.real_t)
+            # print('q_dev', q_dev)
+            # print('r_dev', r_dev)
+            # print('f_dev', f_dev)
+            # print('n_atoms', n_atoms)
             global_size = np.int64(np.ceil(n_pixels / float(self.group_size)) * self.group_size)
             self.phase_factor_qrf_cl(self.queue, (global_size,),
                                      (self.group_size,), q_dev.data, r_dev.data,

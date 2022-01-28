@@ -9,7 +9,7 @@ Author: RAK, JC
 """
 import numpy as np
 from scipy.spatial.transform import Rotation
-from reborn import source, detector, const
+from reborn import source, detector, const, utils
 from reborn.target import crystal, atoms
 from reborn.simulate import clcore
 from reborn.viewers.mplviews import view_pad_data
@@ -47,7 +47,8 @@ uniq_z = np.unique(cryst.molecule.atomic_numbers)
 grouped_r_vecs = []
 grouped_fs = []
 for z in uniq_z:
-    subr = np.squeeze(r_vecs[np.where(cryst.molecule.atomic_numbers == z), :])
+    subr = r_vecs[np.where(cryst.molecule.atomic_numbers == z), :]
+    subr = utils.atleast_2d(np.squeeze(subr))
     grouped_r_vecs.append(subr)
     grouped_fs.append(atoms.hubbel_henke_scattering_factors(q_mags=q_mags, photon_energy=beam.photon_energy,
                                                             atomic_number=z))
@@ -58,7 +59,9 @@ for n in range(N_patterns):
     for j in range(len(grouped_fs)):
         f = grouped_fs[j]
         r = grouped_r_vecs[j]
-        a = simcore.phase_factor_qrf(q_vecs, r, R=R)
+        print('r', r)
+        a = simcore.phase_factor_qrf(q_vecs, r, f=np.ones([r.shape[0]]), R=R)
+        print('finite', np.sum(~np.isfinite(a)))
         amps += a*f
     ints = r_e**2*fluence*solid_angles*polarization_factors*np.abs(amps)**2
     if is_poisson_noise == True:

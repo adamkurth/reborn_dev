@@ -123,6 +123,15 @@ def vec_mag(vec):
     return np.sqrt(np.sum(vec * vec, axis=(vec.ndim - 1)))
 
 
+# def vec_shape(vec):
+#     if not len(vec.shape) == 2:
+#         vec = atleast_2d(np.squeeze(subr))
+#     if not len(vec.shape) == 2:
+#         raise ValueError('Too many dimensions')
+#     if vec.shape[1] != 3:
+#         raise ValueError('These cannot be 3D vectors... wrong shape...')
+#     return vec
+
 def depreciate(*message, caller=0, **kwargs):
     r"""
     Utility for sending warnings when some class, method, function, etc. is depreciated.  It simply prints a message of
