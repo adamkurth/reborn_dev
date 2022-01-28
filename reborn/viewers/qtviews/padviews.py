@@ -87,11 +87,9 @@ class DummyFrameGetter(FrameGetter):
 class PADView(QtCore.QObject):
 
     r"""
-    This is supposed to be an easy way to view PAD data, particularly if you have multiple
-    detector panels.  You can set it up by providing a list of :class:`PADGeometry` instances
-    along with a list of data arrays.
+    This is supposed to be an easy way to view PAD data.  It is a work in progress... but here is the basic concept:
 
-    It is a work in progress...
+    |PADView| relies on a |FrameGetter| subclass to serve up |DataFrames|.
     """
 
     # Note that most of the interface was created using the QT Designer tool.  There are many attributes that are
@@ -137,7 +135,6 @@ class PADView(QtCore.QObject):
             pad_geometry (|PADGeometry| list): PAD geometry information.
             mask_data (|ndarray| list): Data masks.
             raw_data (|ndarray| or list of): The data arrays, or a dictionary with at least a 'pad_data' key.
-            pad_data (|ndarray| or list of): Same as raw_data
             beam (|Beam|): X-ray beam parameters.
             frame_getter (|FrameGetter| subclass): Optionally, a frame getter.
         """

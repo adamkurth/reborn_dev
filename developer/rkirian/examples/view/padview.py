@@ -17,11 +17,11 @@ class MyFrameGetter(FrameGetter):
         # self.simulator = examples.PDBMoleculeSimulator(pdb_file=pdb, pad_geometry=geom, beam=beam)
     def get_data(self, frame_number=0):
         np.random.seed(frame_number)
-        I = geom.q_mags()
+        I = geom.q_mags(beam=beam)
         # I = self.simulator.next()
         # tot = np.sum(I.ravel())
         # I *= 1e5/tot
-        I = np.random.poisson(I)
+        # I = np.random.poisson(I)
         # I = np.double(I)
         df = dataframe.DataFrame()
         df.set_beam(beam)

@@ -31,6 +31,7 @@ class Plugin():
 class Widget(QtGui.QWidget):
 
     stats = None
+    worker = None
 
     def __init__(self, padview):
         super().__init__()
@@ -81,10 +82,19 @@ class Widget(QtGui.QWidget):
         self.layout.addWidget(self.start_button, row, 1, 1, 2)
         self.setLayout(self.layout)
         row += 1
+        self.stop_button = QtGui.QPushButton("Stop")
+        self.stop_button.clicked.connect(self.terminate_thread)
+        self.stop_button.setEnabled(False)
+        self.layout.addWidget(self.stop_button, row, 1, 1, 2)
+        self.setLayout(self.layout)
+        row += 1
         self.show_button = QtGui.QPushButton("Show")
         self.show_button.clicked.connect(self.show_padstats)
+        self.show_button.setEnabled(False)
         self.layout.addWidget(self.show_button, row, 1, 1, 2)
         self.setLayout(self.layout)
+
+        # self.threadpool = QtCore.QThreadPool()
 
     def get_padstats(self):
         self.padview.debug()
@@ -94,14 +104,44 @@ class Widget(QtGui.QWidget):
             parallel = True
         start = int(self.start_frame_spinbox.value())
         stop = int(self.stop_frame_spinbox.value())
-        self.stats = padstats(framegetter=self.padview.frame_getter, start=start, stop=stop, parallel=parallel,
+        # self.stats = padstats(framegetter=self.padview.frame_getter, start=start, stop=stop, parallel=parallel,
+        #                       n_processes=np, verbose=1)
+        self.worker = Worker(self, framegetter=self.padview.frame_getter, start=start, stop=stop, parallel=parallel,
                               n_processes=np, verbose=1)
+        self.start_button.setEnabled(False)
+        self.stop_button.setEnabled(True)
+        self.worker.start()
 
     def show_padstats(self):
         self.padview.debug()
         if self.stats is None:
-            self.get_padstats()
+            print('No stats to show yet... wait for the job to finish...')
+            return
         fg = padstats_framegetter(self.stats)
         pv = PADView(frame_getter=fg, main=False)
         pv.start()
 
+    def terminate_thread(self):
+        if self.worker is not None:
+            print('Attempting to exit thread...')
+            self.worker.exit()
+
+
+class Worker(QtCore.QThread):
+    def __init__(self, parent, *args, **kwargs):
+        super().__init__()
+        self.parent = parent
+        self.args = args
+        self.kwargs = kwargs
+        self.stats = None
+    def run(self):
+        self.parent.start_button.setEnabled(False)
+        self.parent.show_button.setEnabled(False)
+        self.parent.stop_button.setEnabled(True)
+        self.parent.stats = padstats(*self.args, **self.kwargs)
+        self.parent.show_padstats()
+        self.parent.start_button.setEnabled(True)
+        self.parent.show_button.setEnabled(True)
+        self.parent.stop_button.setEnabled(False)
+        # self.quit()
+        # self.wait()

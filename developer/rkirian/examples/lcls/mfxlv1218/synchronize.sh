@@ -1,5 +1,5 @@
 #!/bin/bash
-remote=psexport:/reg/d/psdm/mfx/mfxlv1218/scratch/rkirian/reborn_repo
+remote=psexport:/reg/d/psdm/mfx/mfxlv1218/scratch/rkirian/reborn
 local=../../../../../../reborn/
 rsync -arv --stats --progress --exclude='*.md5' --exclude='*.so' --exclude=__pycache__ --exclude='*swp' --exclude=.git $local $remote
 #

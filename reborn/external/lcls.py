@@ -325,6 +325,13 @@ class LCLSFrameGetter(reborn.fileio.getters.FrameGetter):
     def __init__(self, experiment_id, run_number, pad_detectors, max_events=1e6, psana_dir=None, beam=None, idx=True):
         debug_message('Initializing superclass')
         super().__init__()  # initialize the superclass
+        self.init_params = {"experiment_id": experiment_id,
+                            "run_number": run_number,
+                            "pad_detectors": pad_detectors,
+                            "max_events": max_events,
+                            "psana_dir": psana_dir,
+                            "beam": beam,
+                            "idx": idx}
         self.run_number = run_number
         self.data_string = f'exp={experiment_id}:run={run_number}:smd'
         debug_message('datastring', self.data_string)

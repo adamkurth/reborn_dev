@@ -104,7 +104,9 @@ def padstats_framegetter(stats):
     mask = stats['mask']
     meen = stats['sum']/stats['n_frames']
     meen2 = stats['sum2']/stats['n_frames']
-    sdev = np.sqrt(meen2-meen**2)
+    sdev = np.nan_to_num(meen2-meen**2)
+    sdev[sdev < 0] = 0
+    sdev = np.sqrt(sdev)
     dats = (('mean', meen), ('sdev', sdev), ('min', stats['min']), ('max', stats['max']))
     dfs = []
     for (a, b) in dats:
