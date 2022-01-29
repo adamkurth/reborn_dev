@@ -104,7 +104,7 @@ for j in range(len(grouped_fs)):
 # %%
 # Convert to photons per pixel then add sPoisson noise
 ints = r_e**2*fluence*solid_angles*polarization_factors*np.abs(amps)**2
-ints = np.double(np.random.poisson(ints))
+# ints = np.double(np.random.poisson(ints))
 print('# photons total: %d' % np.round(np.sum(detector.concat_pad_data(ints))))
 
 # %%
