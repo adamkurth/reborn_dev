@@ -949,7 +949,7 @@ class PADGeometryList(list):
             if isinstance(data, list):
                 datacat = np.zeros(self[0].parent_data_shape, dtype=data[0].dtype)
                 for (p, d) in zip(self, data):
-                    datacat[p.parent_data_slice] = d
+                    datacat[p.parent_data_slice] = p.reshape(d)
                 return datacat.ravel()
         return concat_pad_data(data)
 
@@ -970,63 +970,63 @@ class PADGeometryList(list):
 
     def position_vecs(self):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
-        return np.concatenate([p.position_vecs().ravel() for p in self]).reshape([self.n_pixels, 3])
+        return self.concat_data([p.position_vecs().ravel() for p in self]).reshape([self.n_pixels, 3])
 
     def s_vecs(self):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
-        return np.concatenate([p.s_vecs().ravel() for p in self]).reshape([self.n_pixels, 3])
+        return self.concat_data([p.s_vecs().ravel() for p in self]).reshape([self.n_pixels, 3])
 
     def ds_vecs(self, beam):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
-        return np.concatenate([p.ds_vecs(beam=beam).ravel() for p in self]).reshape([self.n_pixels, 3])
+        return self.concat_data([p.ds_vecs(beam=beam).ravel() for p in self]).reshape([self.n_pixels, 3])
 
     def q_vecs(self, beam):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
-        return np.concatenate([p.q_vecs(beam=beam).ravel() for p in self]).reshape([self.n_pixels, 3])
+        return self.concat_data([p.q_vecs(beam=beam).ravel() for p in self]).reshape([self.n_pixels, 3])
 
     def q_mags(self, beam):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
-        return np.concatenate([p.q_mags(beam=beam).ravel() for p in self])
+        return self.concat_data([p.q_mags(beam=beam).ravel() for p in self])
 
     def solid_angles(self):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
-        return np.concatenate([p.solid_angles().ravel() for p in self])
+        return self.concat_data([p.solid_angles().ravel() for p in self])
 
     def solid_angles1(self):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
-        return np.concatenate([p.solid_angles1().ravel() for p in self])
+        return self.concat_data([p.solid_angles1().ravel() for p in self])
 
     def solid_angles2(self):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
-        return np.concatenate([p.solid_angles2().ravel() for p in self])
+        return self.concat_data([p.solid_angles2().ravel() for p in self])
 
     def polarization_factors(self, beam):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
-        return np.concatenate([p.polarization_factors(beam=beam).ravel() for p in self])
+        return self.concat_data([p.polarization_factors(beam=beam).ravel() for p in self])
 
     def scattering_angles(self, beam):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
-        return np.concatenate([p.scattering_angles(beam=beam).ravel() for p in self])
+        return self.concat_data([p.scattering_angles(beam=beam).ravel() for p in self])
 
     def azimuthal_angles(self, beam):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
-        return np.concatenate([p.azimuthal_angles(beam).ravel() for p in self])
+        return self.concat_data([p.azimuthal_angles(beam).ravel() for p in self])
 
     def beamstop_mask(self, beam=None, q_min=None, min_angle=None):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
-        return np.concatenate([p.beamstop_mask(beam, q_min, min_angle).ravel() for p in self])
+        return self.concat_data([p.beamstop_mask(beam, q_min, min_angle).ravel() for p in self])
 
     def zeros(self, *args, **kwargs):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
-        return np.concatenate([p.zeros(*args, **kwargs).ravel() for p in self])
+        return self.concat_data([p.zeros(*args, **kwargs).ravel() for p in self])
 
     def ones(self, *args, **kwargs):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
-        return np.concatenate([p.ones(*args, **kwargs).ravel() for p in self])
+        return self.concat_data([p.ones(*args, **kwargs).ravel() for p in self])
 
     def random(self, *args, **kwargs):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
-        return np.concatenate([p.random(*args, **kwargs).ravel() for p in self])
+        return self.concat_data([p.random(*args, **kwargs).ravel() for p in self])
 
     def max_resolution(self, beam):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
@@ -1245,8 +1245,9 @@ class PADAssembler:
     "interpolate" are cached, hence the need for a class.  The geometry cannot change; there is no update method.
     """
     def __init__(self, pad_list):
+        pad_list = PADGeometryList(pad_list)
         pixel_size = utils.vec_mag(pad_list[0].fs_vec)
-        position_vecs_concat = np.concatenate([p.position_vecs() for p in pad_list])
+        position_vecs_concat = pad_list.concat_data([p.position_vecs() for p in pad_list])
         position_vecs_concat -= np.min(position_vecs_concat, axis=0)
         position_vecs_concat /= pixel_size
         position_vecs_concat = np.floor(position_vecs_concat).astype(np.int64)
@@ -1439,6 +1440,7 @@ class PolarPADAssembler:
         self.phi_min = phi_min
         self.q_mags = q_mags
         self.phis = pad_geometry.azimuthal_angles(beam=beam)
+        self.pad_geometry = pad_geometry
 
     def get_mean(self, data, mask=None):
         r""" Create the mean polar-binned average intensities.
@@ -1448,7 +1450,7 @@ class PolarPADAssembler:
         """
         # TODO: Implement mask
         # TODO: Speed up the algorithm.  Fortran?
-        data = concat_pad_data(data)
+        data = self.pad_geometry.concat_data(data)
         n_q = self.n_q_bins
         q_size = self.q_bin_size
         n_phi = self.n_phi_bins
@@ -1550,7 +1552,7 @@ class RadialProfiler:
     @mask.setter
     def mask(self, mask):
         if mask is not None:
-            mask = concat_pad_data(mask)
+            mask = self.pad_geometry.concat_data(mask)
             # if self._mask is not None:  # Check if we already have an identical mask
             #     if np.sum(np.abs(mask - self.mask)) == 0:
             #         return
@@ -1605,7 +1607,7 @@ class RadialProfiler:
                 raise ValueError("You must provide a |Beam| if q_mags are not provided in RadialProfiler")
             pad_geometry = PADGeometryList(pad_geometry)
             q_mags = pad_geometry.q_mags(beam=beam)
-        q_mags = concat_pad_data(q_mags)
+        q_mags = pad_geometry.concat_data(q_mags)
         if q_range is None:
             q_range = (0, np.max(q_mags))
         if n_bins is None:
@@ -1639,7 +1641,7 @@ class RadialProfiler:
 
         Returns: |ndarray|
         """
-        data = concat_pad_data(data)
+        data = self.pad_geometry.concat_data(data)
         q_mags = self._q_mags
         if mask is not None:
             self.mask = mask
@@ -1680,7 +1682,7 @@ class RadialProfiler:
 
         Returns:  |ndarray|
         """
-        data = concat_pad_data(data)
+        data = self.pad_geometry.concat_data(data)
         return self.get_profile_statistic(data, mask=mask, statistic=np.sum)
 
     def get_mean_profile(self, data, mask=None):
@@ -1694,7 +1696,7 @@ class RadialProfiler:
 
         Returns: |ndarray|
         """
-        data = concat_pad_data(data)
+        data = self.pad_geometry.concat_data(data)
         return self.get_profile_statistic(data, mask=mask, statistic=np.mean)
 
     def get_median_profile(self, data, mask=None):
@@ -1708,7 +1710,7 @@ class RadialProfiler:
 
         Returns:  |ndarray|
         """
-        data = concat_pad_data(data)
+        data = self.pad_geometry.concat_data(data)
         return self.get_profile_statistic(data, mask=mask, statistic=np.median)
 
     def get_sdev_profile(self, data, mask=None):
@@ -1722,7 +1724,7 @@ class RadialProfiler:
 
         Returns:  |ndarray|
         """
-        data = concat_pad_data(data)
+        data = self.pad_geometry.concat_data(data)
         return self.get_profile_statistic(data, mask=mask, statistic=np.std)
 
     def subtract_profile(self, data, mask=None, statistic=np.median):
@@ -1750,12 +1752,12 @@ class RadialProfiler:
             # raise ValueError('Statistic %s not recognized' % (statistic,))
         mprofq = self.bin_centers
         mpat = np.interp(self._q_mags, mprofq, mprof)
-        mpat = concat_pad_data(mpat)
-        data = concat_pad_data(data)
+        mpat = self.pad_geometry.concat_data(mpat)
+        data = self.pad_geometry.concat_data(data)
         data = data.copy()
         data -= mpat
         if as_list:
-            data = split_pad_data(self.pad_geometry, data)
+            data = self.pad_geometry.split_data(data)
         return data
 
     def subtract_median_profile(self, data, mask=None):

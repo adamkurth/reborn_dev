@@ -57,7 +57,9 @@ Edited by Konstantinos Karpos
 # kind of initialization:
 
 import numpy as np
+import matplotlib.pyplot as plt
 from scipy.ndimage import gaussian_filter
+import reborn
 from reborn import detector, source, temp_dir
 from reborn.viewers.mplviews import view_pad_data
 
@@ -352,6 +354,40 @@ c_geom = detector.PADGeometryList(rayonix_geom + epix_geom)
 # Create some arbitrary data
 data = [np.random.random(p.n_pixels)*p.polarization_factors(beam=beam) for p in c_geom]
 view_pad_data(pad_geometry=c_geom, pad_data=data)
+
+# %%
+# Data slicing for non-contiguous PADs
+# ------------------------------------
+
+# %%
+# There are many cases in which PAD data are stored as non-contiguous arrays.  As an example, we will look at a
+# Cheetah-formatted CSPAD array.  We will start with a CrystFEL "geom" file, which happens to define the data slices
+# for the Cheetah format (which differs from the native LCLS format).
+
+from reborn.external import crystfel
+geomfile = reborn.data.cspad_geom_file
+pads = crystfel.geometry_file_to_pad_geometry_list(geomfile)
+
+# %%
+# Let's look at the details of the first PAD:
+
+print(pads[0])
+
+# %%
+# As you can see, the parent_data_slice and parent_data_shape attributes have been propagated from the CrystFEL geometry
+# file into the |PADGeometry| instances.  These have the information needed to slice out individual PADs from the
+# data that are stored on disk.  Let's use an example to see what's going on.  First we display the data
+# in the normal way:
+
+sa = pads.solid_angles()
+view_pad_data(pad_geometry=pads, pad_data=sa)
+
+# %%
+# Now let's see how the data looks in it's original format:
+
+sa2 = pads.reshape(sa)
+plt.imshow(sa2)
+plt.show()
 
 # %%
 # Conclusions
