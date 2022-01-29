@@ -32,7 +32,7 @@ import numpy as np
 import pkg_resources
 import pyopencl as cl
 import pyopencl.array
-from ..utils import depreciate
+from ..utils import depreciate, vec_shape
 cl_array = cl.array.Array
 clcore_file = pkg_resources.resource_filename('reborn.simulate', 'clcore.cpp')
 
@@ -551,6 +551,8 @@ class ClCore(object):
         if n_chunks > 1:
             self._phase_factor_qrf_chunk_r(q=q, r=r, f=f, R=R, U=U, a=a, add=add, twopi=twopi, n_chunks=n_chunks)
         else:
+            r = vec_shape(r)
+            q = vec_shape(q)
             if R is None: R = np.eye(3)
             if U is None: U = np.zeros(3, dtype=self.real_t)
             add = self.int_t(add)
@@ -562,10 +564,6 @@ class ClCore(object):
             q_dev = self.to_device(q, dtype=self.real_t)
             R = self.vec16(R, dtype=self.real_t)
             U = self.vec4(U, dtype=self.real_t)
-            # print('q_dev', q_dev)
-            # print('r_dev', r_dev)
-            # print('f_dev', f_dev)
-            # print('n_atoms', n_atoms)
             global_size = np.int64(np.ceil(n_pixels / float(self.group_size)) * self.group_size)
             self.phase_factor_qrf_cl(self.queue, (global_size,),
                                      (self.group_size,), q_dev.data, r_dev.data,

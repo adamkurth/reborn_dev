@@ -25,32 +25,30 @@ Imports:
 """
 
 import numpy as np
-import scipy.constants as const
 from scipy.spatial.transform import Rotation
-from reborn import detector
-from reborn.source import Beam
+from reborn import source, detector, const
 from reborn.target import crystal, atoms
 from reborn.simulate import clcore
 from reborn.viewers.mplviews import view_pad_data
 
 # %%
 # Define some constants and other parameters that we'll need:
-eV = const.value('electron volt')
-r_e = const.value('classical electron radius')
+eV = const.eV
+r_e = const.r_e
 np.random.seed(0)  # Make random numbers that are reproducible
 
 # %%
 # Setup the beam and detector.  Note that the Jungfrau 4M detector has multiple panels, so we need to deal with lists
 # of detector panels for things like scattering vectors, pixel solid angles, etc.
-beam = Beam(photon_energy=9000*eV, diameter_fwhm=0.2e-6, pulse_energy=2)
+beam = source.Beam(photon_energy=9000*eV, diameter_fwhm=0.2e-6, pulse_energy=2)
 fluence = beam.photon_number_fluence
-pads = detector.jungfrau4m_pad_geometry_list(detector_distance=0.2)
+pads = detector.jungfrau4m_pad_geometry_list(detector_distance=0.1)
 # Speed up simulations by binning pixels 16x16
 pads = pads.binned(16)
-q_vecs = [pad.q_vecs(beam=beam) for pad in pads]
-solid_angles = [pad.solid_angles() for pad in pads]
-polarization_factors = [pad.polarization_factors(beam=beam) for pad in pads]
-q_mags = [p.q_mags(beam=beam) for p in pads]
+q_vecs = pads.q_vecs(beam=beam)
+solid_angles = pads.solid_angles()
+polarization_factors = pads.polarization_factors(beam=beam)
+q_mags = pads.q_mags(beam=beam)
 
 # %%
 # Here is the resolution range:
@@ -83,7 +81,8 @@ simcore.print_device_info()
 #     I(\vec{q}) = J_0 \Delta \Omega r_e^2 P(\vec{q})\left| \sum_n f_n(q) \sum_m \exp(i \vec{q}\cdot\vec{r}_{mn}) \right|^2
 #
 # The double sum allows us to compute the atomic form factors :math:`f_n(q)` just once for each atom type :math:`n`.
-# We must search through the atom types and group them according to atomic number.
+# We must search through the atom types and group them according to atomic number.  In this example we will use the
+# |Hubbel1975| q-dependent form factors mixed with the energy-dependent dispersion corrections from |Henke1993|.
 uniq_z = np.unique(atomic_numbers)
 grouped_r_vecs = []
 grouped_fs = []
@@ -95,29 +94,19 @@ for z in uniq_z:
 
 # %%
 # Now we have the atomic coordinates :math:`\vec{r}_{mn}` and scattering factors :math:`f_n(q)` for atom type
-# :math:`n` and atom number :math:`m`.  Note that we also have a list of detector panels (PADs) that we must loop over.
-# Here we go!
+# :math:`n` and atom number :math:`m`.
 R = Rotation.random().as_matrix()  # Just for fun, let's rotate the molecule
-intensities = []
-for i in range(len(pads)):
-    pad = pads[i]
-    sa = solid_angles[i]
-    p = polarization_factors[i]
-    q = q_vecs[i]
-    amps = 0
-    for j in range(len(grouped_fs)):
-        f = grouped_fs[j][i]
-        r = grouped_r_vecs[j]
-        a = simcore.phase_factor_qrf(q, r, R=R)
-        amps += a*f
-    ints = r_e**2*fluence*sa*p*np.abs(amps)**2
-    intensities.append(pad.reshape(ints))
+amps = 0
+for j in range(len(grouped_fs)):
+    print('element z =', uniq_z[j])
+    amps += grouped_fs[j] * simcore.phase_factor_qrf(q_vecs, grouped_r_vecs[j], R=R)
 
 # %%
-# Let's see how many photons hit the detector:
-print('# photons total: %d' % np.round(np.sum(detector.concat_pad_data(intensities))))
+# Convert to photons per pixel then add sPoisson noise
+ints = r_e**2*fluence*solid_angles*polarization_factors*np.abs(amps)**2
+ints = np.double(np.random.poisson(ints))
+print('# photons total: %d' % np.round(np.sum(detector.concat_pad_data(ints))))
 
 # %%
-# Finally, display the pattern:
-dispim = [np.log10(d+1) for d in intensities]
-view_pad_data(pad_data=dispim, pad_geometry=pads)
+# Finally, display the pattern (plus 1, log scale):
+view_pad_data(pad_data=np.log10(ints+1), pad_geometry=pads)

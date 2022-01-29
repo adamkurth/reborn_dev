@@ -123,14 +123,25 @@ def vec_mag(vec):
     return np.sqrt(np.sum(vec * vec, axis=(vec.ndim - 1)))
 
 
-# def vec_shape(vec):
-#     if not len(vec.shape) == 2:
-#         vec = atleast_2d(np.squeeze(subr))
-#     if not len(vec.shape) == 2:
-#         raise ValueError('Too many dimensions')
-#     if vec.shape[1] != 3:
-#         raise ValueError('These cannot be 3D vectors... wrong shape...')
-#     return vec
+def vec_shape(vec):
+    r"""
+    Ensure that an array has the proper shape that is expected of 3-vector arrays.  They should always be 2-dimensional,
+    with shape (N, 3).
+
+    Arguments:
+        vec (|ndarray|): The vector array.
+
+    Returns:
+        |ndarray| with shape (N, 3)
+
+    """
+    vec = atleast_2d(np.squeeze(vec))
+    if len(vec.shape) != 2:
+        raise ValueError('Something is wrong with your vector array shape. It should be (N, 3)')
+    if vec.shape[1] != 3:
+        raise ValueError('Something is wrong with your vector array shape. It should be (N, 3).')
+    return vec
+
 
 def depreciate(*message, caller=0, **kwargs):
     r"""
