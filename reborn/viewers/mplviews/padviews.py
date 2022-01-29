@@ -41,7 +41,7 @@ def view_pad_data(pad_data, pad_geometry, pad_numbers=False, beam_center=False, 
     if background_color is not None:
         ax.set_facecolor(background_color)
 
-    pad_data_concated = concat_pad_data(pad_data)
+    pad_data_concated = pads.concat_data(pad_data)
 
     if vmin == None:
         vmin = np.min(pad_data_concated)

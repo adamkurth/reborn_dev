@@ -24,21 +24,20 @@ Contributed by Richard Kirian.
 First the imports:
 """
 
-from reborn.external import crystfel
-from reborn.data import cspad_geom_file
+from reborn import detector
 from reborn.viewers.mplviews import view_pad_data
 
 # %%
 # In this example we will load a CrystFEL geometry file.  We use a file that is included with reborn as an example:
-pads = crystfel.geometry_file_to_pad_geometry_list(cspad_geom_file)
+pads = detector.cspad_pad_geometry_list(detector_distance=0.2)
 # %%
-# We will display the q-vector magnitudes, so we make a list of 2D arrays with those values.
-q_mags = [p.reshape(p.q_mags(wavelength=1.5e-10, beam_vec=[0, 0, 1])) for p in pads]
+# We will display the solid angles since we don't have diffraction data handy:
+dat = pads.solid_angles()
 # %%
 # Here's the convenience function for viewing a PAD.  It doesn't have many features at this time, but should suffice to
 # have a quick look at your geometry.  If you want something more elaborate, you should look at the source code and
 # copy/modify as needed.
-view_pad_data(pad_data=q_mags, pad_geometry=pads, pad_numbers=True, show_coords=True, show_scans=True)
+view_pad_data(pad_data=dat, pad_geometry=pads, pad_numbers=True, show_coords=True, show_scans=True)
 # %%
 # Now let's do a little sanity check to make sure that we understand what we are looking at.
 # Note that the `show_scans` keyword will indicate the locations of the corners of the 2D numpy arrays, and also the
