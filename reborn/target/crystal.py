@@ -107,17 +107,10 @@ class UnitCell(object):
     alpha = None  #: Lattice angle in radians (float)
     beta = None  #: Lattice angle in radians (float)
     gamma = None  #: Lattice angle in radians (float)
-    # volume = None  #: Unit cell volume (float)
-    # o_mat = None  #: Orthogonalization matrix (3x3 array).  Does the transform r = O.x on fractional coordinates x.
-    # o_mat_inv = None  #: Inverse orthogonalization matrix (3x3 array)
-    # a_mat = None  #: Orthogonalization matrix transpose (3x3 array). Does the transform q = A.h, with Miller indices h.
-    # a_mat_inv = None  #: A inverse
 
     def __init__(self, a, b, c, alpha, beta, gamma):
         r"""
         Always initialize with the lattice parameters.  Units are SI and radians.
-
-        FIXME: Allow initialization by other specifications
 
         Arguments:
             a: Lattice constant
@@ -151,6 +144,7 @@ class UnitCell(object):
 
     @property
     def o_mat(self):
+        r""" Orthogonalization matrix (3x3 array).  Does the transform r = O.x on fractional coordinates x. """
         a = self.a
         b = self.b
         c = self.c
@@ -167,6 +161,7 @@ class UnitCell(object):
 
     @property
     def o_mat_inv(self):
+        r""" Inverse orthogonalization matrix (3x3 array) """
         a = self.a
         b = self.b
         c = self.c
@@ -183,14 +178,17 @@ class UnitCell(object):
 
     @property
     def a_mat(self):
+        r""" Orthogonalization matrix transpose (3x3 array). Does the transform q = A.h, with Miller indices h. """
         return self.o_mat_inv.T.copy()
 
     @property
     def a_mat_inv(self):
+        r""" Orthogonalization matrix transpose (3x3 array). Does the transform q = A.h, with Miller indices h. """
         return self.o_mat.T.copy()
 
     @property
     def volume(self):
+        r""" Unit cell volume (float) """
         a = self.a
         b = self.b
         c = self.c
@@ -260,11 +258,15 @@ class SpaceGroup(object):
     sym_rotations = None      #: List of 3x3 transformation matrices (fractional coordinates)
     sym_translations = None   #: List of symmetry translation vectors (fractional coordinates)
 
-    def __init__(self, spacegroup_symbol, sym_rotations, sym_translations):
+    def __init__(self, spacegroup_symbol=None, sym_rotations=None, sym_translations=None, hall_number=None):
         r"""
-        Initialization requires that you determine the lists of rotations and translations yourself and provide them
-        upon instantiation.
+
         """
+        if hall_number is not None:
+            import spglib
+            ops = spglib.get_symmetry_from_database(hall_number)
+            sym_rotations = ops['rotations']
+            sym_translations = ops['translations']
         self.spacegroup_symbol = spacegroup_symbol
         self.sym_rotations = sym_rotations
         self.sym_translations = sym_translations
