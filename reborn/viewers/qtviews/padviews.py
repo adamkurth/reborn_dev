@@ -121,6 +121,7 @@ class PADView(QtCore.QObject):
     apply_filters = True
     plugins = None
     _auto_percentiles = None
+    _fixed_title = False
 
     status_bar_style = "background-color:rgb(30, 30, 30);color:rgb(255,0,255);font-weight:bold;font-family:monospace;"
     peak_style = {'pen': pg.mkPen('g'), 'brush': None, 'width': 5, 'size': 10, 'pxMode': True}
@@ -300,17 +301,19 @@ class PADView(QtCore.QObject):
         self.debug()
         if title is not None:
             self.main_window.setWindowTitle(title)
-        title = ''
-        try:
-            t = self.dataframe.get_dataset_id().__str__()
-            if t:
-                title += t+' '
-            f = self.dataframe.get_frame_id().__str__()
-            if f:
-                title += f
-            self.main_window.setWindowTitle(title)
-        except:
-            pass
+            self._fixed_title = True
+        if not self._fixed_title:
+            title = ''
+            try:
+                t = self.dataframe.get_dataset_id().__str__()
+                if t:
+                    title += t+' '
+                f = self.dataframe.get_frame_id().__str__()
+                if f:
+                    title += f
+                self.main_window.setWindowTitle(title)
+            except:
+                pass
 
     def setup_mouse_interactions(self):
         r""" I don't know what this does... obviously something about mouse interactions... """
