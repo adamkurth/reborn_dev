@@ -400,6 +400,8 @@ class CrystalStructure(object):
         a, b, c, al, be, ga = dic['unit_cell']
 
         if unitcell is not None:  # Override the PDB unit cell from the start
+            if isinstance(unitcell, list) or isinstance(unitcell, tuple):
+                unitcell = UnitCell(*unitcell)
             self.unitcell = unitcell
             S = self.unitcell.o_mat_inv * 1e-10  # Convert units
             U = np.zeros(3)
