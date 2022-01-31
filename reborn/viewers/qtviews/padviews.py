@@ -122,6 +122,8 @@ class PADView(QtCore.QObject):
     plugins = None
     _auto_percentiles = None
     _fixed_title = False
+    _dataframe_preprocessor = None
+    _fixed_levels = None
 
     status_bar_style = "background-color:rgb(30, 30, 30);color:rgb(255,0,255);font-weight:bold;font-family:monospace;"
     peak_style = {'pen': pg.mkPen('g'), 'brush': None, 'width': 5, 'size': 10, 'pxMode': True}
@@ -130,7 +132,7 @@ class PADView(QtCore.QObject):
     sig_beam_changed = QtCore.pyqtSignal()
 
     def __init__(self, pad_geometry=None, mask_data=None, frame_getter=None, raw_data=None, pad_data=None,
-                 beam=None, percentiles=None, debug_level=0, main=True):
+                 beam=None, levels=None, percentiles=None, debug_level=0, main=True, dataframe_preprocessor=None):
         """
         Arguments:
             pad_geometry (|PADGeometry| list): PAD geometry information.
@@ -143,7 +145,9 @@ class PADView(QtCore.QObject):
         self.debug_level = debug_level
         self.debug()
         self.main = main
+        self._dataframe_preprocessor = dataframe_preprocessor
         self._auto_percentiles = percentiles
+        self._fixed_levels = levels
         self.debug('frame_getter:', frame_getter)
         if frame_getter is not None:
             self.frame_getter = frame_getter
@@ -238,6 +242,8 @@ class PADView(QtCore.QObject):
 
     @dataframe.setter
     def dataframe(self, val):
+        if self._dataframe_preprocessor is not None:
+            val = self._dataframe_preprocessor(val)
         if isinstance(val, DataFrame):
             self._dataframe = val
             return
@@ -876,6 +882,8 @@ class PADView(QtCore.QObject):
             self.pad_image_items[i].setImage(d)
         if self._auto_percentiles is not None:
             self.set_levels_by_percentiles(percents=self._auto_percentiles)
+        if self._fixed_levels is not None:
+            self.set_levels(self._fixed_levels[0], self._fixed_levels[1])
         self.histogram.regionChanged()
         self.set_title()
 

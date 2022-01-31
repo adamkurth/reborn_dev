@@ -13,8 +13,8 @@ h = const.h
 c = const.c
 photon_energy = 7000*eV
 detector_distance = 2.4
-pulse_energy = 0.5e-3
-drop_diameter = 100e-9
+pulse_energy = 0.1e-3
+drop_diameter = 71e-9
 beam_diameter = 0.5e-6
 beam = Beam(photon_energy=photon_energy, diameter_fwhm=beam_diameter, pulse_energy=pulse_energy)
 fluence = beam.photon_number_fluence

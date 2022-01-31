@@ -551,8 +551,8 @@ class ClCore(object):
         if n_chunks > 1:
             self._phase_factor_qrf_chunk_r(q=q, r=r, f=f, R=R, U=U, a=a, add=add, twopi=twopi, n_chunks=n_chunks)
         else:
-            r = vec_shape(r)
-            q = vec_shape(q)
+            # r = vec_shape(r)
+            # q = vec_shape(q)
             if R is None: R = np.eye(3)
             if U is None: U = np.zeros(3, dtype=self.real_t)
             add = self.int_t(add)
@@ -1067,6 +1067,55 @@ class ClCore(object):
                                                   nF, nS, w, T, F, S, B, add)
         self.queue.finish()
 
+        if I is None:
+            return I_dev.get()
+        else:
+            return I_dev
+
+    def gaussian_lattice_transform_intensities(self, q, abc, N, R=None, I=None, add=False):
+        r"""
+        Calculate crystal lattice transform intensities.  Uses a Gaussian approximation to the lattice transform.
+
+        Arguments:
+            q (|ndarray|)     : q vectors.
+            abc (|ndarray|)   : A 3x3 array containing real-space basis vectors.  Vectors are contiguous
+                                in memory.
+            N (|ndarray|)     : An array containing number of unit cells along each of three axes.
+            R (|ndarray|)     : Rotation matrix acting on atom vectors.
+                (we quietly transpose R and let it operate on q-vectors for speedups)
+            I (:class:pyopencl.array.Array) : OpenCL device array containing intensities.
+            add (bool)        : If true, the function will add to the input I buffer, else the buffer is
+                                overwritten.
+
+        Returns:
+            If I == None, then the output is a numpy array.  Otherwise, it is an opencl array.
+        """
+
+        if not hasattr(self, 'gaussian_lattice_transform_intensities_cl'):
+            self.gaussian_lattice_transform_intensities_cl = self.programs.gaussian_lattice_transform_intensities
+            self.gaussian_lattice_transform_intensities_cl.set_scalar_arg_dtypes(
+                [None, None, None, None, None, self.int_t, self.int_t])
+
+        if R is None:
+            R = np.eye(3)
+        R = self.vec16(R, dtype=self.real_t)
+
+        n_pixels = self.int_t(len(q.ravel())/3)
+        if add is True:
+            add = 1
+        else:
+            add = 0
+        add = self.int_t(add)
+
+        abc = self.vec16(abc, dtype=self.real_t)
+        N = self.vec4(N, dtype=self.int_t)
+        I_dev = self.to_device(I, dtype=self.real_t, shape=(n_pixels))
+        q_dev = self.to_device(q, dtype=self.real_t)
+
+        global_size = np.int(np.ceil(n_pixels / np.float(self.group_size)) * self.group_size)
+        self.gaussian_lattice_transform_intensities_cl(self.queue, (global_size,),
+                                                  (self.group_size,), q_dev.data, abc, N, R, I_dev.data, n_pixels, add)
+        self.queue.finish()
         if I is None:
             return I_dev.get()
         else:

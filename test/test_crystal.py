@@ -133,3 +133,55 @@ def test_08():
             dat1 = cdmap.au_to_k(k, dat)
             dat2 = cdmap.symmetry_transform(0, k, dat)
             assert np.sum(np.abs(dat2 - dat1)) == 0
+
+
+def test_spacegroup():
+
+    hmsymb = 'I 41/a -3 2/d'
+    hall_number = crystal.hall_number_from_hermann_mauguin_symbol(hmsymb)
+    assert(hall_number == 530)
+    itoc_number = crystal.itoc_number_from_hermann_mauguin_symbol(hmsymb)
+    assert(itoc_number == 230)
+    hmsymb2 = crystal.hermann_mauguin_symbol_from_hall_number(hall_number)
+    assert(hmsymb == hmsymb2)
+    itoc_number = 1
+    hall_number = crystal.hall_number_from_itoc_number(itoc_number)
+    assert(hall_number == 1)
+    hm_symb = crystal.hermann_mauguin_symbol_from_itoc_number(itoc_number)
+    assert(hm_symb == 'P 1')
+    itoc = crystal.itoc_number_from_hall_number(1)
+    assert(itoc == 1)
+
+    sg = crystal.SpaceGroup(itoc_number=1)
+    assert(sg.n_molecules == 1)
+    assert(sg.hermann_mauguin_symbol == 'P 1')
+
+    # Check that translations are multiples of 1, 1/2, 1/3, 1/4, or 1/6.
+    uniqtrans = []
+    reductrans = []
+    for h in range(1, 531):
+        sg = crystal.SpaceGroup(hall_number=h)
+        trans = [[],[],[]]
+        transc = [[],[],[]]
+        for vec in sg.sym_translations:
+            for j in range(0, 3):
+                comp = vec[j] % 1
+                comp = min(comp, 1-comp)
+                if comp == 0:
+                    comp = 1
+                comp = int(np.round(1/comp))
+                if comp not in trans[j]:
+                    trans[j].append(comp)
+        for j in range(0, 3):
+            tr = np.sort(np.array(trans[j], dtype=np.int))[::-1]
+            trans[j] = list(tr)
+            indiv = [tr[0]]
+            for p in range(0, len(tr)):
+                for q in range(0, len(tr)):
+                    rat = max(tr[p], tr[q])/float(max(tr[p], tr[q]))
+                    if np.abs(rat - np.round(rat)) > 1e-2:
+                        if tr[q] not in indiv:
+                            indiv.append(tr[p])
+            transc[j] = indiv
+        uniqtrans.append(trans)
+        reductrans.append(transc)

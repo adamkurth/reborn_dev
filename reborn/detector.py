@@ -27,6 +27,7 @@ from . import utils, source
 pnccd_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/pnccd_front_geometry.json')
 cspad_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/cspad_geometry.json')
 cspad_2x2_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/cspad_2x2_geometry.json')
+epix100_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/epix100_geometry.json')
 epix10k_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/epix10k_geometry.json')
 mpccd_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/mpccd_geometry.json')
 jungfrau4m_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/jungfrau4m_geometry.json')
@@ -1930,6 +1931,22 @@ def epix10k_pad_geometry_list(detector_distance=0.1):
         (list): List of |PADGeometry| instances.
     """
     pads = load_pad_geometry_list(epix10k_geom_file)
+    for p in pads:
+        p.t_vec[2] = detector_distance
+    return pads
+
+
+def epix100_pad_geometry_list(detector_distance=0.1):
+    r"""
+    Generate a list of |PADGeometry| instances that are inspired by the epix100 detector.
+
+    Arguments:
+        detector_distance (float): Detector distance in SI units.
+
+    Returns:
+        (list): List of |PADGeometry| instances.
+    """
+    pads = load_pad_geometry_list(epix100_geom_file)
     for p in pads:
         p.t_vec[2] = detector_distance
     return pads

@@ -257,19 +257,44 @@ class SpaceGroup(object):
     spacegroup_symbol = None  #: Spacegroup symbol (free format... has no effect)
     sym_rotations = None      #: List of 3x3 transformation matrices (fractional coordinates)
     sym_translations = None   #: List of symmetry translation vectors (fractional coordinates)
+    hermann_mauguin_symbol = None
 
-    def __init__(self, spacegroup_symbol=None, sym_rotations=None, sym_translations=None, hall_number=None):
+    def __init__(self, spacegroup_symbol=None, sym_rotations=None, sym_translations=None, hermann_mauguin_symbol=None,
+                 hall_number=None, itoc_number=None):
         r"""
 
         """
+        # r"""
+        # Initialize the spacegroup.  You must identify the spacegroup by either a Hall number, a
+        # Hermann Mauguin symbol, or an ITOC number (see International Tables of Crystallography).
+        #
+        # Args:
+        #     hermann_mauguin_symbol (string): Hermann Mauguin symbol (for example: P63)
+        #     hall_number (int): One of the 1-530 Hall numbers.
+        #     itoc_number (int): One of the 230 ITOC numbers.
+        # """
         if hall_number is not None:
-            import spglib
-            ops = spglib.get_symmetry_from_database(hall_number)
-            sym_rotations = ops['rotations']
-            sym_translations = ops['translations']
+            itoc_number = itoc_number_from_hall_number(hall_number)
+            hermann_mauguin_symbol = hermann_mauguin_symbol_from_hall_number(hall_number)
+        elif hermann_mauguin_symbol is not None:
+            hermann_mauguin_symbol = hermann_mauguin_symbol
+            # itoc_number = itoc_number_from_hermann_mauguin_symbol(hermann_mauguin_symbol)
+            hall_number = hall_number_from_hermann_mauguin_symbol(hermann_mauguin_symbol)
+        elif itoc_number is not None:
+            # itoc_number = itoc_number
+            hall_number = hall_number_from_itoc_number(itoc_number)
+            hermann_mauguin_symbol = hermann_mauguin_symbol_from_hall_number(hall_number)
+        if hall_number is not None:
+            sym_rotations, sym_translations = get_symmetry_operators_from_hall_number(hall_number)
+            # import spglib
+            # ops = spglib.get_symmetry_from_database(hall_number)
+            # sym_rotations = ops['rotations']
+            # sym_translations = ops['translations']
         self.spacegroup_symbol = spacegroup_symbol
         self.sym_rotations = sym_rotations
         self.sym_translations = sym_translations
+        if hermann_mauguin_symbol is not None:
+            self.hermann_mauguin_symbol = hermann_mauguin_symbol
 
     def __str__(self):
 
@@ -366,7 +391,7 @@ class CrystalStructure(object):
             temp_save = temp_dir
 
         if not os.path.exists(pdb_file_path):
-            # print("PDB file not found.  Attempting to download it to %s." % temp_dir)
+            print("PDB file not found.  Attempting to download it to %s." % temp_dir)
             pdb_file_path = get_pdb_file(pdb_file_path, save_path=temp_save)
 
         dic = pdb_to_dict(pdb_file_path)
@@ -374,10 +399,9 @@ class CrystalStructure(object):
 
         a, b, c, al, be, ga = dic['unit_cell']
 
-        if unitcell is not None:
-            # Use the user-specified unit cell
+        if unitcell is not None:  # Override the PDB unit cell from the start
             self.unitcell = unitcell
-            S = self.unitcell.o_mat_inv * 1e-10 # Convert to meters
+            S = self.unitcell.o_mat_inv * 1e-10  # Convert units
             U = np.zeros(3)
         else:
             if (a == 1) and (b == 1) and (c == 1):
@@ -385,7 +409,8 @@ class CrystalStructure(object):
                 # where the unit cell constants are set artificially to a = b = c = 1 Ang 
                 # and the angles al = be = ga = 90 degrees.
 
-                # We will set the unit cell to be the difference between the max and min of the atomic coordinates in the three directions.
+                # We will set the unit cell to be the difference between the max and min of the atomic coordinates
+                # in the three directions.
                 r_min = np.zeros(3)
                 r_min[0] = np.min(dic['atomic_coordinates'][:, 0])
                 r_min[1] = np.min(dic['atomic_coordinates'][:, 1])
@@ -410,7 +435,7 @@ class CrystalStructure(object):
                 warn('\nThe U vector is not equal to zero, which could be a serious problem.  Look here:\n'
                      'https://rkirian.gitlab.io/reborn/crystals.html.\n')
 
-        # These are the initial coordinates with strange origin
+        # These are the initial coordinates with strange origin, angstrom units (!!!!)
         r = dic['atomic_coordinates']
         
         Z0 = atoms.atomic_symbols_to_numbers(dic['atomic_symbols'])
@@ -436,30 +461,30 @@ class CrystalStructure(object):
         else:
             r_au = r
 
-        # Transform to fractional coordinates
+        # Transform to fractional coordinates.
         x_au = np.dot(S, r_au.T).T # + U
 
         # Get center of mass (estimate based on atomic number only)
         x_au_com = np.sum((Z*x_au.T).T, axis=0)/np.sum(Z)
 
-        n_sym = len(dic['spacegroup_rotations'])
-        rotations = []
-        translations = []
-        for i in range(n_sym):
-            R = dic['spacegroup_rotations'][i]
-            T = dic['spacegroup_translations'][i]
-            W = np.dot(S, np.dot(R, np.linalg.inv(S)))
-            # assert np.max(np.abs(W - np.round(W))) < 5e-2  # 5% error OK?
-            W = np.round(W)
-            Z = np.dot(S, T) # + np.dot(np.eye(3)-W, U)
-            # assert np.max(np.abs(Z - np.round(Z*12)/12)) < 5e-2  # 5% error OK?
-            Z = np.round(Z*12)/12
-            rotations.append(W)
-            translations.append(Z)
-
-        if spacegroup is not None:
+        if spacegroup is not None:  # Override the PDB spacegroup
+            if isinstance(spacegroup, str):
+                spacegroup = SpaceGroup(hermann_mauguin_symbol=spacegroup)
             self.spacegroup = spacegroup
         else:
+            rotations = []
+            translations = []
+            for i in range(len(dic['spacegroup_rotations'])):
+                R = dic['spacegroup_rotations'][i]
+                T = dic['spacegroup_translations'][i]
+                W = np.dot(S, np.dot(R, np.linalg.inv(S)))
+                # assert np.max(np.abs(W - np.round(W))) < 5e-2  # 5% error OK?
+                W = np.round(W)
+                Z = np.dot(S, T)  # + np.dot(np.eye(3)-W, U)
+                # assert np.max(np.abs(Z - np.round(Z*12)/12)) < 5e-2  # 5% error OK?
+                Z = np.round(Z * 12) / 12
+                rotations.append(W)
+                translations.append(Z)
             self.spacegroup = SpaceGroup(dic['spacegroup_symbol'], rotations, translations)
 
         self.fractional_coordinates = x_au
@@ -1385,3 +1410,127 @@ class FiniteCrystal(object):
             lat.set_gaussian_disorder(sigmas=sigmas)
 
 
+def get_hm_symbols():
+    r""" Returns a list of the 530 Hermann Mauguin symbols. """
+    from ..data import spgrp
+    symbols = []
+    for idx in range(0, 530):
+        symbols.append(spgrp._hmsym[idx].strip())
+
+    return symbols
+
+# hermann_mauguin_symbols = get_hm_symbols()
+
+
+def hermann_mauguin_symbol_from_hall_number(hall_number):
+    from ..data import spgrp
+    if hall_number < 0 or hall_number > 530:
+        raise ValueError('hall_number must be between 1 and 530')
+
+    return spgrp._hmsym[hall_number - 1]
+
+
+def itoc_number_from_hall_number(hall_number):
+    from ..data import spgrp
+    return spgrp._sgnum[hall_number - 1]
+
+
+def hall_number_from_hermann_mauguin_symbol(hermann_mauguin_symbol):
+    from ..data import spgrp
+    idx = None
+    hermann_mauguin_symbol = hermann_mauguin_symbol.strip()
+    for idx in range(0, 530):
+        if hermann_mauguin_symbol == spgrp._hmsym[idx]:
+            break
+
+    if idx is None:
+        raise ValueError('Cannot find Hermann Mauguin symbol')
+
+    return idx+1
+
+
+def itoc_number_from_hermann_mauguin_symbol(hermann_mauguin_symbol):
+
+    return itoc_number_from_hall_number(hall_number_from_hermann_mauguin_symbol(hermann_mauguin_symbol))
+
+
+def hall_number_from_itoc_number(itoc_number):
+    from ..data import spgrp
+    if itoc_number < 1 or itoc_number > 230:
+        raise ValueError('ITOC spacegroup number must be in the range 1 to 230')
+
+    idx = -1
+    for idx in range(0, 530):
+        if itoc_number == spgrp._sgnum[idx]:
+            break
+    return idx+1
+
+
+def hermann_mauguin_symbol_from_itoc_number(itoc_number):
+
+    return hermann_mauguin_symbol_from_hall_number(hall_number_from_itoc_number(itoc_number))
+
+
+def spacegroup_ops_from_hall_number(hall_number):
+    from ..data import spgrp
+    rot = spgrp._spgrp_ops[hall_number - 1]["rotations"]
+    trans = [T for T in spgrp._spgrp_ops[hall_number - 1]['translations']]
+
+    return rot, trans
+
+
+def get_symmetry_operators_from_hall_number(hall_number):
+    from ..data import spgrp
+    if hall_number < 1 or hall_number > 530:
+        raise ValueError("Hall number must be between 1 and 530")
+
+    idx = hall_number - 1
+    Rs = spgrp._spgrp_ops[idx]["rotations"]
+    Ts = [T for T in spgrp._spgrp_ops[idx]['translations']]
+
+    return Rs, Ts
+
+
+def get_symmetry_operators_from_space_group(hm_symbol):
+
+    r"""
+    For a given Hermann-Mauguin spacegroup, provide the symmetry operators in the form of
+    translation and rotation operators.  These operators are in the crystal basis.
+    As of now, this is a rather unreliable function.  My brain hurts badly after attempting
+    to make sense of the ways in which space groups are specified... if you are having trouble
+    finding your spacegroup check that it is contained in the output of print(crystal.get_hm_symbols()).
+
+    Input:
+        hm_symbol (str): A string indicating the spacegroup in Hermann–Mauguin notation (as found in a PDB file)
+
+    Output: Two lists: Rs and Ts.  These correspond to lists of rotation matrices (3x3 numpy
+            arrays) and translation vectors (1x3 numpy arrays)
+    """
+    from ..data import spgrp
+    # First we try to find the "Hall number" corresponding to the Hermann-Mauguin symbol.
+    # This is done in a hacked way using the spglib module.  However, we do not use the
+    # spglib module directly in order to avoid that dependency.  Instead, the operators
+    # that result from the spglib.get_symmetry_from_database() method have been dumped
+    # into the spgrp module included in bornagain.
+
+    # Simply iterate through all HM symbols until we find one that matches:
+    symbol_found = False
+    idx = None
+    if isinstance(hm_symbol, str):
+        hm_symbol = hm_symbol.strip()
+        for idx in range(0, 530):
+            if hm_symbol == spgrp._hmsym[idx].strip():
+                symbol_found = True
+                break
+    else:
+        idx = hm_symbol
+        if idx < 530:
+            symbol_found = True
+
+    if not symbol_found:
+        return None, None
+
+    Rs = spgrp._spgrp_ops[idx]["rotations"]
+    Ts = [T for T in spgrp._spgrp_ops[idx]['translations']]
+
+    return Rs, Ts

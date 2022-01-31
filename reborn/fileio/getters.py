@@ -92,7 +92,7 @@ class FrameGetter(ABC):
 
     @property
     def n_frames(self):
-        return self._n_frames
+        return int(self._n_frames)
 
     @n_frames.setter
     def n_frames(self, n_frames):
@@ -167,6 +167,11 @@ class FrameGetter(ABC):
         from ..viewers.qtviews.padviews import PADView
         pv = PADView(frame_getter=self, **kwargs)
         pv.start()
+
+    def get_padview(self, **kwargs):
+        r""" Create a PADView instance with this FrameGetter instance. """
+        from ..viewers.qtviews.padviews import PADView
+        return PADView(frame_getter=self, **kwargs)
 
     def __iter__(self):
         r""" Do not override this method. """

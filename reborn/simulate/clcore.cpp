@@ -771,6 +771,49 @@ kernel void lattice_transform_intensities_pad(
 }
 
 // Compute approximate gaussian-shaped lattice transform for a crystal: PROD_i  N_i^2 exp(- N_i^2 x_i^2 / 4pi)
+kernel void gaussian_lattice_transform_intensities(
+    global dsfloat *q,     // Scattering vectors
+    const dsfloat16 abc,   // Real-space lattice vectors a,b,c, each contiguous in memory
+    const int4 N,          // Number of unit cells along each axis
+    const dsfloat16 R,     // Rotation matrix
+    global dsfloat *I,     // Lattice transform intensities (output)
+    const int n_pixels,    // Number of pixels
+    const int add          // Refer to phase_factor_pad
+){
+    const int gi = get_global_id(0); /* Global index */
+    // Get the q vector
+    dsfloat4 qmod = (dsfloat4)(q[gi*3],q[gi*3+1],q[gi*3+2],0.0f);
+    // Rotate the q vector
+    qmod = rotate_vec(R, qmod);
+    // Compute lattice transform at this q vector
+    dsfloat x;
+    dsfloat n;
+    dsfloat4 a;
+    dsfloat It = 1.0;
+    // First crystal axis (this could be put in a loop over three axes...)
+    n = (dsfloat)N.x;
+    a = (dsfloat4)(abc.s0,abc.s1,abc.s2,0.0);
+    x = dot(qmod,a);
+    x = x - round(x/PI2)*PI2;
+    It *= n*n*exp(-n*n*x*x/(4*PI));
+    // Second crystal axis
+    n = (dsfloat)N.y;
+    a = (dsfloat4)(abc.s3,abc.s4,abc.s5,0.0);
+    x = dot(qmod,a);
+    x = x - round(x/PI2)*PI2;
+    It *= n*n*exp(-n*n*x*x/(4*PI));
+    // Third crystal axis
+    n = (dsfloat)N.z;
+    a = (dsfloat4)(abc.s6,abc.s7,abc.s8,0.0);
+    x = dot(qmod,a);
+    x = x - round(x/PI2)*PI2;
+    It *= n*n*exp(-n*n*x*x/(4*PI));
+    if (gi < n_pixels){
+        I[gi] = I[gi]*add + It;
+    }
+}
+
+// Compute approximate gaussian-shaped lattice transform for a crystal: PROD_i  N_i^2 exp(- N_i^2 x_i^2 / 4pi)
 // This variant internally computes scattering vectors for a pixel-array detector
 kernel void gaussian_lattice_transform_intensities_pad(
     const dsfloat16 abc,   // Real-space lattice vectors a,b,c, each contiguous in memory
