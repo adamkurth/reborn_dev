@@ -844,8 +844,8 @@ class PADGeometryList(list):
                          "have the same length as the geometry file.")
 
     def add_group(self, pads, group_name=None):
-        r""" Add a group of PADGeometry instances.  Helpful if you have multiple "detectors" that have different
-        properties as compared with others.  Or perhaps there are PADs that should translate as a group."""
+        r""" Extend the PADGeometryList, and create a group name for the new members.  Helpful if you have multiple
+        "detectors" that you wish to combine into a single PADGeometryList."""
         if group_name is None:
             group_name = str(len(self._groups))
         if group_name in self.get_group_names():
@@ -872,6 +872,10 @@ class PADGeometryList(list):
             if g['name'] == group_name:
                 return PADGeometryList([self[i] for i in g['indices']])
         raise ValueError('No group named', group_name)
+
+    def set_group(self, indices, group_name):
+        r""" Assign a group name to a set of indices. """
+        self._groups.append({'name': group_name, 'indices': indices})
 
     def get_all_groups(self):
         r""" Equivalent to get_group, but sets the argument to all group names.  Beware: you may have redundancies!"""
