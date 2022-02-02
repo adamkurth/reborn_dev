@@ -49,7 +49,7 @@ class Beam:
     diameter_fwhm = None
     pulse_energy_fwhm = 0
 
-    def __init__(self, beam_vec=np.array([0, 0, 1]), photon_energy=1.602e-15, wavelength=None,
+    def __init__(self, file_name=None, beam_vec=np.array([0, 0, 1]), photon_energy=1.602e-15, wavelength=None,
                  polarization_vec=np.array([1, 0, 0]), pulse_energy=1e-3, diameter_fwhm=1e-6):
         r"""
         Arguments:
@@ -61,6 +61,9 @@ class Beam:
             pulse_energy (float): Total energy of x-ray pulse.
             diameter_fwhm (float): Beam diameter.  Default is a tophat beam profile, so this is the tophat diameter.
         """
+        if file_name is not None:
+            self.load(file_name)
+            return
         self.beam_vec = beam_vec
         self.polarization_vec = polarization_vec
         self.photon_energy = photon_energy
@@ -231,6 +234,14 @@ class Beam:
         with open(file_name, 'r') as f:
             d = json.load(f)
         self.from_dict(d)
+
+    def save(self, file_name):
+        r""" Save the beam to file. """
+        self.save_json(file_name)
+
+    def load(self, file_name):
+        r""" Load the beam from a file. """
+        return self.load_json(file_name)
 
 
 def load_beam(file_path):

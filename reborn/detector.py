@@ -21,7 +21,7 @@ import os
 import json
 import numpy as np
 import pkg_resources
-from . import utils, source
+from . import utils, source, const
 
 
 pnccd_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/pnccd_front_geometry.json')
@@ -663,6 +663,29 @@ class PADGeometry:
             raise ValueError("Specify either q_min (and wavelength) or min_angle")
         return self.reshape(mask)
 
+    def f2phot(self, beam=None):
+        r""" Returns the conversion factor needed to convert structure factors :math:`|F(\vec q)|^2` to photon counts.
+        Specifically, this function returns :math:`\alpha_i` in the expression
+
+        .. math::
+
+            I_i = \alpha_i |F_i|^2 = J_0 r_e^2 P_i \Delta\Omega_i |F_i|^2
+
+        where
+
+          - :math:`I_i` is the photon counts in pixel :math:`i`
+          - :math:`J_0` is the incident photon fluence (photons per area)
+          - :math:`r_e^2` is the classical electron scattering cross section
+          - :math:`P_i` is the polarization factor for pixel :math:`i`
+          - :math:`\Delta\Omega_i` is the solid angle of pixel :math:`i`
+
+        Arguments:
+            beam (|Beam|): The beam properties
+
+        Returns: |ndarray|
+        """
+        return const.r_e**2*self.solid_angles()*self.polarization_factors(beam=beam)*beam.photon_number_fluence
+
     def reshape(self, dat):
         r"""
         Re-shape a flattened array to a 2D array.
@@ -1012,6 +1035,10 @@ class PADGeometryList(list):
     def scattering_angles(self, beam):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
         return self.concat_data([p.scattering_angles(beam=beam).ravel() for p in self])
+
+    def f2phot(self, beam):
+        r""" Concatenates the output of the matching method in |PADGeometry|"""
+        return self.concat_data([p.f2phot(beam=beam).ravel() for p in self])
 
     def azimuthal_angles(self, beam):
         r""" Concatenates the output of the matching method in |PADGeometry|"""

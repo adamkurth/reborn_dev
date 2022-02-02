@@ -19,10 +19,10 @@ import numpy as np
 class FrameGetter(ABC):
 
     r"""
-    |FrameGetter| is a generic interface for serving up |DataFrames|.  It exists so that we have a standard interface
-    that hides the details of where data come from (disk, shared memory, on-the-fly simulations, etc.), which allows us
-    to build software that can work in a way that is agnostic to the data source.  This of course comes at a cost --
-    the reborn |FrameGetter| only deals with basic coherent diffraction data.
+    |FrameGetter| is a generic interface for serving up |DataFrame| instances.  It exists so that we have a standard
+    interface that hides the details of where data come from (disk, shared memory, on-the-fly simulations, etc.).  With
+    a |FrameGetter| we can build software that can work in a way that is agnostic to the data source.  This of course
+    comes at a cost -- the reborn |FrameGetter| only deals with basic coherent diffraction data.
 
     The FrameGetter serves up |DataFrame| instances that contain diffraction raw data, x-ray |Beam| info, |PADGeometry|
     info, etc.  It is assumed that a set of frames can be indexed with integers, starting with zero.
@@ -92,10 +92,14 @@ class FrameGetter(ABC):
 
     @property
     def n_frames(self):
-        return int(self._n_frames)
+        return self._n_frames
 
     @n_frames.setter
     def n_frames(self, n_frames):
+        try:
+            n_frames = int(n_frames)
+        except OverflowError:  # Could be infinity, which is ok
+            pass
         self._n_frames = n_frames
 
     @abstractmethod

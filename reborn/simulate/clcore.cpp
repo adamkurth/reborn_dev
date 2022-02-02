@@ -872,26 +872,29 @@ kernel void gaussian_lattice_transform_intensities_pad(
 // Compute form factor for a sphere.  Assumes complex amplitude array.
 kernel void sphere_form_factor(
     global const dsfloat *q,       // Scattering magnitudes
-    global dsfloat2 *amps,   // Amplitude array (input/output)
+    global dsfloat2 *amps,         // Amplitude array (input/output)
+    const dsfloat2 dens,           // Density
     const dsfloat r,               // The radius of the sphere
     const int n_q,                 // Number of q magnitudes
     const int add                  // Add to the amplitude buffer
 ){
     const int gi = get_global_id(0); /* Global index */
     dsfloat qr = q[gi]*r;
-    dsfloat a;
+//    dsfloat a;
+    dsfloat2 a = (dsfloat2)(0.0f,0.0f);
     if (qr == 0){
-        a = (4*PI*r*r*r)/3;
+        a.x = (4*PI*r*r*r)/3;
     } else {
-        a = 4*PI*r*r*r*(native_sin(qr)-qr*native_cos(qr))/(qr*qr*qr);
+        a.x = 4*PI*r*r*r*(native_sin(qr)-qr*native_cos(qr))/(qr*qr*qr);
     }
+    a *= dens;
     if (gi < n_q ){
-        if (add == 1){
-            amps[gi].x += a;
-        } else {
-            amps[gi].x = a;
-            amps[gi].y = 0;
-        }
+        amps[gi] = amps[gi]*add + a;
+//        if (add == 1){
+//            amps[gi] += a;
+//        } else {
+//            amps[gi] = a;
+//        }
     }
 }
 

@@ -89,7 +89,7 @@ class PADView(QtCore.QObject):
     r"""
     This is supposed to be an easy way to view PAD data.  It is a work in progress... but here is the basic concept:
 
-    |PADView| relies on a |FrameGetter| subclass to serve up |DataFrames|.
+    |PADView| relies on a |FrameGetter| subclass to serve up |DataFrame| instances.
     """
 
     # Note that most of the interface was created using the QT Designer tool.  There are many attributes that are

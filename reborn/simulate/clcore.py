@@ -481,7 +481,7 @@ class ClCore(object):
         else:
             return a_dev
 
-    def sphere_form_factor(self, r, q, a=None, add=False):
+    def sphere_form_factor(self, r, q, dens=None, a=None, add=False):
         r"""
         Form factor :math:`f(q)` for a sphere of radius :math:`r`, at given :math:`q` magnitudes.  The formula is
 
@@ -506,19 +506,32 @@ class ClCore(object):
             r (float): Sphere radius.
             q (clarray): Scattering vector magnitudes.
             a (clarray): Amplitude array.
+            dens (complex): Scattering density
+            add (bool): Add to the amplitude?  Default: False
 
         Returns: None
         """
         if not hasattr(self, 'sphere_form_factor_cl'):
             self.sphere_form_factor_cl = self.programs.sphere_form_factor
-            self.sphere_form_factor_cl.set_scalar_arg_dtypes([None, None, self.real_t, self.int_t, self.int_t])
-        a_dev = self.to_device(a, dtype=self.complex_t)
+            self.sphere_form_factor_cl.set_scalar_arg_dtypes([None, None, None, self.real_t, self.int_t, self.int_t])
+        if a is None:
+            a_dev = self.to_device(shape=q.shape, dtype=self.complex_t)*0
+        else:
+            a_dev = self.to_device(a, dtype=self.complex_t)
+        if dens is None:
+            dens = 1
+        dens = np.array([np.real(dens), np.imag(dens)], dtype=self.real_t)
         q_dev = self.to_device(q, dtype=self.real_t)
         r = self.real_t(r)
         n = self.int_t(q.shape[0])
         add = self.int_t(add)
         global_size = np.int64(np.ceil(n / float(self.group_size)) * self.group_size)
-        self.sphere_form_factor_cl(self.queue, (global_size,), (self.group_size,), q_dev.data, a_dev.data, r, n, add)
+        self.sphere_form_factor_cl(self.queue, (global_size,), (self.group_size,), q_dev.data, a_dev.data, dens, r, n,
+                                   add)
+        if a is None:
+            return a_dev.get()
+        else:
+            return None
 
     def phase_factor_qrf(self, q, r, f=None, R=None, U=None, a=None, add=False, twopi=False, n_chunks=1):
         r"""

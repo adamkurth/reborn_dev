@@ -15,7 +15,8 @@
 import pkg_resources
 import numpy as np
 from scipy import constants as const
-import reborn
+# import reborn
+from .. import utils, detector
 
 r_e = const.value('classical electron radius')  # meters
 eV = const.value('electron volt')  # J
@@ -28,7 +29,7 @@ def water_number_density():
     return 33.3679e27
 
 
-@reborn.utils.memoize
+@utils.memoize
 def _get_hura_water_data():
     with open(file_name, 'r') as f:
         h = f.readline()
@@ -45,7 +46,7 @@ def get_water_profile(q, temperature=298):
     """
     Depreciated: Use :func:`water_scattering_factor_squared <reborn.simulate.solutions.water_scattering_factor_squared>`
     """
-    reborn.utils.depreciate("Use the function water_scattering_factor_squared instead of get_water_profile.")
+    utils.depreciate("Use the function water_scattering_factor_squared instead of get_water_profile.")
     return water_scattering_factor_squared(q=q, temperature=temperature, volume=None)
 
 
@@ -109,13 +110,10 @@ def get_pad_solution_intensity(pad_geometry, beam, thickness=10.0e-6, liquid='wa
     if liquid != 'water':
         raise ValueError('Sorry, we can only simulate water at this time...')
     volume = thickness * np.pi * (beam.diameter_fwhm / 2) ** 2
-    pads = reborn.detector.PADGeometryList(pad_geometry)
+    pads = detector.PADGeometryList(pad_geometry)
     q_mags = pads.q_mags(beam)
-    J = beam.photon_number_fluence
-    P = pads.polarization_factors(beam)
-    SA = pads.solid_angles()
     F2 = water_scattering_factor_squared(q_mags, temperature=temperature, volume=volume)
-    intensity = r_e ** 2 * J * P * SA * F2
+    intensity = F2 * pads.f2phot(beam)
     if poisson:
         intensity = np.double(np.random.poisson(intensity))
     intensity = pads.split_data(intensity)
