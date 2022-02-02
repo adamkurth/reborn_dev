@@ -436,14 +436,21 @@ class PADGeometry:
         """
         return self.t_vec + (self.n_fs - 1) * self.fs_vec / 2.0 + (self.n_ss - 1) * self.ss_vec / 2.0
 
-    def norm_vec(self):
+    def norm_vec(self, beam=None):
         r"""
         The vector that is normal to the PAD plane.
 
+        Arguments:
+            beam (|Beam|): The beam information, if you want to ensure that the signs are chosen so that the normal
+                           vector points toward the interaction point.
+
         Returns: |ndarray|
         """
-
-        return utils.vec_norm(np.cross(self.fs_vec, self.ss_vec))
+        norm = utils.vec_norm(np.cross(self.fs_vec, self.ss_vec))
+        if beam is not None:
+            if np.dot(beam.beam_vec, norm) >= 0:
+                norm *= -1
+        return norm
 
     def s_vecs(self):
         r"""

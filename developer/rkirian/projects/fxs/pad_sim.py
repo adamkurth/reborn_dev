@@ -1,12 +1,13 @@
 from time import time
 import numpy as np
+from numpy.fft import fftn, ifftn, fftshift
+from scipy.spatial.transform import Rotation
+import pyqtgraph as pg
 from reborn import utils, source, detector, dataframe, const
 from reborn.target import crystal, atoms, placer
 from reborn.fileio.getters import FrameGetter
-import pyqtgraph as pg
-from numpy.fft import fftn, ifftn, fftshift
-from reborn.simulate.clcore import ClCore
-from scipy.spatial.transform import Rotation
+from reborn.simulate import gas, clcore
+from reborn.viewers.qtviews import view_pad_data
 
 ###################################################################
 # Constants
@@ -71,26 +72,34 @@ f = cryst.molecule.get_scattering_factors(beam=beam)
 r_vecs = cryst.molecule.get_centered_coordinates()
 x = cryst.unitcell.r2x(r_vecs)
 rho = dmap.place_atoms_in_map(x, f, mode='nearest')  # FIXME: replace 'nearest' with Cromer Mann densities
-pg.image(np.sum(np.fft.fftshift(np.real(rho)), axis=2))
 rho[rho != 0] -= f_dens_water * dmap.voxel_volume  # FIXME: Need a better model for solvent envelope
 F = fftshift(fftn(rho))
 I = np.abs(F) ** 2
 rho_cell = fftshift(rho)
-clcore = ClCore(double_precision=gpu_double_precision, group_size=gpu_group_size)
-F_gpu = clcore.to_device(F)
-q_vecs_gpu = clcore.to_device(pads.q_vecs(beam=beam))
-q_mags_gpu = clcore.to_device(pads.q_mags(beam=beam))
-amps_gpu = clcore.to_device(shape=pads.n_pixels, dtype=clcore.complex_t)
+gpucore = clcore.ClCore(double_precision=gpu_double_precision, group_size=gpu_group_size)
+F_gpu = gpucore.to_device(F)
+q_vecs_gpu = gpucore.to_device(pads.q_vecs(beam=beam))
+q_mags_gpu = gpucore.to_device(pads.q_mags(beam=beam))
+amps_gpu = gpucore.to_device(shape=pads.n_pixels, dtype=gpucore.complex_t)
 q_min = dmap.q_min
 q_max = dmap.q_max
 protein_number_density = protein_concentration/cryst.molecule.get_molecular_weight()
 n_proteins_per_drop = int(protein_number_density*4/3*np.pi*drop_radius**3)
 protein_diameter = cryst.molecule.max_atomic_pair_distance  # Nominal particle size
 
+# pg.image(np.sum(np.fft.fftshift(np.real(rho)), axis=2))
+
 print('PDB:', pdb_file)
 print('Molecules per drop:', n_proteins_per_drop)
 print('Particle diameter:', protein_diameter)
 print('Density map grid size: (%d, %d, %d)' % tuple(dmap.shape))
+
+gp = gas.get_gas_background(pads, beam, path_length=[-0, 2.5], gas_type='he', pressure=100e-5, n_simulation_steps=5)
+gp2 = gas.get_gas_background(pads, beam, path_length=[-0, 5], gas_type='he', pressure=100e-5, n_simulation_steps=10)
+print('test', np.max(np.abs((gp-gp2)/gp)))
+view_pad_data(pad_geometry=pads, pad_data=gp, beam=beam)
+dsds
+
 
 ###########################################################################
 # Water droplet with protein, 2D PAD simulation
@@ -114,12 +123,12 @@ class DropletGetter(FrameGetter):
                 R = Rotation.random().as_matrix()
                 U = p_vecs[p, :]
                 if atomistic:
-                    clcore.phase_factor_qrf(q_vecs_gpu, r_vecs, f, R=R, U=U, a=a_gpu, add=True)
+                    gpucore.phase_factor_qrf(q_vecs_gpu, r_vecs, f, R=R, U=U, a=a_gpu, add=True)
                 else:
-                    clcore.mesh_interpolation(F_gpu, q_vecs_gpu, N=dmap.shape, q_min=q_min, q_max=q_max,
-                                                  R=R, U=U, a=a_gpu, add=True)
+                    gpucore.mesh_interpolation(F_gpu, q_vecs_gpu, N=dmap.shape, q_min=q_min, q_max=q_max,
+                                               R=R, U=U, a=a_gpu, add=True)
         if droplet > 0:
-            clcore.sphere_form_factor(r=dd/2, q=q_mags_gpu, a=a_gpu, dens=f_dens_water, add=True)
+            gpucore.sphere_form_factor(r=dd / 2, q=q_mags_gpu, a=a_gpu, dens=f_dens_water, add=True)
         I = np.abs(a_gpu.get()) ** 2 * f2phot
         if poisson:
             I = np.random.poisson(I)
