@@ -173,7 +173,7 @@ def test_spacegroup():
                 if comp not in trans[j]:
                     trans[j].append(comp)
         for j in range(0, 3):
-            tr = np.sort(np.array(trans[j], dtype=np.int))[::-1]
+            tr = np.sort(np.array(trans[j], dtype=int))[::-1]
             trans[j] = list(tr)
             indiv = [tr[0]]
             for p in range(0, len(tr)):

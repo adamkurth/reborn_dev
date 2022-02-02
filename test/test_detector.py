@@ -80,7 +80,7 @@ def make_pad_list():
     pad.n_fs = 100
     pad.n_ss = 150
     pad_geom.append(pad)
-    return pad_geom
+    return detector.PADGeometryList(pad_geom)
 
 
 def test_solid_angles():

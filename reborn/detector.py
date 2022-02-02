@@ -21,7 +21,7 @@ import os
 import json
 import numpy as np
 import pkg_resources
-from . import utils, source, const
+from . import utils, source, detector, const
 
 
 pnccd_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/pnccd_front_geometry.json')
@@ -1304,7 +1304,7 @@ class PADAssembler:
     def __init__(self, pad_list):
         pad_list = PADGeometryList(pad_list)
         pixel_size = utils.vec_mag(pad_list[0].fs_vec)
-        position_vecs_concat = pad_list.concat_data([p.position_vecs() for p in pad_list])
+        position_vecs_concat = pad_list.position_vecs()
         position_vecs_concat -= np.min(position_vecs_concat, axis=0)
         position_vecs_concat /= pixel_size
         position_vecs_concat = np.floor(position_vecs_concat).astype(np.int64)
@@ -1609,7 +1609,8 @@ class RadialProfiler:
     @mask.setter
     def mask(self, mask):
         if mask is not None:
-            mask = self.pad_geometry.concat_data(mask)
+            mask = self.concat_data(mask)
+
             # if self._mask is not None:  # Check if we already have an identical mask
             #     if np.sum(np.abs(mask - self.mask)) == 0:
             #         return
@@ -1664,7 +1665,6 @@ class RadialProfiler:
                 raise ValueError("You must provide a |Beam| if q_mags are not provided in RadialProfiler")
             pad_geometry = PADGeometryList(pad_geometry)
             q_mags = pad_geometry.q_mags(beam=beam)
-        q_mags = pad_geometry.concat_data(q_mags)
         if q_range is None:
             q_range = (0, np.max(q_mags))
         if n_bins is None:
@@ -1698,7 +1698,7 @@ class RadialProfiler:
 
         Returns: |ndarray|
         """
-        data = self.pad_geometry.concat_data(data)
+        data = self.concat_data(data)
         q_mags = self._q_mags
         if mask is not None:
             self.mask = mask
@@ -1739,7 +1739,7 @@ class RadialProfiler:
 
         Returns:  |ndarray|
         """
-        data = self.pad_geometry.concat_data(data)
+        # data = self.concat_data(data)
         return self.get_profile_statistic(data, mask=mask, statistic=np.sum)
 
     def get_mean_profile(self, data, mask=None):
@@ -1753,7 +1753,7 @@ class RadialProfiler:
 
         Returns: |ndarray|
         """
-        data = self.pad_geometry.concat_data(data)
+        # data = self.concat_data(data)
         return self.get_profile_statistic(data, mask=mask, statistic=np.mean)
 
     def get_median_profile(self, data, mask=None):
@@ -1767,7 +1767,7 @@ class RadialProfiler:
 
         Returns:  |ndarray|
         """
-        data = self.pad_geometry.concat_data(data)
+        # data = self.concat_data(data)
         return self.get_profile_statistic(data, mask=mask, statistic=np.median)
 
     def get_sdev_profile(self, data, mask=None):
@@ -1781,7 +1781,7 @@ class RadialProfiler:
 
         Returns:  |ndarray|
         """
-        data = self.pad_geometry.concat_data(data)
+        # data = self.concat_data(data)
         return self.get_profile_statistic(data, mask=mask, statistic=np.std)
 
     def subtract_profile(self, data, mask=None, statistic=np.median):
@@ -1809,8 +1809,8 @@ class RadialProfiler:
             # raise ValueError('Statistic %s not recognized' % (statistic,))
         mprofq = self.bin_centers
         mpat = np.interp(self._q_mags, mprofq, mprof)
-        mpat = self.pad_geometry.concat_data(mpat)
-        data = self.pad_geometry.concat_data(data)
+        mpat = self.concat_data(mpat)
+        data = self.concat_data(data)
         data = data.copy()
         data -= mpat
         if as_list:
