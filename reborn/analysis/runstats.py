@@ -61,7 +61,9 @@ def padstats(framegetter=None, start=0, stop=None, parallel=False, n_processes=N
     sum_pad2 = None
     min_pad = None
     max_pad = None
-    n_frames = None
+    beam = 0
+    b_frames = 0
+    n_frames = 0
     for (n, i) in enumerate(frame_ids):
         if verbose:
             print('Frame %6d (%0.2g%%)' % (i, n / len(frame_ids) * 100))
@@ -71,6 +73,10 @@ def padstats(framegetter=None, start=0, stop=None, parallel=False, n_processes=N
         rdat = dat.get_raw_data_flat()
         if rdat is None:
             continue
+        if dat.validate():
+            bdat = dat.get_beam()
+            beam += bdat.wavelength
+            b_frames += 1
         if first:
             s = rdat.shape
             sum_pad = np.zeros(s)
@@ -84,9 +90,18 @@ def padstats(framegetter=None, start=0, stop=None, parallel=False, n_processes=N
         min_pad = np.minimum(min_pad, rdat)
         max_pad = np.maximum(max_pad, rdat)
         n_frames += 1
-    return {'sum': sum_pad, 'sum2': sum_pad2, 'min': min_pad, 'max': max_pad, 'n_frames': n_frames,
-            'dataset_id': dat.get_dataset_id(), 'pad_geometry': dat.get_pad_geometry(),
-            'mask': dat.get_mask_flat(), 'beam': dat.get_beam(), 'start': start, 'stop': stop}
+    beam_frames = b_frames if b_frames != 0 else 1
+    return {'dataset_id': dat.get_dataset_id(),
+            'pad_geometry': dat.get_pad_geometry(),
+            'mask': dat.get_mask_flat(),
+            'n_frames': n_frames,
+            'sum': sum_pad,
+            'min': min_pad,
+            'max': max_pad,
+            'sum2': sum_pad2,
+            'beam': beam / beam_frames,
+            'start': start,
+            'stop': stop}
 
 
 def save_padstats(stats, filepath):

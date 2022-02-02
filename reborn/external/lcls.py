@@ -402,11 +402,9 @@ class LCLSFrameGetter(reborn.fileio.getters.FrameGetter):
             geom = det.get_pad_geometry(event)
             data = det.get_data_split(event)
             mask = det.mask
-            for p, d, m in zip(geom, data, mask):
-                geometry.append(p)
-                pad_data.append(d)
-                if m is not None:
-                    pad_mask.append(m)
+            geometry.extend(geom)
+            pad_data.extend(data)
+            pad_mask.extend([m for m in mask if m is not None])
         df = reborn.dataframe.DataFrame()
         df.set_dataset_id(self.data_string)
         df.set_frame_id(ts)
