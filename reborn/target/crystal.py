@@ -811,7 +811,7 @@ class CrystalDensityMap(object):
 
         Note that it is the third index, which we might associate with "z", that increments most rapidly.
 
-        Returns: numpy array
+        Returns: |ndarray|
         """
 
         shp = self.shape
@@ -830,7 +830,7 @@ class CrystalDensityMap(object):
 
         [[0, 0, 0], [0, 0, 0.25], [0, 0, 0.5], [0, 0, 0.75], [0, 0.25, 0], ... , [ 0.75, 0.75, 0.75]]
 
-        Returns: numpy array
+        Returns: |ndarray|
         """
 
         return self.n_vecs * self.dx
@@ -838,10 +838,7 @@ class CrystalDensityMap(object):
     @property
     def x_limits(self):
         r"""
-        Return a 3x2 array with the limits of the density map.  These limits correspond to the concentions described
-        in the :ref:`documentation <working_with_maps>` ; :math:`x_\text{min} = \text{x_limits[:, 0]}` .
-
-        Returns:
+        Depreciated.  Do not use this.
         """
 
         shp = self.shape
@@ -850,10 +847,12 @@ class CrystalDensityMap(object):
 
     @property
     def x_min(self):
+        r""" Vector pointing to the origin corner of the grid.  All zeros.  """
         return np.zeros(3)
 
     @property
     def x_max(self):
+        r""" Vector pointing to the far corner of the grid (furthest from the origin). """
         return (self.shape - 1) * self.dx
 
     @property
@@ -876,11 +875,10 @@ class CrystalDensityMap(object):
             f_x = \frac{1}{N}\sum_{h=0}^{N-1} F_h \exp(2 \pi i h x / N) \; , \quad x = 0, 1, 2, \ldots , N-1
 
         Note that the above expression is defined such that both :math:`h` and :math:`x` have integer step size.  Our
-        :class:`CrystalDensityMap` class handles oversampling, in which case the integer :math:`h` become
-        :math:`h \rightarrow h/s` and the array size grows according to :math:`N \rightarrow s N`, where
-        :math:`s` is the oversampling ratio.
+        :class:`CrystalDensityMap` class handles oversampling, in which case the integer :math:`h` becomes
+        :math:`h/s` and the array size :math:`N` becomes :math`sN`, where :math:`s` is the oversampling ratio.
 
-        Returns: numpy array
+        Returns: |ndarray|
         """
 
         h0 = np.fft.fftshift(np.fft.fftfreq(self.shape[0], d=self.oversampling/self.shape[0]))

@@ -124,6 +124,7 @@ class PADView(QtCore.QObject):
     _fixed_title = False
     _dataframe_preprocessor = None
     _fixed_levels = None
+    hold_levels = True
 
     status_bar_style = "background-color:rgb(30, 30, 30);color:rgb(255,0,255);font-weight:bold;font-family:monospace;"
     peak_style = {'pen': pg.mkPen('g'), 'brush': None, 'width': 5, 'size': 10, 'pxMode': True}
@@ -132,7 +133,8 @@ class PADView(QtCore.QObject):
     sig_beam_changed = QtCore.pyqtSignal()
 
     def __init__(self, pad_geometry=None, mask_data=None, frame_getter=None, raw_data=None, pad_data=None,
-                 beam=None, levels=None, percentiles=None, debug_level=0, main=True, dataframe_preprocessor=None):
+                 beam=None, levels=None, percentiles=None, debug_level=0, main=True, dataframe_preprocessor=None,
+                 hold_levels=False):
         """
         Arguments:
             pad_geometry (|PADGeometry| list): PAD geometry information.
@@ -145,6 +147,7 @@ class PADView(QtCore.QObject):
         self.debug_level = debug_level
         self.debug()
         self.main = main
+        self.hold_levels = hold_levels
         self._dataframe_preprocessor = dataframe_preprocessor
         self._auto_percentiles = percentiles
         self._fixed_levels = levels
@@ -873,6 +876,8 @@ class PADView(QtCore.QObject):
     def update_pads(self):
         r""" Update the data that is displayed. """
         self.debug()
+        if self.hold_levels:
+            levels = self.get_levels()
         data = self.get_pad_display_data()
         if data is None:
             self.debug('get_pad_display_data returned None!')
@@ -881,9 +886,14 @@ class PADView(QtCore.QObject):
             d = np.nan_to_num(data[i])
             self.pad_image_items[i].setImage(d)
         if self._auto_percentiles is not None:
+            self.debug('auto_percentiles')
             self.set_levels_by_percentiles(percents=self._auto_percentiles)
         if self._fixed_levels is not None:
+            self.debug('fixed_levels')
             self.set_levels(self._fixed_levels[0], self._fixed_levels[1])
+        if self.hold_levels:
+            self.debug('hold_levels')
+            self.set_levels(levels[0], levels[1])
         self.histogram.regionChanged()
         self.set_title()
 

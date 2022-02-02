@@ -642,13 +642,18 @@ class PADGeometry:
         q2 = np.dot(q_vecs, beam.e2_vec)
         return np.arctan2(q2, q1)
 
-    def beamstop_mask(self, beam=None, q_min=None, min_angle=None):
+    def beamstop_mask(self, beam=None, q_min=None, q_max=None, min_angle=None, max_angle=None, min_radius=None,
+                      max_radius=None):
         r"""
 
         Arguments:
             beam (|Beam|): Instance of the Beam class (for wavelength)
-            q_min: Minimum q magnitude
-            min_angle: Minimum scattering angle
+            q_min (float): Minimum q magnitude (mask smaller q values)
+            q_max (float): Maximum q magnitude (mask larger q values)
+            min_angle (float): Minimum scattering angle (mask smaller angles)
+            max_angle (float): Maximum scattering angle (mask larger angles)
+            min_radius (float): Minimum size (mask pixels within)
+            max_radius (float): Maximum size (mask pixels beyond)
 
         Returns: |ndarray|
         """
@@ -657,10 +662,24 @@ class PADGeometry:
         mask = self.ones().ravel()
         if q_min is not None:
             mask[self.q_mags(beam=beam) < q_min] = 0
-        elif min_angle is not None:
+        if q_max is not None:
+            mask[self.q_mags(beam=beam) > q_max] = 0
+        if min_angle is not None:
             mask[self.scattering_angles(beam=beam) < min_angle] = 0
-        else:
-            raise ValueError("Specify either q_min (and wavelength) or min_angle")
+        if max_angle is not None:
+            mask[self.scattering_angles(beam=beam) > max_angle] = 0
+        if min_radius is not None:
+            v = self.position_vecs()
+            x = np.dot(beam.e1_vec, v.T).ravel()
+            y = np.dot(beam.e2_vec, v.T).ravel()
+            r = np.sqrt(x**2 + y**2)
+            mask[r < min_radius] = 0
+        if max_radius is not None:
+            v = self.position_vecs()
+            x = np.dot(beam.e1_vec, v.T).ravel()
+            y = np.dot(beam.e2_vec, v.T).ravel()
+            r = np.sqrt(x**2 + y**2)
+            mask[r > max_radius] = 0
         return self.reshape(mask)
 
     def f2phot(self, beam=None):
@@ -1044,9 +1063,9 @@ class PADGeometryList(list):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
         return self.concat_data([p.azimuthal_angles(beam).ravel() for p in self])
 
-    def beamstop_mask(self, beam=None, q_min=None, min_angle=None):
+    def beamstop_mask(self, *args, **kwargs):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
-        return self.concat_data([p.beamstop_mask(beam, q_min, min_angle).ravel() for p in self])
+        return self.concat_data([p.beamstop_mask(*args, **kwargs).ravel() for p in self])
 
     def zeros(self, *args, **kwargs):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
@@ -1078,6 +1097,12 @@ class PADGeometryList(list):
         r""" See corresponding method in |PADGeometry|. """
         for p in self:
             p.rotate(matrix)
+
+    def center_at_origin(self):
+        r""" Translate such that the PADs are roughly centered at the origin.  This is lazy; just subtract the average
+        pixel position... """
+        v = np.mean(self.position_vecs(), axis=0)
+        self.translate(-v)
 
 
 def f2_to_photon_counts(f_squared, beam=None, pad_geometry=None):
