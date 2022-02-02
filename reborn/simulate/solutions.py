@@ -1,3 +1,4 @@
+
 # This file is part of reborn <https://kirianlab.gitlab.io/reborn/>.
 #
 # reborn is free software: you can redistribute it and/or modify
@@ -17,9 +18,12 @@ import numpy as np
 from scipy import constants as const
 # import reborn
 from .. import utils, detector
+from . import gas
 
 r_e = const.value('classical electron radius')  # meters
 eV = const.value('electron volt')  # J
+kb = const.value('Boltzmann constant')  # J  K^-1
+
 
 file_name = pkg_resources.resource_filename('reborn', 'data/scatter/water_scattering_data.txt')
 
@@ -118,3 +122,77 @@ def get_pad_solution_intensity(pad_geometry, beam, thickness=10.0e-6, liquid='wa
         intensity = np.double(np.random.poisson(intensity))
     intensity = pads.split_data(intensity)
     return intensity
+
+
+
+def get_gas_background(pad_geometry, 
+                        beam, 
+                        path_length=[0.0, 1.0], 
+                        gas_type:str='he', 
+                        temperature:float=293.15,
+                        pressure:float=101325.0,
+                        n_simulation_steps:int=20,
+                        poisson:bool=False):
+
+    r"""
+    Given a list of |PADGeometry| instances along with a |Beam| instance, calculate the scattering intensity
+    :math:`I(q)` of a helium of given path length.
+
+    Args:
+        pad_geometry (list of |PADGeometry| instances): PAD geometry info.
+        beam (|Beam|): X-ray beam parameters.
+        path_length (list of |float|): Path length of gas the beam is 'propagating' through
+        liquid (str): We can only do "water" at this time.
+        temperature (float): Temperature of the gas.
+        poisson (bool): If True, add Poisson noise (default=True)
+
+    Returns:
+        List of |ndarray| instances containing intensities.
+    """
+
+
+    gas_options = ['he', 'helium', 'air']
+    if gas_type not in gas_options:
+        raise ValueError(f'Sorry, the only options are {gas_options}. Considering writing your own function for other gases.')
+
+    pads = detector.PADGeometryList(pad_geometry)
+    q_mags = pads.q_mags(beam)
+
+    for i in range(2):
+        if path_length[i] == 0:
+            path_length[i] = 1e-6 # Avoid values close to the detector.
+
+    iter_list = np.linspace(path_length[0], path_length[1], n_simulation_steps)
+    dx = iter_list[1] - iter_list[0]
+
+    volume = np.pi * dx * (beam.diameter_fwhm/2) ** 2  # volume of a cylinder
+    n_molecules = pressure * volume / (kb * temperature)
+
+    # initialize a zeros array the same shape as the detector
+    I_total = pads.zeros()
+
+    alpha = r_e ** 2 * beam.photon_number_fluence
+    for step in iter_list:
+        for p in pads:  # change the detector distance
+            p.t_vec[2] = step
+        q_mags_0 = pads.q_mags(beam=beam)  # calculate the q_mags for that particlar distance
+        polarization = pads.polarization_factors(beam=beam)  # calculate the polarization factors
+        solid_angles = pads.solid_angles2()  # Approximate solid angles
+        scatt = gas.isotropic_gas_intensity_profile(molecule='He', beam=beam, q_mags=q_mags)  # 1D intensity profile
+        F2 = np.abs(scatt) ** 2 * n_molecules
+        I = alpha * polarization * solid_angles * F2  # calculate the scattering intensity
+        if poisson:
+            I = np.random.poisson(I).astype(np.double)  # add in some Poisson noise for funsies
+        I_total += I  # sum the results
+
+    return I_total
+
+
+
+
+
+
+
+
+
+
