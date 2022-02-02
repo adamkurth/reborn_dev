@@ -38,12 +38,12 @@ protein_concentration = 10  # Protein concentration in mg/ml = kg/m^3
 random_seed = 2022  # Seed for random number generator (choose None to make it random)
 gpu_double_precision = True
 gpu_group_size = 32
-poisson = 1
+poisson = 0
 protein = 1
-droplet = 1
-correct_sa = 0
+droplet = 0
+correct_sa = 1
 atomistic = 0
-one_particle = 0
+one_particle = 1
 
 #########################################################################
 # Derived parameters
