@@ -183,7 +183,7 @@ def test_radial_profiler_02():
     wav = 1.5e-10
     q_mags = np.ravel([p.q_mags(beam_vec=beam, wavelength=wav) for p in pad_geom])
     rad = detector.RadialProfiler(q_mags=q_mags, mask=None, n_bins=100, q_range=None)
-    data = np.ravel([np.random.rand(p.n_ss, p.n_fs) for p in pad_geom])
+    data = np.linspace(0, 1, pad_geom.n_pixels)
     prof = rad.get_mean_profile(data)
     assert(np.max(prof) <= 1)
     assert(np.min(prof) >= 0)

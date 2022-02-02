@@ -1685,6 +1685,11 @@ class RadialProfiler:
         self.pad_geometry = pad_geometry
         self.beam = beam
 
+    def concat_data(self, data):
+        if self.pad_geometry is not None:
+            return self.pad_geometry.concat_data(data)
+        return detector.concat_pad_data(data)
+
     def get_profile_statistic(self, data, mask=None, statistic=None):
         r"""
         Calculate the radial profile of averaged intensities.
