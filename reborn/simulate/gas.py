@@ -92,9 +92,9 @@ def get_gas_background(pad_geometry,
     pads = pads0.copy()
     q_mags = pads.q_mags(beam)
 
-    for i in range(2):
-        if path_length[i] == 0:
-            path_length[i] = 1e-6  # Avoid values close to the detector.
+    # for i in range(2):
+    #     if path_length[i] == 0:
+    #         path_length[i] = 1e-6  # Avoid values close to the detector.
 
     iter_list = np.linspace(path_length[0], path_length[1], n_simulation_steps)
     dx = iter_list[1] - iter_list[0]

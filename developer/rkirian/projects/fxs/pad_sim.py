@@ -45,8 +45,8 @@ droplet = 0
 correct_sa = 1
 atomistic = 0
 one_particle = 1
-gas_background = 1
-view = 0
+gas_background = 0
+view = 1
 
 #########################################################################
 # Derived parameters
@@ -96,11 +96,12 @@ print('Molecules per drop:', n_proteins_per_drop)
 print('Particle diameter:', protein_diameter)
 print('Density map grid size: (%d, %d, %d)' % tuple(dmap.shape))
 
-gass = gas.get_gas_background(pads, beam, path_length=[-0, 2.5], gas_type='he', pressure=100e-5, n_simulation_steps=5)
-gass2 = gas.get_gas_background(pads, beam, path_length=[-0, 5], gas_type='he', pressure=100e-5, n_simulation_steps=10)
-print('test', np.max(np.abs((gass-gass2)/gass)))
-if view:
-    view_pad_data(pad_geometry=pads, pad_data=gass, beam=beam)
+if gas_background:
+    gass = gas.get_gas_background(pads, beam, path_length=[-0, 2.5], gas_type='he', pressure=100e-5, n_simulation_steps=5)
+    gass2 = gas.get_gas_background(pads, beam, path_length=[-0, 5], gas_type='he', pressure=100e-5, n_simulation_steps=10)
+    print('test', np.max(np.abs((gass-gass2)/gass)))
+    if view:
+        view_pad_data(pad_geometry=pads, pad_data=gass, beam=beam)
 
 
 
