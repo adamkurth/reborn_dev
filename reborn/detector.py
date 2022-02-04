@@ -34,6 +34,43 @@ jungfrau4m_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/jung
 rayonix_mx340_xfel_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/rayonix_mx340_xfel_geometry.json')
 
 
+debug = False
+
+
+def debug_msg(*args, **kwargs):
+    if debug:
+        print(*args, **kwargs)
+
+
+def cached(method):
+    r""" Experimental decorator for caching results from a method.  Assumes no arguments are needed. """
+    def wrapper(self):
+        if self.do_cache:
+            attr = '__cached__'+method.__name__
+            if hasattr(self, attr):
+                debug_msg('Returning cached result:', attr)
+            out = method(self)
+            setattr(self, attr, out)
+            return out
+        out = method(self)
+        return out
+    return wrapper
+
+
+def clear_cache(self):
+    r""" Function to clear cache created by the cached decorator above. """
+    if not self.do_cache:
+        return
+    d = self.__dict__
+    todel = []
+    for k in d.keys():
+        if '__cached__' in k:
+            debug_msg('Deleting', k)
+            todel.append(k)
+    for k in todel:
+        delattr(self, k)
+
+
 class PADGeometry:
     r"""
     A container for pixel-array detector (PAD) geometry specification.  By definition, a PAD consists of a single 2D
@@ -103,6 +140,7 @@ class PADGeometry:
     _name = ''
     _parent_data_slice = None  # Slice of parent data block
     _parent_data_shape = None  # Shape of parent data block
+    do_cache = False  # This is experimental... not sure if we really want to cache things like solid angles...
 
     def __init__(self, distance=None, pixel_size=None, shape=None, **kwargs):
         r"""
@@ -182,6 +220,10 @@ class PADGeometry:
             raise ValueError("The parent data shape is defined but the parent data slice is undefined.")
         return True
 
+    def clear_cache(self):
+        r""" Clear the cache (e.g. cached q_vecs). """
+        clear_cache(self)
+
     @property
     def name(self):
         r"""(*str*) The unique name of this panel. """
@@ -200,6 +242,7 @@ class PADGeometry:
 
     @n_fs.setter
     def n_fs(self, val):
+        self.clear_cache()
         self._n_fs = int(val)
 
     @property
@@ -211,6 +254,7 @@ class PADGeometry:
 
     @n_ss.setter
     def n_ss(self, val):
+        self.clear_cache()
         self._n_ss = int(val)
 
     @property
@@ -235,18 +279,21 @@ class PADGeometry:
 
     @fs_vec.setter
     def fs_vec(self, fs_vec):
+        self.clear_cache()
         self._fs_vec = np.array(fs_vec).reshape((3,))
         if self._fs_vec.size != 3:
             raise ValueError('PADGeometry vectors should have a length of 3 (it is a vector)')
 
     @ss_vec.setter
     def ss_vec(self, ss_vec):
+        self.clear_cache()
         self._ss_vec = np.array(ss_vec).reshape((3,))
         if self._ss_vec.size != 3:
             raise ValueError('PADGeometry vectors should have a length of 3 (it is a vector)')
 
     @t_vec.setter
     def t_vec(self, t_vec):
+        self.clear_cache()
         self._t_vec = np.array(t_vec).reshape((3,))
         if self._t_vec.size != 3:
             raise ValueError('PADGeometry vectors should have a length of 3 (it is a vector)')
@@ -259,6 +306,7 @@ class PADGeometry:
 
     @parent_data_slice.setter
     def parent_data_slice(self, slc):
+        self.clear_cache()
         self._parent_data_slice = _slice_to_tuple(slc)
 
     @property
@@ -268,6 +316,7 @@ class PADGeometry:
 
     @parent_data_shape.setter
     def parent_data_shape(self, shape):
+        self.clear_cache()
         if isinstance(shape, list):
             shape = tuple(shape)
         if not (isinstance(shape, tuple) or (shape is None)):
@@ -304,6 +353,7 @@ class PADGeometry:
         r""" Make a copy of this class instance. """
         p = PADGeometry()
         p.from_dict(self.to_dict())
+        p.do_cache = self.do_cache
         return p
 
     def save_json(self, file_name):
@@ -414,6 +464,7 @@ class PADGeometry:
             j[m == 1] = np.nan
         return j, i
 
+    @cached
     def position_vecs(self):
         r"""
         Compute vectors pointing from origin to pixel centers.
@@ -452,13 +503,13 @@ class PADGeometry:
                 norm *= -1
         return norm
 
+    @cached
     def s_vecs(self):
         r"""
         Outgoing unit-vectors (length 1) pointing from sample to pixel.
 
         Returns: |ndarray|
         """
-
         return utils.vec_norm(self.position_vecs())
 
     def ds_vecs(self, beam=None, **kwargs):
@@ -532,6 +583,7 @@ class PADGeometry:
             beam = source.Beam(beam_vec=beam_vec, wavelength=wavelength)
         return utils.vec_mag(self.q_vecs(beam=beam))
 
+    @cached
     def solid_angles(self):
         r"""
         Calculate solid angles of pixels.  See solid_angles2 method.
@@ -1394,7 +1446,7 @@ class IcosphereGeometry:
 
     def compute_vertices_and_faces(self):
         r"""
-        Compute vertex and face coordinates.  FIXME: Needs documentation.
+        Compute vertex and face coordinates.
         """
         # Make the base icosahedron
         vertex = self._vertex
@@ -1546,7 +1598,6 @@ class PolarPADAssembler:
 
     def get_sdev(self, data, mask=None):
         r""" Create polar-binned standard deviation.  Not implemented yet."""
-        # TODO: Implement this once it is needed.
         raise NotImplementedError('Time to implement this method!')
 
 

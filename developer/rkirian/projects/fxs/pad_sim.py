@@ -45,6 +45,8 @@ droplet = 0
 correct_sa = 1
 atomistic = 0
 one_particle = 1
+gas_background = 1
+view = 0
 
 #########################################################################
 # Derived parameters
@@ -94,11 +96,12 @@ print('Molecules per drop:', n_proteins_per_drop)
 print('Particle diameter:', protein_diameter)
 print('Density map grid size: (%d, %d, %d)' % tuple(dmap.shape))
 
-gp = gas.get_gas_background(pads, beam, path_length=[-0, 2.5], gas_type='he', pressure=100e-5, n_simulation_steps=5)
-gp2 = gas.get_gas_background(pads, beam, path_length=[-0, 5], gas_type='he', pressure=100e-5, n_simulation_steps=10)
-print('test', np.max(np.abs((gp-gp2)/gp)))
-view_pad_data(pad_geometry=pads, pad_data=gp, beam=beam)
-dsds
+gass = gas.get_gas_background(pads, beam, path_length=[-0, 2.5], gas_type='he', pressure=100e-5, n_simulation_steps=5)
+gass2 = gas.get_gas_background(pads, beam, path_length=[-0, 5], gas_type='he', pressure=100e-5, n_simulation_steps=10)
+print('test', np.max(np.abs((gass-gass2)/gass)))
+if view:
+    view_pad_data(pad_geometry=pads, pad_data=gass, beam=beam)
+
 
 
 ###########################################################################
@@ -127,9 +130,12 @@ class DropletGetter(FrameGetter):
                 else:
                     gpucore.mesh_interpolation(F_gpu, q_vecs_gpu, N=dmap.shape, q_min=q_min, q_max=q_max,
                                                R=R, U=U, a=a_gpu, add=True)
+        I = 0
         if droplet > 0:
             gpucore.sphere_form_factor(r=dd / 2, q=q_mags_gpu, a=a_gpu, dens=f_dens_water, add=True)
         I = np.abs(a_gpu.get()) ** 2 * f2phot
+        if gas_background:
+            I += gass
         if poisson:
             I = np.random.poisson(I)
         if correct_sa:
@@ -138,5 +144,7 @@ class DropletGetter(FrameGetter):
         df = dataframe.DataFrame(pad_geometry=pads, beam=beam, raw_data=I, mask=mask)
         return df
 fg = DropletGetter()
-pv = fg.get_padview(hold_levels=True)
-pv.start()
+df = fg.get_next_frame()
+if view:
+    pv = fg.get_padview(hold_levels=True)
+    pv.start()
