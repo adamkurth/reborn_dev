@@ -2,16 +2,18 @@ import reborn
 import matplotlib.pyplot as plt
 import numpy as np
 
-try:
-    import density_f
-except ImportError:
-    from numpy.f2py import compile
-    f90file = "density.f90"
-    compile(source=open(f90file, "rb").read(),
-            modulename=f90file.replace(".f90", "_f"),
-            extension=".f90", #extra_args='--f90flags="-fcheck=all -Wall"',
-            verbose=False)
-    import density_f
+# try:
+#     import density_f
+# except ImportError:
+#     from numpy.f2py import compile
+#     f90file = "density.f90"
+#     compile(source=open(f90file, "rb").read(),
+#             modulename=f90file.replace(".f90", "_f"),
+#             extension=".f90", #extra_args='--f90flags="-fcheck=all -Wall"',
+#             verbose=False)
+#     import density_f
+
+density_f = reborn.fortran.import_f90('density.f90', hash=True)
 
 from time import time
 
