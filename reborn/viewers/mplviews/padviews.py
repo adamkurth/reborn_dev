@@ -104,3 +104,40 @@ def view_pad_data(pad_data, pad_geometry, pad_numbers=False, beam_center=False, 
         plt.show()
 
     return ax, im
+
+
+def view_polar_data(polar_pad_assembler, data, title, show=True, **kwargs):
+    r"""
+    Creates correct plot of polar-binned data.
+
+    Arguments:
+        polar_pad_assembler (obj): pad assembler used for polar conversion.
+        data (np.ndarray): The data to plot.
+        title (str): Title for plot.
+        show (bool): Display plot.
+        **kwargs : Additional keyword arguments passed to imshow.
+    """
+    pc = polar_pad_assembler.phi_bin_centers
+    qc = polar_pad_assembler.q_bin_centers
+    polar_extent = [pc[0]/2/np.pi, pc[-1]/2/np.pi, qc[0]/1e10, qc[-1]/1e10]
+
+    plt.figure()
+    plt.title(title)
+    ax = plt.gca()
+    ax.set_aspect('equal')
+
+    if "vmin" not in kwargs:
+        kwargs["vmin"] = np.min(data)
+    if "vmax" not in kwargs:
+        kwargs["vmax"] = np.max(data)
+    if "interpolation" not in kwargs:
+        kwargs["interpolation"] = 'none'
+
+    kwargs["extent"] = polar_extent
+    im = ax.imshow(data, **kwargs)
+    plt.colorbar()
+    plt.xlabel(r'$\phi/2\pi$')
+    plt.ylabel(r'$q$ [${\AA}^{-1}$]')
+    if show:
+        plt.show()
+    return ax, im
