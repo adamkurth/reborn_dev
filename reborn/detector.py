@@ -1453,9 +1453,11 @@ class PolarPADAssembler:
             data (list or |ndarray|): The PAD data to be binned.
             mask (list or |ndarray|): A mask to indicate ignored pixels.
         """
-        # TODO: Implement mask
         # TODO: Speed up the algorithm.  Fortran?
         data = self.pad_geometry.concat_data(data)
+        if mask is None:
+            mask = np.ones_like(data)
+        mask = reborn.detector.concat_pad_data(mask)
         n_q = self.n_q_bins
         q_size = self.q_bin_size
         n_phi = self.n_phi_bins
@@ -1466,24 +1468,24 @@ class PolarPADAssembler:
         phi = self.phis
         sum_ = np.zeros([n_q, n_phi])
         cnt = np.zeros([n_q, n_phi], dtype=int)
-        for i in range(len(data)):
-            qi = q[i]
-            pi = phi[i] % (2 * np.pi)
-            vi = data[i]
-            q_ind = int(np.floor((qi - q_min) / q_size))
+        for d, m, q_i, p_i in zip(data, mask, q, phi):
+            if m == 0:
+                continue
+            q_ind = int(np.floor((q_i - q_min) / q_size))
             if q_ind >= n_q:
                 continue
             if q_ind < 0:
                 continue
-            p_ind = int(np.floor((pi - phi_min) / phi_size))
+            p = p_i % (2 * np.pi)
+            p_ind = int(np.floor((p - phi_min) / phi_size))
             if p_ind >= n_phi:
                 continue
             if p_ind < 0:
                 continue
             cnt[q_ind, p_ind] += 1
-            sum_[q_ind, p_ind] += vi
+            sum_[q_ind, p_ind] += d
         mean_ = np.divide(sum_, cnt, out=np.zeros_like(sum_), where=cnt != 0)
-        return mean_
+        return mean_, cnt
 
     def get_sdev(self, data, mask=None):
         r""" Create polar-binned standard deviation.  Not implemented yet."""
