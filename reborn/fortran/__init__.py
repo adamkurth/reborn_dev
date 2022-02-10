@@ -28,7 +28,7 @@ std_args += ' -DNPY_DISTUTILS_APPEND_FLAGS=0'
 omp_args = " --f90flags='-fopenmp -O2' -lgomp"
 os.environ['NPY_DISTUTILS_APPEND_FLAGS'] = '1'
 os.environ['NPY_NO_DEPRECATED_API'] = 'NPY_1_7_API_VERSION'
-autocompile = configs['autorecompile_fortran']
+autocompile = configs['autocompile_fortran']
 
 
 def import_f90(source_file, extra_args='', hash=True, verbose=False, with_omp=False):
