@@ -106,7 +106,7 @@ def view_pad_data(pad_data, pad_geometry, pad_numbers=False, beam_center=False, 
     return ax, im
 
 
-def view_polar_data(polar_pad_assembler, data, title, show=True, **kwargs):
+def view_polar_data(polar_pad_assembler, data, title=None, show=True, **kwargs):
     r"""
     Creates correct plot of polar-binned data.
 
@@ -122,7 +122,6 @@ def view_polar_data(polar_pad_assembler, data, title, show=True, **kwargs):
     polar_extent = [pc[0]/2/np.pi, pc[-1]/2/np.pi, qc[0]/1e10, qc[-1]/1e10]
 
     plt.figure()
-    plt.title(title)
     ax = plt.gca()
     ax.set_aspect('equal')
 
@@ -138,6 +137,8 @@ def view_polar_data(polar_pad_assembler, data, title, show=True, **kwargs):
     plt.colorbar()
     plt.xlabel(r'$\phi/2\pi$')
     plt.ylabel(r'$q$ [${\AA}^{-1}$]')
+    if title is not None:
+        plt.title(title)
     if show:
         plt.show()
     return ax, im
