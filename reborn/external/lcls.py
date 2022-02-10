@@ -387,38 +387,38 @@ class LCLSFrameGetter(reborn.fileio.getters.FrameGetter):
             debug_message('The event is None!')
             return None
         self.event_codes = self.evr.eventCodes(event)
+        xray_on = 40 in self.event_codes   # FIXME: This number might differ from one experiment to the next
+        laser_on = 41 in self.event_codes  # FIXME: This number might differ from one experiment to the next
+        photon_energy = None
         try:
             photon_energy = self.ebeam_detector.get(event).ebeamPhotonEnergy()*reborn.const.eV
         except AttributeError:
             debug_message(f'Run {self.run_number} frame {frame_number} causes ebeamPhotonEnergy failure, skipping this '
                      f'shot.')
-            photon_energy = None
-        beam = self.beam
-        beam.photon_energy = photon_energy
         geometry = reborn.detector.PADGeometryList()
-        for det in self.detectors:
-            for p in det.get_pad_geometry(event):
-                geometry.append(p)
         pad_data = []
+        pad_mask = []
         for det in self.detectors:
-            for dat in det.get_data_split(event):
-                pad_data.append(dat)
-        mask = []
-        for det in self.detectors:
-            for m in det.mask:
-                if m is not None:
-                    mask.append(m)
-        xray_on = 40 in self.event_codes   # FIXME: This number might differ from one experiment to the next
-        laser_on = 41 in self.event_codes  # FIXME: This number might differ from one experiment to the next
+            geom = det.get_pad_geometry(event)
+            data = det.get_data_split(event)
+            mask = det.mask
+            geometry.extend(geom)
+            pad_data.extend(data)
+            pad_mask.extend([m for m in mask if m is not None])
         df = reborn.dataframe.DataFrame()
         df.set_dataset_id(self.data_string)
         df.set_frame_id(ts)
         df.set_frame_index(frame_number)
-        df.set_beam(beam)
-        df.set_pad_geometry(geometry)
-        df.set_raw_data(pad_data)
-        if mask:
-            df.set_mask(mask)
+        if photon_energy is not None:
+            beam = self.beam
+            beam.photon_energy = photon_energy
+            df.set_beam(beam)
+        if geometry:
+            df.set_pad_geometry(geometry)
+        if pad_data:
+            df.set_raw_data(pad_data)
+        if pad_mask:
+            df.set_mask(pad_mask)
         parameters = {'xray_on': xray_on, 'laser_on': laser_on}
         df.parameters = parameters
         debug_message('returning', df)
