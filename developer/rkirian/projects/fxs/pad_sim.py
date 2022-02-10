@@ -24,25 +24,26 @@ rad90 = np.pi/2
 # Configurations
 #######################################################################
 pad_geometry_file = [detector.epix100_geom_file, detector.jungfrau4m_geom_file]
-pad_binning = [4, 1]
+pad_binning = [2, 2]
 detector_distance = [2.4, 0.5]
 beamstop_size = 5e-3
 photon_energy = 7000 * eV
 pulse_energy = 0.5e-3
 drop_radius = 70e-9 / 2
 beam_diameter = 0.5e-6
-map_resolution = 0.2e-9  # Minimum resolution for 3D density map
+map_resolution = 0.1e-9  # Minimum resolution for 3D density map
 map_oversample = 2  # Oversampling factor for 3D density map
 cell = 200e-10  # Unit cell size (assume P1, cubic)
 pdb_file = ['1SS8', '3IYF', '1PCQ', '2LYZ', 'BDNA25_sp.pdb'][0]
 protein_concentration = 10  # Protein concentration in mg/ml = kg/m^3
+gas_params = {'path_length': [0, None], 'gas_type': 'he', 'pressure': 100e-5, 'n_simulation_steps': 3}
 random_seed = 2022  # Seed for random number generator (choose None to make it random)
-gpu_double_precision = True
+gpu_double_precision = False
 gpu_group_size = 32
-poisson = 0
+poisson = 1
 protein = 1
-droplet = 0
-correct_sa = 1
+droplet = 1
+correct_sa = 0
 atomistic = 0
 one_particle = 1
 gas_background = 0
@@ -65,7 +66,6 @@ for i in range(len(pad_geometry_file)):
     p.translate([0, 0, detector_distance[i]])
     pads += p
 mask = pads.beamstop_mask(beam=beam, min_radius=beamstop_size)
-f2phot = pads.f2phot(beam)
 f_dens_water = atoms.xraylib_scattering_density('H2O', water_density, photon_energy, approximate=True)
 q_mags = pads.q_mags(beam=beam)
 cryst = crystal.CrystalStructure(pdb_file, spacegroup='P1', unitcell=(cell, cell, cell, rad90, rad90, rad90))
@@ -76,7 +76,6 @@ x = cryst.unitcell.r2x(r_vecs)
 rho = dmap.place_atoms_in_map(x, f, mode='nearest')  # FIXME: replace 'nearest' with Cromer Mann densities
 rho[rho != 0] -= f_dens_water * dmap.voxel_volume  # FIXME: Need a better model for solvent envelope
 F = fftshift(fftn(rho))
-I = np.abs(F) ** 2
 rho_cell = fftshift(rho)
 gpucore = clcore.ClCore(double_precision=gpu_double_precision, group_size=gpu_group_size)
 F_gpu = gpucore.to_device(F)
@@ -96,14 +95,11 @@ print('Molecules per drop:', n_proteins_per_drop)
 print('Particle diameter:', protein_diameter)
 print('Density map grid size: (%d, %d, %d)' % tuple(dmap.shape))
 
+########################################################################
+# Gas background
+########################################################################
 if gas_background:
-    gass = gas.get_gas_background(pads, beam, path_length=[-0, 2.5], gas_type='he', pressure=100e-5, n_simulation_steps=5)
-    gass2 = gas.get_gas_background(pads, beam, path_length=[-0, 5], gas_type='he', pressure=100e-5, n_simulation_steps=10)
-    print('test', np.max(np.abs((gass-gass2)/gass)))
-    if view:
-        view_pad_data(pad_geometry=pads, pad_data=gass, beam=beam)
-
-
+    gasbak = gas.get_gas_background(pads, beam, **gas_params)
 
 ###########################################################################
 # Water droplet with protein, 2D PAD simulation
@@ -131,19 +127,19 @@ class DropletGetter(FrameGetter):
                 else:
                     gpucore.mesh_interpolation(F_gpu, q_vecs_gpu, N=dmap.shape, q_min=q_min, q_max=q_max,
                                                R=R, U=U, a=a_gpu, add=True)
-        I = 0
         if droplet > 0:
             gpucore.sphere_form_factor(r=dd / 2, q=q_mags_gpu, a=a_gpu, dens=f_dens_water, add=True)
-        I = np.abs(a_gpu.get()) ** 2 * f2phot
+        pattern = np.abs(a_gpu.get()) ** 2 * pads.f2phot(beam)
         if gas_background:
-            I += gass
+            pattern += gasbak
         if poisson:
-            I = np.random.poisson(I)
+            pattern = np.random.poisson(pattern)
         if correct_sa:
-            I *= 1e6/pads.solid_angles()
+            pattern *= 1e6/pads.solid_angles()
         print(time() - t, 'seconds')
-        df = dataframe.DataFrame(pad_geometry=pads, beam=beam, raw_data=I, mask=mask)
+        df = dataframe.DataFrame(pad_geometry=pads, beam=beam, raw_data=pattern, mask=mask)
         return df
+
 fg = DropletGetter()
 df = fg.get_next_frame()
 if view:

@@ -311,13 +311,13 @@ class DataFrame:
     #
     # def load(self, filename):
     #     dat = np.load(filename)
-    #     self.set_dataset_id(utils.key_value_default(dat, 'dataset_id'))
-    #     self.set_frame_id(utils.key_value_default(dat, 'frame_id', 0))
-    #     self.set_pad_geometry(utils.key_value_default(dat, 'pad_geometry'))
-    #     self.set_beam(utils.key_value_default(dat, 'beam'))
-    #     self.set_raw_data(utils.key_value_default(dat, 'raw_data'))
-    #     self.set_processed_data(utils.key_value_default(dat, 'processed_data'))
-    #     self.set_mask(utils.key_value_default(dat, 'mask'))
+    #     self.set_dataset_id(dat.get('dataset_id'))
+    #     self.set_frame_id(dat.get('frame_id', 0))
+    #     self.set_pad_geometry(dat.get('pad_geometry'))
+    #     self.set_beam(dat.get('beam'))
+    #     self.set_raw_data(dat.get('raw_data'))
+    #     self.set_processed_data(dat.get('processed_data'))
+    #     self.set_mask(dat.get('mask'))
 
 
     # def get_bragg_peaks(self):
