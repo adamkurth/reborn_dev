@@ -6,6 +6,7 @@ except ImportError:
     delayed = None
 from ..dataframe import DataFrame
 from ..fileio.getters import ListFrameGetter
+from ..source import Beam
 
 
 def padstats(framegetter=None, start=0, stop=None, parallel=False, n_processes=None, process_id=None, verbose=False):
@@ -61,12 +62,12 @@ def padstats(framegetter=None, start=0, stop=None, parallel=False, n_processes=N
     sum_pad2 = None
     min_pad = None
     max_pad = None
-    beam = 0
-    b_frames = 0
+    beam_wavelength = 0
+    beam_frames = 0
     n_frames = 0
     for (n, i) in enumerate(frame_ids):
         if verbose:
-            print('Frame %6d (%0.2g%%)' % (i, n / len(frame_ids) * 100))
+            print(f'Frame {i:6d} ({n / len(frame_ids) * 100:0.2g})')
         dat = framegetter.get_frame(frame_number=i)
         if dat is None:
             continue
@@ -74,9 +75,9 @@ def padstats(framegetter=None, start=0, stop=None, parallel=False, n_processes=N
         if rdat is None:
             continue
         if dat.validate():
-            bdat = dat.get_beam()
-            beam += bdat.wavelength
-            b_frames += 1
+            beam_data = dat.get_beam()
+            beam_wavelength += beam_data.wavelength
+            beam_frames += 1
         if first:
             s = rdat.shape
             sum_pad = np.zeros(s)
@@ -90,7 +91,11 @@ def padstats(framegetter=None, start=0, stop=None, parallel=False, n_processes=N
         min_pad = np.minimum(min_pad, rdat)
         max_pad = np.maximum(max_pad, rdat)
         n_frames += 1
-    beam_frames = b_frames if b_frames != 0 else 1
+    if beam_frames == 0:
+        beam = None
+    else:
+        avg_wavelength = beam_wavelength / beam_frames
+        beam = Beam(wavelength=avg_wavelength)
     return {'dataset_id': dat.get_dataset_id(),
             'pad_geometry': dat.get_pad_geometry(),
             'mask': dat.get_mask_flat(),
@@ -99,7 +104,7 @@ def padstats(framegetter=None, start=0, stop=None, parallel=False, n_processes=N
             'min': min_pad,
             'max': max_pad,
             'sum2': sum_pad2,
-            'beam': beam / beam_frames,
+            'beam': beam,
             'start': start,
             'stop': stop}
 
@@ -129,7 +134,8 @@ def padstats_framegetter(stats):
         d.set_dataset_id(stats['dataset_id'])
         d.set_frame_id(a)
         d.set_pad_geometry(geom)
-        d.set_beam(beam)
+        if beam is not None:
+            d.set_beam(beam)
         d.set_mask(mask)
         d.set_raw_data(b)
         dfs.append(d)
