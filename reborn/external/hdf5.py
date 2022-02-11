@@ -5,6 +5,13 @@ from ..source import Beam
 
 
 def save_pad_geometry_as_h5(pad_geometry, h5_file_path):
+    r"""
+    Save |PADGeometryList| in an HDF5 file format in a standardized way.
+
+    Arguments:
+        pad_geometry (|PADGeometryList|): pad geometry to save
+        h5_file_path (str): filename
+    """
     with h5py.File(h5_file_path, 'a') as hf:
         for i, pad in enumerate(pad_geometry):
             p = f'geometry/pad_{i:03n}'
@@ -16,6 +23,15 @@ def save_pad_geometry_as_h5(pad_geometry, h5_file_path):
 
 
 def load_pad_geometry_from_h5(h5_file_path):
+    r"""
+    Load |PADGeometryList| from HDF5 file in a standardized way.
+
+    Arguments:
+        h5_file_path (str): filename
+
+    Returns:
+        pad_geometry (|PADGeometryList|): pad geometry saved in hdf5 file
+    """
     geometry = PADGeometryList()
     with h5py.File(h5_file_path, 'r') as hf:
         pads = list(hf['geometry'].keys())
@@ -33,6 +49,13 @@ def load_pad_geometry_from_h5(h5_file_path):
 
 
 def save_mask_as_h5(mask, h5_file_path):
+    r"""
+    Save mask in an HDF5 file format in a standardized way.
+
+    Arguments:
+        mask (list or |ndarray|): mask to save
+        h5_file_path (str): filename
+    """
     if isinstance(mask, list):
         mask = concat_pad_data(mask)
     with h5py.File(h5_file_path, 'a') as hf:
@@ -40,12 +63,28 @@ def save_mask_as_h5(mask, h5_file_path):
 
 
 def load_mask_from_h5(h5_file_path):
+    r"""
+    Load mask from HDF5 file in a standardized way.
+
+    Arguments:
+        h5_file_path (str): filename
+
+    Returns:
+        mask (|ndarray|): mask saved in hdf5 file
+    """
     with h5py.File(h5_file_path, 'r') as hf:
         mask = hf[f'geometry/mask'][:]
     return mask
 
 
 def save_beam_as_h5(beam, h5_file_path):
+    r"""
+    Save |Beam| in an HDF5 file format in a standardized way.
+
+    Arguments:
+        beam (|Beam|): beam to save
+        h5_file_path (str): filename
+    """
     beam_dict = beam.to_dict()
     with h5py.File(h5_file_path, 'a') as hf:
         hf.create_dataset('data/beam/beam_profile', data=beam_dict['beam_profile'])
@@ -55,6 +94,15 @@ def save_beam_as_h5(beam, h5_file_path):
 
 
 def load_beam_from_h5(h5_file_path):
+    r"""
+    Load |Beam| from HDF5 file in a standardized way.
+
+    Arguments:
+        h5_file_path (str): filename
+
+    Returns:
+        beam (|Beam|): beam saved in hdf5 file
+    """
     beam = Beam()
     beam_dict = dict()
     with h5py.File(h5_file_path, 'r') as hf:
@@ -73,6 +121,24 @@ def load_beam_from_h5(h5_file_path):
 
 
 def save_padstats_as_h5(experiment_id, run, stats, h5_file_path):
+    r"""
+    Save padstats in an HDF5 file format in a standardized way.
+
+    Arguments:
+        stats (dict): dict to save
+                      with keys: 'dataset_id'
+                                 'pad_geometry'
+                                 'mask'
+                                 'n_frames'
+                                 'sum'
+                                 'min'
+                                 'max'
+                                 'sum2'
+                                 'beam'
+                                 'start'
+                                 'stop'
+        h5_file_path (str): filename
+    """
     save_pad_geometry_as_h5(stats['pad_geometry'], h5_file_path)
     save_mask_as_h5(stats['mask'], h5_file_path)
     save_beam_as_h5(stats['beam'], h5_file_path)
@@ -91,6 +157,26 @@ def save_padstats_as_h5(experiment_id, run, stats, h5_file_path):
 
 
 def load_padstats_from_h5(h5_file_path):
+    r"""
+    Load padstats from HDF5 file format in a standardized way.
+
+    Arguments:
+        h5_file_path (str): filename
+
+    Returns:
+        stats (dict): dict to save
+                      with keys: 'dataset_id'
+                                 'pad_geometry'
+                                 'mask'
+                                 'n_frames'
+                                 'sum'
+                                 'min'
+                                 'max'
+                                 'sum2'
+                                 'beam'
+                                 'start'
+                                 'stop'
+    """
     stats = {'pad_geometry': load_pad_geometry_from_h5(h5_file_path),
              'mask': load_mask_from_h5(h5_file_path),
              'beam': load_beam_from_h5(h5_file_path)}
