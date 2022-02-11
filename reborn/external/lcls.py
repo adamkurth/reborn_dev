@@ -393,8 +393,7 @@ class LCLSFrameGetter(reborn.fileio.getters.FrameGetter):
         try:
             photon_energy = self.ebeam_detector.get(event).ebeamPhotonEnergy()*reborn.const.eV
         except AttributeError:
-            debug_message(f'Run {self.run_number} frame {frame_number} causes ebeamPhotonEnergy failure, skipping this '
-                     f'shot.')
+            debug_message(f'Skipping run {self.run_number} frame {frame_number}: ebeamPhotonEnergy failure')
         geometry = reborn.detector.PADGeometryList()
         pad_data = []
         pad_mask = []
