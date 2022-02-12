@@ -28,7 +28,7 @@ from numpy import sin, cos
 from numpy.fft import fftshift, fft, ifft, fftn
 from scipy.sparse import csr_matrix
 from scipy.spatial.transform import Rotation
-
+from .config import configs
 
 logger = logging.getLogger()
 
@@ -173,7 +173,9 @@ def debug(*args, **kwargs):
         logger = logging.getLogger()
         logger.debug(*args, **kwargs)
     """
-    logger.debug(*args, **kwargs)
+    if configs['debug']:
+        msg = "DEBUG:" + get_caller(1) + ':'
+        print(msg, *args, **kwargs)
 
 
 def error(*message, caller=0, **kwargs):
