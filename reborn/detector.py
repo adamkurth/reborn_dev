@@ -1558,43 +1558,38 @@ class PolarPADAssembler:
         self.phis = pad_geometry.azimuthal_angles(beam=beam)
         self.pad_geometry = pad_geometry
 
-    def get_mean(self, data, mask=None):
+    def get_mean(self, data, mask=None, routine='p'):
         r""" Create the mean polar-binned average intensities.
         Arguments:
             data (list or |ndarray|): The PAD data to be binned.
             mask (list or |ndarray|): A mask to indicate ignored pixels.
+            routine (str): 'f' for fortran, 'p' for python
         """
-        # TODO: Speed up the algorithm.  Fortran?
         data = self.pad_geometry.concat_data(data)
         if mask is None:
             mask = np.ones_like(data)
-        mask = reborn.detector.concat_pad_data(mask)
-        n_q = self.n_q_bins
-        q_size = self.q_bin_size
-        n_phi = self.n_phi_bins
-        phi_size = self.phi_bin_size
-        q_min = self.q_min
-        phi_min = self.phi_min
-        q = self.q_mags
-        phi = self.phis
-        sum_ = np.zeros([n_q, n_phi])
-        cnt = np.zeros([n_q, n_phi], dtype=int)
-        for d, m, q_i, p_i in zip(data, mask, q, phi):
-            if m == 0:
+        mask = detector.concat_pad_data(mask)
+        polar_shape = (self.n_q_bins, self.n_phi_bins)
+        _p = self.phis % (2 * np.pi)
+        _pi = np.floor((_p - self.phi_min) / self.phi_bin_size)
+        _qi = np.floor((self.q_mags - self.q_min) / self.q_bin_size)
+        q_index = _qi.astype(int)
+        p_index = _pi.astype(int)
+        # conditions
+        cm = mask == 0
+        cq = (q_index >= self.n_q_bins) * (q_index < 0)
+        cp = (p_index >= self.n_phi_bins) * (p_index < 0)
+        cqp = cq * cp
+        # calculate average binned pixel
+        sum_ = np.zeros(polar_shape)
+        cnt = np.zeros(polar_shape, dtype=int)
+        for m, c, q_i, p_i, d in zip(cm, cqp, q_index, p_index, data):
+            if m:
                 continue
-            q_ind = int(np.floor((q_i - q_min) / q_size))
-            if q_ind >= n_q:
+            if c:
                 continue
-            if q_ind < 0:
-                continue
-            p = p_i % (2 * np.pi)
-            p_ind = int(np.floor((p - phi_min) / phi_size))
-            if p_ind >= n_phi:
-                continue
-            if p_ind < 0:
-                continue
-            cnt[q_ind, p_ind] += 1
-            sum_[q_ind, p_ind] += d
+            cnt[q_i, p_i] += 1
+            sum_[q_i, p_i] += d
         mean_ = np.divide(sum_, cnt, out=np.zeros_like(sum_), where=cnt != 0)
         return mean_, cnt
 
