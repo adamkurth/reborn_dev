@@ -134,7 +134,7 @@ def view_polar_data(polar_pad_assembler, data, title=None, show=True, **kwargs):
 
     kwargs["extent"] = polar_extent
     im = ax.imshow(data, **kwargs)
-    plt.colorbar()
+    plt.colorbar(im, ax=ax)
     plt.xlabel(r'$\phi/2\pi$')
     plt.ylabel(r'$q$ [${\AA}^{-1}$]')
     if title is not None:
