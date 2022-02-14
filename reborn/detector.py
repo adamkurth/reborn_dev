@@ -22,6 +22,10 @@ import json
 import numpy as np
 import pkg_resources
 from . import utils, source, detector, const
+try:
+    from .fortran import polar_f
+except ImportError:
+    polar_f = None
 
 
 pnccd_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/pnccd_front_geometry.json')
@@ -1558,12 +1562,11 @@ class PolarPADAssembler:
         self.phis = pad_geometry.azimuthal_angles(beam=beam)
         self.pad_geometry = pad_geometry
 
-    def get_mean(self, data, mask=None, routine='p'):
+    def get_mean(self, data, mask=None):
         r""" Create the mean polar-binned average intensities.
         Arguments:
             data (list or |ndarray|): The PAD data to be binned.
             mask (list or |ndarray|): A mask to indicate ignored pixels.
-            routine (str): 'f' for fortran, 'p' for python
         """
         data = self.pad_geometry.concat_data(data)
         if mask is None:
@@ -1576,20 +1579,34 @@ class PolarPADAssembler:
         q_index = _qi.astype(int)
         p_index = _pi.astype(int)
         # conditions
-        cm = mask == 0
-        cq = (q_index >= self.n_q_bins) * (q_index < 0)
-        cp = (p_index >= self.n_phi_bins) * (p_index < 0)
-        cqp = cq * cp
+        _cqn = q_index >= self.n_q_bins
+        _cq0 = q_index < 0
+        _cpn = p_index >= self.n_phi_bins
+        _cp0 = p_index < 0
+        _cq = _cqn | _cq0
+        _cp = _cpn | _cp0
+        cqp = _cq | _cp
+        conditions = (mask == 0) | cqp
+        keepers = ~conditions
+        qk = q_index[keepers]
+        pk = p_index[keepers]
+        dk = data[keepers]
         # calculate average binned pixel
-        sum_ = np.zeros(polar_shape)
-        cnt = np.zeros(polar_shape, dtype=int)
-        for m, c, q_i, p_i, d in zip(cm, cqp, q_index, p_index, data):
-            if m:
-                continue
-            if c:
-                continue
-            cnt[q_i, p_i] += 1
-            sum_[q_i, p_i] += d
+        if polar_f is None:
+            sum_ = np.zeros(polar_shape)
+            cnt = np.zeros(polar_shape, dtype=int)
+            for q, p, d in zip(qk, pk, dk):
+                cnt[q, p] += 1
+                sum_[q, p] += d
+            # vectorized code below is not equivalent to for loop above
+            # because slicing only works with unique values
+            # cnt[qk, pk] += 1
+            # sum_[qk, pk] += data[keepers]
+        else:
+            n_q, n_p = polar_shape
+            psum, count = polar_f.polar_binning(n_q, n_p, qk, pk, dk)
+            cnt = count.reshape(polar_shape).astype(int).T
+            sum_ = psum.reshape(polar_shape).T
         mean_ = np.divide(sum_, cnt, out=np.zeros_like(sum_), where=cnt != 0)
         return mean_, cnt
 
