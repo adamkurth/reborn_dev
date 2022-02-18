@@ -131,6 +131,7 @@ class PADView(QtCore.QObject):
 
     sig_geometry_changed = QtCore.pyqtSignal()
     sig_beam_changed = QtCore.pyqtSignal()
+    sig_dataframe_changed = QtCore.pyqtSignal()
 
     def __init__(self, pad_geometry=None, mask_data=None, frame_getter=None, raw_data=None, pad_data=None,
                  beam=None, levels=None, percentiles=None, debug_level=0, main=True, dataframe_preprocessor=None,
@@ -249,11 +250,12 @@ class PADView(QtCore.QObject):
             val = self._dataframe_preprocessor(val)
         if isinstance(val, DataFrame):
             self._dataframe = val
+            self.sig_dataframe_changed.emit()
             return
-        if self.dataframe is not None:
-            d = self.dataframe.get_raw_data_flat()
-            self.dataframe.set_raw_data(d*0)
-            self.dataframe.clear_processed_data()
+        # if self.dataframe is not None:
+        #     d = self.dataframe.get_raw_data_flat()
+        #     self.dataframe.set_raw_data(d*0)
+        #     self.dataframe.clear_processed_data()
         self.debug('Attempted to set dataframe to wrong type!!!!', '(', val, ')')
 
     def setup_ui(self):
@@ -400,8 +402,6 @@ class PADView(QtCore.QObject):
         self.set_shortcut("Ctrl+r", self.edit_ring_radii)
         self.set_shortcut("Ctrl+a", self.toggle_coordinate_axes)
         self.set_shortcut("Ctrl+l", self.toggle_pad_labels)
-        self.set_shortcut("Ctrl+s", self.increase_skip)
-        self.set_shortcut("Shift+s", self.decrease_skip)
         self.set_shortcut("m", self.toggle_masks)
 
     def update_status_string(self, frame_number=None, n_frames=None):
@@ -521,16 +521,6 @@ class PADView(QtCore.QObject):
                 self.hide_rois()
                 return
         self.show_rois()
-
-    # FIXME: This frame skip stuff should be in the frame navigator.
-    def increase_skip(self):
-        self.debug()
-        self.frame_getter.skip = 10**np.floor(np.log10(self.frame_getter.skip)+1)
-
-    # FIXME: Move into frame navigator.
-    def decrease_skip(self):
-        self.debug()
-        self.frame_getter.skip = np.max([10**(np.floor(np.log10(self.frame_getter.skip))-1), 1])
 
     def show_coordinate_axes(self):
         self.debug()
@@ -800,28 +790,6 @@ class PADView(QtCore.QObject):
             center = np.array([roi.pos()[0], roi.pos()[1]]) + radius
             inds = np.sqrt(np.sum((v_vecs - center)**2, axis=1)) < radius
         return inds, roi.name
-
-    # def mask_hovering_roi(self, setval=0, toggle=False, mask_outside=False):
-    #     r""" Mask the ROI region that the mouse cursor is hovering over. """
-    #     self.debug()
-    #     inds, typ = self.get_hovering_roi_indices()
-    #     if inds is None:
-    #         return
-    #     mask = self.dataframe.get_mask_flat()
-    #     if mask_outside:
-    #         inds = -(inds - 1)
-    #     if toggle:
-    #         mask[inds] = -(mask[inds] - 1)
-    #     else:
-    #         mask[inds] = setval
-    #     self.dataframe.set_mask(mask)
-    #     self.update_masks()
-
-    # def mask_hovering_roi_inverse(self):
-    #     self.mask_hovering_roi(setval=1)
-    #
-    # def mask_hovering_roi_toggle(self):
-    #     self.mask_hovering_roi(toggle=True)
 
     def clear_masks(self):
         self.dataframe.set_mask(None)
@@ -1192,15 +1160,15 @@ class PADView(QtCore.QObject):
         self.update_display_data()
 
     # FIXME: This should be handled by the frame navigator
-    def show_next_frame(self):
+    def show_next_frame(self, skip=1):
         self.debug()
-        self.dataframe = ensure_dataframe(self.frame_getter.get_next_frame(), self.dataframe)
+        self.dataframe = ensure_dataframe(self.frame_getter.get_next_frame(skip=skip), self.dataframe)
         self.update_display_data()
 
     # FIXME: This should be handled by the frame navigator
-    def show_previous_frame(self):
+    def show_previous_frame(self, skip=1):
         self.debug()
-        self.dataframe = ensure_dataframe(self.frame_getter.get_previous_frame(), self.dataframe)
+        self.dataframe = ensure_dataframe(self.frame_getter.get_previous_frame(skip=skip), self.dataframe)
         self.update_display_data()
 
     # FIXME: This should be handled by the frame navigator

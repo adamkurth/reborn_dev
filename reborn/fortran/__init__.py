@@ -57,7 +57,7 @@ def import_f90(source_file, extra_args='', hash=True, verbose=False, with_omp=Fa
     # First ensure that the source file ends with .f90 and that it is a full path.
     if source_file.split('.')[-1] != 'f90':  # possibly/some/path/name.f90
         source_file += '.f90'
-    debug('Input source file', source_file)
+    debug('Input source file:', source_file)
     # If the source file is found immediately, we're done searching.  Else, cast a bigger net.
     if not os.path.exists(source_file):  # Search for the file in the usual places
         paths = sys.path
@@ -75,7 +75,7 @@ def import_f90(source_file, extra_args='', hash=True, verbose=False, with_omp=Fa
     if not os.path.exists(source_file):
         raise ValueError("Source file not found", source_file)
     source_file = os.path.abspath(source_file)
-    debug('source_file modified', source_file)
+    debug('source_file =', source_file)
     # We compile in the directory of the source by default so that the binaries are in the same directory.
     # We can make an option to do this differently if need be.
     cwd = os.getcwd()
@@ -121,11 +121,12 @@ def import_f90(source_file, extra_args='', hash=True, verbose=False, with_omp=Fa
     os.chdir(cwd)
     return module
 
-
-utils_f = import_f90('utils', autocompile=autocompile)
-interpolations_f = import_f90('interpolations', autocompile=autocompile)
-fortran_indexing_f = import_f90('fortran_indexing', autocompile=autocompile)
-peaks_f = import_f90('peaks', autocompile=autocompile, extra_args=omp_args)
-omp_test_f = import_f90('omp_test', autocompile=autocompile, extra_args=omp_args)
-density_f = import_f90('density', autocompile=autocompile, extra_args=omp_args)
-scatter_f = import_f90('scatter', autocompile=autocompile, extra_args=omp_args)
+dir = os.path.dirname(__file__)
+print(dir)
+utils_f = import_f90(os.path.join(dir, 'utils'), autocompile=autocompile)
+interpolations_f = import_f90(os.path.join(dir, 'interpolations'), autocompile=autocompile)
+fortran_indexing_f = import_f90(os.path.join(dir, 'fortran_indexing'), autocompile=autocompile)
+peaks_f = import_f90(os.path.join(dir, 'peaks'), autocompile=autocompile, extra_args=omp_args)
+omp_test_f = import_f90(os.path.join(dir, 'omp_test'), autocompile=autocompile, extra_args=omp_args)
+density_f = import_f90(os.path.join(dir, 'density'), autocompile=autocompile, extra_args=omp_args)
+scatter_f = import_f90(os.path.join(dir, 'scatter'), autocompile=autocompile, extra_args=omp_args)

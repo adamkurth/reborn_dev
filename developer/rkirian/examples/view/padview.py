@@ -41,4 +41,5 @@ pv = PADView(frame_getter=frame_getter, debug_level=1)
 # pv.show_pad_labels()
 dr = np.pi/180
 pv.add_rings(q_mags=[2e10], d_spacings=[50e-10], pens=pg.mkPen([255, 0, 0], width=2))
+pv.run_plugin('frame_navigator')
 pv.start()

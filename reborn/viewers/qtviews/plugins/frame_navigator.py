@@ -14,8 +14,9 @@
 # along with reborn.  If not, see <https://www.gnu.org/licenses/>.
 
 import numpy as np
-from pyqtgraph import QtGui
+from pyqtgraph import QtGui, QtCore
 from functools import partial
+from reborn.utils import debug
 
 class Plugin():
 
@@ -31,78 +32,96 @@ class Plugin():
 #               : Property binding of frame number label and frame number variable
 #               : Shuffle Functionality using Timer/Thread
 
+def push(label, func, layout):
+    r""" Make QPushButton, connect to function, add to layout"""
+    b = QtGui.QPushButton(label, None)
+    b.clicked.connect(func)
+    layout.addWidget(b)
+    return b
+
+def label(label, layout):
+    b = QtGui.QLabel(None)
+    b.setText(str(label))
+    layout.addWidget(b)
+    return b
+
+def text(label, layout):
+    b = QtGui.QLineEdit(None)
+    b.setText(str(label))
+    layout.addWidget(b)
+    return b
+
 class Widget(QtGui.QWidget):
-    
     def __init__(self, padview):
         super().__init__()
-
-        self.frame_number = 0
-        self.frame_skip_count = 1
-        self.total_frames = 100
-        self.time_duration_seconds = 3
-        self.autoplay_mode = False
-
         self.padview = padview
         self.setWindowTitle('Frame Navigator')
-        self.layout = QtGui.QGridLayout()
-
-        self.playpause_button = QtGui.QPushButton(u"⏯️", None)
-        self.playpause_button.clicked.connect(self.toggle_play_pause)
-
-        self.next_button = QtGui.QPushButton(u"⏭️", None)
-        self.next_button.clicked.connect(self.get_next_frame)
-
-        self.prev_button = QtGui.QPushButton(u"⏮", None)
-        self.prev_button.clicked.connect(self.get_prev_frame)
-
-        self.shuffle_button = QtGui.QPushButton(u"🔀", None)
-        self.shuffle_button.clicked.connect(self.get_random_frame)
-
-        self.frame_no_label = QtGui.QLabel(None)
-        self.frame_no_label.setText(str(self.frame_number))
-
-        self.frame_count_textfield = QtGui.QLineEdit(None)
-        self.time_duration_textfield = QtGui.QLineEdit(None)
-
-        row = 1
-        self.layout.addWidget(self.prev_button, row, 1)
-        self.layout.addWidget(self.playpause_button, row, 2)
-        self.layout.addWidget(self.shuffle_button, row, 3)
-        self.layout.addWidget(self.next_button, row, 4)
-
-        row = 2
-        self.layout.addWidget(QtGui.QLabel("Frame No.: ", None), row, 1)
-        self.layout.addWidget(self.frame_no_label, row, 2)
-        self.layout.addWidget(QtGui.QLabel("Frame Count: ", None), row, 3)
-        self.layout.addWidget(self.frame_count_textfield, row, 4)
-        self.layout.addWidget(QtGui.QLabel("Seconds: ", None), row, 5)
-        self.layout.addWidget(self.time_duration_textfield, row, 6)
-
+        self.layout = QtGui.QVBoxLayout()
+        # ======  Back  |  Next  |  Rand  ================
+        layout = QtGui.QHBoxLayout()
+        push("Back", self.show_previous_frame, layout)
+        push("Next", self.show_next_frame, layout)
+        push("Rand", padview.show_random_frame, layout)
+        self.layout.addLayout(layout)
+        # ====== Go to frame  =============================
+        layout = QtGui.QHBoxLayout()
+        push("Go to frame", self.show_frame, layout)
+        self.goto = text("1", layout)
+        self.goto.returnPressed.connect(self.show_frame)
+        self.layout.addLayout(layout)
+        # ====== Play  | Rate  ============================
+        layout = QtGui.QHBoxLayout()
+        self.play = push("Play", self.toggle_play, layout)
+        self.play_timer = QtCore.QTimer()
+        self.play_timer.timeout.connect(self.show_next_frame)
+        label("Rate (Hz):", layout)
+        self.rate = text("1", layout)
+        self.layout.addLayout(layout)
+        # ====== Frame X of Y   ===========================
+        layout = QtGui.QHBoxLayout()
+        self.frame_num = label('', layout)
+        self.layout.addLayout(layout)
+        # ====== Frame ID: Z  ==============================
+        layout = QtGui.QHBoxLayout()
+        self.frame_id = label('', layout)
+        self.layout.addLayout(layout)
+        # ====== Skip  |              |  ===================
+        layout = QtGui.QHBoxLayout()
+        label('Skip:', layout)
+        self.skip = text('1', layout)
+        self.layout.addLayout(layout)
+        self.dataframe_updated()
+        padview.sig_dataframe_changed.connect(self.dataframe_updated)
         self.setLayout(self.layout)
 
-        QtGui.QShortcut(QtGui.QKeySequence('f'), self).activated.connect(self.get_next_frame)
-        QtGui.QShortcut(QtGui.QKeySequence('b'), self).activated.connect(self.get_prev_frame)
-        QtGui.QShortcut(QtGui.QKeySequence('r'), self).activated.connect(self.get_random_frame)
-        QtGui.QShortcut(QtGui.QKeySequence('p'), self).activated.connect(self.toggle_play_pause)
+    def dataframe_updated(self):
+        r""" What to do when PADView DataFrame has been updated. """
+        pv = self.padview
+        text = 'Frame %d of %d' % (pv.frame_getter.current_frame, pv.frame_getter.n_frames)
+        self.frame_num.setText(text)
+        self.frame_id.setText('Frame ID: ' + str(pv.dataframe.get_frame_id()))
 
-    def get_next_frame(self):
-        self.frame_number += self.frame_skip_count
-        self.frame_no_label.setText(str(self.frame_number))
+    def show_next_frame(self):
+        self.padview.show_next_frame(skip=int(self.skip.text()))
 
-    def get_prev_frame(self):
-        self.frame_number -= self.frame_skip_count
-        self.frame_no_label.setText(str(self.frame_number))
+    def show_previous_frame(self):
+        self.padview.show_previous_frame(skip=int(self.skip.text()))
 
-    def get_random_frame(self):
-        self.frame_number = np.random.randint(0, self.total_frames)
-        self.frame_no_label.setText(str(self.frame_number))
+    def show_frame(self):
+        self.padview.show_frame(int(self.goto.text()))
 
-    def toggle_play_pause(self):
-        self.autoplay_mode = not self.autoplay_mode
-        self.playpause_button.setEnabled(self.autoplay_mode)
+    def toggle_play(self):
+        if self.play.text() == "Play":
+            self.play.setText("Pause")
+            self.play_timer.start(1000/float(self.rate.text()))
+            print("Play")
+        elif self.play.text() == "Pause":
+            self.play.setText("Play")
+            self.play_timer.stop()
+            print("Pause")
+        else:
+            raise ValueError("Value should be Play or Pause")
 
-    def set_time_duration(self):
-        self.time_duration_seconds = int(self.time_duration_textfield.getText())
-
-    def set_frame_count(self):
-        self.frame_skip_count = int(self.frame_count_textfield.getText())
+    # def toggle_play_pause(self):
+    #     self.autoplay_mode = not self.autoplay_mode
+    #     self.playpause_button.setEnabled(self.autoplay_mode)
