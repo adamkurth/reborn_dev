@@ -22,6 +22,10 @@ import json
 import numpy as np
 import pkg_resources
 from . import utils, source, detector, const
+try:
+    from .fortran import polar_f
+except ImportError:
+    polar_f = None
 
 
 pnccd_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/pnccd_front_geometry.json')
@@ -1564,37 +1568,45 @@ class PolarPADAssembler:
             data (list or |ndarray|): The PAD data to be binned.
             mask (list or |ndarray|): A mask to indicate ignored pixels.
         """
-        # TODO: Speed up the algorithm.  Fortran?
         data = self.pad_geometry.concat_data(data)
         if mask is None:
             mask = np.ones_like(data)
-        mask = reborn.detector.concat_pad_data(mask)
-        n_q = self.n_q_bins
-        q_size = self.q_bin_size
-        n_phi = self.n_phi_bins
-        phi_size = self.phi_bin_size
-        q_min = self.q_min
-        phi_min = self.phi_min
-        q = self.q_mags
-        phi = self.phis
-        sum_ = np.zeros([n_q, n_phi])
-        cnt = np.zeros([n_q, n_phi], dtype=int)
-        for d, m, q_i, p_i in zip(data, mask, q, phi):
-            if m == 0:
-                continue
-            q_ind = int(np.floor((q_i - q_min) / q_size))
-            if q_ind >= n_q:
-                continue
-            if q_ind < 0:
-                continue
-            p = p_i % (2 * np.pi)
-            p_ind = int(np.floor((p - phi_min) / phi_size))
-            if p_ind >= n_phi:
-                continue
-            if p_ind < 0:
-                continue
-            cnt[q_ind, p_ind] += 1
-            sum_[q_ind, p_ind] += d
+        mask = detector.concat_pad_data(mask)
+        polar_shape = (self.n_q_bins, self.n_phi_bins)
+        _p = self.phis % (2 * np.pi)
+        _pi = np.floor((_p - self.phi_min) / self.phi_bin_size)
+        _qi = np.floor((self.q_mags - self.q_min) / self.q_bin_size)
+        q_index = _qi.astype(int)
+        p_index = _pi.astype(int)
+        # conditions
+        _cqn = q_index >= self.n_q_bins
+        _cq0 = q_index < 0
+        _cpn = p_index >= self.n_phi_bins
+        _cp0 = p_index < 0
+        _cq = _cqn | _cq0
+        _cp = _cpn | _cp0
+        cqp = _cq | _cp
+        conditions = (mask == 0) | cqp
+        keepers = ~conditions
+        qk = q_index[keepers]
+        pk = p_index[keepers]
+        dk = data[keepers]
+        # calculate average binned pixel
+        if polar_f is None:
+            sum_ = np.zeros(polar_shape)
+            cnt = np.zeros(polar_shape, dtype=int)
+            for q, p, d in zip(qk, pk, dk):
+                cnt[q, p] += 1
+                sum_[q, p] += d
+            # vectorized code below is not equivalent to for loop above
+            # because slicing only works with unique values
+            # cnt[qk, pk] += 1
+            # sum_[qk, pk] += data[keepers]
+        else:
+            n_q, n_p = polar_shape
+            psum, count = polar_f.polar_binning(n_q, n_p, qk, pk, dk)
+            cnt = count.reshape(polar_shape).astype(int).T
+            sum_ = psum.reshape(polar_shape).T
         mean_ = np.divide(sum_, cnt, out=np.zeros_like(sum_), where=cnt != 0)
         return mean_, cnt
 

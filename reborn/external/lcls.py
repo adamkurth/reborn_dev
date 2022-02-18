@@ -316,6 +316,7 @@ class AreaDetector(object):
         return self._home_geometry.n_pixels
 
 
+# noinspection PyUnresolvedReferences
 class LCLSFrameGetter(reborn.fileio.getters.FrameGetter):
 
     mask = None

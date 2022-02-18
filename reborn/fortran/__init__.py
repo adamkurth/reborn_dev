@@ -122,7 +122,6 @@ def import_f90(source_file, extra_args='', hash=True, verbose=False, with_omp=Fa
     return module
 
 dir = os.path.dirname(__file__)
-print(dir)
 utils_f = import_f90(os.path.join(dir, 'utils'), autocompile=autocompile)
 interpolations_f = import_f90(os.path.join(dir, 'interpolations'), autocompile=autocompile)
 fortran_indexing_f = import_f90(os.path.join(dir, 'fortran_indexing'), autocompile=autocompile)
@@ -130,3 +129,4 @@ peaks_f = import_f90(os.path.join(dir, 'peaks'), autocompile=autocompile, extra_
 omp_test_f = import_f90(os.path.join(dir, 'omp_test'), autocompile=autocompile, extra_args=omp_args)
 density_f = import_f90(os.path.join(dir, 'density'), autocompile=autocompile, extra_args=omp_args)
 scatter_f = import_f90(os.path.join(dir, 'scatter'), autocompile=autocompile, extra_args=omp_args)
+

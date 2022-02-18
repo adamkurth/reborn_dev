@@ -20,6 +20,7 @@ def save_pad_geometry_as_h5(pad_geometry, h5_file_path):
             hf.create_dataset(f'{p}/ss_vec', data=pad.ss_vec)
             hf.create_dataset(f'{p}/n_fs', data=pad.n_fs)
             hf.create_dataset(f'{p}/n_ss', data=pad.n_ss)
+    print(f'Saved PADGeometryList: {h5_file_path}')
 
 
 def load_pad_geometry_from_h5(h5_file_path):
@@ -60,6 +61,7 @@ def save_mask_as_h5(mask, h5_file_path):
         mask = concat_pad_data(mask)
     with h5py.File(h5_file_path, 'a') as hf:
         hf.create_dataset('geometry/mask', data=mask)
+    print(f'Saved mask: {h5_file_path}')
 
 
 def load_mask_from_h5(h5_file_path):
@@ -91,6 +93,7 @@ def save_beam_as_h5(beam, h5_file_path):
         del beam_dict['beam_profile']
         for k, v in beam_dict.items():
             hf.create_dataset(f'data/beam/{k}', data=np.array(v))
+    print(f'Saved beam: {h5_file_path}')
 
 
 def load_beam_from_h5(h5_file_path):
@@ -153,7 +156,7 @@ def save_padstats_as_h5(experiment_id, run, stats, h5_file_path):
         hf.create_dataset('data/sum2', data=stats['sum2'])
         hf.create_dataset('data/start', data=stats['start'])
         hf.create_dataset('data/stop', data=stats['stop'])
-    print(f'Saved {h5_file_path}!')
+    print(f'Saved padstats: {h5_file_path}')
 
 
 def load_padstats_from_h5(h5_file_path):
@@ -192,3 +195,47 @@ def load_padstats_from_h5(h5_file_path):
         stats['start'] = hf['data/start']
         stats['stop'] = hf['data/stop']
     return stats
+
+
+def save_analysis_as_h5(dataset_name, data, h5_file_path):
+    r"""
+    Save analysis result in an HDF5 file format in a standardized way.
+
+    Arguments:
+        dataset_name (str): dataset name for hdf5
+        data (|ndarray|): data to store
+        h5_file_path (str): filename
+    """
+    with h5py.File(h5_file_path, 'a') as hf:
+        hf.create_dataset(f'analysis/{dataset_name}', data=data)
+    print(f'Saved analysis: {h5_file_path}!')
+
+
+def get_analysis_h5_keys(h5_file_path):
+    r"""
+    Retrieve analysis keys saved in an HDF5 file format.
+
+    Arguments:
+        h5_file_path (str): filename
+    """
+    with h5py.File(h5_file_path, 'a') as hf:
+        ks = list(hf['analysis/'])
+    return ks
+
+
+def load_analysis_from_h5(analysis_key, h5_file_path):
+    r"""
+    Load analysis results from an HDF5 file format in a standardized way.
+
+    Arguments:
+        analysis_key (list): analysis keys for data to retrieve
+        h5_file_path (str): filename
+
+    Returns:
+        data (dict): data stored in HDF5 file
+    """
+    data = {}
+    with h5py.File(h5_file_path, 'a') as hf:
+        for k in analysis_key:
+            data[k] = hf[f'analysis/{k}'][:]
+    return data
