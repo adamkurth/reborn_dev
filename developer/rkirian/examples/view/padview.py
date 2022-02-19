@@ -1,6 +1,6 @@
 import numpy as np
 import pyqtgraph as pg
-from reborn.simulate import examples
+from reborn.simulate import solutions
 from reborn.viewers.qtviews import PADView
 from reborn import detector, dataframe, source
 from reborn.fileio.getters import FrameGetter
@@ -8,7 +8,7 @@ from reborn.const import eV
 # np.random.seed(0)
 pdb = '1LYZ'
 geom = detector.cspad_pad_geometry_list(detector_distance=0.1)
-beam = source.Beam(photon_energy=2000*eV, pulse_energy=1e-3, diameter_fwhm=100e-9)
+beam = source.Beam(photon_energy=9500*eV, pulse_energy=1e-3, diameter_fwhm=100e-9)
 class MyFrameGetter(FrameGetter):
     def __init__(self):
         super().__init__()
@@ -17,11 +17,14 @@ class MyFrameGetter(FrameGetter):
         # self.simulator = examples.PDBMoleculeSimulator(pdb_file=pdb, pad_geometry=geom, beam=beam)
     def get_data(self, frame_number=0):
         np.random.seed(frame_number)
-        I = geom.q_mags(beam=beam)
+        g = geom.copy()
+        g.translate([0, 0, 0.05])
+        I = solutions.get_pad_solution_intensity(beam=beam, pad_geometry=g, thickness=500e-6)  # geom.q_mags(
+        # beam=beam)
         # I = self.simulator.next()
         # tot = np.sum(I.ravel())
         # I *= 1e5/tot
-        # I = np.random.poisson(I)
+        I = np.random.poisson(I)
         # I = np.double(I)
         df = dataframe.DataFrame()
         df.set_beam(beam)
@@ -39,7 +42,7 @@ pv = PADView(frame_getter=frame_getter, debug_level=1)
 # pv.show_coordinate_axes()
 # pv.show_grid()
 # pv.show_pad_labels()
-dr = np.pi/180
-pv.add_rings(q_mags=[2e10], d_spacings=[50e-10], pens=pg.mkPen([255, 0, 0], width=2))
-pv.run_plugin('frame_navigator')
+# dr = np.pi/180
+pv.add_rings(q_mags=[2e10]) #, d_spacings=[50e-10], pens=pg.mkPen([255, 0, 0], width=2))
+pv.run_plugin('fit_ellipse')
 pv.start()

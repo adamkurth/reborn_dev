@@ -13,10 +13,8 @@
 # You should have received a copy of the GNU General Public License
 # along with reborn.  If not, see <https://www.gnu.org/licenses/>.
 
-import numpy as np
 from pyqtgraph import QtGui, QtCore
-from functools import partial
-from reborn.utils import debug
+
 
 class Plugin():
 
@@ -121,7 +119,3 @@ class Widget(QtGui.QWidget):
             print("Pause")
         else:
             raise ValueError("Value should be Play or Pause")
-
-    # def toggle_play_pause(self):
-    #     self.autoplay_mode = not self.autoplay_mode
-    #     self.playpause_button.setEnabled(self.autoplay_mode)

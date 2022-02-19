@@ -64,7 +64,7 @@ class PADViewMainWindow(QtGui.QMainWindow):
 
 
 def ensure_dataframe(data, parent):
-    r""" Convert dictionaries from FrameGetter class to DataFrame instances. """
+    r""" Convert dictionaries to DataFrame instances. """
     if not isinstance(parent, DataFrame):
         raise ValueError('parent must be a DataFrame')
     if isinstance(data, DataFrame):
@@ -76,6 +76,7 @@ def ensure_dataframe(data, parent):
 
 
 class DummyFrameGetter(FrameGetter):
+    r""" Makes a FrameGetter for a single DataFrame. """
     def __init__(self, dataframe):
         super().__init__()
         self.dataframe = dataframe
@@ -174,7 +175,7 @@ class PADView(QtCore.QObject):
                 if isinstance(raw_data, DataFrame):
                     break
             if isinstance(raw_data, DataFrame):
-                self.dataframe = raw_data
+                self._dataframe = raw_data
 
         if self.dataframe is None:  # In case frame_getter does not return a DataFrame
             self.debug('FrameGetter is not returning DataFrame type... you should fix this...')
@@ -204,7 +205,8 @@ class PADView(QtCore.QObject):
             # Handling of mask info:
             if mask_data is None:
                 mask_data = [p.ones() for p in pad_geometry]
-            self.dataframe = reborn.dataframe.DataFrame(raw_data=raw_data['pad_data'], pad_geometry=pad_geometry, beam=beam,
+            self._dataframe = reborn.dataframe.DataFrame(raw_data=raw_data['pad_data'], pad_geometry=pad_geometry,
+                                                         beam=beam,
                                                         mask=mask_data)
             self.frame_getter = DummyFrameGetter(self.dataframe)
 
@@ -246,6 +248,7 @@ class PADView(QtCore.QObject):
 
     @dataframe.setter
     def dataframe(self, val):
+        val = ensure_dataframe(val, self._dataframe)
         if self._dataframe_preprocessor is not None:
             val = self._dataframe_preprocessor(val)
         if isinstance(val, DataFrame):
@@ -347,8 +350,10 @@ class PADView(QtCore.QObject):
         add_menu(file_menu, 'Save File...', connect=self.save_data_file_dialog)
         add_menu(file_menu, 'Exit', short='Ctrl+Q', connect=self.app.quit)
         data_menu = self.menubar.addMenu('Data')
+        add_menu(data_menu, 'Frame navigator...', connect=lambda: self.run_plugin('frame_navigator'))
         add_menu(data_menu, 'Clear processed data', connect=self.clear_processed_data)
         geom_menu = self.menubar.addMenu('Geometry')
+        add_menu(geom_menu, 'Shift detector...', connect=lambda: self.run_plugin('shift_detector'))
         add_menu(geom_menu, 'Show coordinates', connect=self.toggle_coordinate_axes)
         add_menu(geom_menu, 'Show grid', connect=self.toggle_grid)
         add_menu(geom_menu, 'Show PAD labels', connect=self.toggle_pad_labels)
@@ -357,6 +362,7 @@ class PADView(QtCore.QObject):
         add_menu(geom_menu, 'Save PAD geometry...', connect=self.save_pad_geometry)
         add_menu(geom_menu, 'Load PAD geometry...', connect=self.load_pad_geometry)
         mask_menu = self.menubar.addMenu('Mask')
+        add_menu(mask_menu, 'Mask editor...', connect=lambda: self.run_plugin('mask_editor'))
         add_menu(mask_menu, 'Clear masks', connect=self.clear_masks)
         add_menu(mask_menu, 'Toggle masks visible', connect=self.toggle_masks)
         # add_menu(mask_menu, 'Choose mask color', connect=self.choose_mask_color)
@@ -1150,37 +1156,37 @@ class PADView(QtCore.QObject):
     # FIXME: This should be handled by the frame navigator
     def show_history_next(self):
         self.debug()
-        self.dataframe = ensure_dataframe(self.frame_getter.get_history_next(), self.dataframe)
+        self.dataframe = self.frame_getter.get_history_next()
         self.update_display_data()
 
     # FIXME: This should be handled by the frame navigator
     def show_history_previous(self):
         self.debug()
-        self.dataframe = ensure_dataframe(self.frame_getter.get_history_previous(), self.dataframe)
+        self.dataframe = self.frame_getter.get_history_previous()
         self.update_display_data()
 
     # FIXME: This should be handled by the frame navigator
     def show_next_frame(self, skip=1):
         self.debug()
-        self.dataframe = ensure_dataframe(self.frame_getter.get_next_frame(skip=skip), self.dataframe)
+        self.dataframe = self.frame_getter.get_next_frame(skip=skip)
         self.update_display_data()
 
     # FIXME: This should be handled by the frame navigator
     def show_previous_frame(self, skip=1):
         self.debug()
-        self.dataframe = ensure_dataframe(self.frame_getter.get_previous_frame(skip=skip), self.dataframe)
+        self.dataframe = self.frame_getter.get_previous_frame(skip=skip)
         self.update_display_data()
 
     # FIXME: This should be handled by the frame navigator
     def show_random_frame(self):
         self.debug()
-        self.dataframe = ensure_dataframe(self.frame_getter.get_random_frame(), self.dataframe)
+        self.dataframe = self.frame_getter.get_random_frame()
         self.update_display_data()
 
     # FIXME: This should be handled by the frame navigator
     def show_frame(self, frame_number=0):
         self.debug()
-        self.dataframe = ensure_dataframe(self.frame_getter.get_frame(frame_number=frame_number), self.dataframe)
+        self.dataframe = self.frame_getter.get_frame(frame_number=frame_number)
         self.debug(self.dataframe, level=2)
         self.update_display_data()
 

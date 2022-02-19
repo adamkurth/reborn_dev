@@ -185,12 +185,13 @@ def fit_ellipse_pad(pad_geometry, data, threshold, mask=None):
     Returns:
         |ndarray| : Ellipse fit parameters (see :func:`fit_ellipse <reborn.analysis.optimize.fit_ellipse>` function)
     """
-    pads = utils.ensure_list(pad_geometry)
-    data = utils.ensure_list(data)
+    pads = detector.PADGeometryList(pad_geometry)
+    data = pads.split_data(data)
     if mask is not None:
         mask = utils.ensure_list(mask)
     else:
         mask = [np.ones(d.shape) for d in data]
+    mask = pads.split_data(mask)
     fit_mask = []
     for i in range(len(pads)):
         m = np.zeros(data[i].shape)
