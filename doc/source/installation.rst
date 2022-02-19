@@ -4,18 +4,17 @@ Installation
 The "installation" of reborn consists of including the reborn project directory in your python path, and making
 sure that you have all the needed dependencies.
 All of the packages that reborn depends on are known to install with conda and/or pip.
-Typically, the fortran code in reborn will auto-compile the first time that you import any reborn module.
-Occasionally, it will be necessary to install a fortran compiler, such as gfortran, on your system.
-On rare occasions, you may need to compile the fortran code manually.
-The only package that tends to be somewhat difficult is pyopencl, but you will only need this package if you plan to do
-GPU computations.
+reborn contains some fortran code that needs to be compiled.  Usually the fortran code will auto-compile upon
+first import, but if that fails you might need to install a fortran compiler, such as gfortran, on your system.
+On rare occasions, the fortran auto-compiler may fail, in which case you may need to compile the fortran code
+"manually".
+The only package that tends to be somewhat difficult is pyopencl, but you will only need this package if you plan
+to do GPU computations.
 
 Since reborn's interface is not considered "stable", it is recommended that you keep a clone of the reborn git
-repository where you are doing your analysis or simulations so that you can reproduce your
-results in the future.
+repository where you are doing your analysis or simulations so that you can reproduce your results in the future.
 You should consider keeping track of the exact version of reborn, down to the exact git commit, since things may change
-in a month from now.
-One way to track the *exact* version of reborn is to add it as a
+in a month from now. One way to track the *exact* version of reborn is to add it as a
 `git submodule <https://git-scm.com/book/en/v2/Git-Tools-Submodules>`_ to your project's git repository.
 
 Getting reborn
@@ -30,8 +29,8 @@ Assuming you have |git| on your computer, you should clone reborn on your comput
 Dependencies
 ------------
 
-As of 2020, reborn is only tested with Python 3, because
-`Python 2 is dead <https://www.python.org/doc/sunset-python-2/>`_.
+As of 2020, reborn is only tested with Python 3.
+`Never use Python 2 <https://www.python.org/doc/sunset-python-2/>`_.
 The `environment.yml` file lists all of the packages that are installed upon regular testing of reborn.
 Here are the current contents of that file:
 
@@ -88,21 +87,8 @@ Compilation of Fortran code
 ---------------------------
 
 Fortran code usually auto-compiles on the first import via the numpy f2py tool, but in some circumstances you may need
-to compile manually.
-This can be done using the ``setup.py`` script as follows:
-
-.. code-block:: bash
-
-    export NPY_DISTUTILS_APPEND_FLAGS=1
-    export NPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION
-    python setup.py build_ext --inplace
-
-In old versions of |numpy|, the environment variables in the above are essential.
-
-If you update reborn, you should re-compile the fortran code (unless you are certain that no fortran code was updated).
-
-If the above fails, you can have a look at the ``developer/compile-fortran.sh`` script.  There are occasionally issues
-caused by the mixing of dynamic libraries between different Python versions (not our fault...).
+to compile manually.  If reborn fails to import the fortran module, you can have a look at the
+``developer/compile-fortran.sh`` script.
 
 Installing reborn with pip
 --------------------------
@@ -116,24 +102,17 @@ accommodates future changes to reborn:
 
     pip install --no-deps --editable .
 
-You should execute the above *from the base directory* of the git repository.  The ``--editable`` flag in the above
-means that you usually do not need to reinstall python code when you pull the latest updates the reborn git repository.
-However, it will be necessary to reinstall if Fortran code has changed.
-
 Setting up OpenCL for GPU computing
 -----------------------------------
 
-In some cases, |pyopencl| installs via conda without the need for additional steps.  If you have
-runtime errors, check if the command ``clinfo`` indicates the presence of a GPU.
-If not, then you might need to install drivers or development toolkits for your specific hardware.
-If ``clinfo`` detects your GPU, then you probably just need to ensure that pyopencl can find an "Installable Client
-Driver" (ICD) file.
-They are often found in the directory ``/etc/OpenCL/vendors`` -- look for files with the ``.icd``
-extension.
-If you see the file ``pocl.icd``, then you should at least be able to use a CPU as a poor substitute for a GPU.
-Ideally, you will find vendor-specific ICD files such as ``nvidia.icd`` or ``intel.icd``.
-You need to make sure that these files can be found by the |pyopencl| module, which *probably* means that you need to
-create a symbolic link like this:
+In some cases, |pyopencl| installs via conda without the need for additional steps.  If you have runtime errors, check
+if the command ``clinfo`` indicates the presence of a GPU.  If not, then you might need to install drivers or
+development toolkits for your specific hardware.  If ``clinfo`` detects your GPU, then you probably just need to ensure
+that pyopencl can find an "Installable Client Driver" (ICD) file.  These files are often found in the directory
+``/etc/OpenCL/vendors`` -- look there for files with the ``.icd`` extension.  If you see the file ``pocl.icd``, then you
+should at least be able to use a CPU as a poor substitute for a GPU.  Ideally, you will find vendor-specific ICD files
+such as ``nvidia.icd`` or ``intel.icd``.  You need to make sure that these files can be found by the |pyopencl| module,
+which *probably* means that you need to create a symbolic link like this:
 
 .. code-block:: bash
 
@@ -142,11 +121,12 @@ create a symbolic link like this:
 If the above fails, read through the tips in the
 `pyopencl documentation <https://documen.tician.de/pyopencl/misc.html>`_.
 
-
 Installing pyvkfft for performing FFTs on GPUs
 ----------------------------------------------
 
-`vkfft <https://github.com/DTolm/VkFFT/>`_ is a GPU-accelerated multi-dimensional Fast Fourier Transform library supporting many backends (Vulkan, CUDA, HIP and OpenCL). To get it to install (as of July 2021) the instructions below should be of help.
+`vkfft <https://github.com/DTolm/VkFFT/>`_ is a GPU-accelerated multi-dimensional Fast Fourier Transform library
+supporting many backends (Vulkan, CUDA, HIP and OpenCL). To get it to install (as of July 2021) the instructions below
+should be of help.
 
 .. code-block:: bash
 
@@ -156,12 +136,11 @@ Installing pyvkfft for performing FFTs on GPUs
     conda install -c conda-forge ocl-icd-system
     pip install pyvkfft
 
-and on Agave, to request an interactive node with GPUs you can do something like
+On ASU's Agave cluster, to request an interactive node with GPUs you can do something like
 
 .. code-block:: bash
 
     interactive -p gpu -q wildfire -t 60 --gres=gpu:1 
-
 
 Testing your setup
 ------------------
@@ -199,14 +178,18 @@ For pyopengl, the following might help:
 Mac OS notes
 ------------
 
-It might help to install xcode, Homebrew, or similar, to get gfortran, for example.
+Presumably you will need to install xcode, and then use homebrew or similar to get gfortran.  You could also try
+installing gfortran via conda.  We stopped testing with Mac OS, which seems to become more difficult to work with upon
+each release...
 
 Windows 10 Notes
 ----------------
 
 The best option on Windows is probably to use a virtual machine such as VirtualBox to get a proper Linux environment.
 
-Another option for Windows 10 is to install Microsoft's Ubuntu subsystem.
+Another option for Windows 10 is to install Microsoft's Ubuntu subsystem.  Below are some very old instructions that
+*might* work for you...
+
 There are issues with displaying windows when using the Ubuntu subsystem, and one work-around is
 to install VcXsrv.
 
