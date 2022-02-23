@@ -4,17 +4,13 @@ Installation
 The "installation" of reborn consists of including the reborn project directory in your python path, and making
 sure that you have all the needed dependencies.
 All of the packages that reborn depends on are known to install with conda and/or pip.
-reborn contains some fortran code that needs to be compiled.  Usually the fortran code will auto-compile upon
-first import, but if that fails you might need to install a fortran compiler, such as gfortran, on your system.
-On rare occasions, the fortran auto-compiler may fail, in which case you may need to compile the fortran code
-"manually".
-The only package that tends to be somewhat difficult is pyopencl, but you will only need this package if you plan
-to do GPU computations.
+Fortran code included in reborn should auto-compile upon first import.
+The only package that tends to be somewhat difficult is pyopencl, which is only needed if you plan to do GPU
+computations.
 
-Since reborn's interface is not considered "stable", it is recommended that you keep a clone of the reborn git
-repository where you are doing your analysis or simulations so that you can reproduce your results in the future.
-You should consider keeping track of the exact version of reborn, down to the exact git commit, since things may change
-in a month from now. One way to track the *exact* version of reborn is to add it as a
+Although we try to maintain backward compatibility as we develop reborn, it is under active development and the API is
+subject to change.  If reborn is used to  produce important results that you need to replicate in the future, you should
+consider keeping track of the version of reborn, down to the exact git commit.  One way to do this is to add reborn as a
 `git submodule <https://git-scm.com/book/en/v2/Git-Tools-Submodules>`_ to your project's git repository.
 
 Getting reborn
@@ -37,7 +33,7 @@ Here are the current contents of that file:
 .. literalinclude:: ../../environment.yml
 
 Some of the core modules of reborn only require |scipy| and its dependencies, but GPU simulations require |pyopencl|,
-viewers require pyqt5, and so on.
+viewers require |pyqt5|, and so on.
 If you use a good package manager you might as well install all of the above dependencies.
 
 Setting up Python with Miniconda
@@ -74,7 +70,7 @@ Including reborn in your python path
 ------------------------------------
 
 You do not need to "install" reborn; just add the reborn repository to the python search path.
-This can be done by setting the appropriate environment variable:
+This can be done by setting the appropriate environment variable.  For example, in the |bash| shell:
 
 .. code-block:: bash
 
@@ -86,17 +82,16 @@ It might be convenient to add the above line to your `bash startup script
 Compilation of Fortran code
 ---------------------------
 
-Fortran code usually auto-compiles on the first import via the numpy f2py tool, but in some circumstances you may need
+Fortran code usually auto-compiles on the first import via the numpy |f2py| tool, but in some circumstances you may need
 to compile manually.  If reborn fails to import the fortran module, you can have a look at the
-``developer/compile-fortran.sh`` script.
+`compile-fortran.sh <https://gitlab.com/kirianlab/reborn/-/blob/master/developer/compile_fortran.sh>`_ script.
 
 Installing reborn with pip
 --------------------------
 
-It is not recommended to install reborn with pip because you might end up with caches in places that you are unaware of,
-which can cause confusion.
-But if you really like the idea of installing the package, you should at least consider doing so in a way that
-accommodates future changes to reborn:
+It is not recommended to install reborn with pip because you might end up with caches in places that you are unaware of.
+But if you really like the idea of installing reborn, you should at least consider doing so in a way that
+accommodates future changes:
 
 .. code-block:: bash
 
@@ -108,11 +103,11 @@ Setting up OpenCL for GPU computing
 In some cases, |pyopencl| installs via conda without the need for additional steps.  If you have runtime errors, check
 if the command ``clinfo`` indicates the presence of a GPU.  If not, then you might need to install drivers or
 development toolkits for your specific hardware.  If ``clinfo`` detects your GPU, then you probably just need to ensure
-that pyopencl can find an "Installable Client Driver" (ICD) file.  These files are often found in the directory
-``/etc/OpenCL/vendors`` -- look there for files with the ``.icd`` extension.  If you see the file ``pocl.icd``, then you
+that the pyopencl package can find an "Installable Client Driver" (ICD) file.  These files are often found in the
+directory ``/etc/OpenCL/vendors`` -- they should have a ``.icd`` extension.  If you see the file ``pocl.icd``, then you
 should at least be able to use a CPU as a poor substitute for a GPU.  Ideally, you will find vendor-specific ICD files
-such as ``nvidia.icd`` or ``intel.icd``.  You need to make sure that these files can be found by the |pyopencl| module,
-which *probably* means that you need to create a symbolic link like this:
+such as ``nvidia.icd`` or ``intel.icd``.  Often times you can help |pyopencl| find the ICD files by creating a symbolic
+link, for example like this:
 
 .. code-block:: bash
 
@@ -125,8 +120,8 @@ Installing pyvkfft for performing FFTs on GPUs
 ----------------------------------------------
 
 `vkfft <https://github.com/DTolm/VkFFT/>`_ is a GPU-accelerated multi-dimensional Fast Fourier Transform library
-supporting many backends (Vulkan, CUDA, HIP and OpenCL). To get it to install (as of July 2021) the instructions below
-should be of help.
+supporting many backends (Vulkan, CUDA, HIP and OpenCL). The reborn package does not depend on vkfft, but it may be
+helpful for your application.  To get it to install (as of July 2021) the instructions below should be of help.
 
 .. code-block:: bash
 
@@ -161,12 +156,6 @@ If you need a fortran compiler:
 .. code-block:: bash
 
     apt-get install gfortran
-
-For pyopencl, it might be helpful to install pocl:
-
-.. code-block:: bash
-
-    apt-get install pocl-opencl-icd
 
 For pyopengl, the following might help:
 

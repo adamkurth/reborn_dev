@@ -55,6 +55,7 @@ rst_epilog = """
 
 .. |ndarray|  replace:: :class:`ndarray <numpy.ndarray>`
 .. |slice|  replace:: `slice <https://docs.python.org/dev/library/functions.html#slice>`__
+.. |sliced|  replace:: `sliced <https://docs.python.org/dev/library/functions.html#slice>`__
 
 .. |Jungfrau|  replace:: `Jungfrau <https://lcls.slac.stanford.edu/detectors/jungfrau>`__
 .. |xraylib|  replace:: `xraylib <https://github.com/tschoonj/xraylib/wiki>`__
@@ -69,6 +70,9 @@ rst_epilog = """
 .. |pycodestyle|  replace:: `pycodestyle <https://pypi.org/project/pycodestyle/>`__
 .. |spherical_coordinates|  replace:: `spherical coordinates <https://en.wikipedia.org/wiki/Spherical_coordinate_system>`__
 .. |psana|  replace:: `psana <https://pswww.slac.stanford.edu/swdoc/releases/ana-current/psana-ref/html/psana/>`__
+.. |pyqt5|  replace:: `pyqt5 <https://pypi.org/project/PyQt5/>`__
+.. |bash| replace:: `bash <https://www.gnu.org/software/bash/manual/html_node/What-is-Bash_003f.html>`__
+.. |f2py| replace:: `f2py <https://numpy.org/doc/stable/f2py/>`__
 
 .. |dipole_notes|  replace:: `dipole scattering notes <files/dipole.pdf>`__
 

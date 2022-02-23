@@ -15,10 +15,10 @@ Pixel-Array Detectors
     Schematic of a Pixel-Array Detector.
 
 The |PADGeometry| class contains the data and methods needed to deal
-with "pixel-array detectors" (PADs).  This detector is assumed to consist of an orthogonal 2D grid of
+with "pixel-array detectors" (PADs).  This detector is assumed to consist of a regular 2D grid of
 pixels.  We specify the locations of detector pixels with respect to an arbitrary origin that is also
 the origin of the coordinates of the object that creates the diffraction pattern.  The 2D grid of pixels is described by
-the following vectors:
+the following parameters:
 
 * :math:`\vec{t}` is the vector that points from the origin to the *center* of the first pixel in memory.
 * :math:`\vec{f}` is the vector that points from the first pixel in memory to the next pixel in the fast-scan direction.
@@ -28,13 +28,22 @@ the following vectors:
 
 In the above:
 
-* The lengths of the :math:`\vec{f}` and :math:`\vec{s}` vectors encode the size of the (possibly rectangular) pixel.
-  They moreover form the *basis* of the 2D grid that maps the pixel positions in the 3D space of the measurement.
-* The term "fast-scan" corresponds to the right-most index of a 2D numpy |ndarray| containing PAD data.
-* The term "slow-scan" corresponds to the left-most index of a 2D |ndarray| containing PAD data.
+* The :math:`\vec{f}` and :math:`\vec{s}` vectors form the *basis* of the 2D grid of pixels.  These vectors also set the
+  pixel size.  Note that pixels need not be square.
+* The term "fast-scan" corresponds to the right-most index of an |ndarray| containing PAD data.
+* The term "slow-scan" corresponds to the left-most index of an |ndarray| containing PAD data.
 * In the default memory buffer layout of an |ndarray|, the fast-scan direction corresponds to pixels that are
   contiguous in memory, and which therefore have the smallest stride.  If the phrase "contiguous in memory" and the
   term "stride" does not mean anything to you, then you need to read the |numpy| documentation for |ndarray|.
+
+.. note::
+
+    In December 2021, we added the capability of a |PADGeometry| instance to contain information about how the data
+    corresponding to a given PAD may be |sliced| from a parent |ndarray|.  You may optionally define the following
+    parameters:
+
+    * ``parent_shape`` : The expected shape of the parent |ndarray|.
+    * ``parent_slice`` : The |slice| object needed to extract or insert this PAD's data into the parent |ndarray|.
 
 .. note::
 
@@ -48,7 +57,7 @@ related to detector geometry, are:
 :math:`\hat{b}` is the incident beam vector that describes the nominal direction of the x-ray beam.
 
 :math:`\hat{e}_1` is the direction of the principle electric field vector, which would be the direction of the electric
-filed in the case of linearly polarized x-rays.  The second vector that is needed for unpolarized or elliptically
+field in the case of linearly polarized x-rays.  The second vector that is needed for unpolarized or elliptically
 polarized x-rays is always :math:`\hat{e}_2 = \hat{b}\times\hat{e}_1` .
 
 With the above vectors specified, we may now generate the quantities that will be useful when doing diffraction analysis
@@ -100,7 +109,8 @@ where the vector normal to the PAD is
 
     \hat{n} = \frac{\vec{f}\times\vec{s}}{|\vec{f}\times\vec{s}|}
 
-The :class:`PADGeometry <reborn.detector.PADGeometry>` class can currently generate the above quantities for you, along with other helpful functions.
+The |PADGeometry| class can currently generate the above quantities for you, along with other helpful functions.  The
+|PADGeometryList| class combines multiple |PADGeometry| instances.
 
 .. note::
 
