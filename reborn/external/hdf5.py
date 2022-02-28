@@ -8,6 +8,8 @@ def save_pad_geometry_as_h5(pad_geometry, h5_file_path):
     r"""
     Save |PADGeometryList| in an HDF5 file format in a standardized way.
 
+    FIXME: Missing the parent_data_slice and parent_data_shape info.
+
     Arguments:
         pad_geometry (|PADGeometryList|): pad geometry to save
         h5_file_path (str): filename
@@ -125,7 +127,9 @@ def load_beam_from_h5(h5_file_path):
 
 def save_padstats_as_h5(experiment_id, run, stats, h5_file_path):
     r"""
-    Save padstats in an HDF5 file format in a standardized way.
+    Save padstats in an HDF5 file format in a dictionary with the keys following keys:
+
+    FIXME: There is a sphinx warning caused by this doc string.
 
     Arguments:
         stats (dict): dict to save

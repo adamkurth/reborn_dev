@@ -14,11 +14,8 @@ Pixel-Array Detectors
 
     Schematic of a Pixel-Array Detector.
 
-The |PADGeometry| class contains the data and methods needed to deal
-with "pixel-array detectors" (PADs).  This detector is assumed to consist of a regular 2D grid of
-pixels.  We specify the locations of detector pixels with respect to an arbitrary origin that is also
-the origin of the coordinates of the object that creates the diffraction pattern.  The 2D grid of pixels is described by
-the following parameters:
+The |PADGeometry| class contains the data and methods needed to deal with "pixel-array detectors" (PADs).
+This detector is assumed to consist of a regular 2D grid of pixels specified by the following parameters:
 
 * :math:`\vec{t}` is the vector that points from the origin to the *center* of the first pixel in memory.
 * :math:`\vec{f}` is the vector that points from the first pixel in memory to the next pixel in the fast-scan direction.
@@ -28,28 +25,18 @@ the following parameters:
 
 In the above:
 
-* The :math:`\vec{f}` and :math:`\vec{s}` vectors form the *basis* of the 2D grid of pixels.  These vectors also set the
-  pixel size.  Note that pixels need not be square.
+* The :math:`\vec{f}` and :math:`\vec{s}` vectors form the basis of the 2D grid of pixels.  As such, they also
+  define the "pixel size".
 * The term "fast-scan" corresponds to the right-most index of an |ndarray| containing PAD data.
 * The term "slow-scan" corresponds to the left-most index of an |ndarray| containing PAD data.
 * In the default memory buffer layout of an |ndarray|, the fast-scan direction corresponds to pixels that are
-  contiguous in memory, and which therefore have the smallest stride.  If the phrase "contiguous in memory" and the
+  contiguous in memory, and which have the smallest stride.  If the phrase "contiguous in memory" and the
   term "stride" does not mean anything to you, then you need to read the |numpy| documentation for |ndarray|.
 
 .. note::
 
-    In December 2021, we added the capability of a |PADGeometry| instance to contain information about how the data
-    corresponding to a given PAD may be |sliced| from a parent |ndarray|.  You may optionally define the following
-    parameters:
-
-    * ``parent_shape`` : The expected shape of the parent |ndarray|.
-    * ``parent_slice`` : The |slice| object needed to extract or insert this PAD's data into the parent |ndarray|.
-
-.. note::
-
-    The reborn package never uses angles to describe detector geometry.  Angles are a truly awful specification due to
-    the many different conventions used by different literature and software, and, as all good students know, *rotation
-    operations do not commute*.
+    The reborn package never uses angles to describe detector geometry.  Angles cause a lot of confusion that is easily
+    avoided with the use of vectors.
 
 Additional vectors that are important for calculating things related to x-ray scattering, but which are not inherently
 related to detector geometry, are:
@@ -109,7 +96,7 @@ where the vector normal to the PAD is
 
     \hat{n} = \frac{\vec{f}\times\vec{s}}{|\vec{f}\times\vec{s}|}
 
-The |PADGeometry| class can currently generate the above quantities for you, along with other helpful functions.  The
+The |PADGeometry| class can currently generate the above quantities for you, along with other helpful quantities.  The
 |PADGeometryList| class combines multiple |PADGeometry| instances.
 
 .. note::
@@ -117,78 +104,65 @@ The |PADGeometry| class can currently generate the above quantities for you, alo
     Once the above is understood, you might want to look at the :ref:`example <example_pad_geometry>` of how to use the
     PAD geometry tools provided by reborn.
 
-Data and geometry formats
--------------------------
+Working with multiple PADs
+--------------------------
 
-A central task in diffraction analysis is the assignment of physical locations (3D vectors) to each detector pixel.
-Actually, our task is two-fold:
+XFELs frequently use detectors that are split up in to many separate PADs.  The |PADGeometryList| class is a special
+sub-class of the python list that provides convenience methods for working with multiple PADs.  Some
+:ref:`examples <example_pad_geometry>` are provided.
 
-1) Transform the data found on disk or in memory to numpy arrays.
-2) Determine the 3D positions corresponding to the elements of the numpy arrays.
+Data and slicing
+----------------
 
-The :class:`PADGeometry <reborn.detector.PADGeometry>` class contains the needed information to perform step (2), but
-does not have any involvement in step (1).  Step (1) is often a messy process that requires specialized code, and
-we have made no effort to standardize that process.  However, once you have a
-:class:`PADGeometry <reborn.detector.PADGeometry>` instance along with corresponding numpy arrays, your analysis code
-can hopefully be written in a source-agnostic way.
+By default, |PADGeometry| and |PADGeometryList| assume that the data for each PAD is stored in contiguous memory blocks.
+However, there are many cases in which PAD data are not contiguous due to hardware considerations.
+For example, 4 PADs on a single silicon chip might be stored in a 2x2 arrangement in order to maximize read/write
+speeds, but each PAD is not contiguous.
 
-Since XFELs tend to use multiple PADs, you should plan to work with lists of
-:class:`PADGeometry <reborn.detector.PADGeometry>` instances rather than a single one. You can still do vectorized
-operations on all panels at once with the numpy ravel function.
+If your raw data is not contiguous, then you probably have an important decision to make:
 
+**Option 1** is to write a specialized functions that extract all the PAD data arrays and make them contiguous before
+passing them into your analysis pipeline.
+This is good if you care about having an analysis pipeline that is agnostic to the origin of the data, and which can
+easily handle mixtures of differently sized PADs.
+
+**Option 2** is to maintain the raw data layout throughout your analysis.  This is good if you want to easily save
+processed data in the same layout as the raw data, and if you have some geometry files that refer to the raw data
+layout.
+
+If you wish to maintain the raw data layout, you may configure a |PADGeometry| instance to contain information about how
+the individual PAD data should be |sliced| from the parent |ndarray|.
+This is specified by the following parameters:
+
+    * ``parent_data_shape`` : The expected shape of the parent |ndarray|.
+    * ``parent_data_slice`` : The |slice| object needed to extract or insert this PAD's data into the parent |ndarray|.
+
+There are |PADGeometry| methods such as ``slice_from_parent`` that might make your code a bit cleaner.
+
+Reading and writing PAD geometry info
+-------------------------------------
+
+There are methods in the detector class for reading and writing the information needed to save/recall a
+|PADGeometryList|.  They are currently saved in json format, but this will likely change now that we know that json
+files do not accommodate comments.
 
 Working with CrystFEL geometry files
 ------------------------------------
 
-The following is relevant if you need to work with a CrystFEL ".geom" file.  They are ubiquitous in SFX work, and
-thus we have a bit of code included in reborn for handling them.
+reborn includes a module to help with reading CrystFEL
+`geom <http://www.desy.de/~twhite/crystfel/manual-crystfel_geometry.html>`_ files.  If you just want a |PADGeometryList|
+then you can simply use the
+:func:`geometry_file_to_pad_geometry_list() <reborn.external.crystfel.geometry_file_to_pad_geometry_list>` function.
+Note that the ``parent_data_shape`` and ``parent_data_slice`` attributes will be set by this function.
 
-Firstly, you need to read about the CrystFEL `geom <http://www.desy.de/~twhite/crystfel/manual-crystfel_geometry.html>`_ 
-file specification.  Note that CrystFEL geom files contain a lot more than geometry information.  They also contain
-information about...
+CrystFEL geom files contain a lot more than static geometry information.  They also contain information about
 
 * detector properties (e.g. saturation levels, common-mode noise and conversions between digital data units and
   deposited x-ray energy),
 * information about how to obtain encoder values that specify detector positions,
-* formatting of the files that contain the diffraction data,
+* formatting of the files that contain the diffraction data, and
 * how programs like indexamajig should treat the data (e.g. the no_index card)
 
 If you want to read in the complete information from a geom file you can convert it to a python dictionary using the
 :func:`load_crystfel_geometry() <reborn.external.crystfel.load_crystfel_geometry>` function, which is just a wrapper
-for the corresponding function in the `cfelpyutils <https://pypi.org/project/cfelpyutils/>`_ package.  Be careful:
-the units here might not be the same as assumed in reborn code.
-
-Most importantly, geom files contain the three principal vectors that reborn utilizes, although it may not be obvious
-at first glance.  If you just want this information, then you can simply use a geom file to generate a list of
-:class:`PADGeometry <reborn.detector.PADGeometry>` instances via the
-:func:`geometry_file_to_pad_geometry_list() <reborn.external.crystfel.geometry_file_to_pad_geometry_list>` function.  If
-you use this function, you do not need to worry about units since they are in the standard reborn units (SI).
-
-A note on detector "geometry complications"
--------------------------------------------
-
-There is much to say about the complications that arise in analyzing PAD data.  One of the first points of confusion
-is due to the entanglement of detector geometry with detector data formats.  Some programs re-format the raw data
-found on disk and then re-write to an intermediate file format that is used later in the analysis pipeline.  This is
-what occurs, for example, when the program `Cheetah <http://www.desy.de/~barty/cheetah/Cheetah/Welcome.html>`_ reads
-data from an XTC file [1] created at the LCLS; Cheetah immediately re-formats the data internally and then writes
-processed data in a specialized variant of the CXIDB file format [2].
-In the case of CSPAD detector data from LCLS, the data are re-written by Cheetah in a way that the
-detector PADs are no longer contiguous in memory, which is sometimes nice for the purpose of viewing raw data, but it
-leads many people to the following puzzle: given a CrystFEL geom file that refers to the data layout in a
-Cheetah-formatted CXIDB file, how does one map that geometry to the original raw XTC data format presented in the LCLS
-software psana?  Often times, this puzzle may be avoided by maintaining data in the original layout.  There are a couple
-of utilities that may be helpful in :mod:`reborn.external`.
-
-Footnotes
----------
-
-[1] I have not been able to find documentation of the XTC file format in the
-`LCLS Data Analysis <https://confluence.slac.stanford.edu/display/PSDM/LCLS+Data+Analysis>`_ documentation, but there
-are some "recipies" for accessing this data with Python that are helpful, and the LCLS staff are *extremely* helpful
-in this regard so you should email them with questions!
-
-[2] CXIDB files do indeed have
-have `documentation <https://www.cxidb.org/>`_), but so far it does not appear that the specification is enforced
-strictly by anyone.  Reading a CXIDB file is not as deterministic as, for example, reading a
-`PDB file <https://www.rcsb.org/pdb/static.do?p=file_formats/pdb/index.html>`_.
+for the corresponding function in the `cfelpyutils <https://pypi.org/project/cfelpyutils/>`_ package.

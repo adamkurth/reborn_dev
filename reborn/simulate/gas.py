@@ -60,11 +60,11 @@ def air_intensity_profile(q_mags=None, beam=None):
 def get_gas_background(pad_geometry,
                         beam,
                         path_length=[0.0, 1.0],
-                        gas_type:str='he',
-                        temperature:float=293.15,
-                        pressure:float=101325.0,
-                        n_simulation_steps:int=20,
-                        poisson:bool=False):
+                        gas_type='he',
+                        temperature=293.15,
+                        pressure=101325.0,
+                        n_simulation_steps=20,
+                        poisson=False):
     r"""
     Given a list of |PADGeometry| instances along with a |Beam| instance, calculate the scattering intensity
     :math:`I(q)` of a helium of given path length.
