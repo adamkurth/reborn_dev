@@ -19,9 +19,9 @@ from pyopencl import array as clarray
 from reborn.simulate.clcore import ClCore #, help, print_device_info
 cl_array = clarray.Array
 try:
-    test_core = clcore.ClCore(context=None, queue=None, group_size=1, double_precision=True)
+    test_core = ClCore(context=None, queue=None, group_size=1, double_precision=True)
 except:
-    test_core = clcore.ClCore(context=None, queue=None, group_size=1, double_precision=False)
+    test_core = ClCore(context=None, queue=None, group_size=1, double_precision=False)
 
 def test_nothing():
     assert test_core is not None
