@@ -18,12 +18,10 @@ import numpy as np
 from pyopencl import array as clarray
 from reborn.simulate.clcore import ClCore #, help, print_device_info
 cl_array = clarray.Array
-havecl = True
-# help()
-# context = pyopencl.create_some_context()
-# queue = pyopencl.CommandQueue(context)
-test_core = ClCore(context=None, queue=None, group_size=1, double_precision=True, debug=1)
-print('created ClCore')
+try:
+    test_core = clcore.ClCore(context=None, queue=None, group_size=1, double_precision=True)
+except:
+    test_core = clcore.ClCore(context=None, queue=None, group_size=1, double_precision=False)
 
 def test_nothing():
     assert test_core is not None
@@ -31,13 +29,6 @@ if test_core.double_precision:
     have_double = True
 else:
     have_double = False
-# ctx = reborn.simulate.clcore.create_some_gpu_context()
-# except ImportError:
-#     ClCore = None
-#     clarray = None
-#     pyopencl = None
-#     havecl = False
-
 
 def func(vecs):
     return vecs[:, 0].ravel().copy()

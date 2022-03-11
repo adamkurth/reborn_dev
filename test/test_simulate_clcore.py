@@ -26,24 +26,18 @@ import numpy as np
 import reborn as ba
 from reborn import utils
 
-# try:
 from reborn.simulate import clcore
-# import pyopencl
 from pyopencl import array as clarray
 cl_array = clarray.Array
-havecl = True
-# Check for double precision:
-test_core = clcore.ClCore(context=None, queue=None, group_size=1, double_precision=True)
+try:
+    test_core = clcore.ClCore(context=None, queue=None, group_size=1, double_precision=True)
+except:
+    test_core = clcore.ClCore(context=None, queue=None, group_size=1, double_precision=False)
 if test_core.double_precision:
     have_double = True
 else:
     have_double = False
 ctx = clcore.create_some_gpu_context()
-# except ImportError:
-#     clcore = None
-#     clarray = None
-#     pyopencl = None
-#     havecl = False
 
 from reborn.utils import rotation_about_axis
 
@@ -55,18 +49,16 @@ if len(sys.argv) > 1:
 
 def test_clcore_float():
 
-    if havecl:
-        _clcore(double_precision=False)
-        _test_rotations(double_precision=False)
+    _clcore(double_precision=False)
+    _test_rotations(double_precision=False)
         # _test_ridiculous_sum(double_precision=False)
 
 
 def test_clcore_double():
 
-    if havecl and have_double:
-        _clcore(double_precision=True)
-        _test_rotations(double_precision=True)
-        # _test_ridiculous_sum(double_precision=True)
+    _clcore(double_precision=True)
+    _test_rotations(double_precision=True)
+    # _test_ridiculous_sum(double_precision=True)
 
 
 def _clcore(double_precision=False):
@@ -328,9 +320,6 @@ def _clcore(double_precision=False):
 
 def _test_rotations(double_precision=False):
 
-    # if not havecl:
-    #     return
-
     core = clcore.ClCore(context=None, queue=None, group_size=1, double_precision=double_precision)
 
     theta = 25*np.pi/180.
@@ -374,9 +363,6 @@ def _test_rotations(double_precision=False):
 
 
 # def _test_ridiculous_sum(double_precision=False):
-#
-#     # if not havecl:
-#     #     return
 #
 #     core = clcore.ClCore(context=None, queue=None, group_size=1, double_precision=double_precision)
 #
