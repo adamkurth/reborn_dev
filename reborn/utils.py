@@ -127,72 +127,86 @@ def vec_shape(vec):
     return vec
 
 
-def depreciate(*message, caller=0, **kwargs):
+def depreciate(*args, caller=0, **kwargs):
     r"""
-    Utility for sending warnings when some class, method, function, etc. is depreciated.  It simply prints a message of
-    the form "WARNING: DEPRECIATION: blah blah blah" but perhaps it will do someting more sophisticated in the future
-    if the need arises.
+    Standard way of printing a depreciation message.  It is presently just a wrapper around the print function,
+    but prepends "WARNING:DEPRECIATION:<caller>:" to the error message, where <caller> is (optionally) the name of the
+    function from which the message originated.
 
     Arguments:
-        message: whatever you want to have printed to the screen
+        args: Standard print function positional arguments
+        kwargs: Standard print function keyword arguments
+        caller (int): To include the caller in the message, set to an integer >= 1.
 
     Returns: None
     """
-    msg = "WARNING:DEPRECIATION:"
-    if caller:
-        msg += get_caller(1)+':'
-    print(msg, *message, **kwargs)
+    msg = "WARNING:DEPRECIATION"
+    if caller >= 0:
+        msg += get_caller(1)
+    msg += ':'
+    print(msg, *args, **kwargs)
 
 
-def warn(*message, caller=0, **kwargs):
+def warn(*args, caller=0, **kwargs):
     r"""
-    Standard way of sending a warning message.  As of now this simply results in a function call
-
-    sys.stdout.write("WARNING: %s\n" % message)
-
-    The purpose of this function is that folks can search for "WARNING:" to find all warning messages, e.g. with grep.
+    Standard way of printing a warning message.  It is presently just a wrapper around the print function, but prepends
+    "WARNING:<caller>:" to the error message, where <caller> is (optionally) the name of the function from which the
+    message originated.
 
     Arguments:
-        message: The message you want to have printed.
-        caller (int): Prefix the warning message with name of function calling warn.
+        args: Standard print function positional arguments
+        kwargs: Standard print function keyword arguments
+        caller (int): To include the caller in the message, set to an integer >= 1.
 
     Returns: None
     """
     msg = "WARNING:"
-    if caller:
-        msg += get_caller(1)+':'
-    print(msg, *message, **kwargs)
+    if caller >= 0:
+        msg += get_caller(1)
+    msg += ':'
+    print(msg, *args, **kwargs)
 
 
-def debug(*args, **kwargs):
+def debug(*args, caller=0, **kwargs):
     r"""
-    Standard way of sending an debug message.  As of now it is equivalent to the following:
-
-    .. code-block:: python
-
-        logger = logging.getLogger()
-        logger.debug(*args, **kwargs)
-    """
-    if configs['debug']:
-        msg = "DEBUG:" + get_caller(1) + ':'
-        print(msg, *args, **kwargs)
-
-
-def error(*message, caller=0, **kwargs):
-    r"""
-    Standard way of sending an error message.  As of now this simply results in a function call
-
-    sys.stdout.write("ERROR: %s\n" % message)
+    Standard way of printing a debug message.  It is presently just a wrapper around the print function, but prepends
+    "DEBUG:<caller>:" to the error message, where <caller> is (optionally) the name of the function from which the
+    message originated.
 
     Arguments:
-        message: the message you want to have printed.
+        args: Standard print function positional arguments
+        kwargs: Standard print function keyword arguments
+        caller (int): To include the caller in the message, set to an integer >= 1.
+
+    Returns: None
+    """
+    if not configs['debug']:
+        return
+    msg = "DEBUG:"
+    if caller >= 0:
+        msg += get_caller(1)
+    msg += ':'
+    print(msg, *args, **kwargs)
+
+
+def error(*args, caller=0, **kwargs):
+    r"""
+    Standard way of printing an error message.  It is presently just a wrapper around the print function, but prepends
+    "ERROR:<caller>:" to the error message, where <caller> is (optionally) the name of the function from which the
+    message originated.
+
+    Arguments:
+        args: Standard print function positional arguments
+        kwargs: Standard print function keyword arguments
+        caller (int): To include the caller in the message, set to an integer >= 1.
 
     Returns: None
     """
     msg = "ERROR:"
-    if caller:
-        msg += get_caller(1)+':'
-    print(msg, *message, **kwargs)
+    if caller >= 0:
+        msg += get_caller(1)
+    msg += ':'
+    print(msg, *args, **kwargs)
 
 
 def random_rotation():
@@ -277,27 +291,6 @@ def random_beam_vector(div_fwhm):
     bvec /= np.sqrt(np.sum(bvec ** 2))
 
     return bvec
-
-
-# def random_mosaic_rotation(mosaicity_fwhm):
-#     r"""
-#     Attempt to generate a random orientation for a crystal mosaic domain.  This is a hack.
-#     We take the matrix product of three rotations, each of the same FWHM, about the three
-#     orthogonal axis.  The order of this product is a random permutation.
-#
-#     :param mosaicity_fwhm:
-#     :return:
-#     """
-#
-#     if mosaicity_fwhm == 0:
-#         return np.eye(3)
-#
-#     rs = list()
-#     rs.append(rotation_about_axis(np.random.normal(0, mosaicity_fwhm / 2.354820045, [1])[0], [1.0, 0, 0]))
-#     rs.append(rotation_about_axis(np.random.normal(0, mosaicity_fwhm / 2.354820045, [1])[0], [0, 1.0, 0]))
-#     rs.append(rotation_about_axis(np.random.normal(0, mosaicity_fwhm / 2.354820045, [1])[0], [0, 0, 1.0]))
-#     rind = np.random.permutation([0, 1, 2])
-#     return rs[rind[0]].dot(rs[rind[1]].dot(rs[rind[2]]))
 
 
 def triangle_solid_angle(r1, r2, r3):
@@ -387,172 +380,172 @@ def max_pair_distance(vecs):
     return d_max[0]
 
 
-def trilinear_insert(*args, **kwargs):
-    r"""
-    Don't use this function.  Use functions in reborn.misc.interpolate.
-    """
-    depreciate("Don't use reborn.utils.trilinear_insert.  Use the functions in reborn.misc.interpolate.")
-    from .misc.interpolate import trilinear_insert
-    return trilinear_insert(*args, **kwargs)
+# def trilinear_insert(*args, **kwargs):
+#     r"""
+#     Don't use this function.  Use functions in reborn.misc.interpolate.
+#     """
+#     depreciate("Don't use reborn.utils.trilinear_insert.  Use the functions in reborn.misc.interpolate.")
+#     from .misc.interpolate import trilinear_insert
+#     return trilinear_insert(*args, **kwargs)
 
 
-def rotate3D(f, R_in):
-    r"""
-    Rotate a 3D array of numbers in 3-dimensions.
-    The function works by rotating each 2D sections of the 3D array via three shears,
-    as described by Unser et al. (1995) "Convolution-based interpolation for fast,
-    high-quality rotation of images." IEEE Transactions on Image Processing, 4:1371.
-
-    Note 1: If the input array, f, is non-cubic, it will be zero-padded to a cubic array
-            with length the size of the largest side of the original array.
-
-    Note 2: If you don't want wrap arounds, make sure the input array, f, is zero-padded to
-            at least sqrt(2) times the largest dimension of the desired object.
-
-    Note 3: Proper Euler angle convention is used, i.e, zyz.
-
-    Arguments:
-        f (*3D |ndarray|*) : The 3D input array.
-        euler_angles (1x3 |ndarray|) : The three Euler angles, in zyz format.
-
-    Returns:
-        - **f_rot** (*3D |ndarray|*) : The rotated 3D array.
-    """
-
-    # ---------------------------
-    # Define private functions
-    depreciate("Use the rotations in reborn.misc.rotate.Rotate3D instead of reborn.utils.rotate3D.")
-
-    def rotate90(f):
-        r"""FIXME: Docstring."""
-        return np.transpose(np.fliplr(f))
-
-    def rotate180(f):
-        r"""FIXME: Docstring."""
-        return np.fliplr(np.flipud(f))
-
-    def rotate270(f):
-        r"""FIXME: Docstring."""
-        return np.transpose(np.flipud(f))
-
-    def shiftx(f, kxfac, xfac):
-        r"""FIXME: Docstring."""
-        return ifft(fftshift(fft(f, axis=0), axes=0) * kxfac, axis=0) * xfac
-
-    def shifty(f, kyfac, yfac):
-        r"""FIXME: Docstring."""
-        return ifft(fftshift(fft(f, axis=1), axes=1) * kyfac, axis=1) * yfac
-
-    def rotate2D(fr, kxfac, xfac, kyfac, yfac, n90_mod_four):
-        """ Rotate a 2D section.
-        FIXME: Joe Chen: Needs proper documentation."""
-
-        if n90_mod_four == 1:
-            fr = rotate90(fr)
-        elif n90_mod_four == 2:
-            fr = rotate180(fr)
-        elif n90_mod_four == 3:
-            fr = rotate270(fr)
-
-        fr = shiftx(fr, kxfac, xfac)
-        fr = shifty(fr, kyfac, yfac)
-        fr = shiftx(fr, kxfac, xfac)
-
-        return fr
-
-    def rotate_setup(f, ang):
-        """ Set up required to rotate.
-        FIXME: Joe Chen: Needs proper docstring.
-        FIXME: Joe Chen: Parameter f is unused"""
-        n90 = np.rint(ang * TwoOverPi)
-        dang = ang - n90 * PiOvTwo
-
-        t = -np.tan(0.5 * dang)
-        s = np.sin(dang)
-
-        kxfac = np.exp(cx1 * t)
-        xfac = np.exp(cx2_2 - cx2_3 * t)
-
-        kyfac = np.exp(cy1 * s)
-        yfac = np.exp(cy2_2 - cy2_3 * s)
-
-        n90_mod_Four = n90 % 4
-
-        return kxfac, xfac, kyfac, yfac, n90_mod_Four
-
-    def __rotate_euler_z(f, ang):
-
-        kxfac, xfac, kyfac, yfac, n90_mod_Four = rotate_setup(f, ang)
-
-        f_rot = np.zeros((N, N, N), dtype=np.complex128)
-        for ii in range(0, N):
-            f_rot[ii, :, :] = rotate2D(f[ii, :, :], kxfac, xfac, kyfac, yfac, n90_mod_Four)
-
-        return f_rot
-
-    def __rotate_euler_y(f, ang):
-
-        kxfac, xfac, kyfac, yfac, n90_mod_Four = rotate_setup(f, ang)
-
-        f_rot = np.zeros((N, N, N), dtype=np.complex128)
-        for ii in range(0, N):
-            f_rot[:, ii, :] = rotate2D(f[:, ii, :], kxfac, xfac, kyfac, yfac, n90_mod_Four)
-
-        return f_rot
-
-    # ---------------------------
-    # Get the max shape of the array
-    nx, ny, nz = f.shape
-    N = np.max([nx, ny, nz])
-
-    # Make array cubic if the array is not cubic.
-    if nx != ny or nx != nz or ny != nz:
-        f_rot = np.zeros((N, N, N), dtype=np.complex128)
-        f_rot[0:nx, 0:ny, 0:nz] = f
-    else:
-        f_rot = f
-
-    # ---------------------------
-    # Pre-calculations for speed
-    Y, X = np.meshgrid(np.arange(N), np.arange(N))
-
-    y0 = 0.5 * (N - 1)
-    cx1 = -1j * 2.0 * np.pi / N * X * (Y - y0)
-    cx2_1 = -1j * np.pi * (1 - (N % 2) / N)
-    cx2_2 = cx2_1 * X
-    cx2_3 = cx2_1 * (Y - y0)
-
-    x0 = 0.5 * (N - 1)
-    cy1 = -1j * 2.0 * np.pi / N * Y * (X - x0)
-    cy2_1 = -1j * np.pi * (1 - (N % 2) / N)
-    cy2_2 = cy2_1 * Y
-    cy2_3 = cy2_1 * (X - x0)
-
-    TwoOverPi = 2.0 / np.pi
-    PiOvTwo = 0.5 * np.pi
-
-    # ---------------------------
-    # Do the rotations
-
-    # print(euler_angles)
-
-    # --------------------
-    # Joe's implementation
-    euler_angles = R_in.as_euler('xyx')
-    # euler_angles = R.from_euler('zyz', euler_angles).as_euler('xyx')
-    euler_angles[1] = -euler_angles[1]
-    # --------------------
-    # Kevin's implementation
-    # euler_angles = input_rotation.as_euler('xyx') # input_rotation will be a scipy object when we change the
-    # interface to the rotate3D function
-    # euler_angles = -euler_angles
-    # --------------------
-
-    f_rot = __rotate_euler_z(f_rot, ang=euler_angles[0])
-    f_rot = __rotate_euler_y(f_rot, ang=euler_angles[1])
-    f_rot = __rotate_euler_z(f_rot, ang=euler_angles[2])
-
-    return f_rot
+# def rotate3D(f, R_in):
+#     r"""
+#     Rotate a 3D array of numbers in 3-dimensions.
+#     The function works by rotating each 2D sections of the 3D array via three shears,
+#     as described by Unser et al. (1995) "Convolution-based interpolation for fast,
+#     high-quality rotation of images." IEEE Transactions on Image Processing, 4:1371.
+#
+#     Note 1: If the input array, f, is non-cubic, it will be zero-padded to a cubic array
+#             with length the size of the largest side of the original array.
+#
+#     Note 2: If you don't want wrap arounds, make sure the input array, f, is zero-padded to
+#             at least sqrt(2) times the largest dimension of the desired object.
+#
+#     Note 3: Proper Euler angle convention is used, i.e, zyz.
+#
+#     Arguments:
+#         f (*3D |ndarray|*) : The 3D input array.
+#         euler_angles (1x3 |ndarray|) : The three Euler angles, in zyz format.
+#
+#     Returns:
+#         - **f_rot** (*3D |ndarray|*) : The rotated 3D array.
+#     """
+#
+#     # ---------------------------
+#     # Define private functions
+#     depreciate("Use the rotations in reborn.misc.rotate.Rotate3D instead of reborn.utils.rotate3D.")
+#
+#     def rotate90(f):
+#         r"""FIXME: Docstring."""
+#         return np.transpose(np.fliplr(f))
+#
+#     def rotate180(f):
+#         r"""FIXME: Docstring."""
+#         return np.fliplr(np.flipud(f))
+#
+#     def rotate270(f):
+#         r"""FIXME: Docstring."""
+#         return np.transpose(np.flipud(f))
+#
+#     def shiftx(f, kxfac, xfac):
+#         r"""FIXME: Docstring."""
+#         return ifft(fftshift(fft(f, axis=0), axes=0) * kxfac, axis=0) * xfac
+#
+#     def shifty(f, kyfac, yfac):
+#         r"""FIXME: Docstring."""
+#         return ifft(fftshift(fft(f, axis=1), axes=1) * kyfac, axis=1) * yfac
+#
+#     def rotate2D(fr, kxfac, xfac, kyfac, yfac, n90_mod_four):
+#         """ Rotate a 2D section.
+#         FIXME: Joe Chen: Needs proper documentation."""
+#
+#         if n90_mod_four == 1:
+#             fr = rotate90(fr)
+#         elif n90_mod_four == 2:
+#             fr = rotate180(fr)
+#         elif n90_mod_four == 3:
+#             fr = rotate270(fr)
+#
+#         fr = shiftx(fr, kxfac, xfac)
+#         fr = shifty(fr, kyfac, yfac)
+#         fr = shiftx(fr, kxfac, xfac)
+#
+#         return fr
+#
+#     def rotate_setup(f, ang):
+#         """ Set up required to rotate.
+#         FIXME: Joe Chen: Needs proper docstring.
+#         FIXME: Joe Chen: Parameter f is unused"""
+#         n90 = np.rint(ang * TwoOverPi)
+#         dang = ang - n90 * PiOvTwo
+#
+#         t = -np.tan(0.5 * dang)
+#         s = np.sin(dang)
+#
+#         kxfac = np.exp(cx1 * t)
+#         xfac = np.exp(cx2_2 - cx2_3 * t)
+#
+#         kyfac = np.exp(cy1 * s)
+#         yfac = np.exp(cy2_2 - cy2_3 * s)
+#
+#         n90_mod_Four = n90 % 4
+#
+#         return kxfac, xfac, kyfac, yfac, n90_mod_Four
+#
+#     def __rotate_euler_z(f, ang):
+#
+#         kxfac, xfac, kyfac, yfac, n90_mod_Four = rotate_setup(f, ang)
+#
+#         f_rot = np.zeros((N, N, N), dtype=np.complex128)
+#         for ii in range(0, N):
+#             f_rot[ii, :, :] = rotate2D(f[ii, :, :], kxfac, xfac, kyfac, yfac, n90_mod_Four)
+#
+#         return f_rot
+#
+#     def __rotate_euler_y(f, ang):
+#
+#         kxfac, xfac, kyfac, yfac, n90_mod_Four = rotate_setup(f, ang)
+#
+#         f_rot = np.zeros((N, N, N), dtype=np.complex128)
+#         for ii in range(0, N):
+#             f_rot[:, ii, :] = rotate2D(f[:, ii, :], kxfac, xfac, kyfac, yfac, n90_mod_Four)
+#
+#         return f_rot
+#
+#     # ---------------------------
+#     # Get the max shape of the array
+#     nx, ny, nz = f.shape
+#     N = np.max([nx, ny, nz])
+#
+#     # Make array cubic if the array is not cubic.
+#     if nx != ny or nx != nz or ny != nz:
+#         f_rot = np.zeros((N, N, N), dtype=np.complex128)
+#         f_rot[0:nx, 0:ny, 0:nz] = f
+#     else:
+#         f_rot = f
+#
+#     # ---------------------------
+#     # Pre-calculations for speed
+#     Y, X = np.meshgrid(np.arange(N), np.arange(N))
+#
+#     y0 = 0.5 * (N - 1)
+#     cx1 = -1j * 2.0 * np.pi / N * X * (Y - y0)
+#     cx2_1 = -1j * np.pi * (1 - (N % 2) / N)
+#     cx2_2 = cx2_1 * X
+#     cx2_3 = cx2_1 * (Y - y0)
+#
+#     x0 = 0.5 * (N - 1)
+#     cy1 = -1j * 2.0 * np.pi / N * Y * (X - x0)
+#     cy2_1 = -1j * np.pi * (1 - (N % 2) / N)
+#     cy2_2 = cy2_1 * Y
+#     cy2_3 = cy2_1 * (X - x0)
+#
+#     TwoOverPi = 2.0 / np.pi
+#     PiOvTwo = 0.5 * np.pi
+#
+#     # ---------------------------
+#     # Do the rotations
+#
+#     # print(euler_angles)
+#
+#     # --------------------
+#     # Joe's implementation
+#     euler_angles = R_in.as_euler('xyx')
+#     # euler_angles = R.from_euler('zyz', euler_angles).as_euler('xyx')
+#     euler_angles[1] = -euler_angles[1]
+#     # --------------------
+#     # Kevin's implementation
+#     # euler_angles = input_rotation.as_euler('xyx') # input_rotation will be a scipy object when we change the
+#     # interface to the rotate3D function
+#     # euler_angles = -euler_angles
+#     # --------------------
+#
+#     f_rot = __rotate_euler_z(f_rot, ang=euler_angles[0])
+#     f_rot = __rotate_euler_y(f_rot, ang=euler_angles[1])
+#     f_rot = __rotate_euler_z(f_rot, ang=euler_angles[2])
+#
+#     return f_rot
 
 
 def make_label_radial_shell(r_bin_vec, n_vec):

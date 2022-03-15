@@ -15,7 +15,7 @@
 
 import numpy as np
 from reborn import utils
-from reborn.utils import rotate3D
+# from reborn.utils import rotate3D
 
 
 def test_max_pair_distance():
