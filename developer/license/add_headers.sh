@@ -24,3 +24,5 @@ for ext in py cpp f90 ; do
     done
   done
 done
+
+rm file_header_*
