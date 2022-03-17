@@ -14,7 +14,7 @@
 # along with reborn.  If not, see <https://www.gnu.org/licenses/>.
 
 r"""
-Water background scatter
+Water 1D Profiles
 ========================
 
 Simple example of how to access and plot a water radial profile.
@@ -24,7 +24,6 @@ Contributed by Kosta Karpos
 
 import numpy as np
 import pylab as plt
-from reborn import detector, source
 from reborn.simulate.solutions import water_scattering_factor_squared
 
 
