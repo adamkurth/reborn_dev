@@ -111,7 +111,7 @@ def import_f90(source_file, extra_args='', hash=True, verbose=False, with_omp=Fa
         debug('Import failed!')
         debug('Compiling again...', modulename)
         numpy.f2py.compile(source, modulename=modulename, extension='.f90', extra_args=extra_args, verbose=verbose)
-        debug('Importing again', os.getcwd())
+        debug('Importing again', modulename)
         module = importlib.import_module(modulename)
     debug('Module name:', module)
     if hash:  # Create a file with the md5 hash of the source f90 file.  This is only created upon successful compile.
