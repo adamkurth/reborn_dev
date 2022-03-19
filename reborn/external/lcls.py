@@ -150,7 +150,7 @@ def get_pad_geometry_from_psana(pad_det, run_number, splitter):
 
 class EpicsTranslationStageMotion:
     r""" A class that updates PADGeometry according to stages with positions specified by EPICS PVs. """
-    def __init__(self, epics_pv, vector=np.array([0, 0, 1e-3])):
+    def __init__(self, epics_pv=None, vector=np.array([0, 0, 1e-3])):
         r"""
         Arguments:
             epics_pv ('str'): The EPICS PV string.
@@ -158,7 +158,8 @@ class EpicsTranslationStageMotion:
                                 multiplied by this vector and added to PADGeometry.t_vec
         """
         self.detector = psana.Detector(epics_pv)
-        self.vector = vector
+        self.vector = np.array(vector)
+        self.epics_pv = epics_pv
     def modify_geometry(self, pad_geometry, event):
         r""" Modify the PADGeometryList.
 
@@ -169,6 +170,7 @@ class EpicsTranslationStageMotion:
         position = self.detector(event)
         p = pad_geometry.copy()
         p.translate(self.vector * position)
+        debug_message('Shifted detector.  %s=%f, vec='%(self.epics_pv, position), self.vector*position)
         return p
 
 
@@ -189,6 +191,7 @@ class TranslationMotion:
         """
         p = pad_geometry.copy()
         p.translate(self.vector)
+        debug_message('Static translation', self.vector)
         return p
 
 
@@ -220,11 +223,8 @@ class AreaDetector(object):
         self.detector = psana.Detector(pad_id, **kwargs)
         self.detector_type = self.get_detector_type()
         self.data_type = data_type
-        self.motions = motions
-        if isinstance(motions, str):
-            self.motions = [EpicsTranslationStageMotion(epics_pv=motions)]
-        if isinstance(motions, list):
-            self.motions = [TranslationMotion(vector=motions)]
+        self.motions = []
+        self.setup_motions(motions)
         if self.detector_type == 'cspad':
             self.splitter = lambda data: pad_to_asic_data_split(data, 1, 2)
         if self.detector_type == 'epix10k2m':
@@ -249,12 +249,32 @@ class AreaDetector(object):
             else:
                 geometry = get_pad_geometry_from_psana(self.detector, run_number, self.splitter)
         self._home_geometry = geometry.copy()
+        debug_message('Initial (home) geometry', self._home_geometry)
         # print(self._home_geometry)
         self.mask = mask
         if isinstance(mask, str):
             self.mask = detector.load_pad_masks(mask)
         if self.mask is None:
             self.mask = [p.ones() for p in self._home_geometry]
+
+    def setup_motions(self, motions):
+        debug_message('setup_motions', motions)
+        if isinstance(motions, list) or isinstance(motions, tuple):
+            debug_message('list type')
+            if isinstance(motions[0], float) or isinstance(motions[0], int):
+                debug_message('simple vector')
+                self.motions.append(TranslationMotion(vector=motions))
+                return
+            debug_message('list of motions')    
+            for m in motions:
+                self.setup_motions(m)
+        if isinstance(motions, str):
+            debug_message('str')
+            self.motions.append(EpicsTranslationStageMotion(epics_pv=motions))
+        if isinstance(motions, dict):
+            debug_message('dict')
+            self.motions.append(EpicsTranslationStageMotion(**motions))
+
 
     def get_detector_type(self):
         """ The psana detector fails to provide reliable information on detector type. """
@@ -316,7 +336,6 @@ class AreaDetector(object):
         return self._home_geometry.n_pixels
 
 
-# noinspection PyUnresolvedReferences
 class LCLSFrameGetter(reborn.fileio.getters.FrameGetter):
 
     mask = None
@@ -394,7 +413,8 @@ class LCLSFrameGetter(reborn.fileio.getters.FrameGetter):
         try:
             photon_energy = self.ebeam_detector.get(event).ebeamPhotonEnergy()*reborn.const.eV
         except AttributeError:
-            debug_message(f'Skipping run {self.run_number} frame {frame_number}: ebeamPhotonEnergy failure')
+            debug_message(f'Run {self.run_number} frame {frame_number} causes ebeamPhotonEnergy failure, skipping this '
+                     f'shot.')
         geometry = reborn.detector.PADGeometryList()
         pad_data = []
         pad_mask = []
