@@ -1,18 +1,3 @@
-# This file is part of reborn <https://kirianlab.gitlab.io/reborn/>.
-#
-# reborn is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# reborn is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with reborn.  If not, see <https://www.gnu.org/licenses/>.
-
 import numpy as np
 from .. import utils, const, detector
 from ..target import crystal, atoms
@@ -75,11 +60,12 @@ def air_intensity_profile(q_mags=None, beam=None):
 def get_gas_background(pad_geometry,
                         beam,
                         path_length=[0.0, 1.0],
-                        gas_type='he',
-                        temperature=293.15,
-                        pressure=101325.0,
-                        n_simulation_steps=20,
-                        poisson=False):
+                        gas_type:str='he',
+                        temperature:float=293.15,
+                        pressure:float=101325.0,
+                        n_simulation_steps:int=20,
+                        poisson:bool=False):
+
     r"""
     Given a list of |PADGeometry| instances along with a |Beam| instance, calculate the scattering intensity
     :math:`I(q)` of a helium of given path length.
@@ -95,33 +81,80 @@ def get_gas_background(pad_geometry,
     Returns:
         List of |ndarray| instances containing intensities.
     """
+
+
     gas_options = ['he', 'helium', 'air']
     if gas_type not in gas_options:
         raise ValueError(f'Sorry, the only options are {gas_options}. Considering writing your own function for other gases.')
-    pads0 = detector.PADGeometryList(pad_geometry).copy()
-    pads = detector.PADGeometryList(pads0.copy())
-    if path_length[1] is None:
-        path_length[1] = np.max(pads.position_vecs().dot(beam.beam_vec))
-    dx = float(path_length[1] - path_length[0])/n_simulation_steps
-    offsets = (np.arange(n_simulation_steps)+0.5)*dx
+
+    padsm = detector.PADGeometryList(pad_geometry)
+    pads0 = detector.PADGeometryList(pads.copy())
+    # for p in pads:
+    #     p.do_cache = True
+    # q_mags = pads.q_mags(beam)
+
+    # for i in range(2):
+    #     if path_length[i] == 0:
+    #         path_length[i] = 1e-6  # Avoid values close to the detector.
+
+    iter_list = np.linspace(path_length[0], path_length[1], n_simulation_steps)
+    dx = iter_list[1] - iter_list[0]
+
     volume = np.pi * dx * (beam.diameter_fwhm/2) ** 2  # volume of a cylinder
     n_molecules = pressure * volume / (const.k * temperature)
-    alpha = const.r_e ** 2 * beam.photon_number_fluence * n_molecules
-    total = pads.zeros()
-    for offset in offsets:
-        print(offset)
-        for (p0, p) in zip(pads0, pads):  # change the detector distance
-            p.t_vec = p0.t_vec - beam.beam_vec * offset
-        ang = pads.scattering_angles(beam)
-        mask = np.ones(pads.n_pixels)
+
+    # initialize a zeros array the same shape as the detector
+    tot = padsm.zeros()
+    qtemp = np.linspace(0, 10e10, 1000)
+    gp = isotropic_gas_intensity_profile(molecule='He', beam=beam, q_mags=qtemp)
+    alpha = const.r_e ** 2 * beam.photon_number_fluence
+
+    bvec = beam.beam_vec
+    b = beam.beam_vec
+    e1 = beam.e1_vec
+    a = beam.polarization_weight
+    e1 = utils.vec_norm(np.array(e1))
+    b = utils.vec_norm(np.array(b))
+    polarization_vec_2 = np.cross(e1, b)
+    n_pixels = pads0.n_pixels
+    areas = padsm.concat_data([utils.vec_mag(np.cross(p.fs_vec, p.ss_vec)) for p in padsm])
+    for step in iter_list:
+        for (p0, p) in zip(pads0, padsm):  # change the detector distance
+            p.t_vec = p0.t_vec - beam.beam_vec * step
+        pvecs = padsm.position_vecs()
+        mpvecs = utils.vec_mag(pvecs)
+        npvecs = utils.vec_norm(pvecs)
+        costheta = npvecs.dot(bvec)
+        theta = np.arccos(costheta)
+        mask = np.ones(n_pixels)
+        mask[theta >= np.pi/2*0.98] = 0
+        if a is None:
+            weight1 = 1
+            weight2 = 0
+        else:
+            weight1 = a
+            weight2 = 1 - a
+        polarization_factor = np.zeros(n_pixels)
+        if weight1 > 0:
+            polarization_factor += weight1 * (1 - np.abs(np.dot(npvecs, e1)) ** 2)
+        if weight2 > 0:
+            polarization_factor += weight2 * (1 - np.abs(np.dot(npvecs, polarization_vec_2)) ** 2)
+        polarization = polarization_factor.ravel()
+
+
+        ang = padsm.scattering_angles(beam=beam)
+        mask = np.ones(padsm.n_pixels)
         mask[ang >= np.pi/2*0.98] = 0
-        polarization = pads.polarization_factors(beam)  # calculate the polarization factors
-        solid_angles = pads.solid_angles2()  # Approximate solid angles
-        q_mags = pads.q_mags(beam)
-        scatt = isotropic_gas_intensity_profile(molecule='He', beam=beam, q_mags=q_mags)  # 1D intensity profile
+        polarization = padsm.polarization_factors(beam=beam)  # calculate the polarization factors
+        solid_angles = padsm.solid_angles()  # Approximate solid angles
+        q = padsm.q_mags(beam=beam)
+        scatt = np.interp(q, qtemp, gp)
+        # scatt = isotropic_gas_intensity_profile(molecule='He', beam=beam, q_mags=q_mags)  # 1D intensity profile
         F2 = np.abs(scatt) ** 2 * n_molecules
         I = alpha * polarization * solid_angles * F2  # calculate the scattering intensity
-        total += I*mask  # sum the results
+        tot += I*mask  # sum the results
+
     if poisson:
-        total = np.random.poisson(total).astype(np.double)  # add in some Poisson noise for funsies
-    return total
+        tot = np.random.poisson(tot).astype(np.double)  # add in some Poisson noise for funsies
+
+    return tot
