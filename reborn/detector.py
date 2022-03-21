@@ -1049,25 +1049,60 @@ class PADGeometryList(list):
 
     def concat_data(self, data):
         r""" Concatenate a list of |ndarray| instances into a single concatenated 1D |ndarray| ."""
+        if isinstance(data, np.ndarray):
+            if data.size != self.n_pixels:
+                raise ValueError("Length of ndarray is not as expected:", data.size, 'instead of', self.n_pixels)
+            return data.ravel()
         if isinstance(data, list):
             if len(data) != len(self):
                 raise ValueError("Length of data list is not the same length as the PADGeometryList")
+            for (d, p) in zip(data, self):
+                if d.size != p.n_pixels:
+                    raise ValueError("Data does not match PADGeometry size:", d.size, 'instead of', p.n_pixels)
+        else:
+            raise ValueError("Data type not recognized:", type(data))
         if self.defines_slicing():
             self.validate()
-            if isinstance(data, np.ndarray):
-                return data.ravel()
             if isinstance(data, list):
                 datacat = np.zeros(self[0].parent_data_shape, dtype=data[0].dtype)
                 for (p, d) in zip(self, data):
                     datacat[p.parent_data_slice] = p.reshape(d)
                 return datacat.ravel()
-        return concat_pad_data(data)
+        return np.concatenate([d.ravel() for d in data])
 
     def split_data(self, data):
         r""" Slice this PAD data from a parent data array. """
         if not self.defines_slicing():
             return split_pad_data(self, data)
         return [p.slice_from_parent(data) for p in self]
+
+    def concat_vecs(self, data):
+        r""" Concatenate a list of (N, 3) |ndarray| instances into a single concatenated (N, 3) |ndarray| ."""
+        if isinstance(data, np.ndarray):
+            if data.size != self.n_pixels*3:
+                raise ValueError("Length of ndarray is not as expected:", data.size, 'instead of', self.n_pixels*3)
+            return data.reshape((self.n_pixels, 3))
+        if isinstance(data, list):
+            if len(data) != len(self):
+                raise ValueError("Length of data list is not the same length as the PADGeometryList")
+        else:
+            raise ValueError("Data type not recognized:", type(data))
+        x = []
+        y = []
+        z = []
+        for d in data:
+            d = d.reshape((int(d.size/3), 3))
+            x.append(d[:, 0])
+            y.append(d[:, 1])
+            z.append(d[:, 2])
+        x = self.concat_data(x)
+        y = self.concat_data(y)
+        z = self.concat_data(z)
+        return np.vstack((x, y, z)).T.copy()
+
+    def split_vecs(self, data):
+        r""" Slice this PAD data from a parent data array. """
+        raise NotImplemented
 
     @property
     def n_pixels(self):
@@ -1080,19 +1115,19 @@ class PADGeometryList(list):
 
     def position_vecs(self):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
-        return self.concat_data([p.position_vecs().ravel() for p in self]).reshape([self.n_pixels, 3])
+        return self.concat_vecs([p.position_vecs() for p in self])
 
     def s_vecs(self):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
-        return self.concat_data([p.s_vecs().ravel() for p in self]).reshape([self.n_pixels, 3])
+        return self.concat_vecs([p.s_vecs() for p in self])
 
     def ds_vecs(self, beam):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
-        return self.concat_data([p.ds_vecs(beam=beam).ravel() for p in self]).reshape([self.n_pixels, 3])
+        return self.concat_vecs([p.ds_vecs(beam=beam) for p in self])
 
     def q_vecs(self, beam):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
-        return self.concat_data([p.q_vecs(beam=beam).ravel() for p in self]).reshape([self.n_pixels, 3])
+        return self.concat_vecs([p.q_vecs(beam=beam) for p in self])
 
     def q_mags(self, beam):
         r""" Concatenates the output of the matching method in |PADGeometry|"""

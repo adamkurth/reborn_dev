@@ -28,7 +28,8 @@ configs['autocompile_fortran'] = configs.get('autocompile_fortran', True)
 if os.path.exists(__file__.replace('config.py', 'custom_config.py')):
     try:
         from .custom_config import configs as custom
-        print('Loaded custom config')
+        print('**** you have a custom reborn configuration! ****')
+        print(__file__.replace('config.py', 'custom_config.py'))
         for k in custom:
             configs[k] = custom[k]
     except ImportError:
