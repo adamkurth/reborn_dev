@@ -1929,6 +1929,39 @@ class RadialProfiler:
             data = self.pad_geometry.split_data(data)
         return data
 
+    def divide_profile(self, data, mask=None, statistic=np.median):
+        r"""
+        Given some PAD data, subtract a radial profile (mean or median).
+
+        Arguments:
+            data (|ndarray|):  The intensity data from which the radial profile is formed.
+            mask (|ndarray|):  Optional.  A mask to indicate bad pixels.  Zero is bad, one is good.  If no mask is
+                                 provided here, the mask configured with :meth:`set_mask` will be used.
+            statistic (function): Provide a function of your choice that runs on each radial bin.
+
+        Returns:
+
+        """
+        as_list = False
+        if isinstance(data, list):
+            as_list = True
+        if statistic == 'mean':
+            mprof = self.get_mean_profile(data, mask=mask)
+        elif statistic == 'median':
+            mprof = self.get_median_profile(data, mask=mask)
+        else:
+            mprof = self.get_profile_statistic(data, mask=mask, statistic=statistic)
+            # raise ValueError('Statistic %s not recognized' % (statistic,))
+        mprofq = self.bin_centers
+        mpat = np.interp(self._q_mags, mprofq, mprof)
+        mpat = self.concat_data(mpat)
+        data = self.concat_data(data)
+        data = data.copy()
+        data /= mpat
+        if as_list:
+            data = self.pad_geometry.split_data(data)
+        return data
+        
     def subtract_median_profile(self, data, mask=None):
         r"""
         Given some PAD data, calculate the radial median and subtract it from the data.
