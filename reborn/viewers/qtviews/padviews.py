@@ -64,7 +64,7 @@ class PADViewMainWindow(QtGui.QMainWindow):
 
 
 def ensure_dataframe(data, parent):
-    r""" Convert dictionaries to DataFrame instances. """
+    r""" Convert old-style dictionaries to proper DataFrame instances. """
     if not isinstance(parent, DataFrame):
         raise ValueError('parent must be a DataFrame')
     if isinstance(data, DataFrame):
