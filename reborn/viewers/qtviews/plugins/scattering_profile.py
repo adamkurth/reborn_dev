@@ -17,7 +17,6 @@ import numpy as np
 import reborn
 import pyqtgraph as pg
 from pyqtgraph import QtGui, QtCore
-from reborn.simulate import solutions
 
 
 class Plugin():
@@ -47,7 +46,7 @@ class Plugin():
         if self.water_profile is not None:
             self.plot_water_profile(toggle=False)
         pg.QtGui.QApplication.processEvents()
-    def update_geometry(self, update_profile=True):
+    def update_geometry(self):
         self.padview.debug()
         pads = self.padview.dataframe.get_pad_geometry()
         beam = self.padview.dataframe.get_beam()
@@ -70,6 +69,7 @@ class Plugin():
 class Widget(QtGui.QMainWindow):
     def __init__(self, padview, plugin):
         super().__init__()
+        self.setWindowTitle('Scattering Profile')
         self.hbox = QtGui.QHBoxLayout()
         self.splitter = QtGui.QSplitter(QtCore.Qt.Vertical)
         self.hbox.addWidget(self.splitter)
