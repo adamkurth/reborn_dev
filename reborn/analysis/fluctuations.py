@@ -85,7 +85,7 @@ def data_correlation(n, data, mask, cached=False):
         m_cf = correlate(s1=mask, cached=cached)
     else:
         data_roll = np.roll(data, n, axis=0)
-        masl_roll = np.roll(mask, n, axis=0)
+        mask_roll = np.roll(mask, n, axis=0)
         d_cf = correlate(s1=data, s2=data_roll, cached=cached)
         m_cf = correlate(s1=mask, s2=mask_roll, cached=cached)
     return np.divide(d_cf, m_cf, out=zros, where=m_cf != 0)
