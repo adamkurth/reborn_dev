@@ -249,6 +249,7 @@ class PADView(QtCore.QObject):
 
     @dataframe.setter
     def dataframe(self, val):
+        self.debug()
         val = ensure_dataframe(val, self._dataframe)
         if self._dataframe_preprocessor is not None:
             val = self._dataframe_preprocessor(val)
@@ -871,6 +872,7 @@ class PADView(QtCore.QObject):
             self.set_levels(levels[0], levels[1])
         self.histogram.regionChanged()
         self.set_title()
+        self.update_masks()
 
     # FIXME: We also need an update_beam method.
     def update_pad_geometry(self, pad_geometry=None):
@@ -1219,7 +1221,7 @@ class PADView(QtCore.QObject):
         self.debug(self.dataframe, level=2)
         self.update_display_data()
 
-    def update_display_data(self):
+    def update_display_data(self, dataframe=None):
         r"""
         Update display with new data, e.g. when moving to next frame.
 
@@ -1228,9 +1230,11 @@ class PADView(QtCore.QObject):
 
         Returns:
         """
+        if dataframe is not None:
+            self.dataframe = dataframe
         self.debug()
         self.update_pads()
-        self.remove_scatter_plots()
+        # self.remove_scatter_plots()
         if self.do_peak_finding is True:
             self.find_peaks()
             self.display_peaks()
