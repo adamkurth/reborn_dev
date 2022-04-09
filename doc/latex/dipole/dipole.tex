@@ -618,13 +618,13 @@ $G(\vec{r}, \vec{r}')$ that satisfies the equation
 where $\delta(\vec{r}-\vec{r}')$ is the Dirac delta function.  Once equipped with $G(\vec{r}, \vec{r}')$ we may easily
 show that the solution for $V(\vec{r})$ is
 \begin{align}\label{eqn:useg}
-V(\vec{r}) = \int_\text{Vol} g(\vec{r}')G(\vec{r}, \vec{r}') d^3 r'\;.
+V(\vec{r}) = \int_{\text{Vol}} g(\vec{r}')G(\vec{r}, \vec{r}') d^3 r'\;.
 \end{align}
 Working the proof backwards from the above, we apply $\mathcal{L}_{\vec{r}}$ to both sides of the equation:
 \begin{align}
-\mathcal{L}_{\vec{r}} V(\vec{r}) &= \mathcal{L}_{\vec{r}} \int_\text{Vol} g(\vec{r}')G(\vec{r}, \vec{r}')d^3 r' \\
-&= \int_\text{Vol} g(\vec{r}')  \mathcal{L}_{\vec{r}} G(\vec{r}, \vec{r}') d^3 r' \\
-    &= \int_\text{Vol} g(\vec{r}')  \delta(\vec{r} - \vec{r}') d^3 r' \\
+\mathcal{L}_{\vec{r}} V(\vec{r}) &= \mathcal{L}_{\vec{r}} \int_{\text{Vol}} g(\vec{r}')G(\vec{r}, \vec{r}')d^3 r' \\
+&= \int_{\text{Vol}} g(\vec{r}')  \mathcal{L}_{\vec{r}} G(\vec{r}, \vec{r}') d^3 r' \\
+    &= \int_{\text{Vol}} g(\vec{r}')  \delta(\vec{r} - \vec{r}') d^3 r' \\
     \mathcal{L}_{\vec{r}} V(\vec{r}) &= g(\vec{r})
 \end{align}
 
@@ -670,11 +670,11 @@ Delta function by taking the volume integral of both sides of equation
 \ref{eqn:symR}
 about an infinitesimal volume centered on the origin:
 \begin{align}
-\int_\text{sphere}\nabla^2 G(R) d^3R  + k^2 \int_\text{sphere} G(R) d^3R = 1 \;.
+\int_{\text{sphere}}\nabla^2 G(R) d^3R  + k^2 \int_\text{sphere} G(R) d^3R = 1 \;.
 \end{align}
 In the limit $R\rightarrow 0$ we have $G(R) \rightarrow A/R$:
 \begin{align}
-A \int_\text{sphere}\nabla^2 \frac{1}{R} d^3R  + A k^2 \int_\text{sphere} \frac{1}{R} 4\pi R^2dR = 1 \;.
+A \int_{\text{sphere}}\nabla^2 \frac{1}{R} d^3R  + A k^2 \int_\text{sphere} \frac{1}{R} 4\pi R^2dR = 1 \;.
 \end{align}
 For the first term on the LHS we use the result from Griffiths chapter 1: 
  $\nabla^2 (1/R) = -4\pi \delta(R)$.  The second term on the LHS 
@@ -691,13 +691,13 @@ spherical wave:
 
 With the Green's function, we finally plug it into equation \ref{eqn:useg}:
 \begin{align}
-V_\omega(\vec{r}) = \int_\text{Vol} \frac{\rho_\omega(\vec{r}')}{4\pi \epsilon_0} \frac{e^{ik|\vec{r}-\vec{r}'|}}{ |\vec{r}-\vec{r}'|} d^3 r'\;.
+V_\omega(\vec{r}) = \int_{\text{Vol}} \frac{\rho_\omega(\vec{r}')}{4\pi \epsilon_0} \frac{e^{ik|\vec{r}-\vec{r}'|}}{ |\vec{r}-\vec{r}'|} d^3 r'\;.
 \end{align}
 Finally, we switch from frequency to the time variable by taking a 
 Fourier transform of the above:
 \begin{align}
-V(\vec{r}, t) &= \int_{-\infty}^\infty \left\{\int_\text{Vol} \frac{\rho_\omega(\vec{r}')}{4\pi \epsilon_0} \frac{e^{ik|\vec{r}-\vec{r}'|}}{ |\vec{r}-\vec{r}'|} d^3 r' \right\}e^{-i\omega t}d\omega \\
-&=\int_\text{Vol} \left\{ \int_{-\infty}^\infty\rho_\omega(\vec{r}') e^{-i\omega (t -|\vec{r}-\vec{r}'|/c)} d\omega\right\}\frac{1}{4\pi \epsilon_0} \frac{1}{ |\vec{r}-\vec{r}'|} d^3 r'  \;.
+V(\vec{r}, t) &= \int_{-\infty}^\infty \left\{\int_{\text{Vol}} \frac{\rho_\omega(\vec{r}')}{4\pi \epsilon_0} \frac{e^{ik|\vec{r}-\vec{r}'|}}{ |\vec{r}-\vec{r}'|} d^3 r' \right\}e^{-i\omega t}d\omega \\
+&=\int_{\text{Vol}} \left\{ \int_{-\infty}^\infty\rho_\omega(\vec{r}') e^{-i\omega (t -|\vec{r}-\vec{r}'|/c)} d\omega\right\}\frac{1}{4\pi \epsilon_0} \frac{1}{ |\vec{r}-\vec{r}'|} d^3 r'  \;.
 \end{align}
 Comparing the term in the curly braces with equation \ref{eqn:Vw} gives us the 
 retarded potential
