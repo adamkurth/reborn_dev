@@ -1,0 +1,122 @@
+<!DOCTYPE HTML>
+
+<!--Converted with LaTeX2HTML 2019.2 (Released June 5, 2019) -->
+<HTML lang="EN">
+<HEAD>
+<TITLE>Appendix: Fourier transform of rotationally symmetric object</TITLE>
+<META NAME="description" CONTENT="Appendix: Fourier transform of rotationally symmetric object">
+<META NAME="keywords" CONTENT="dipole">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=utf-8">
+<META NAME="viewport" CONTENT="width=device-width, initial-scale=1.0">
+<META NAME="Generator" CONTENT="LaTeX2HTML v2019.2">
+
+<LINK REL="STYLESHEET" HREF="dipole.css">
+
+<LINK REL="next" HREF="node14.html">
+<LINK REL="previous" HREF="node12.html">
+<LINK REL="next" HREF="node14.html">
+</HEAD>
+
+<BODY >
+
+<DIV CLASS="navigation"><!--Navigation Panel-->
+<A
+ HREF="node14.html">
+<IMG WIDTH="37" HEIGHT="24" ALT="next" SRC="next.png"></A> 
+<A
+ HREF="dipole.html">
+<IMG WIDTH="26" HEIGHT="24" ALT="up" SRC="up.png"></A> 
+<A
+ HREF="node12.html">
+<IMG WIDTH="63" HEIGHT="24" ALT="previous" SRC="prev.png"></A>   
+<BR>
+<B> Next:</B> <A
+ HREF="node14.html">Bibliography</A>
+<B> Up:</B> <A
+ HREF="dipole.html">Classical derivation of far-field</A>
+<B> Previous:</B> <A
+ HREF="node12.html">Appendix: Time-averaged Poynting vector</A>
+<BR>
+<BR></DIV>
+<!--End of Navigation Panel-->
+
+<H1><A ID="SECTION000130000000000000000"></A>
+<A ID="sec:3d1d"></A>
+<BR>
+Appendix: Fourier transform of rotationally symmetric object
+</H1>
+
+<P>
+If we consider just a single atom situated at the origin, the atomic form factor 
+is equal to
+<P></P>
+<DIV CLASS="mathdisplay"><TABLE CLASS="equation" >
+<TR >
+<TD  style="text-align:center;"><SPAN CLASS="MATH"><IMG STYLE="height: 5.34ex; vertical-align: -2.10ex; " SRC="img251.svg"
+ ALT="$\displaystyle f(\vec{q}) = \int \rho(r) \exp(-i \vec{q}\cdot\vec{r}) \; d^3r \; .$"></SPAN></TD>
+<TD  CLASS="eqno" style="text-align:right">
+(<SPAN CLASS="arabic">118</SPAN>)</TD></TR>
+</TABLE></DIV>
+<P></P>
+Due to rotational symmetry, we are free to choose a convenient direction 
+<!-- MATH
+ $\vec{q} = q \hat{\vec{z}}$
+ -->
+<SPAN CLASS="MATH"><IMG STYLE="height: 2.28ex; vertical-align: -0.55ex; " SRC="img252.svg"
+ ALT="$\vec{q} = q \hat{\vec{z}}$"></SPAN> such that in the
+spherical coordinate system we have <!-- MATH
+ $\vec{q}\cdot\vec{r} =  q r \cos\theta$
+ -->
+<SPAN CLASS="MATH"><IMG STYLE="height: 2.25ex; vertical-align: -0.55ex; " SRC="img253.svg"
+ ALT="$\vec{q}\cdot\vec{r} = q r \cos\theta$"></SPAN>.  
+Now we write down our Fourier transform with
+reference only to the magnitudes <SPAN CLASS="MATH"><IMG STYLE="height: 1.64ex; vertical-align: -0.55ex; " SRC="img254.svg"
+ ALT="$q$"></SPAN> and <SPAN CLASS="MATH"><IMG STYLE="height: 1.19ex; vertical-align: -0.10ex; " SRC="img255.svg"
+ ALT="$r$"></SPAN>:
+<P></P>
+<DIV CLASS="mathdisplay"><TABLE CLASS="equation" >
+<TR >
+<TD  style="text-align:right;"><SPAN CLASS="MATH"><IMG STYLE="height: 2.51ex; vertical-align: -0.68ex; " SRC="img256.svg"
+ ALT="$\displaystyle f(\vec{q})$"></SPAN></TD>
+<TD  style="text-align:left;"><SPAN CLASS="MATH"><IMG STYLE="height: 5.82ex; vertical-align: -2.19ex; " SRC="img257.svg"
+ ALT="$\displaystyle = \int_0^{2\pi} d\phi \int_0^\infty \rho(r) r^2 dr \int_0^\pi
+\sin\theta d\theta \exp(-i q r \cos\theta)$"></SPAN></TD>
+<TD  CLASS="eqno" style="text-align:right">
+(<SPAN CLASS="arabic">119</SPAN>)</TD></TR>
+<TR >
+<TD>&nbsp;</TD>
+<TD  style="text-align:left;"><SPAN CLASS="MATH"><IMG STYLE="height: 5.98ex; vertical-align: -2.35ex; " SRC="img258.svg"
+ ALT="$\displaystyle =2\pi \int_0^\infty \rho(r) r^2 dr \int_{-1}^1 d\cos\theta \exp(-i q r
+\cos\theta)$"></SPAN></TD>
+<TD  CLASS="eqno" style="text-align:right">
+(<SPAN CLASS="arabic">120</SPAN>)</TD></TR>
+<TR >
+<TD>&nbsp;</TD>
+<TD  style="text-align:left;"><SPAN CLASS="MATH"><IMG STYLE="height: 6.14ex; vertical-align: -2.49ex; " SRC="img259.svg"
+ ALT="$\displaystyle =2\pi \int_0^\infty \rho(r) r^2 dr \frac{1}{-iqr}\int_{iqr}^{-iqr} du \exp(u)$"></SPAN></TD>
+<TD  CLASS="eqno" style="text-align:right">
+(<SPAN CLASS="arabic">121</SPAN>)</TD></TR>
+<TR >
+<TD>&nbsp;</TD>
+<TD  style="text-align:left;"><SPAN CLASS="MATH"><IMG STYLE="height: 5.58ex; vertical-align: -2.19ex; " SRC="img260.svg"
+ ALT="$\displaystyle =2\pi \int_0^\infty \rho(r) r^2 dr \frac{\exp(iqr) - \exp(-iqr)}{iqr}$"></SPAN></TD>
+<TD  CLASS="eqno" style="text-align:right">
+(<SPAN CLASS="arabic">122</SPAN>)</TD></TR>
+<TR >
+<TD  style="text-align:right;"><SPAN CLASS="MATH"><IMG STYLE="height: 2.51ex; vertical-align: -0.68ex; " SRC="img261.svg"
+ ALT="$\displaystyle f(q)$"></SPAN></TD>
+<TD  style="text-align:left;"><SPAN CLASS="MATH"><IMG STYLE="height: 5.58ex; vertical-align: -2.19ex; " SRC="img262.svg"
+ ALT="$\displaystyle = \int_0^\infty \rho(r) \frac{\sin(qr)}{qr} 4\pi r^2 dr$"></SPAN></TD>
+<TD  CLASS="eqno" style="text-align:right">
+(<SPAN CLASS="arabic">123</SPAN>)</TD></TR>
+</TABLE></DIV>
+<P></P>
+
+<P>
+<BR><HR>
+
+</BODY>
+</HTML>

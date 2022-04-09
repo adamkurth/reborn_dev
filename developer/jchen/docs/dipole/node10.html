@@ -1,0 +1,432 @@
+<!DOCTYPE HTML>
+
+<!--Converted with LaTeX2HTML 2019.2 (Released June 5, 2019) -->
+<HTML lang="EN">
+<HEAD>
+<TITLE>Appendix: Solution to the inhomogeneous wave equation</TITLE>
+<META NAME="description" CONTENT="Appendix: Solution to the inhomogeneous wave equation">
+<META NAME="keywords" CONTENT="dipole">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=utf-8">
+<META NAME="viewport" CONTENT="width=device-width, initial-scale=1.0">
+<META NAME="Generator" CONTENT="LaTeX2HTML v2019.2">
+
+<LINK REL="STYLESHEET" HREF="dipole.css">
+
+<LINK REL="next" HREF="node11.html">
+<LINK REL="previous" HREF="node9.html">
+<LINK REL="next" HREF="node11.html">
+</HEAD>
+
+<BODY >
+
+<DIV CLASS="navigation"><!--Navigation Panel-->
+<A
+ HREF="node11.html">
+<IMG WIDTH="37" HEIGHT="24" ALT="next" SRC="next.png"></A> 
+<A
+ HREF="dipole.html">
+<IMG WIDTH="26" HEIGHT="24" ALT="up" SRC="up.png"></A> 
+<A
+ HREF="node9.html">
+<IMG WIDTH="63" HEIGHT="24" ALT="previous" SRC="prev.png"></A>   
+<BR>
+<B> Next:</B> <A
+ HREF="node11.html">Appendix: Liénard-Wiechert potential</A>
+<B> Up:</B> <A
+ HREF="dipole.html">Classical derivation of far-field</A>
+<B> Previous:</B> <A
+ HREF="node9.html">Refractive Index</A>
+<BR>
+<BR></DIV>
+<!--End of Navigation Panel-->
+
+<H1><A ID="SECTION000100000000000000000"></A>
+<A ID="appendix:inhomogeneous"></A>
+<BR>
+Appendix: Solution to the inhomogeneous wave equation
+</H1>
+
+<P>
+We wish to solve for <!-- MATH
+ $V(\vec{r}, t)$
+ -->
+<SPAN CLASS="MATH"><IMG STYLE="height: 2.51ex; vertical-align: -0.68ex; " SRC="img150.svg"
+ ALT="$V(\vec{r}, t)$"></SPAN> in the inhomogeneous equation
+<P></P>
+<DIV CLASS="mathdisplay"><TABLE CLASS="equation" >
+<TR >
+<TD  style="text-align:right;"><SPAN CLASS="MATH"><IMG STYLE="height: 5.18ex; vertical-align: -1.69ex; " SRC="img151.svg"
+ ALT="$\displaystyle \nabla^2 V(\vec{r}, t) - \mu_0\epsilon_0 \frac{\partial^2 V(\vec{r}, t)}{\partial t^2}$"></SPAN></TD>
+<TD  style="text-align:left;"><SPAN CLASS="MATH"><IMG STYLE="height: 2.51ex; vertical-align: -0.68ex; " SRC="img152.svg"
+ ALT="$\displaystyle = -\rho(\vec{r}, t) / \epsilon_0$"></SPAN></TD>
+<TD  CLASS="eqno" style="text-align:right">
+<A ID="eqn:ihV2">(<SPAN CLASS="arabic">62</SPAN>)</A></TD></TR>
+</TABLE></DIV>
+<P></P>
+assuming that we know <!-- MATH
+ $\rho(\vec{r}, t)$
+ -->
+<SPAN CLASS="MATH"><IMG STYLE="height: 2.51ex; vertical-align: -0.68ex; " SRC="img153.svg"
+ ALT="$\rho(\vec{r}, t)$"></SPAN>.  Note that if we solve this 
+equation, the same approach may be applied to the components
+of the vector potential <SPAN CLASS="MATH"><IMG STYLE="height: 1.78ex; vertical-align: -0.10ex; " SRC="img154.svg"
+ ALT="$\vec{A}$"></SPAN> in equation <A HREF="node2.html#eqn:ihA">6</A>.
+
+<P>
+Briefly, Green's method works as follows.  Assume we have a linear operator <!-- MATH
+ $\mathcal{L}_{\vec{r}}$
+ -->
+<SPAN CLASS="MATH"><IMG STYLE="height: 2.12ex; vertical-align: -0.45ex; " SRC="img155.svg"
+ ALT="$\mathcal{L}_{\vec{r}}$"></SPAN> and we 
+wish to solve for <!-- MATH
+ $V(\vec{r})$
+ -->
+<SPAN CLASS="MATH"><IMG STYLE="height: 2.51ex; vertical-align: -0.68ex; " SRC="img156.svg"
+ ALT="$V(\vec{r})$"></SPAN> in the following equation:
+<P></P>
+<DIV CLASS="mathdisplay"><TABLE CLASS="equation" >
+<TR >
+<TD  style="text-align:center;"><SPAN CLASS="MATH"><IMG STYLE="height: 2.51ex; vertical-align: -0.68ex; " SRC="img157.svg"
+ ALT="$\displaystyle \mathcal{L}_{\vec{r}} V(\vec{r}) = g(\vec{r}) \;.$"></SPAN></TD>
+<TD  CLASS="eqno" style="text-align:right">
+(<SPAN CLASS="arabic">63</SPAN>)</TD></TR>
+</TABLE></DIV>
+<P></P>
+The <SPAN CLASS="MATH"><IMG STYLE="height: 1.22ex; vertical-align: -0.10ex; " SRC="img158.svg"
+ ALT="$\vec r$"></SPAN> subscript indicates that the operator involves the <SPAN  CLASS="textit">unprimed</SPAN> 
+coordinates.
+Now assume further that we can find the &ldquo;Green's function&rdquo;
+<!-- MATH
+ $G(\vec{r}, \vec{r}')$
+ -->
+<SPAN CLASS="MATH"><IMG STYLE="height: 2.51ex; vertical-align: -0.68ex; " SRC="img159.svg"
+ ALT="$G(\vec{r}, \vec{r}')$"></SPAN> that satisfies the equation
+<P></P>
+<DIV CLASS="mathdisplay"><TABLE CLASS="equation" >
+<TR >
+<TD  style="text-align:center;"><SPAN CLASS="MATH"><IMG STYLE="height: 2.58ex; vertical-align: -0.68ex; " SRC="img160.svg"
+ ALT="$\displaystyle \mathcal{L}_{\vec{r}} G(\vec{r}, \vec{r}') = \delta(\vec{r}-\vec{r}')$"></SPAN></TD>
+<TD  CLASS="eqno" style="text-align:right">
+(<SPAN CLASS="arabic">64</SPAN>)</TD></TR>
+</TABLE></DIV>
+<P></P>
+where <!-- MATH
+ $\delta(\vec{r}-\vec{r}')$
+ -->
+<SPAN CLASS="MATH"><IMG STYLE="height: 2.51ex; vertical-align: -0.68ex; " SRC="img161.svg"
+ ALT="$\delta(\vec{r}-\vec{r}')$"></SPAN> is the Dirac delta function.  Once equipped with <!-- MATH
+ $G(\vec{r}, \vec{r}')$
+ -->
+<SPAN CLASS="MATH"><IMG STYLE="height: 2.51ex; vertical-align: -0.68ex; " SRC="img159.svg"
+ ALT="$G(\vec{r}, \vec{r}')$"></SPAN> we may easily
+show that the solution for <!-- MATH
+ $V(\vec{r})$
+ -->
+<SPAN CLASS="MATH"><IMG STYLE="height: 2.51ex; vertical-align: -0.68ex; " SRC="img156.svg"
+ ALT="$V(\vec{r})$"></SPAN> is
+<P></P>
+<DIV CLASS="mathdisplay"><TABLE CLASS="equation" >
+<TR >
+<TD  style="text-align:center;"><SPAN CLASS="MATH"><IMG STYLE="height: 5.43ex; vertical-align: -2.19ex; " SRC="img162.svg"
+ ALT="$\displaystyle V(\vec{r}) = \int_{\text{Vol}} g(\vec{r}')G(\vec{r}, \vec{r}') d^3 r'\;.$"></SPAN></TD>
+<TD  CLASS="eqno" style="text-align:right">
+<A ID="eqn:useg">(<SPAN CLASS="arabic">65</SPAN>)</A></TD></TR>
+</TABLE></DIV>
+<P></P>
+Working the proof backwards from the above, we apply <!-- MATH
+ $\mathcal{L}_{\vec{r}}$
+ -->
+<SPAN CLASS="MATH"><IMG STYLE="height: 2.12ex; vertical-align: -0.45ex; " SRC="img155.svg"
+ ALT="$\mathcal{L}_{\vec{r}}$"></SPAN> to both sides of the equation:
+<P></P>
+<DIV CLASS="mathdisplay"><TABLE CLASS="equation" >
+<TR >
+<TD  style="text-align:right;"><SPAN CLASS="MATH"><IMG STYLE="height: 2.51ex; vertical-align: -0.68ex; " SRC="img163.svg"
+ ALT="$\displaystyle \mathcal{L}_{\vec{r}} V(\vec{r})$"></SPAN></TD>
+<TD  style="text-align:left;"><SPAN CLASS="MATH"><IMG STYLE="height: 5.43ex; vertical-align: -2.19ex; " SRC="img164.svg"
+ ALT="$\displaystyle = \mathcal{L}_{\vec{r}} \int_{\text{Vol}} g(\vec{r}')G(\vec{r}, \vec{r}')d^3 r'$"></SPAN></TD>
+<TD  CLASS="eqno" style="text-align:right">
+(<SPAN CLASS="arabic">66</SPAN>)</TD></TR>
+<TR >
+<TD>&nbsp;</TD>
+<TD  style="text-align:left;"><SPAN CLASS="MATH"><IMG STYLE="height: 5.43ex; vertical-align: -2.19ex; " SRC="img165.svg"
+ ALT="$\displaystyle = \int_{\text{Vol}} g(\vec{r}') \mathcal{L}_{\vec{r}} G(\vec{r}, \vec{r}') d^3 r'$"></SPAN></TD>
+<TD  CLASS="eqno" style="text-align:right">
+(<SPAN CLASS="arabic">67</SPAN>)</TD></TR>
+<TR >
+<TD>&nbsp;</TD>
+<TD  style="text-align:left;"><SPAN CLASS="MATH"><IMG STYLE="height: 5.43ex; vertical-align: -2.19ex; " SRC="img166.svg"
+ ALT="$\displaystyle = \int_{\text{Vol}} g(\vec{r}') \delta(\vec{r} - \vec{r}') d^3 r'$"></SPAN></TD>
+<TD  CLASS="eqno" style="text-align:right">
+(<SPAN CLASS="arabic">68</SPAN>)</TD></TR>
+<TR >
+<TD  style="text-align:right;"><SPAN CLASS="MATH"><IMG STYLE="height: 2.51ex; vertical-align: -0.68ex; " SRC="img163.svg"
+ ALT="$\displaystyle \mathcal{L}_{\vec{r}} V(\vec{r})$"></SPAN></TD>
+<TD  style="text-align:left;"><SPAN CLASS="MATH"><IMG STYLE="height: 2.51ex; vertical-align: -0.68ex; " SRC="img167.svg"
+ ALT="$\displaystyle = g(\vec{r})$"></SPAN></TD>
+<TD  CLASS="eqno" style="text-align:right">
+(<SPAN CLASS="arabic">69</SPAN>)</TD></TR>
+</TABLE></DIV>
+<P></P>
+
+<P>
+In order to solve equation <A HREF="#eqn:ihV2">63</A>, we will first remove the time variable by expanding <!-- MATH
+ $V(\vec{r})$
+ -->
+<SPAN CLASS="MATH"><IMG STYLE="height: 2.51ex; vertical-align: -0.68ex; " SRC="img156.svg"
+ ALT="$V(\vec{r})$"></SPAN> and
+<!-- MATH
+ $\rho(\vec{r})$
+ -->
+<SPAN CLASS="MATH"><IMG STYLE="height: 2.51ex; vertical-align: -0.68ex; " SRC="img12.svg"
+ ALT="$\rho(\vec{r})$"></SPAN> into their Fourier transforms:
+<P></P>
+<DIV CLASS="mathdisplay"><TABLE CLASS="equation" >
+<TR >
+<TD  style="text-align:right;"><SPAN CLASS="MATH"><IMG STYLE="height: 2.51ex; vertical-align: -0.68ex; " SRC="img30.svg"
+ ALT="$\displaystyle V(\vec{r}, t)$"></SPAN></TD>
+<TD  style="text-align:left;"><SPAN CLASS="MATH"><IMG STYLE="height: 5.65ex; vertical-align: -2.35ex; " SRC="img168.svg"
+ ALT="$\displaystyle = \int_{-\infty}^{\infty} V_{\omega}(\vec{r})e^{- i\omega t} d\omega$"></SPAN></TD>
+<TD  CLASS="eqno" style="text-align:right">
+<A ID="eqn:Vw">(<SPAN CLASS="arabic">70</SPAN>)</A></TD></TR>
+<TR >
+<TD  style="text-align:right;"><SPAN CLASS="MATH"><IMG STYLE="height: 2.51ex; vertical-align: -0.68ex; " SRC="img169.svg"
+ ALT="$\displaystyle \rho(\vec{r}, t)$"></SPAN></TD>
+<TD  style="text-align:left;"><SPAN CLASS="MATH"><IMG STYLE="height: 5.65ex; vertical-align: -2.35ex; " SRC="img170.svg"
+ ALT="$\displaystyle = \int_{-\infty}^{\infty} \rho_{\omega}(\vec{r})e^{- i\omega t} d\omega \;.$"></SPAN></TD>
+<TD  CLASS="eqno" style="text-align:right">
+(<SPAN CLASS="arabic">71</SPAN>)</TD></TR>
+</TABLE></DIV>
+<P></P>
+We plug the above into equation <A HREF="#eqn:ihV2">63</A> we get a differential 
+equation for each spectral component:
+<P></P>
+<DIV CLASS="mathdisplay"><TABLE CLASS="equation" >
+<TR >
+<TD  style="text-align:center;"><SPAN CLASS="MATH"><IMG STYLE="height: 2.72ex; vertical-align: -0.68ex; " SRC="img171.svg"
+ ALT="$\displaystyle (\nabla^2 + k^2) V_\omega(\vec{r}) = -\rho_\omega (\vec{r})/\epsilon_0$"></SPAN></TD>
+<TD  CLASS="eqno" style="text-align:right">
+(<SPAN CLASS="arabic">72</SPAN>)</TD></TR>
+</TABLE></DIV>
+<P></P>
+where <!-- MATH
+ $k = \sqrt{\mu_0\epsilon_0}\omega$
+ -->
+<SPAN CLASS="MATH"><IMG STYLE="height: 2.60ex; vertical-align: -0.88ex; " SRC="img172.svg"
+ ALT="$k = \sqrt{\mu_0\epsilon_0}\omega$"></SPAN>.  We now seek the Green's function for
+<P></P>
+<DIV CLASS="mathdisplay"><TABLE CLASS="equation" >
+<TR >
+<TD  style="text-align:center;"><SPAN CLASS="MATH"><IMG STYLE="height: 2.72ex; vertical-align: -0.68ex; " SRC="img173.svg"
+ ALT="$\displaystyle (\nabla^2 + k^2)G(\vec{r}, \vec{r}') = \delta(\vec{r}-\vec{r}')$"></SPAN></TD>
+<TD  CLASS="eqno" style="text-align:right">
+(<SPAN CLASS="arabic">73</SPAN>)</TD></TR>
+</TABLE></DIV>
+<P></P>
+The above is easiest to solve if the delta function is at the origin, so we define <!-- MATH
+ $\vec{R} = \vec{r}-\vec{r}'$
+ -->
+<SPAN CLASS="MATH"><IMG STYLE="height: 2.08ex; vertical-align: -0.29ex; " SRC="img174.svg"
+ ALT="$\vec{R} = \vec{r}-\vec{r}'$"></SPAN>:
+<P></P>
+<DIV CLASS="mathdisplay"><TABLE CLASS="equation" >
+<TR >
+<TD  style="text-align:center;"><SPAN CLASS="MATH"><IMG STYLE="height: 2.72ex; vertical-align: -0.68ex; " SRC="img175.svg"
+ ALT="$\displaystyle (\nabla^2 + k^2)G(\vec{r}, \vec{r}') = \delta(\vec{R})$"></SPAN></TD>
+<TD  CLASS="eqno" style="text-align:right">
+(<SPAN CLASS="arabic">74</SPAN>)</TD></TR>
+</TABLE></DIV>
+<P></P>
+When written in terms of the <SPAN CLASS="MATH"><IMG STYLE="height: 1.78ex; vertical-align: -0.10ex; " SRC="img176.svg"
+ ALT="$\vec{R}$"></SPAN> coordinates, the RHS is rotationally 
+invariant, and hence the Green's function can only be a function of the radial 
+magnitude: 
+<!-- MATH
+ $G(\vec{r}, \vec{r}') = G(R)$
+ -->
+<SPAN CLASS="MATH"><IMG STYLE="height: 2.51ex; vertical-align: -0.68ex; " SRC="img177.svg"
+ ALT="$G(\vec{r}, \vec{r}') = G(R)$"></SPAN>.  In writing the Laplacian operator in spherical 
+coordinates, we've reduced our equation to a single variable:
+<P></P>
+<DIV CLASS="mathdisplay"><TABLE CLASS="equation" >
+<TR >
+<TD  style="text-align:center;"><SPAN CLASS="MATH"><IMG STYLE="height: 5.75ex; vertical-align: -2.30ex; " SRC="img178.svg"
+ ALT="$\displaystyle \left(\frac{1}{R}\frac{\partial}{\partial R}R + k^2\right)G(R) = \delta(R) \;.$"></SPAN></TD>
+<TD  CLASS="eqno" style="text-align:right">
+<A ID="eqn:symR">(<SPAN CLASS="arabic">75</SPAN>)</A></TD></TR>
+</TABLE></DIV>
+<P></P>
+If we look in the regions <SPAN CLASS="MATH"><IMG STYLE="height: 2.25ex; vertical-align: -0.55ex; " SRC="img179.svg"
+ ALT="$R \ne 0$"></SPAN> where <!-- MATH
+ $\delta(R)=0$
+ -->
+<SPAN CLASS="MATH"><IMG STYLE="height: 2.51ex; vertical-align: -0.68ex; " SRC="img180.svg"
+ ALT="$\delta(R)=0$"></SPAN> we have the equation
+<P></P>
+<DIV CLASS="mathdisplay"><TABLE CLASS="equation" >
+<TR >
+<TD  style="text-align:center;"><SPAN CLASS="MATH"><IMG STYLE="height: 4.95ex; vertical-align: -1.69ex; " SRC="img181.svg"
+ ALT="$\displaystyle \frac{\partial}{\partial R}[RG(R)] =- k^2 [R G(R)]$"></SPAN></TD>
+<TD  CLASS="eqno" style="text-align:right">
+(<SPAN CLASS="arabic">76</SPAN>)</TD></TR>
+</TABLE></DIV>
+<P></P>
+with the usual solutions
+<P></P>
+<DIV CLASS="mathdisplay"><TABLE CLASS="equation" >
+<TR >
+<TD  style="text-align:center;"><SPAN CLASS="MATH"><IMG STYLE="height: 5.26ex; vertical-align: -1.69ex; " SRC="img182.svg"
+ ALT="$\displaystyle G(R) = A \frac{e^{ikR}}{R} + B \frac{e^{-ikR}}{R} \;.$"></SPAN></TD>
+<TD  CLASS="eqno" style="text-align:right">
+(<SPAN CLASS="arabic">77</SPAN>)</TD></TR>
+</TABLE></DIV>
+<P></P>
+With foresight, we can set <SPAN CLASS="MATH"><IMG STYLE="height: 1.77ex; vertical-align: -0.10ex; " SRC="img183.svg"
+ ALT="$B=0$"></SPAN> because the <SPAN  CLASS="textit">incoming</SPAN> spherical waves produce results
+that violate causality (we've effectively introduced a boundary condition at 
+infinity).  In order to determine the coefficient <SPAN CLASS="MATH"><IMG STYLE="height: 1.77ex; vertical-align: -0.10ex; " SRC="img184.svg"
+ ALT="$A$"></SPAN> we eliminate the 
+Delta function by taking the volume integral of both sides of equation 
+<A HREF="#eqn:symR">76</A>
+about an infinitesimal volume centered on the origin:
+<P></P>
+<DIV CLASS="mathdisplay"><TABLE CLASS="equation" >
+<TR >
+<TD  style="text-align:center;"><SPAN CLASS="MATH"><IMG STYLE="height: 5.73ex; vertical-align: -2.49ex; " SRC="img185.svg"
+ ALT="$\displaystyle \int_{\text{sphere}}\nabla^2 G(R) d^3R + k^2 \int_\text{sphere} G(R) d^3R = 1 \;.$"></SPAN></TD>
+<TD  CLASS="eqno" style="text-align:right">
+(<SPAN CLASS="arabic">78</SPAN>)</TD></TR>
+</TABLE></DIV>
+<P></P>
+In the limit <!-- MATH
+ $R\rightarrow 0$
+ -->
+<SPAN CLASS="MATH"><IMG STYLE="height: 1.77ex; vertical-align: -0.10ex; " SRC="img186.svg"
+ ALT="$R\rightarrow 0$"></SPAN> we have <!-- MATH
+ $G(R) \rightarrow A/R$
+ -->
+<SPAN CLASS="MATH"><IMG STYLE="height: 2.51ex; vertical-align: -0.68ex; " SRC="img187.svg"
+ ALT="$G(R) \rightarrow A/R$"></SPAN>:
+<P></P>
+<DIV CLASS="mathdisplay"><TABLE CLASS="equation" >
+<TR >
+<TD  style="text-align:center;"><SPAN CLASS="MATH"><IMG STYLE="height: 5.73ex; vertical-align: -2.49ex; " SRC="img188.svg"
+ ALT="$\displaystyle A \int_{\text{sphere}}\nabla^2 \frac{1}{R} d^3R + A k^2 \int_\text{sphere} \frac{1}{R} 4\pi R^2dR = 1 \;.$"></SPAN></TD>
+<TD  CLASS="eqno" style="text-align:right">
+(<SPAN CLASS="arabic">79</SPAN>)</TD></TR>
+</TABLE></DIV>
+<P></P>
+For the first term on the LHS we use the result from Griffiths chapter 1: 
+ <!-- MATH
+ $\nabla^2 (1/R) = -4\pi \delta(R)$
+ -->
+<SPAN CLASS="MATH"><IMG STYLE="height: 2.61ex; vertical-align: -0.68ex; " SRC="img189.svg"
+ ALT="$\nabla^2 (1/R) = -4\pi \delta(R)$"></SPAN>.  The second term on the LHS 
+vanishes.  Finally giving us
+<P></P>
+<DIV CLASS="mathdisplay"><TABLE CLASS="equation" >
+<TR >
+<TD  style="text-align:center;"><SPAN CLASS="MATH"><IMG STYLE="height: 4.84ex; vertical-align: -1.69ex; " SRC="img190.svg"
+ ALT="$\displaystyle A = -\frac{1}{4\pi} \;.$"></SPAN></TD>
+<TD  CLASS="eqno" style="text-align:right">
+(<SPAN CLASS="arabic">80</SPAN>)</TD></TR>
+</TABLE></DIV>
+<P></P>
+After all the above work, we finally have the Green's function &ndash; an outgoing 
+spherical wave:
+<P></P>
+<DIV CLASS="mathdisplay"><TABLE CLASS="equation" >
+<TR >
+<TD  style="text-align:center;"><SPAN CLASS="MATH"><IMG STYLE="height: 5.95ex; vertical-align: -2.27ex; " SRC="img191.svg"
+ ALT="$\displaystyle G(\vec{r}, \vec{r}') = - \frac{e^{ik\vert\vec{r}-\vec{r}'\vert}}{4\pi
+\vert\vec{r}-\vec{r}'\vert} \;.$"></SPAN></TD>
+<TD  CLASS="eqno" style="text-align:right">
+(<SPAN CLASS="arabic">81</SPAN>)</TD></TR>
+</TABLE></DIV>
+<P></P>
+
+<P>
+With the Green's function, we finally plug it into equation <A HREF="#eqn:useg">66</A>:
+<P></P>
+<DIV CLASS="mathdisplay"><TABLE CLASS="equation" >
+<TR >
+<TD  style="text-align:center;"><SPAN CLASS="MATH"><IMG STYLE="height: 5.95ex; vertical-align: -2.27ex; " SRC="img192.svg"
+ ALT="$\displaystyle V_\omega(\vec{r}) = \int_{\text{Vol}} \frac{\rho_\omega(\vec{r}')...
+... \frac{e^{ik\vert\vec{r}-\vec{r}'\vert}}{ \vert\vec{r}-\vec{r}'\vert} d^3 r'\;.$"></SPAN></TD>
+<TD  CLASS="eqno" style="text-align:right">
+(<SPAN CLASS="arabic">82</SPAN>)</TD></TR>
+</TABLE></DIV>
+<P></P>
+Finally, we switch from frequency to the time variable by taking a 
+Fourier transform of the above:
+<P></P>
+<DIV CLASS="mathdisplay"><TABLE CLASS="equation" >
+<TR >
+<TD  style="text-align:right;"><SPAN CLASS="MATH"><IMG STYLE="height: 2.51ex; vertical-align: -0.68ex; " SRC="img30.svg"
+ ALT="$\displaystyle V(\vec{r}, t)$"></SPAN></TD>
+<TD  style="text-align:left;"><SPAN CLASS="MATH"><IMG STYLE="height: 6.04ex; vertical-align: -2.35ex; " SRC="img193.svg"
+ ALT="$\displaystyle = \int_{-\infty}^\infty \left\{\int_{\text{Vol}} \frac{\rho_\omeg...
+...ec{r}'\vert}}{ \vert\vec{r}-\vec{r}'\vert} d^3 r' \right\}e^{-i\omega t}d\omega$"></SPAN></TD>
+<TD  CLASS="eqno" style="text-align:right">
+(<SPAN CLASS="arabic">83</SPAN>)</TD></TR>
+<TR >
+<TD>&nbsp;</TD>
+<TD  style="text-align:left;"><SPAN CLASS="MATH"><IMG STYLE="height: 5.80ex; vertical-align: -2.35ex; " SRC="img194.svg"
+ ALT="$\displaystyle =\int_{\text{Vol}} \left\{ \int_{-\infty}^\infty\rho_\omega(\vec{...
+...ght\}\frac{1}{4\pi \epsilon_0} \frac{1}{ \vert\vec{r}-\vec{r}'\vert} d^3 r' \;.$"></SPAN></TD>
+<TD  CLASS="eqno" style="text-align:right">
+(<SPAN CLASS="arabic">84</SPAN>)</TD></TR>
+</TABLE></DIV>
+<P></P>
+Comparing the term in the curly braces with equation <A HREF="#eqn:Vw">71</A> gives us the 
+retarded potential
+<P></P>
+<DIV CLASS="mathdisplay"><TABLE CLASS="equation" >
+<TR >
+<TD  style="text-align:right;"><SPAN CLASS="MATH"><IMG STYLE="height: 2.51ex; vertical-align: -0.68ex; " SRC="img30.svg"
+ ALT="$\displaystyle V(\vec{r}, t)$"></SPAN></TD>
+<TD  style="text-align:left;"><SPAN CLASS="MATH"><IMG STYLE="height: 5.49ex; vertical-align: -2.10ex; " SRC="img31.svg"
+ ALT="$\displaystyle = \frac{1}{4\pi\epsilon_0}\int \frac{\rho(\vec{r}', t_r)}{{\mbox{...
+...09in}{.08in}{\includegraphics[trim= 1em 0 14em 0,clip]{fonts/ScriptR}}$}}}d^3r'$"></SPAN></TD>
+<TD  CLASS="eqno" style="text-align:right">
+(<SPAN CLASS="arabic">85</SPAN>)</TD></TR>
+</TABLE></DIV>
+<P></P>
+along with the retarded time
+<P></P>
+<DIV CLASS="mathdisplay"><TABLE CLASS="equation" >
+<TR >
+<TD  style="text-align:center;"><SPAN CLASS="MATH"><IMG STYLE="height: 2.51ex; vertical-align: -0.68ex; " SRC="img195.svg"
+ ALT="$\displaystyle t_r \equiv t - {\mbox{$\resizebox{.09in}{.08in}{\includegraphics[trim= 1em 0 14em 0,clip]{fonts/ScriptR}}$}}/ c \;.$"></SPAN></TD>
+<TD  CLASS="eqno" style="text-align:right">
+(<SPAN CLASS="arabic">86</SPAN>)</TD></TR>
+</TABLE></DIV>
+<P></P>
+
+<P>
+
+<DIV CLASS="navigation"><HR>
+<!--Navigation Panel-->
+<A
+ HREF="node11.html">
+<IMG WIDTH="37" HEIGHT="24" ALT="next" SRC="next.png"></A> 
+<A
+ HREF="dipole.html">
+<IMG WIDTH="26" HEIGHT="24" ALT="up" SRC="up.png"></A> 
+<A
+ HREF="node9.html">
+<IMG WIDTH="63" HEIGHT="24" ALT="previous" SRC="prev.png"></A>   
+<BR>
+<B> Next:</B> <A
+ HREF="node11.html">Appendix: Liénard-Wiechert potential</A>
+<B> Up:</B> <A
+ HREF="dipole.html">Classical derivation of far-field</A>
+<B> Previous:</B> <A
+ HREF="node9.html">Refractive Index</A></DIV>
+<!--End of Navigation Panel-->
+
+</BODY>
+</HTML>

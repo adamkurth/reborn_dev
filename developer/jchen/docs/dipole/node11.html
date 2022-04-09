@@ -1,0 +1,333 @@
+<!DOCTYPE HTML>
+
+<!--Converted with LaTeX2HTML 2019.2 (Released June 5, 2019) -->
+<HTML lang="EN">
+<HEAD>
+<TITLE>Appendix: Liénard-Wiechert potential</TITLE>
+<META NAME="description" CONTENT="Appendix: Liénard-Wiechert potential">
+<META NAME="keywords" CONTENT="dipole">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=utf-8">
+<META NAME="viewport" CONTENT="width=device-width, initial-scale=1.0">
+<META NAME="Generator" CONTENT="LaTeX2HTML v2019.2">
+
+<LINK REL="STYLESHEET" HREF="dipole.css">
+
+<LINK REL="next" HREF="node12.html">
+<LINK REL="previous" HREF="node10.html">
+<LINK REL="next" HREF="node12.html">
+</HEAD>
+
+<BODY >
+
+<DIV CLASS="navigation"><!--Navigation Panel-->
+<A
+ HREF="node12.html">
+<IMG WIDTH="37" HEIGHT="24" ALT="next" SRC="next.png"></A> 
+<A
+ HREF="dipole.html">
+<IMG WIDTH="26" HEIGHT="24" ALT="up" SRC="up.png"></A> 
+<A
+ HREF="node10.html">
+<IMG WIDTH="63" HEIGHT="24" ALT="previous" SRC="prev.png"></A>   
+<BR>
+<B> Next:</B> <A
+ HREF="node12.html">Appendix: Time-averaged Poynting vector</A>
+<B> Up:</B> <A
+ HREF="dipole.html">Classical derivation of far-field</A>
+<B> Previous:</B> <A
+ HREF="node10.html">Appendix: Solution to the</A>
+<BR>
+<BR></DIV>
+<!--End of Navigation Panel-->
+
+<H1><A ID="SECTION000110000000000000000"></A>
+<A ID="appendix:lienard"></A>
+<BR>
+Appendix: Liénard-Wiechert potential
+</H1>
+
+<P>
+We have a particle moving along the trajectory <!-- MATH
+ $\vec{w}(t)$
+ -->
+<SPAN CLASS="MATH"><IMG STYLE="height: 2.51ex; vertical-align: -0.68ex; " SRC="img196.svg"
+ ALT="$\vec{w}(t)$"></SPAN>, and we want the retarded potential at position <SPAN CLASS="MATH"><IMG STYLE="height: 1.22ex; vertical-align: -0.10ex; " SRC="img197.svg"
+ ALT="$\vec{r}$"></SPAN>:
+<P></P>
+<DIV CLASS="mathdisplay"><TABLE CLASS="equation" >
+<TR >
+<TD  style="text-align:center;"><SPAN CLASS="MATH"><IMG STYLE="height: 5.66ex; vertical-align: -2.27ex; " SRC="img198.svg"
+ ALT="$\displaystyle V(\vec{r}, t) = \frac{1}{4\pi\epsilon_0}\int \frac{\rho(\vec{r}', t_r)}{\vert\vec{r} - \vec{r}'\vert} d^3r'$"></SPAN></TD>
+<TD  CLASS="eqno" style="text-align:right">
+(<SPAN CLASS="arabic">87</SPAN>)</TD></TR>
+</TABLE></DIV>
+<P></P>
+where the retarded time is
+<P></P>
+<DIV CLASS="mathdisplay"><TABLE CLASS="equation" >
+<TR >
+<TD  style="text-align:center;"><SPAN CLASS="MATH"><IMG STYLE="height: 2.58ex; vertical-align: -0.68ex; " SRC="img199.svg"
+ ALT="$\displaystyle t_r(t, \vec{r}') \equiv t - \vert\vec{r}-\vec{r}'\vert/c$"></SPAN></TD>
+<TD  CLASS="eqno" style="text-align:right">
+(<SPAN CLASS="arabic">88</SPAN>)</TD></TR>
+</TABLE></DIV>
+<P></P>
+The density of a point particle is
+<P></P>
+<DIV CLASS="mathdisplay"><TABLE CLASS="equation" >
+<TR >
+<TD  style="text-align:right;"><SPAN CLASS="MATH"><IMG STYLE="height: 2.51ex; vertical-align: -0.68ex; " SRC="img169.svg"
+ ALT="$\displaystyle \rho(\vec{r}, t)$"></SPAN></TD>
+<TD  style="text-align:left;"><SPAN CLASS="MATH"><IMG STYLE="height: 2.51ex; vertical-align: -0.68ex; " SRC="img200.svg"
+ ALT="$\displaystyle = q \delta(\vec{r} - \vec{w}(t))$"></SPAN></TD>
+<TD  CLASS="eqno" style="text-align:right">
+(<SPAN CLASS="arabic">89</SPAN>)</TD></TR>
+<TR >
+<TD>&nbsp;</TD>
+<TD  style="text-align:left;"><SPAN CLASS="MATH"><IMG STYLE="height: 5.34ex; vertical-align: -2.10ex; " SRC="img201.svg"
+ ALT="$\displaystyle = q \int \delta(\vec{r} - \vec{w}(t')) \delta(t' - t_r(t, \vec{r}')) dt'$"></SPAN></TD>
+<TD  CLASS="eqno" style="text-align:right">
+(<SPAN CLASS="arabic">90</SPAN>)</TD></TR>
+</TABLE></DIV>
+<P></P>
+Plug the density into the retarded potential:
+<P></P>
+<DIV CLASS="mathdisplay"><TABLE CLASS="equation" >
+<TR >
+<TD  style="text-align:center;"><SPAN CLASS="MATH"><IMG STYLE="height: 5.66ex; vertical-align: -2.27ex; " SRC="img202.svg"
+ ALT="$\displaystyle V(\vec{r}, t) = \frac{q}{4\pi\epsilon_0}\iint \frac{ \delta(\vec{...
+...w}(t')) \delta(t' - t_r(t, \vec{r}')) }{\vert\vec{r} - \vec{r}'\vert} d^3r' dt'$"></SPAN></TD>
+<TD  CLASS="eqno" style="text-align:right">
+(<SPAN CLASS="arabic">91</SPAN>)</TD></TR>
+</TABLE></DIV>
+<P></P>
+Note that the time <SPAN CLASS="MATH"><IMG STYLE="height: 1.62ex; vertical-align: -0.10ex; " SRC="img203.svg"
+ ALT="$t$"></SPAN> that appears in the retarded time is not the same as the dummy variable <SPAN CLASS="MATH"><IMG STYLE="height: 1.89ex; vertical-align: -0.10ex; " SRC="img204.svg"
+ ALT="$t'$"></SPAN>.  Now we do the integral over space, which involves swapping <SPAN CLASS="MATH"><IMG STYLE="height: 1.89ex; vertical-align: -0.10ex; " SRC="img107.svg"
+ ALT="$\vec{r}'$"></SPAN> with <!-- MATH
+ $\vec{w}(t)$
+ -->
+<SPAN CLASS="MATH"><IMG STYLE="height: 2.51ex; vertical-align: -0.68ex; " SRC="img196.svg"
+ ALT="$\vec{w}(t)$"></SPAN> everywhere.  In particular, note that there is an 
+<SPAN CLASS="MATH"><IMG STYLE="height: 1.89ex; vertical-align: -0.10ex; " SRC="img107.svg"
+ ALT="$\vec{r}'$"></SPAN> in the retarded time <!-- MATH
+ $t_r(t, \vec{r}')$
+ -->
+<SPAN CLASS="MATH"><IMG STYLE="height: 2.51ex; vertical-align: -0.68ex; " SRC="img205.svg"
+ ALT="$t_r(t, \vec{r}')$"></SPAN>
+<P></P>
+<DIV CLASS="mathdisplay"><TABLE CLASS="equation" >
+<TR >
+<TD  style="text-align:center;"><SPAN CLASS="MATH"><IMG STYLE="height: 5.66ex; vertical-align: -2.27ex; " SRC="img206.svg"
+ ALT="$\displaystyle V(\vec{r}, t) = \frac{q}{4\pi\epsilon_0}\int \frac{ \delta(t' - t_r(t, \vec{w}(t') )\;) }{\vert\vec{r} - \vec{w}(t')\vert} dt'$"></SPAN></TD>
+<TD  CLASS="eqno" style="text-align:right">
+<A ID="eqn:tint">(<SPAN CLASS="arabic">92</SPAN>)</A></TD></TR>
+</TABLE></DIV>
+<P></P>
+Next we need to do the integral over time, but we have a delta function with a function as its argument.  The general rule for a delta function is that it is zero except when the argument is equal to zero.  To handle this situation, we use the 
+following general rule:
+<P></P>
+<DIV CLASS="mathdisplay"><TABLE CLASS="equation" >
+<TR >
+<TD  style="text-align:right;"><SPAN CLASS="MATH"><IMG STYLE="height: 2.51ex; vertical-align: -0.68ex; " SRC="img207.svg"
+ ALT="$\displaystyle \delta(g(x))$"></SPAN></TD>
+<TD  style="text-align:left;"><SPAN CLASS="MATH"><IMG STYLE="height: 5.66ex; vertical-align: -2.27ex; " SRC="img208.svg"
+ ALT="$\displaystyle = \frac{\delta(x-x')}{\vert g'(x')\vert}$"></SPAN></TD>
+<TD  CLASS="eqno" style="text-align:right">
+(<SPAN CLASS="arabic">93</SPAN>)</TD></TR>
+</TABLE></DIV>
+<P></P>
+where <SPAN CLASS="MATH"><IMG STYLE="height: 1.89ex; vertical-align: -0.10ex; " SRC="img209.svg"
+ ALT="$x'$"></SPAN> is implicitly defined by the expression
+<P></P>
+<DIV CLASS="mathdisplay"><TABLE CLASS="equation" >
+<TR >
+<TD  style="text-align:right;"><SPAN CLASS="MATH"><IMG STYLE="height: 2.58ex; vertical-align: -0.68ex; " SRC="img210.svg"
+ ALT="$\displaystyle g(x')$"></SPAN></TD>
+<TD  style="text-align:left;"><SPAN CLASS="MATH"><IMG STYLE="height: 1.68ex; vertical-align: -0.10ex; " SRC="img18.svg"
+ ALT="$\displaystyle = 0$"></SPAN></TD>
+<TD  CLASS="eqno" style="text-align:right">
+(<SPAN CLASS="arabic">94</SPAN>)</TD></TR>
+</TABLE></DIV>
+<P></P>
+and the primed <SPAN CLASS="MATH"><IMG STYLE="height: 2.51ex; vertical-align: -0.68ex; " SRC="img211.svg"
+ ALT="$g'(x)$"></SPAN> means to take the derivative
+<P></P>
+<DIV CLASS="mathdisplay"><TABLE CLASS="equation" >
+<TR >
+<TD  style="text-align:right;"><SPAN CLASS="MATH"><IMG STYLE="height: 2.58ex; vertical-align: -0.68ex; " SRC="img212.svg"
+ ALT="$\displaystyle g'(x)$"></SPAN></TD>
+<TD  style="text-align:left;"><SPAN CLASS="MATH"><IMG STYLE="height: 4.95ex; vertical-align: -1.69ex; " SRC="img213.svg"
+ ALT="$\displaystyle \equiv \frac{d }{dx}g(x) \;.$"></SPAN></TD>
+<TD  CLASS="eqno" style="text-align:right">
+(<SPAN CLASS="arabic">95</SPAN>)</TD></TR>
+</TABLE></DIV>
+<P></P>
+We therefore can write our delta function in time as:
+<P></P>
+<DIV CLASS="mathdisplay"><TABLE CLASS="equation" >
+<TR >
+<TD  style="text-align:center;"><SPAN CLASS="MATH"><IMG STYLE="height: 7.50ex; vertical-align: -4.12ex; " SRC="img214.svg"
+ ALT="$\displaystyle \delta(t' - t_r(t, \vec{w}(t') )\;) = \frac{\delta(t' - t^*)}{\le...
+...rac{\vert\vec{r} - \vec{w}(t')\vert}{c}\right) \right)_{t' = t^*} \right \vert}$"></SPAN></TD>
+<TD  CLASS="eqno" style="text-align:right">
+(<SPAN CLASS="arabic">96</SPAN>)</TD></TR>
+</TABLE></DIV>
+<P></P>
+We work out the denominator:
+<P></P>
+<DIV CLASS="mathdisplay"><TABLE CLASS="equation" >
+<TR >
+<TD  style="text-align:right;"><SPAN CLASS="MATH"><IMG STYLE="height: 5.75ex; vertical-align: -2.30ex; " SRC="img215.svg"
+ ALT="$\displaystyle \frac{d}{dt'} \left( t' - \left(t - \frac{\vert\vec{r} - \vec{w}(t')\vert}{c}\right) \right)$"></SPAN></TD>
+<TD  style="text-align:left;"><SPAN CLASS="MATH"><IMG STYLE="height: 4.95ex; vertical-align: -1.69ex; " SRC="img216.svg"
+ ALT="$\displaystyle = 1 + \frac{1}{c} \frac{d}{dt'} \vert\vec{r} - \vec{w}(t')\vert$"></SPAN></TD>
+<TD  CLASS="eqno" style="text-align:right">
+(<SPAN CLASS="arabic">97</SPAN>)</TD></TR>
+<TR >
+<TD>&nbsp;</TD>
+<TD  style="text-align:left;"><SPAN CLASS="MATH"><IMG STYLE="height: 4.99ex; vertical-align: -1.69ex; " SRC="img217.svg"
+ ALT="$\displaystyle = 1 + \frac{1}{c} \frac{d}{dt'} \left( \left( \vec{r} - \vec{w}(t')\right)^2 \right)^{1/2}$"></SPAN></TD>
+<TD  CLASS="eqno" style="text-align:right">
+(<SPAN CLASS="arabic">98</SPAN>)</TD></TR>
+<TR >
+<TD>&nbsp;</TD>
+<TD  style="text-align:left;"><SPAN CLASS="MATH"><IMG STYLE="height: 5.53ex; vertical-align: -2.27ex; " SRC="img218.svg"
+ ALT="$\displaystyle = 1 + \frac{1}{2c} \frac{1}{ \vert\vec{r} - \vec{w}(t')\vert } \frac{d}{dt'}\left( \vec{r} - \vec{w}(t')\right)^2$"></SPAN></TD>
+<TD  CLASS="eqno" style="text-align:right">
+(<SPAN CLASS="arabic">99</SPAN>)</TD></TR>
+<TR >
+<TD>&nbsp;</TD>
+<TD  style="text-align:left;"><SPAN CLASS="MATH"><IMG STYLE="height: 5.53ex; vertical-align: -2.27ex; " SRC="img219.svg"
+ ALT="$\displaystyle = 1 + \frac{1}{2c} \frac{1}{ \vert\vec{r} - \vec{w}(t')\vert } \f...
+...cdot \vec{r} + \vec{w}(t')\cdot \vec{w}(t') - 2\vec{r} \cdot \vec{w}(t')\right)$"></SPAN></TD>
+<TD  CLASS="eqno" style="text-align:right">
+(<SPAN CLASS="arabic">100</SPAN>)</TD></TR>
+<TR >
+<TD>&nbsp;</TD>
+<TD  style="text-align:left;"><SPAN CLASS="MATH"><IMG STYLE="height: 5.42ex; vertical-align: -2.27ex; " SRC="img220.svg"
+ ALT="$\displaystyle = 1 + \frac{1}{2c} \frac{1}{ \vert\vec{r} - \vec{w}(t')\vert } \l...
+... 2 \vec{w}(t')\cdot \dot{\vec{w}}(t') - 2\vec{r} \cdot
+\dot{\vec{w}}(t')\right)$"></SPAN></TD>
+<TD  CLASS="eqno" style="text-align:right">
+(<SPAN CLASS="arabic">101</SPAN>)</TD></TR>
+<TR >
+<TD>&nbsp;</TD>
+<TD  style="text-align:left;"><SPAN CLASS="MATH"><IMG STYLE="height: 5.66ex; vertical-align: -2.27ex; " SRC="img221.svg"
+ ALT="$\displaystyle = 1 - \frac{1}{c} \frac{ \left( \vec{r} \cdot
+\dot{\vec{w}}(t') - \vec{w}(t')\cdot \dot{\vec{w}}(t') \right) }{ \vert\vec{r} - \vec{w}(t')\vert }$"></SPAN></TD>
+<TD  CLASS="eqno" style="text-align:right">
+(<SPAN CLASS="arabic">102</SPAN>)</TD></TR>
+<TR >
+<TD>&nbsp;</TD>
+<TD  style="text-align:left;"><SPAN CLASS="MATH"><IMG STYLE="height: 5.66ex; vertical-align: -2.27ex; " SRC="img222.svg"
+ ALT="$\displaystyle = 1 - \frac{1}{c} \frac{ \left( \vec{r} - \vec{w}(t') \right)\cdot \dot{\vec{w}}(t') }{ \vert\vec{r} - \vec{w}(t')\vert }$"></SPAN></TD>
+<TD  CLASS="eqno" style="text-align:right">
+(<SPAN CLASS="arabic">103</SPAN>)</TD></TR>
+</TABLE></DIV>
+<P></P>
+We now determine what <SPAN CLASS="MATH"><IMG STYLE="height: 1.75ex; vertical-align: -0.10ex; " SRC="img223.svg"
+ ALT="$t^*$"></SPAN> is by the implicit expression
+<P></P>
+<DIV CLASS="mathdisplay"><TABLE CLASS="equation" >
+<TR >
+<TD  style="text-align:center;"><SPAN CLASS="MATH"><IMG STYLE="height: 5.75ex; vertical-align: -2.30ex; " SRC="img224.svg"
+ ALT="$\displaystyle t' - \left(t - \frac{\vert\vec{r} - \vec{w}(t')\vert}{c}\right) = 0$"></SPAN></TD>
+<TD  CLASS="eqno" style="text-align:right">
+(<SPAN CLASS="arabic">104</SPAN>)</TD></TR>
+</TABLE></DIV>
+<P></P>
+Compare the above to the definition of the retarded time of the particle:
+<P></P>
+<DIV CLASS="mathdisplay"><TABLE CLASS="equation" >
+<TR >
+<TD  style="text-align:center;"><SPAN CLASS="MATH"><IMG STYLE="height: 5.08ex; vertical-align: -1.69ex; " SRC="img225.svg"
+ ALT="$\displaystyle t_r = t - \frac{\vert\vec{r} - \vec{w}(t_r)\vert}{c}$"></SPAN></TD>
+<TD  CLASS="eqno" style="text-align:right">
+(<SPAN CLASS="arabic">105</SPAN>)</TD></TR>
+</TABLE></DIV>
+<P></P>
+Thus we have <SPAN CLASS="MATH"><IMG STYLE="height: 2.10ex; vertical-align: -0.45ex; " SRC="img226.svg"
+ ALT="$t^* = t_r$"></SPAN>, which we substitute in to get
+<P></P>
+<DIV CLASS="mathdisplay"><TABLE CLASS="equation" >
+<TR >
+<TD  style="text-align:right;"><SPAN CLASS="MATH"><IMG STYLE="height: 2.51ex; vertical-align: -0.68ex; " SRC="img30.svg"
+ ALT="$\displaystyle V(\vec{r}, t)$"></SPAN></TD>
+<TD  style="text-align:left;"><SPAN CLASS="MATH"><IMG STYLE="height: 7.40ex; vertical-align: -4.02ex; " SRC="img227.svg"
+ ALT="$\displaystyle = \frac{q}{4\pi\epsilon_0}\int \frac{ 1 }{\vert\vec{r} - \vec{w}(...
+...)\cdot \dot{\vec{w}}(t') }{ \vert\vec{r} - \vec{w}(t') \vert } \right\vert} dt'$"></SPAN></TD>
+<TD  CLASS="eqno" style="text-align:right">
+(<SPAN CLASS="arabic">106</SPAN>)</TD></TR>
+<TR >
+<TD>&nbsp;</TD>
+<TD  style="text-align:left;"><SPAN CLASS="MATH"><IMG STYLE="height: 7.16ex; vertical-align: -4.02ex; " SRC="img228.svg"
+ ALT="$\displaystyle = \frac{q}{4\pi\epsilon_0} \frac{ 1 }{\vert\vec{r} - \vec{w}(t_r)...
+...ht)\cdot \dot{\vec{w}}(t_r) }{ \vert\vec{r} - \vec{w}(t_r) \vert } \right\vert}$"></SPAN></TD>
+<TD  CLASS="eqno" style="text-align:right">
+(<SPAN CLASS="arabic">107</SPAN>)</TD></TR>
+</TABLE></DIV>
+<P></P>
+We can now clean this up with the definitions <!-- MATH
+ $\dot{\vec{w}}(t_r) = \vec{v}$
+ -->
+<SPAN CLASS="MATH"><IMG STYLE="height: 2.51ex; vertical-align: -0.68ex; " SRC="img229.svg"
+ ALT="$\dot{\vec{w}}(t_r) = \vec{v}$"></SPAN>, <!-- MATH
+ $\vec{\beta} = \vec{v}/c$
+ -->
+<SPAN CLASS="MATH"><IMG STYLE="height: 2.51ex; vertical-align: -0.68ex; " SRC="img230.svg"
+ ALT="$\vec{\beta} = \vec{v}/c$"></SPAN> and <!-- MATH
+ ${\mbox{$\resizebox{.09in}{.08in}{\includegraphics[trim= 1em 0 14em 0,clip]{fonts/ScriptR}}$}}= \vec{r} - \vec{w}(t_r)$
+ -->
+<SPAN CLASS="MATH"><IMG STYLE="height: 2.51ex; vertical-align: -0.68ex; " SRC="img231.svg"
+ ALT="${\mbox{$\resizebox{.09in}{.08in}{\includegraphics[trim= 1em 0 14em 0,clip]{fonts/ScriptR}}$}}= \vec{r} - \vec{w}(t_r)$"></SPAN>:
+<P></P>
+<DIV CLASS="mathdisplay"><TABLE CLASS="equation" >
+<TR >
+<TD  style="text-align:center;"><SPAN CLASS="MATH"><IMG STYLE="height: 5.42ex; vertical-align: -2.27ex; " SRC="img232.svg"
+ ALT="$\displaystyle V(\vec{r}, t) = \frac{1}{4\pi\epsilon_0} \frac{q}{\left\vert {\mb...
+...raphics[trim= 1em 0 14em 0,clip]{fonts/BoldR}}$}}\cdot \vec{\beta} \right\vert}$"></SPAN></TD>
+<TD  CLASS="eqno" style="text-align:right">
+(<SPAN CLASS="arabic">108</SPAN>)</TD></TR>
+</TABLE></DIV>
+<P></P>
+This same procedure may be applied to each of the components of <SPAN CLASS="MATH"><IMG STYLE="height: 1.78ex; vertical-align: -0.10ex; " SRC="img154.svg"
+ ALT="$\vec{A}$"></SPAN> to get
+<P></P>
+<DIV CLASS="mathdisplay"><TABLE CLASS="equation" >
+<TR >
+<TD  style="text-align:center;"><SPAN CLASS="MATH"><IMG STYLE="height: 5.42ex; vertical-align: -2.27ex; " SRC="img233.svg"
+ ALT="$\displaystyle \vec{A}(\vec{r}, t) = \frac{1}{4\pi\epsilon_0} \frac{q\vec{v}}{\l...
+...ics[trim= 1em 0 14em 0,clip]{fonts/BoldR}}$}}\cdot \vec{\beta} \right\vert} \;.$"></SPAN></TD>
+<TD  CLASS="eqno" style="text-align:right">
+(<SPAN CLASS="arabic">109</SPAN>)</TD></TR>
+</TABLE></DIV>
+<P></P>
+
+<P>
+
+<DIV CLASS="navigation"><HR>
+<!--Navigation Panel-->
+<A
+ HREF="node12.html">
+<IMG WIDTH="37" HEIGHT="24" ALT="next" SRC="next.png"></A> 
+<A
+ HREF="dipole.html">
+<IMG WIDTH="26" HEIGHT="24" ALT="up" SRC="up.png"></A> 
+<A
+ HREF="node10.html">
+<IMG WIDTH="63" HEIGHT="24" ALT="previous" SRC="prev.png"></A>   
+<BR>
+<B> Next:</B> <A
+ HREF="node12.html">Appendix: Time-averaged Poynting vector</A>
+<B> Up:</B> <A
+ HREF="dipole.html">Classical derivation of far-field</A>
+<B> Previous:</B> <A
+ HREF="node10.html">Appendix: Solution to the</A></DIV>
+<!--End of Navigation Panel-->
+
+</BODY>
+</HTML>
