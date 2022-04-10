@@ -83,11 +83,11 @@ def import_f90(source_file, extra_args='', hash=True, verbose=False, with_omp=Fa
     sys.path.append(directory)
     debug('CD to', directory)
     os.chdir(directory)  # We move into the directory where the f90 file is located.
-    debug('working cwd', os.getcwd())
+    debug('Working directory', os.getcwd())
     source_file = os.path.basename(source_file)
     # We will name the output module just as the input source, but with a _f appended to it.
     modulename = source_file.replace('.f90', '_f')
-    debug('module_name', modulename)
+    debug('module_name =', modulename)
     # If not auto-compiling, just try to import and fail if import doesn't work
     if not autocompile:
         return importlib.import_module(modulename)
@@ -100,9 +100,16 @@ def import_f90(source_file, extra_args='', hash=True, verbose=False, with_omp=Fa
             do_compile = True
         debug('md5_check', md5_check)
     source = open(source_file, "rb").read()
+    compile_args = {'modulename': modulename, 'extension': '.f90', 'extra_args': extra_args,
+                    'verbose': verbose, 'full_output': False}
     if do_compile:
-        debug('Compiling...', modulename)
-        numpy.f2py.compile(source, modulename=modulename, extension='.f90', extra_args=extra_args, verbose=verbose)
+        debug('Compiling...', source, 'to', modulename)
+        fp = numpy.f2py.compile(source, **compile_args)
+        print(('='*40+'\n')*5)
+        # import inspect
+        # for m in inspect.getmembers(fp, predicate=inspect.ismethod):
+        #     print(m)
+        print(fp)#str(fp.stdout.decode('utf-8')))#['stdout'])
     # We try to import now, and if it fails, we try to compile one last time.
     try:
         debug('Importing...', modulename)
@@ -110,7 +117,8 @@ def import_f90(source_file, extra_args='', hash=True, verbose=False, with_omp=Fa
     except ImportError:
         debug('Import failed!')
         debug('Compiling again...', modulename)
-        numpy.f2py.compile(source, modulename=modulename, extension='.f90', extra_args=extra_args, verbose=verbose)
+        fp = numpy.f2py.compile(source, **compile_args)
+        print(fp)
         debug('Importing again', modulename)
         module = importlib.import_module(modulename)
     debug('Module name:', module)

@@ -349,7 +349,8 @@ class PADView(QtCore.QObject):
             return action
         file_menu = self.menubar.addMenu('File')
         add_menu(file_menu, 'Open file...', connect=self.open_data_file_dialog)
-        add_menu(file_menu, 'Save File...', connect=self.save_data_file_dialog)
+        add_menu(file_menu, 'Save file...', connect=self.save_data_file_dialog)
+        add_menu(file_menu, 'Save screenshot...', connect=self.save_screenshot_dialog)
         add_menu(file_menu, 'Exit', short='Ctrl+Q', connect=self.app.quit)
         data_menu = self.menubar.addMenu('Data')
         add_menu(data_menu, 'Frame navigator...', connect=lambda: self.run_plugin('frame_navigator'))
@@ -1184,37 +1185,31 @@ class PADView(QtCore.QObject):
         for image in self.pad_image_items:
             image.setBorder(None)
 
-    # FIXME: This should be handled by the frame navigator
     def show_history_next(self):
         self.debug()
         self.dataframe = self.frame_getter.get_history_next()
         self.update_display_data()
 
-    # FIXME: This should be handled by the frame navigator
     def show_history_previous(self):
         self.debug()
         self.dataframe = self.frame_getter.get_history_previous()
         self.update_display_data()
 
-    # FIXME: This should be handled by the frame navigator
     def show_next_frame(self, skip=1):
         self.debug()
         self.dataframe = self.frame_getter.get_next_frame(skip=skip)
         self.update_display_data()
 
-    # FIXME: This should be handled by the frame navigator
     def show_previous_frame(self, skip=1):
         self.debug()
         self.dataframe = self.frame_getter.get_previous_frame(skip=skip)
         self.update_display_data()
 
-    # FIXME: This should be handled by the frame navigator
     def show_random_frame(self):
         self.debug()
         self.dataframe = self.frame_getter.get_random_frame()
         self.update_display_data()
 
-    # FIXME: This should be handled by the frame navigator
     def show_frame(self, frame_number=0):
         self.debug()
         self.dataframe = self.frame_getter.get_frame(frame_number=frame_number)
@@ -1553,6 +1548,21 @@ class PADView(QtCore.QObject):
         method = getattr(self, method_name, None)
         if method is not None:
             method(*args, **kwargs)
+
+    def save_screenshot_dialog(self):
+        self.debug()
+        filepath, _ = self.save_file_dialog(title='Screenshot', default='padview_screenshot.jpg')
+        self.save_screenshot(filepath)
+
+    def save_screenshot(self, filename):
+        self.debug(':', filename)
+        p = self.main_window.grab()
+        p.save(filename)
+
+    def save_file_dialog(self, title='Filepath', default='file', types=None):
+        options = QtGui.QFileDialog.Options()
+        name, type = QtGui.QFileDialog.getSaveFileName(self.main_window, title, default, types, options=options)
+        return name, type
 
 
 def view_pad_data(pad_data=None, pad_geometry=None, show=True, title=None, **kwargs):

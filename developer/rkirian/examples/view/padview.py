@@ -6,6 +6,7 @@ from reborn.viewers.qtviews import PADView
 from reborn import detector, dataframe, source
 from reborn.fileio.getters import FrameGetter
 from reborn.const import eV
+import pandas
 # np.random.seed(0)
 pdb = '1LYZ'
 geom = detector.cspad_pad_geometry_list(detector_distance=0.1)
@@ -17,6 +18,7 @@ class MyFrameGetter(FrameGetter):
         super().__init__()
         self.n_frames = 1000
         self.init_params = {}
+        self.pandas_dataframe = pandas.DataFrame({'Frame #': np.arange(self.n_frames)})
         # self.simulator = examples.PDBMoleculeSimulator(pdb_file=pdb, pad_geometry=geom, beam=beam)
     def get_data(self, frame_number=0):
         np.random.seed(frame_number)
@@ -30,9 +32,17 @@ class MyFrameGetter(FrameGetter):
         df.set_raw_data(I)
         df.set_dataset_id(pdb)
         return df
+def processor(dat):
+    print('='*30, 'update mask')
+    m = dat.get_mask_list()
+    m[0][:, :] = 0
+    dat.set_mask(m)
+    return dat
+
 frame_getter = MyFrameGetter()
 # frame_getter.view(debug_level=1)
-pv = PADView(frame_getter=frame_getter, debug_level=1)
+pv = PADView(frame_getter=frame_getter, debug_level=1, dataframe_preprocessor=processor)
+pv.save_screenshot('/home/rkirian/Downloads/test.jpg')
 # pv.show_all_geom_info()
 # pv.show_pad_frames()
 # x = (np.random.rand(1000, 2)-0.5)*1000
