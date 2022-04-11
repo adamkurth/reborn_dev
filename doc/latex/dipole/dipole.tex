@@ -136,18 +136,18 @@ Under the dipole approximations we consider locations very far from a localized
 source.  The electric field contains two terms: the generalized Coulomb field 
 and the radiation field:
 \begin{align}
-\vec{E}(\vec r, t) = \vec{E}_\text{Coulomb}(\vec r, t) + \vec 
-E_\text{rad}(\vec r, t) \;.
+\vec{E}(\vec r, t) = \vec{E}_{\text{Coulomb}}(\vec r, t) + \vec 
+E_{\text{rad}}(\vec r, t) \;.
 \end{align}
 The
 radiation field in equation \ref{eqn:Erad} dominates because it falls off in proportion to $1/\rcurs$ whereas the generalized
 Coulomb field falls off in proportion to $1/\rcurs^2$.  We therefore focus on the
 radiation field
 \begin{align}
-\vec{E}_\text{rad}(\vec r, t) = \frac{q}{4\pi\epsilon_0} 
+\vec{E}_{\text{rad}}(\vec r, t) = \frac{q}{4\pi\epsilon_0} 
 \frac{\rcurs}{(\brcurs\cdot \vec{u})^3}
 [\brcurs \times (\vec{u} \times \vec{a})] \; , \quad\quad 
-\vec{B}_\text{rad}(\vec{r}, t)
+\vec{B}_{\text{rad}}(\vec{r}, t)
 = \frac{1}{c}\hrcurs \times \vec{E}(\vec{r}, t)
 \end{align}
 for the remainder of this note.
@@ -162,7 +162,7 @@ larger than the dipole, and the time it takes light to traverse the extent of th
 small compared to the period of oscillation.}
 $v \ll c$, and we may use $\vec{u} \approx c \hrcurs$.  Plugging these in, we get
 \begin{align}\label{eqn:dip1}
-\vec{E}_\text{dip}(\vec{r},t) &= \frac{q}{4\pi\epsilon_0} \frac{r}{(\vec{r}\cdot c \hvec{r})^3}
+\vec{E}_{\text{dip}}(\vec{r},t) &= \frac{q}{4\pi\epsilon_0} \frac{r}{(\vec{r}\cdot c \hvec{r})^3}
 \vec{r} \times (c \hvec{r} \times \vec{a}) \\
 &= \frac{\mu_0 }{4\pi} \frac{1}{r} \hvec{r} \times ( \hvec{r} \times  
 \ddot{\vec{p}}(t_r))
@@ -170,11 +170,11 @@ $v \ll c$, and we may use $\vec{u} \approx c \hrcurs$.  Plugging these in, we ge
 where $\vec{p}(t) = q \vec{r}'(t)$ is the dipole moment of the point charge.
 The magnetic field is
 \begin{align}
-\vec{B}_\text{dip} =  \frac{1}{c} \hvec{r} \times \vec{E}_\text{dip} 
+\vec{B}_{\text{dip}} =  \frac{1}{c} \hvec{r} \times \vec{E}_{\text{dip}} 
 \end{align}
 and the Poynting vector is
 \begin{align}
-\vec{S} =  \frac{1}{\mu_0} \vec{E}_\text{dip}\times\vec{B}_\text{dip} =  \frac{1}{\mu_0c} E_\text{dip}^2\hvec{r} 
+\vec{S} =  \frac{1}{\mu_0} \vec{E}_{\text{dip}}\times\vec{B}_{\text{dip}} =  \frac{1}{\mu_0c} E_{\text{dip}}^2\hvec{r} 
 = \frac{\mu_0}{16 \pi^2 cr^2} |\hvec{r} \times    \ddot{\vec{p}}|^2\hvec{r} \;.\\
 \end{align}
 The differential power radiated through a differential area $d\vec{a} = r^2 \sin\theta d\theta d\phi \hvec{r} = r^2 d\Omega \hvec{r}$ is
@@ -211,16 +211,16 @@ If the electron was bound to an atom we could develop a crude model by adding a 
 \end{align}  
 Plugging this into the dipole radiation formula \ref{eqn:dip1} gives
 \begin{align}
-\vec{E}_\text{dip} =  -\frac{r_e}{r} [\hvec{r} \times ( \hvec{r} \times  \vec{E}_0(t_r))] 
+\vec{E}_{\text{dip}} =  -\frac{r_e}{r} [\hvec{r} \times ( \hvec{r} \times  \vec{E}_0(t_r))] 
 \end{align}
 where we simplified the expression by defining the classical electron radius
 \begin{align}
-r_e = \frac{1}{4\pi \epsilon_0} \frac{e^2}{m_e c^2} \approx 2.8\times10^{-15} \; \text{m} \;.
+r_e = \frac{1}{4\pi \epsilon_0} \frac{e^2}{m_e c^2} \approx 2.8\times10^{-15} \; {\text{m}} \;.
 \end{align}
 The Poynting vector is
 \begin{align}
-\vec{S} =  \frac{1}{\mu_0} \vec{E}_\text{dip}\times\vec{B}_\text{dip} =  
-\frac{1}{\mu_0c} E_\text{dip}^2\hvec{r} 
+\vec{S} =  \frac{1}{\mu_0} \vec{E}_{\text{dip}}\times\vec{B}_{\text{dip}} =  
+\frac{1}{\mu_0c} E_{\text{dip}}^2\hvec{r} 
 = \frac{\mu_0}{16 \pi^2 cr^2} |\hvec{r} \times    \ddot{\vec{p}}|^2\hvec{r} 
 \;.
 \end{align}
@@ -302,7 +302,7 @@ Consider the the scattered field from a free electron located at position $\vec{
 \end{align}
 The scattered field is
 \begin{align}
-\vec{E}_\text{dip}(\vec{r},t) =  \frac{r_e}{r} [\hvec{r} \times ( \hvec{r} \times  \vec{E}_0 )] \exp(i\vec{k}_0 \cdot \vec{r}' - i \omega t_r)
+\vec{E}_{\text{dip}}(\vec{r},t) =  \frac{r_e}{r} [\hvec{r} \times ( \hvec{r} \times  \vec{E}_0 )] \exp(i\vec{k}_0 \cdot \vec{r}' - i \omega t_r)
 \end{align}
 where $t_r = t - \rcurs/c$.  Since we observe in the ``far-field'', where $r \gg r'$, we may use the following approximation:
 \begin{align}
@@ -312,19 +312,19 @@ where $t_r = t - \rcurs/c$.  Since we observe in the ``far-field'', where $r \gg
 Plugging in the approximation $t_r \approx t - r/c + \hvec{r} \cdot \vec r'$ we 
 have
 \begin{align}
-\vec{E}_\text{dip}(\vec{r},t) =  \frac{r_e}{r} [\hvec{r} \times ( \hvec{r} \times  \vec{E}_0 )]\exp\left(i\vec{k}_0 \cdot \vec{r}' - i\omega t + i \frac{\omega}{c}( r  - \hvec{r}\cdot \vec{r}')\right) \;.
+\vec{E}_{\text{dip}}(\vec{r},t) =  \frac{r_e}{r} [\hvec{r} \times ( \hvec{r} \times  \vec{E}_0 )]\exp\left(i\vec{k}_0 \cdot \vec{r}' - i\omega t + i \frac{\omega}{c}( r  - \hvec{r}\cdot \vec{r}')\right) \;.
 \end{align}
 Defining $\vec{k} = \omega/c\; \hvec{r}=2\pi/\lambda \hvec{r}$ (the outgoing wavevector, directed at the detector) and $\vec{q} = \vec{k}-\vec{k}_0$, we get
 \begin{align}
-\vec{E}_\text{dip}(\vec{r},t) =  r_e\frac{e^{ikr}}{r} e^{-i\omega t}[\hvec{r} \times ( \hvec{r} \times  \vec{E}_0 )]e^{-i\vec{q}\cdot\vec{r}'} \;.
+\vec{E}_{\text{dip}}(\vec{r},t) =  r_e\frac{e^{ikr}}{r} e^{-i\omega t}[\hvec{r} \times ( \hvec{r} \times  \vec{E}_0 )]e^{-i\vec{q}\cdot\vec{r}'} \;.
 \end{align}
 Finally, in order to form a diffraction pattern, we sum over many electrons at positions $\vec{r}_i'$:
 \begin{align}
-\vec{E}_\text{diff}(\vec{r},t) =  r_e\frac{e^{ikr}}{r} e^{-i\omega t}[\hvec{r} \times ( \hvec{r} \times  \vec{E}_0 )] \sum_i e^{-i\vec{q}\cdot\vec{r}_i'} \;.
+\vec{E}_{\text{diff}}(\vec{r},t) =  r_e\frac{e^{ikr}}{r} e^{-i\omega t}[\hvec{r} \times ( \hvec{r} \times  \vec{E}_0 )] \sum_i e^{-i\vec{q}\cdot\vec{r}_i'} \;.
 \end{align}
 In the continuum limit, with electron density $\rho(\vec{r})$, we have
 \begin{align}
-\vec{E}_\text{diff}(\vec{r},t) =  r_e\frac{e^{ikr}}{r} e^{-i\omega t}[\hvec{r} \times ( \hvec{r} \times  \vec{E}_0 )] \int \rho(\vec{r}') e^{-i\vec{q}\cdot\vec{r}'} d^3r' \;.
+\vec{E}_{\text{diff}}(\vec{r},t) =  r_e\frac{e^{ikr}}{r} e^{-i\omega t}[\hvec{r} \times ( \hvec{r} \times  \vec{E}_0 )] \int \rho(\vec{r}') e^{-i\vec{q}\cdot\vec{r}'} d^3r' \;.
 \end{align}
 We typically define the ``form factor'' as
 \begin{align}\label{eqn:formfactor}
@@ -333,7 +333,7 @@ We typically define the ``form factor'' as
 This form factor is just the Fourier transform of the electron density, with the conjugate variable $\vec{q}$ being defined by the incoming and outgoing wavevectors.  The time-averaged Poynting vector is\footnote{See Appendix \ref{sec:poynt} for details.}
 \begin{align}
 \avg{\vec{S}(\vec{r})} = \frac{1}{\mu_0}\avg{
-\Re\{\vec{E}_\text{diff}\}\times\Re\{\vec{B}_\text{diff}\}} = r_e^2 
+\Re\{\vec{E}_{\text{diff}}\}\times\Re\{\vec{B}_{\text{diff}}\}} = r_e^2 
 \frac{1}{r^2} J_0 | \hvec{r} \times  \hvec{E}_0 |^2 \left| \int \rho(\vec{r}') 
 e^{-i\vec{q}\cdot\vec{r}'} d^3r' \right|^2 \hvec{r} \;.
 \end{align}
@@ -376,7 +376,7 @@ The solution for $\vec{x}(t)$ gives the dipole moment
 Comparing the above with equation \ref{eqn:pddot_thompson}, we see that the 
 correction we should make to the radiation field is
 \begin{align}
-\vec{E}_\text{dip} =  -\frac{\omega^2}{\omega_0^2 - \omega^2 - i \gamma 
+\vec{E}_{\text{dip}} =  -\frac{\omega^2}{\omega_0^2 - \omega^2 - i \gamma 
 \omega}\frac{r_e}{r} [\hvec{r} \times ( \hvec{r} \times  
 \vec{E}_0(t_r))] \;
 \end{align}
@@ -527,13 +527,13 @@ density from equation \ref{eqn:scatterdens}:
 % permittivity $\epsilon_r$ placed in a uniform field, and found that the internal 
 % field $\vec{E}_0$ within the sphere is 
 % \begin{align}
-% \vec{E}_\text{int} = \frac{3}{\epsilon_r + 2} \vec{E}_0 \;.
+% \vec{E}_{\text{int}} = \frac{3}{\epsilon_r + 2} \vec{E}_0 \;.
 % \end{align}
 % Assuming that the sphere is much smaller than the wavelength of the radiation, 
 % we may use this result to determine the Rayleigh scattering cross section for a 
 % dielectric sphere.  The polarization (dipole moment per volume) is 
-% $\vec{P}=\epsilon_0\chi_e \vec{E}_\text{int} = \epsilon_0(\epsilon_r - 1) 
-% \vec{E}_\text{int}$, and hence the total dipole moment of a sphere of radius $R$ 
+% $\vec{P}=\epsilon_0\chi_e \vec{E}_{\text{int}} = \epsilon_0(\epsilon_r - 1) 
+% \vec{E}_{\text{int}}$, and hence the total dipole moment of a sphere of radius $R$ 
 % is
 % \begin{align}
 % \vec{p} = \frac{4}{3} \pi R^3 \vec{P} = 4 \pi R^3 \epsilon_0  
@@ -670,11 +670,11 @@ Delta function by taking the volume integral of both sides of equation
 \ref{eqn:symR}
 about an infinitesimal volume centered on the origin:
 \begin{align}
-\int_{\text{sphere}}\nabla^2 G(R) d^3R  + k^2 \int_\text{sphere} G(R) d^3R = 1 \;.
+\int_{\text{sphere}}\nabla^2 G(R) d^3R  + k^2 \int_{\text{sphere}} G(R) d^3R = 1 \;.
 \end{align}
 In the limit $R\rightarrow 0$ we have $G(R) \rightarrow A/R$:
 \begin{align}
-A \int_{\text{sphere}}\nabla^2 \frac{1}{R} d^3R  + A k^2 \int_\text{sphere} \frac{1}{R} 4\pi R^2dR = 1 \;.
+A \int_{\text{sphere}}\nabla^2 \frac{1}{R} d^3R  + A k^2 \int_{\text{sphere}} \frac{1}{R} 4\pi R^2dR = 1 \;.
 \end{align}
 For the first term on the LHS we use the result from Griffiths chapter 1: 
  $\nabla^2 (1/R) = -4\pi \delta(R)$.  The second term on the LHS 
@@ -688,7 +688,6 @@ spherical wave:
  G(\vec{r}, \vec{r}') = - \frac{e^{ik|\vec{r}-\vec{r}'|}}{4\pi 
 |\vec{r}-\vec{r}'|} \;.
 \end{align}
-
 
 With the Green's function, we finally plug it into equation \ref{eqn:useg}:
 \begin{align}
