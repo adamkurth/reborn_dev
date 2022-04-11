@@ -13,14 +13,8 @@
 # You should have received a copy of the GNU General Public License
 # along with reborn.  If not, see <https://www.gnu.org/licenses/>.
 
-from time import time
-# import multiprocessing
-from reborn.viewers.qtviews.padviews import get_caller
-from pyqtgraph.Qt import QtGui, QtCore
-# from reborn.analysis.runstats import padstats, padstats_framegetter
+from pyqtgraph.Qt import QtGui
 from reborn.viewers.pandaviews import DataFrameWidget
-
-# cpu_count = multiprocessing.cpu_count()
 
 class Plugin():
     widget = None
@@ -51,3 +45,4 @@ class Widget(QtGui.QWidget):
         row = model_index.row()
         # column = model_index.column()
         self.padview.show_frame(frame_number=row)
+

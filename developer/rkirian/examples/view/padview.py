@@ -43,6 +43,7 @@ frame_getter = MyFrameGetter()
 # frame_getter.view(debug_level=1)
 pv = PADView(frame_getter=frame_getter, debug_level=1, dataframe_preprocessor=processor)
 pv.save_screenshot('/home/rkirian/Downloads/test.jpg')
+pv.run_plugin('view_pandas_table')
 # pv.show_all_geom_info()
 # pv.show_pad_frames()
 # x = (np.random.rand(1000, 2)-0.5)*1000

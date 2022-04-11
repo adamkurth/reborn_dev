@@ -875,7 +875,6 @@ class PADView(QtCore.QObject):
         self.set_title()
         self.update_masks()
 
-    # FIXME: We also need an update_beam method.
     def update_pad_geometry(self, pad_geometry=None):
         r""" Update the PAD geometry.  Apply Qt transforms.  Also emits the sig_geometry_changed signal."""
         self.debug()
@@ -1044,11 +1043,9 @@ class PADView(QtCore.QObject):
             self.remove_rings()
             self.add_rings(**d)
 
-    # FIXME: Rings are dependent on beam and geometry.  They need to be updated when the beam changes.
-    # FIXME: Add option to put labels on rings that indicate resolution or q magnitudes.
     def add_rings(self, radii=None, angles=None, q_mags=None, d_spacings=None, pens=None, repeat=True):
         r""" Plot rings.  Note that these are in a plane located 1 meter from the sample position; calculate the radius
-        Needed for an equivalent detector at that distance.  If you know the scattering angle, the radius is
+        needed for an equivalent detector at that distance.  If you know the scattering angle, the radius is
         tan(theta).  The repeat keyword will include all rings for a given d-spacing."""
         self.debug()
         pens = utils.ensure_list(pens)
@@ -1520,17 +1517,6 @@ class PADView(QtCore.QObject):
 
     def stop(self):
         self.debug()
-        # FIXME: Figure out how to make the main window close all other windows.
-        # # self.app.closeAllWindows()  Why doesn't this work?
-        # if self.plugins is not None:
-        #     for key in self.plugins.keys():
-        #         plugin = self.plugins[key]
-        #         if hasattr(plugin, 'widget'):
-        #             self.debug('Closing widget %s' % key, 1)
-        #             self.plugins[key] = None
-        #             # plugin.widget.close()
-        # self.app.quit()
-        # del self.app
 
     def show(self):
         self.debug()
@@ -1566,7 +1552,7 @@ class PADView(QtCore.QObject):
 
 
 def view_pad_data(pad_data=None, pad_geometry=None, show=True, title=None, **kwargs):
-    r""" Convenience function that creates a PADView2 instance and starts it. """
+    r""" Convenience function that creates a PADView instance and starts it. """
     pv = PADView(raw_data=pad_data, pad_geometry=pad_geometry, **kwargs)
     if title is not None:
         pv.set_title(title)

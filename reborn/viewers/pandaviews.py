@@ -2,23 +2,23 @@
 DataFrameTable
 ==============
 
-Modified by R. Kirian from original source:
+Modified by R.A. Kirian from original source:
 https://gist.github.com/jsexauer/f2bb0cc876828b54f2ed
 
-Quick and Dirty Qt app to view pandas DataFrames.  Includes sorting and
-filterting.
+Quick and Dirty Qt app to view pandas DataFrames.  Includes sorting,
+filterting, and plotting.
 
 Based on qtpandas in pandas sandbox module, by Jev Kuznetsov
 
 Usage:
  - To quickly display a dataframe, just use DataFrameApp(df)
- >>> import sys, pandas
- >>> from DataFrameGUI import DataFrameApp
- >>> df = pandas.DataFrame([1,2,3])
- >>> root = QtGui.QApplication(sys.argv)
- >>> app = DataFrameApp(df)
- >>> app.show()
- >>> root.exec_()
+ # >>> import sys, pandas
+ # >>> from DataFrameGUI import DataFrameApp
+ # >>> df = pandas.DataFrame([1,2,3])
+ # >>> root = QtGui.QApplication(sys.argv)
+ # >>> app = DataFrameApp(df)
+ # >>> app.show()
+ # >>> root.exec_()
 
  - To build your own widget, subclass DataFrameWidget
 
@@ -28,10 +28,11 @@ Usage:
 # sip.setapi('QString', 2)
 # sip.setapi('QVariant', 2)
 
-
+import numpy as np
+import pyqtgraph as pg
+from pyqtgraph import QtGui, QtCore
 import pandas
 import operator
-from pyqtgraph import QtGui, QtCore
 import sys
 
 from functools import partial
@@ -62,26 +63,27 @@ class DataFrameModel(QtCore.QAbstractTableModel):
     RawIndexRole = 65
 
     def __init__(self):
-        super(DataFrameModel, self).__init__()
+        super().__init__()
         self._df = pandas.DataFrame()
         self._orig_df = pandas.DataFrame()
         self._pre_dyn_filter_df = None
         self._resort = lambda : None # Null resort functon
 
-    def setDataFrame(self, dataFrame):
+    def set_dataframe(self, dataframe):
         """Set or change pandas DataFrame to show"""
-        self.df = dataFrame
-        self._orig_df = dataFrame.copy()
+        self.df = dataframe
+        self._orig_df = dataframe.copy()
         self._pre_dyn_filter_df = None # Clear dynamic filter
 
     @property
     def df(self):
         return self._df
+
     @df.setter
-    def df(self, dataFrame):
+    def df(self, dataframe):
         """Setter should only be used internal to DataFrameModel.  Others should use setDataFrame()"""
         self.modelAboutToBeReset.emit()
-        self._df = dataFrame
+        self._df = dataframe
         self.modelReset.emit()
 
     @QtCore.pyqtSlot()
@@ -616,9 +618,8 @@ class DataFrameWidget(QtGui.QTableView):
         """
         super(DataFrameWidget, self).__init__(parent)
 
-
-        self.defaultExcelFile = "temp.xls"
-        self.defaultExcelSheet = "Output"
+        # self.defaultExcelFile = "temp.xls"
+        # self.defaultExcelSheet = "Output"
 
         # Set up view
         self._data_model = DataFrameModel()
@@ -640,7 +641,7 @@ class DataFrameWidget(QtGui.QTableView):
         # Initilize to passed dataframe
         if df is None:
             df = pandas.DataFrame()
-        self._data_model.setDataFrame(df)
+        self._data_model.set_dataframe(df)
 
 
         #self.setSortingEnabled(True)
@@ -710,40 +711,36 @@ class DataFrameWidget(QtGui.QTableView):
         """Create popup menu used for header"""
         menu = QtGui.QMenu(self)
         col_ix = self.horizontalHeader().logicalIndexAt(pos)
-
         if col_ix == -1:
             # Out of bounds
             return
-
         # Filter Menu Action
         menu.addAction(DynamicFilterMenuAction(self, menu, col_ix))
         menu.addAction(FilterListMenuWidget(self, menu, col_ix))
-        menu.addAction(self._icon('DialogResetButton'),
-                        "Reset",
-                        self._data_model.reset)
-
+        menu.addAction(self._icon('DialogResetButton'), "Reset", self._data_model.reset)
         # Sort Ascending/Decending Menu Action
-        menu.addAction(self._icon('TitleBarShadeButton'),
-                        "Sort Ascending",
+        menu.addAction(self._icon('TitleBarShadeButton'), "Sort Ascending",
                        partial(self._data_model.sort, col_ix=col_ix, order=QtCore.Qt.AscendingOrder))
-        menu.addAction(self._icon('TitleBarUnshadeButton'),
-                        "Sort Descending",
+        menu.addAction(self._icon('TitleBarUnshadeButton'), "Sort Descending",
                        partial(self._data_model.sort, col_ix=col_ix, order=QtCore.Qt.DescendingOrder))
         menu.addSeparator()
-
+        menu.addAction("Plot Single Column", partial(self.plot_single_column, col_ix=col_ix))
+        menu.addSeparator()
         # Hide
         menu.addAction("Hide", partial(self.hideColumn, col_ix))
-
         # Show (column to left and right)
         for i in (-1, 1):
             if self.isColumnHidden(col_ix+i):
                 menu.addAction("Show %s" % self._data_model.headerData(col_ix+i, QtCore.Qt.Horizontal),
                                 partial(self.showColumn, col_ix+i))
-
         menu.exec_(self.mapToGlobal(pos))
 
+    def plot_single_column(self, col_ix):
+        dat = self.df.iloc[:, col_ix]
+        pg.plot(dat, pen=None, symbol='o', symbolBrush='b', symbolPen=None)
+
     def setDataFrame(self, df):
-        self._data_model.setDataFrame(df)
+        self._data_model.set_dataframe(df)
         self.resizeColumnsToContents()
 
     def filter(self, col_ix, needle):
@@ -760,7 +757,7 @@ class DataFrameWidget(QtGui.QTableView):
     def df(self, dataFrame):
         # Use the "hard setting" of the dataframe because anyone who's interacting with the
         #  DataFrameWidget (ie, end user) would be setting this
-        self._data_model.setDataFrame(dataFrame)
+        self._data_model.set_dataframe(dataFrame)
 
     def keyPressEvent(self, event):
         """Implements keyboard shortcuts"""
@@ -820,6 +817,12 @@ class DataFrameWidget(QtGui.QTableView):
                     self.openPersistentEditor(idx)
 
 
+# class DataFramePlotWidget(QtGui.QWidget):
+#     def __init__(self, df, col):
+#         super().__init__()
+#
+
+
 class DataFrameApp(QtGui.QMainWindow):
     """Sample DataFrameTable Application"""
     def __init__(self, df, title="Inspecting DataFrame"):
@@ -846,24 +849,24 @@ class DataFrameApp(QtGui.QMainWindow):
         self.setWindowTitle(title)
 
 
-class ExampleWidgetForWidgetedCell(QtGui.QComboBox):
-    """
-    To implement a persistent state for the widgetd cell, you must provide
-    a `getWidgetedCellState` and `setWidgetedCellState` methods.  This is how
-    the WidgetedCell framework can create and destory your widget as needed.
-    """
-    def __init__(self, parent):
-        super(ExampleWidgetForWidgetedCell, self).__init__(parent)
-        self.addItem("Option A")
-        self.addItem("Option B")
-        self.addItem("Option C")
-        self.setCurrentIndex(0)
-
-    def get_widgeted_cell_state(self):
-        return self.currentIndex()
-
-    def set_widgeted_cell_state(self, state):
-        self.setCurrentIndex(state)
+# class ExampleWidgetForWidgetedCell(QtGui.QComboBox):
+#     """
+#     To implement a persistent state for the widgetd cell, you must provide
+#     a `getWidgetedCellState` and `setWidgetedCellState` methods.  This is how
+#     the WidgetedCell framework can create and destory your widget as needed.
+#     """
+#     def __init__(self, parent):
+#         super(ExampleWidgetForWidgetedCell, self).__init__(parent)
+#         self.addItem("Option A")
+#         self.addItem("Option B")
+#         self.addItem("Option C")
+#         self.setCurrentIndex(0)
+#
+#     def get_widgeted_cell_state(self):
+#         return self.currentIndex()
+#
+#     def set_widgeted_cell_state(self, state):
+#         self.setCurrentIndex(state)
 
 
 def view_pandas_dataframe(df):
