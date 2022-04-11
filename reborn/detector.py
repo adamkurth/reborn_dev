@@ -1788,8 +1788,8 @@ class RadialProfiler:
         self.bin_size = bin_size
         self.q_range = q_range
         self.q_edge_range = q_edge_range
-        self.mask = mask
         self.pad_geometry = pad_geometry
+        self.mask = mask
         self.beam = beam
 
     def concat_data(self, data):
