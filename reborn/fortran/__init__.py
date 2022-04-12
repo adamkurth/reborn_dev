@@ -105,11 +105,11 @@ def import_f90(source_file, extra_args='', hash=True, verbose=False, with_omp=Fa
     if do_compile:
         debug('Compiling...', source, 'to', modulename)
         fp = numpy.f2py.compile(source, **compile_args)
-        print(('='*40+'\n')*5)
+        # print(('='*40+'\n')*5)
         # import inspect
         # for m in inspect.getmembers(fp, predicate=inspect.ismethod):
         #     print(m)
-        print(fp)#str(fp.stdout.decode('utf-8')))#['stdout'])
+        # print(fp)#str(fp.stdout.decode('utf-8')))#['stdout'])
     # We try to import now, and if it fails, we try to compile one last time.
     try:
         debug('Importing...', modulename)
@@ -118,7 +118,7 @@ def import_f90(source_file, extra_args='', hash=True, verbose=False, with_omp=Fa
         debug('Import failed!')
         debug('Compiling again...', modulename)
         fp = numpy.f2py.compile(source, **compile_args)
-        print(fp)
+        # print(fp)
         debug('Importing again', modulename)
         module = importlib.import_module(modulename)
     debug('Module name:', module)

@@ -40,6 +40,8 @@ def processor(dat):
     return dat
 
 frame_getter = MyFrameGetter()
+import pandas
+frame_getter.pandas_dataframe = pandas.DataFrame({'1': np.arange(1000)*2, '2': np.sin(np.arange(1000)/100)})
 # frame_getter.view(debug_level=1)
 pv = PADView(frame_getter=frame_getter, debug_level=1, dataframe_preprocessor=processor)
 pv.save_screenshot('/home/rkirian/Downloads/test.jpg')
