@@ -1,0 +1,152 @@
+<!DOCTYPE HTML>
+
+<!--Converted with LaTeX2HTML 2019.2 (Released June 5, 2019) -->
+<HTML lang="EN">
+<HEAD>
+<TITLE>Overview</TITLE>
+<META NAME="description" CONTENT="Overview">
+<META NAME="keywords" CONTENT="dipole">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=utf-8">
+<META NAME="viewport" CONTENT="width=device-width, initial-scale=1.0">
+<META NAME="Generator" CONTENT="LaTeX2HTML v2019.2">
+
+<LINK REL="STYLESHEET" HREF="dipole.css">
+
+<LINK REL="next" HREF="node2.html">
+<LINK REL="previous" HREF="dipole.html">
+<LINK REL="next" HREF="node2.html">
+</HEAD>
+
+<BODY >
+
+<DIV CLASS="navigation"><!--Navigation Panel-->
+<A
+ HREF="node2.html">
+<IMG WIDTH="37" HEIGHT="24" ALT="next" SRC="next.png"></A> 
+<A
+ HREF="dipole.html">
+<IMG WIDTH="26" HEIGHT="24" ALT="up" SRC="up.png"></A> 
+<A
+ HREF="dipole.html">
+<IMG WIDTH="63" HEIGHT="24" ALT="previous" SRC="prev.png"></A>   
+<BR>
+<B> Next:</B> <A
+ HREF="node2.html">Electromagnetic fields from a</A>
+<B> Up:</B> <A
+ HREF="dipole.html">Classical derivation of far-field</A>
+<B> Previous:</B> <A
+ HREF="dipole.html">Classical derivation of far-field</A>
+<BR>
+<BR></DIV>
+<!--End of Navigation Panel-->
+
+<H1><A ID="SECTION00010000000000000000">
+Overview</A>
+</H1>
+
+<P>
+There are multiple ways to develop the theory of x-ray diffraction.  In order to make this guide 
+accessible to motivated undergraduates, we will build upon the most popular
+undergraduate electrodynamics textbook by David Griffiths[<A
+ HREF="node14.html#Griffiths2018">1</A>].  The main result we derive is
+the diffraction intensity equation:
+<P></P>
+<DIV CLASS="mathdisplay"><TABLE CLASS="equation" >
+<TR >
+<TD  style="text-align:center;"><SPAN CLASS="MATH"><IMG STYLE="height: 6.13ex; vertical-align: -2.30ex; " SRC="img1.svg"
+ ALT="$\displaystyle I(\vec{q}) = J_0 r_e^2 \Delta \Omega \mathcal{P}(\vec{q}) \left\vert \int
+\rho(\vec{r}) e^{-i \vec{q}\cdot\vec{r}} d^3 r \right\vert^2 \;.$"></SPAN></TD>
+<TD  CLASS="eqno" style="text-align:right">
+<A ID="eqn:key">(<SPAN CLASS="arabic">1</SPAN>)</A></TD></TR>
+</TABLE></DIV>
+<P></P>
+The above result assumes (1) perfect plane-wave illumination with wavelength <SPAN CLASS="MATH"><IMG STYLE="height: 1.80ex; vertical-align: -0.10ex; " SRC="img2.svg"
+ ALT="$\lambda$"></SPAN>, (2) far-field measurements (the
+distance to the detector is <SPAN  CLASS="textit">much</SPAN> greater than the size of the object)
+and (3) the first-order Born approximation, which loosely means that the scattering amplitudes are very weak
+compared to the incident amplitudes. The quantities in equation <A HREF="#eqn:key">1</A> are as follows:
+
+<UL>
+<LI><!-- MATH
+ $I(\vec{q})$
+ -->
+<SPAN CLASS="MATH"><IMG STYLE="height: 2.51ex; vertical-align: -0.68ex; " SRC="img3.svg"
+ ALT="$I(\vec{q})$"></SPAN> is the x-ray diffraction signal in a pixel (power per 
+pixel)
+</LI>
+<LI><!-- MATH
+ $\vec{q}=\vec{k}-\vec{k}_0$
+ -->
+<SPAN CLASS="MATH"><IMG STYLE="height: 2.25ex; vertical-align: -0.55ex; " SRC="img4.svg"
+ ALT="$\vec{q}=\vec{k}-\vec{k}_0$"></SPAN> is the wavevector transfer
+</LI>
+<LI><SPAN CLASS="MATH"><IMG STYLE="height: 2.12ex; vertical-align: -0.45ex; " SRC="img5.svg"
+ ALT="$J_0$"></SPAN> is the incident intensity (power per area)
+</LI>
+<LI><!-- MATH
+ $r_e = 2.818 \times 10^{-15}$
+ -->
+<SPAN CLASS="MATH"><IMG STYLE="height: 2.37ex; vertical-align: -0.45ex; " SRC="img6.svg"
+ ALT="$r_e = 2.818 \times 10^{-15}$"></SPAN>&nbsp;m is the Classical electron radius
+</LI>
+<LI><SPAN CLASS="MATH"><IMG STYLE="height: 2.15ex; vertical-align: -0.45ex; " SRC="img7.svg"
+ ALT="$\vec{k}_0$"></SPAN> is the incident wavevector with magnitude <!-- MATH
+ $|\vec{k}_0| =
+|\vec{k}| = \frac{2\pi}{\lambda}$
+ -->
+<SPAN CLASS="MATH"><IMG STYLE="height: 2.90ex; vertical-align: -0.90ex; " SRC="img8.svg"
+ ALT="$\vert\vec{k}_0\vert =
+\vert\vec{k}\vert = \frac{2\pi}{\lambda}$"></SPAN>
+</LI>
+<LI><SPAN CLASS="MATH"><IMG STYLE="height: 1.80ex; vertical-align: -0.10ex; " SRC="img9.svg"
+ ALT="$\vec{k}$"></SPAN> is the outgoing wavevector that points from the target to the detector pixel
+</LI>
+<LI><!-- MATH
+ $\Delta \Omega$
+ -->
+<SPAN CLASS="MATH"><IMG STYLE="height: 1.77ex; vertical-align: -0.10ex; " SRC="img10.svg"
+ ALT="$\Delta \Omega$"></SPAN> is the solid angle of the detector pixel (assumed very 
+small)
+</LI>
+<LI><!-- MATH
+ $\mathcal{P}(\vec{q})$
+ -->
+<SPAN CLASS="MATH"><IMG STYLE="height: 2.51ex; vertical-align: -0.68ex; " SRC="img11.svg"
+ ALT="$\mathcal{P}(\vec{q})$"></SPAN> is the polarization factor defined below
+</LI>
+<LI><!-- MATH
+ $\rho(\vec{r})$
+ -->
+<SPAN CLASS="MATH"><IMG STYLE="height: 2.51ex; vertical-align: -0.68ex; " SRC="img12.svg"
+ ALT="$\rho(\vec{r})$"></SPAN> is the scattering density, which is approximately equal to 
+the electron density.
+</LI>
+</UL>
+
+<P>
+
+<DIV CLASS="navigation"><HR>
+<!--Navigation Panel-->
+<A
+ HREF="node2.html">
+<IMG WIDTH="37" HEIGHT="24" ALT="next" SRC="next.png"></A> 
+<A
+ HREF="dipole.html">
+<IMG WIDTH="26" HEIGHT="24" ALT="up" SRC="up.png"></A> 
+<A
+ HREF="dipole.html">
+<IMG WIDTH="63" HEIGHT="24" ALT="previous" SRC="prev.png"></A>   
+<BR>
+<B> Next:</B> <A
+ HREF="node2.html">Electromagnetic fields from a</A>
+<B> Up:</B> <A
+ HREF="dipole.html">Classical derivation of far-field</A>
+<B> Previous:</B> <A
+ HREF="dipole.html">Classical derivation of far-field</A></DIV>
+<!--End of Navigation Panel-->
+
+</BODY>
+</HTML>

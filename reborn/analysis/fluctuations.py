@@ -16,11 +16,12 @@
 import numpy as np
 
 
-def correlate(s1, s2=None):
+def correlate(s1, s2=None, cached=False):
     r"""
     Computes correlation function.
     If two signals are provided computes cross correlation.
     If one singal is provided computes auto correlation.
+    If cached, assumes Fourier transforms are already computed.
 
     Computed via Fourier transforms:
         cf = iFT(FT(s1) FT(s2)*)
@@ -28,12 +29,18 @@ def correlate(s1, s2=None):
     Arguments:
         s1 (|ndarray|): signal 1
         s2 (|ndarray|): signal 2
+        cache (bool): provide ffts instead of computing
     Returns:
-        cf (|ndarray|): correlation of s1 and s2
+        correlation (|ndarray|): correlation of s1 and s2
     """
-    a = np.fft.fft(s1)
-    b = a.copy() if s2 is None else np.fft.fft(s2)
-    return np.real(np.fft.ifft(a * np.conj(b)))
+    if cached:
+        a = s1
+        b = a.copy() if s2 is None else s2
+    else:
+        a = np.fft.fft(s1, axis=1)
+        b = a.copy() if s2 is None else np.fft.fft(s2, axis=1)
+    correlation = np.fft.ifft(a * np.conj(b))
+    return np.real(correlation)
 
 
 def subtract_masked_data_mean(data, mask):
@@ -56,7 +63,7 @@ def subtract_masked_data_mean(data, mask):
     return data
 
 
-def data_correlation(n, data, mask):
+def data_correlation(n, data, mask, cached=False):
     r"""
     Computes cross correlation of data with data shifted by n.
 
@@ -66,15 +73,41 @@ def data_correlation(n, data, mask):
         n (int): number of q rings to shift
         data (|ndarray|): data
         mask (|ndarray|): mask (i.e. data to ignore)
+        cache (bool): provide ffts instead of computing
     Returns:
         ccf (|ndarray|): cross correlation function of data
     """
-    data = subtract_masked_data_mean(data, mask)
     zros = np.zeros_like(data)
+    if not cached:
+        data = subtract_masked_data_mean(data, mask)
     if n == 0:
-        d_cf = correlate(data)
-        m_cf = correlate(mask)
+        d_cf = correlate(s1=data, cached=cached)
+        m_cf = correlate(s1=mask, cached=cached)
     else:
-        d_cf = correlate(data, np.roll(data, n, axis=0))
-        m_cf = correlate(mask, np.roll(mask, n, axis=0))
+        data_roll = np.roll(data, n, axis=0)
+        mask_roll = np.roll(mask, n, axis=0)
+        d_cf = correlate(s1=data, s2=data_roll, cached=cached)
+        m_cf = correlate(s1=mask, s2=mask_roll, cached=cached)
     return np.divide(d_cf, m_cf, out=zros, where=m_cf != 0)
+
+
+def compute_data_correlations(data, mask):
+    r"""
+    Computes cross correlation of data with data shifted by n.
+
+    Note: For n = 0 this returns the auto correlation of the data.
+
+    Arguments:
+        data (|ndarray|): data
+        mask (|ndarray|): mask (i.e. data to ignore)
+    Returns:
+        correlations (dict): correlations of data
+    """
+    data = subtract_masked_data_mean(data, mask)
+    data = np.fft.fft(data, axis=1)
+    mask = np.fft.fft(mask, axis=1)
+    q_range = data.shape[0]
+    correlations = {n: data_correlation(n=n, data=data,
+                                        mask=mask, cached=True)
+                    for n in range(q_range)}
+    return correlations

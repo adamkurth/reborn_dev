@@ -520,21 +520,42 @@ def get_cromermann_parameters(atomic_numbers=None):
 
 
 def get_cromer_mann_densities(Z, r):
+    r"""
+    Given the Cromer-Mann scattering factors :math:`f(q)`, we calculate :math:`\rho(r)` as follows:
 
+    .. math::
+
+        \rho(r) &= \frac{1}{8\pi} \int f(q) \exp(i \vec{q}\cdot\vec{r}) d^3 q \\
+                &= \frac{1}{8\pi} \int  \left[ c + \sum_{i=1}^4 a_i \exp(-b_i q^2 / 16\pi^2) \right] \exp(i \vec{
+                q}\cdot\vec{r})
+                d^3 q
+
+    Args:
+        Z:
+        r:
+
+    Returns:
+
+    """
     Z = utils.atleast_1d(Z)
     r = utils.atleast_1d(r)
     out = np.zeros((Z.size, r.size))
     cmann = get_cromermann_parameters()
     for (zi, z) in enumerate(Z):
         if z == 1:
-            rho = (1/(np.pi*5.291e-30))*np.exp(-2*r/5.291e-10)
+            a0 = 0.5291e-10
+            rho = np.exp(-2*r/a0)/(np.pi*a0**3)
             out[zi, :] = rho
             continue
-        a = cmann[z]
-        b = a[4:]
+        cm = cmann[z]
+        a = cm[0:4]
+        b = cm[4:8]*1e-20/(4*np.pi)**2  # b has units of angstrom^2, so convert to m^2
+        # c = cm[8]
         rho = np.zeros(r.size)
         for i in range(4):
-            rho += a[i]*8*(np.pi/b[i])**(3/2)*np.exp(-12*np.pi**2*(r*1e10)**2/b[i])
+            rho += a[i] * (np.pi / b[i]) ** (3.0 / 2.0) * np.exp(-r**2 / (4*b[i]))
+            # rho += a[i]*8*(np.pi/b[i])**(3/2)*np.exp(-12*np.pi**2*(r*1e10)**2/b[i])
+        rho /= 8*np.pi**3
         out[zi, :] = rho
     return out
 

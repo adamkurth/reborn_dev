@@ -391,7 +391,7 @@ class CrystalStructure(object):
             temp_save = temp_dir
 
         if not os.path.exists(pdb_file_path):
-            print("PDB file not found.  Attempting to download it to %s." % temp_dir)
+            # print("PDB file not found.  Attempting to download it to %s." % temp_dir)
             pdb_file_path = get_pdb_file(pdb_file_path, save_path=temp_save)
 
         dic = pdb_to_dict(pdb_file_path)

@@ -53,7 +53,8 @@ def load_pad_geometry_from_h5(h5_file_path):
     geometry = PADGeometryList()
     with h5py.File(h5_file_path, 'r') as hf:
         pads = list(hf['geometry'].keys())
-        pads.remove('mask')
+        if 'mask' in pads:
+            pads.remove('mask')
         for pad in pads:
             p = f'geometry/{pad}'
             geom = PADGeometry()
@@ -92,7 +93,11 @@ def load_mask_from_h5(h5_file_path):
         mask (|ndarray|): mask saved in hdf5 file
     """
     with h5py.File(h5_file_path, 'r') as hf:
-        mask = hf[f'geometry/mask'][:]
+        geom_keys = list(hf['geometry'].keys())
+        if 'mask' in geom_keys:
+            mask = hf[f'geometry/mask'][:]
+        else:
+            mask = None
     return mask
 
 
@@ -161,6 +166,7 @@ def save_padstats_as_h5(experiment_id, run, stats, h5_file_path):
                                  'stop'
         h5_file_path (str): filename
     """
+    save_stats = ['n_frames', 'max', 'min', 'sum', 'sum2', 'start', 'stop']
     save_pad_geometry_as_h5(stats['pad_geometry'], h5_file_path)
     save_mask_as_h5(stats['mask'], h5_file_path)
     save_beam_as_h5(stats['beam'], h5_file_path)
@@ -168,13 +174,8 @@ def save_padstats_as_h5(experiment_id, run, stats, h5_file_path):
         hf.create_dataset('meta/experiment_id', data=experiment_id)
         hf.create_dataset('meta/run_number', data=run)
         hf.create_dataset('meta/dataset_id', data=stats['dataset_id'])
-        hf.create_dataset('data/n_frames', data=stats['n_frames'])
-        hf.create_dataset('data/max', data=stats['max'])
-        hf.create_dataset('data/min', data=stats['min'])
-        hf.create_dataset('data/sum', data=stats['sum'])
-        hf.create_dataset('data/sum2', data=stats['sum2'])
-        hf.create_dataset('data/start', data=stats['start'])
-        hf.create_dataset('data/stop', data=stats['stop'])
+        for ss in save_stats:
+            hf.create_dataset(f'padstats/{ss}', data=stats[ss])
     print(f'Saved padstats: {h5_file_path}')
 
 
@@ -199,6 +200,8 @@ def load_padstats_from_h5(h5_file_path):
                                  'start'
                                  'stop'
     """
+    save_stats_scalar = ['n_frames', 'start', 'stop']
+    save_stats_arrays = ['max', 'min', 'sum', 'sum2']
     stats = {'pad_geometry': load_pad_geometry_from_h5(h5_file_path),
              'mask': load_mask_from_h5(h5_file_path),
              'beam': load_beam_from_h5(h5_file_path)}
@@ -206,13 +209,10 @@ def load_padstats_from_h5(h5_file_path):
         stats['experiment_id'] = hf['meta/experiment_id'][()].decode('utf-8')
         stats['run_number'] = hf['meta/run_number'][()]
         stats['dataset_id'] = hf['meta/dataset_id'][()].decode('utf-8')
-        stats['n_frames'] = hf['data/n_frames'][()]
-        stats['max'] = hf['data/max']
-        stats['min'] = hf['data/min']
-        stats['sum'] = hf['data/sum']
-        stats['sum2'] = hf['data/sum2']
-        stats['start'] = hf['data/start']
-        stats['stop'] = hf['data/stop']
+        for ss in save_stats_scalar:
+            stats[ss] = hf[f'data/{ss}'][()]
+        for ss in save_stats_arrays:
+            stats[ss] = hf[f'data/{ss}'][:]
     return stats
 
 

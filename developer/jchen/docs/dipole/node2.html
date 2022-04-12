@@ -1,0 +1,227 @@
+<!DOCTYPE HTML>
+
+<!--Converted with LaTeX2HTML 2019.2 (Released June 5, 2019) -->
+<HTML lang="EN">
+<HEAD>
+<TITLE>Electromagnetic fields from a moving point charge</TITLE>
+<META NAME="description" CONTENT="Electromagnetic fields from a moving point charge">
+<META NAME="keywords" CONTENT="dipole">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=utf-8">
+<META NAME="viewport" CONTENT="width=device-width, initial-scale=1.0">
+<META NAME="Generator" CONTENT="LaTeX2HTML v2019.2">
+
+<LINK REL="STYLESHEET" HREF="dipole.css">
+
+<LINK REL="next" HREF="node3.html">
+<LINK REL="previous" HREF="node1.html">
+<LINK REL="next" HREF="node3.html">
+</HEAD>
+
+<BODY >
+
+<DIV CLASS="navigation"><!--Navigation Panel-->
+<A
+ HREF="node3.html">
+<IMG WIDTH="37" HEIGHT="24" ALT="next" SRC="next.png"></A> 
+<A
+ HREF="dipole.html">
+<IMG WIDTH="26" HEIGHT="24" ALT="up" SRC="up.png"></A> 
+<A
+ HREF="node1.html">
+<IMG WIDTH="63" HEIGHT="24" ALT="previous" SRC="prev.png"></A>   
+<BR>
+<B> Next:</B> <A
+ HREF="node3.html">Dipole radiation</A>
+<B> Up:</B> <A
+ HREF="dipole.html">Classical derivation of far-field</A>
+<B> Previous:</B> <A
+ HREF="node1.html">Overview</A>
+<BR>
+<BR></DIV>
+<!--End of Navigation Panel-->
+
+<H1><A ID="SECTION00020000000000000000">
+Electromagnetic fields from a moving point charge</A>
+</H1>
+
+<P>
+Here we briefly outline how the electromagnetic 
+fields from a moving point charge were derived by Griffiths, starting with Maxwell's equations
+in vacuum:
+<P></P>
+<DIV CLASS="mathdisplay"><TABLE CLASS="equation" >
+<TR >
+<TD  style="text-align:right;"><SPAN CLASS="MATH"><IMG STYLE="height: 1.78ex; vertical-align: -0.10ex; " SRC="img13.svg"
+ ALT="$\displaystyle \nabla \cdot \vec{E}$"></SPAN></TD>
+<TD  style="text-align:left;"><SPAN CLASS="MATH"><IMG STYLE="height: 2.51ex; vertical-align: -0.68ex; " SRC="img14.svg"
+ ALT="$\displaystyle = \rho/\epsilon_0$"></SPAN></TD>
+<TD  style="text-align:right;"><SPAN CLASS="MATH"><IMG STYLE="height: 1.97ex; vertical-align: -0.29ex; " SRC="img15.svg"
+ ALT="$\displaystyle \ \nabla\times\vec{E}$"></SPAN></TD>
+<TD  style="text-align:left;"><SPAN CLASS="MATH"><IMG STYLE="height: 4.95ex; vertical-align: -1.69ex; " SRC="img16.svg"
+ ALT="$\displaystyle = -\frac{\partial\vec{B}}{\partial t}$"></SPAN></TD>
+<TD  CLASS="eqno" style="text-align:right">
+(<SPAN CLASS="arabic">2</SPAN>)</TD></TR>
+<TR >
+<TD  style="text-align:right;"><SPAN CLASS="MATH"><IMG STYLE="height: 1.78ex; vertical-align: -0.10ex; " SRC="img17.svg"
+ ALT="$\displaystyle \nabla \cdot \vec{B}$"></SPAN></TD>
+<TD  style="text-align:left;"><SPAN CLASS="MATH"><IMG STYLE="height: 1.68ex; vertical-align: -0.10ex; " SRC="img18.svg"
+ ALT="$\displaystyle = 0$"></SPAN></TD>
+<TD  style="text-align:right;"><SPAN CLASS="MATH"><IMG STYLE="height: 1.97ex; vertical-align: -0.29ex; " SRC="img19.svg"
+ ALT="$\displaystyle \nabla\times\vec{B}$"></SPAN></TD>
+<TD  style="text-align:left;"><SPAN CLASS="MATH"><IMG STYLE="height: 4.95ex; vertical-align: -1.69ex; " SRC="img20.svg"
+ ALT="$\displaystyle = \mu_0 \vec{J}+\mu_0 \epsilon_0 \frac{\partial\vec{E}}{\partial t}\;.$"></SPAN></TD>
+<TD  CLASS="eqno" style="text-align:right">
+(<SPAN CLASS="arabic">3</SPAN>)</TD></TR>
+</TABLE></DIV>
+<P></P>
+As developed in Griffiths chapter 10, Maxwell's equations may be written in terms of the scalar
+and vector potentials that are defined as
+<P></P>
+<DIV CLASS="mathdisplay"><TABLE CLASS="equation" >
+<TR >
+<TD  style="text-align:right;"><SPAN CLASS="MATH"><IMG STYLE="height: 1.78ex; vertical-align: -0.10ex; " SRC="img21.svg"
+ ALT="$\displaystyle \vec{B}$"></SPAN></TD>
+<TD  style="text-align:left;"><SPAN CLASS="MATH"><IMG STYLE="height: 2.23ex; vertical-align: -0.55ex; " SRC="img22.svg"
+ ALT="$\displaystyle = \nabla \times \vec{A}\;,$"></SPAN></TD>
+<TD  style="text-align:right;"><SPAN CLASS="MATH"><IMG STYLE="height: 1.78ex; vertical-align: -0.10ex; " SRC="img23.svg"
+ ALT="$\displaystyle \vec{E}$"></SPAN></TD>
+<TD  style="text-align:left;"><SPAN CLASS="MATH"><IMG STYLE="height: 4.95ex; vertical-align: -1.69ex; " SRC="img24.svg"
+ ALT="$\displaystyle = -\nabla V -\frac{\partial \vec{A}}{\partial t} \;.$"></SPAN></TD>
+<TD  CLASS="eqno" style="text-align:right">
+<A ID="eqn:pots">(<SPAN CLASS="arabic">4</SPAN>)</A></TD></TR>
+</TABLE></DIV>
+<P></P>
+When working in the Lorenz gauge, namely
+<P></P>
+<DIV CLASS="mathdisplay"><TABLE CLASS="equation" >
+<TR >
+<TD  style="text-align:center;"><SPAN CLASS="MATH"><IMG STYLE="height: 4.95ex; vertical-align: -1.69ex; " SRC="img25.svg"
+ ALT="$\displaystyle \nabla \cdot \vec{A} = -\mu_0 \epsilon_0 \frac{\partial V}{\partial t} \;,$"></SPAN></TD>
+<TD  CLASS="eqno" style="text-align:right">
+(<SPAN CLASS="arabic">5</SPAN>)</TD></TR>
+</TABLE></DIV>
+<P></P>
+Maxwell's equations are reduced to a set of four inhomogeneous wave equations:
+<P></P>
+<DIV CLASS="mathdisplay"><TABLE CLASS="equation" >
+<TR >
+<TD  style="text-align:right;"><SPAN CLASS="MATH"><IMG STYLE="height: 5.18ex; vertical-align: -1.69ex; " SRC="img26.svg"
+ ALT="$\displaystyle \nabla^2 V - \mu_0\epsilon_0 \frac{\partial^2 V}{\partial t^2}$"></SPAN></TD>
+<TD  style="text-align:left;"><SPAN CLASS="MATH"><IMG STYLE="height: 2.51ex; vertical-align: -0.68ex; " SRC="img27.svg"
+ ALT="$\displaystyle = -\rho / \epsilon_0$"></SPAN></TD>
+<TD  style="text-align:right;"><SPAN CLASS="MATH"><IMG STYLE="height: 5.18ex; vertical-align: -1.69ex; " SRC="img28.svg"
+ ALT="$\displaystyle \nabla^2 \vec{A} - \mu_0\epsilon_0 \frac{\partial^2 \vec{A}}{\partial t^2}$"></SPAN></TD>
+<TD  style="text-align:left;"><SPAN CLASS="MATH"><IMG STYLE="height: 2.23ex; vertical-align: -0.55ex; " SRC="img29.svg"
+ ALT="$\displaystyle = -\mu_0 \vec{J} \;.$"></SPAN></TD>
+<TD  CLASS="eqno" style="text-align:right">
+<A ID="eqn:ihA">(<SPAN CLASS="arabic">6</SPAN>)</A></TD></TR>
+</TABLE></DIV>
+<P></P>
+The inhomogeneous wave equations may be solved using Green's method<A ID="tex2html1"
+  HREF="footnode.html#foot1217"><SUP><SPAN CLASS="arabic">1</SPAN></SUP></A>, which yields the retarded potentials:
+<P></P>
+<DIV CLASS="mathdisplay"><TABLE CLASS="equation" >
+<TR >
+<TD  style="text-align:right;"><SPAN CLASS="MATH"><IMG STYLE="height: 2.51ex; vertical-align: -0.68ex; " SRC="img30.svg"
+ ALT="$\displaystyle V(\vec{r}, t)$"></SPAN></TD>
+<TD  style="text-align:left;"><SPAN CLASS="MATH"><IMG STYLE="height: 5.49ex; vertical-align: -2.10ex; " SRC="img31.svg"
+ ALT="$\displaystyle = \frac{1}{4\pi\epsilon_0}\int \frac{\rho(\vec{r}', t_r)}{{\mbox{...
+...09in}{.08in}{\includegraphics[trim= 1em 0 14em 0,clip]{fonts/ScriptR}}$}}}d^3r'$"></SPAN></TD>
+<TD  style="text-align:right;"><SPAN CLASS="MATH"><IMG STYLE="height: 2.51ex; vertical-align: -0.68ex; " SRC="img32.svg"
+ ALT="$\displaystyle \vec{A}(\vec{r}, t)$"></SPAN></TD>
+<TD  style="text-align:left;"><SPAN CLASS="MATH"><IMG STYLE="height: 5.49ex; vertical-align: -2.10ex; " SRC="img33.svg"
+ ALT="$\displaystyle = \frac{\mu_0}{4\pi}\int \frac{\vec{J}(\vec{r}', t_r)}{{\mbox{$\r...
+...09in}{.08in}{\includegraphics[trim= 1em 0 14em 0,clip]{fonts/ScriptR}}$}}}d^3r'$"></SPAN></TD>
+<TD  CLASS="eqno" style="text-align:right">
+(<SPAN CLASS="arabic">7</SPAN>)</TD></TR>
+</TABLE></DIV>
+<P></P>
+where <!-- MATH
+ ${\mbox{$\resizebox{.09in}{.08in}{\includegraphics[trim= 1em 0 14em 0,clip]{fonts/BoldR}}$}}= \vec{r} - \vec{r}'(t_r)$
+ -->
+<SPAN CLASS="MATH"><IMG STYLE="height: 2.51ex; vertical-align: -0.68ex; " SRC="img34.svg"
+ ALT="${\mbox{$\resizebox{.09in}{.08in}{\includegraphics[trim= 1em 0 14em 0,clip]{fonts/BoldR}}$}}= \vec{r} - \vec{r}'(t_r)$"></SPAN> and the retarded time is <!-- MATH
+ $t_r = t -{\mbox{$\resizebox{.09in}{.08in}{\includegraphics[trim= 1em 0 14em 0,clip]{fonts/ScriptR}}$}}/c$
+ -->
+<SPAN CLASS="MATH"><IMG STYLE="height: 2.51ex; vertical-align: -0.68ex; " SRC="img35.svg"
+ ALT="$t_r = t -{\mbox{$\resizebox{.09in}{.08in}{\includegraphics[trim= 1em 0 14em 0,clip]{fonts/ScriptR}}$}}/c$"></SPAN>.  For a <SPAN  CLASS="textit">point charge</SPAN> 
+moving on the <SPAN  CLASS="textit">trajectory</SPAN> <!-- MATH
+ $\vec{r}'(t)$
+ -->
+<SPAN CLASS="MATH"><IMG STYLE="height: 2.51ex; vertical-align: -0.68ex; " SRC="img36.svg"
+ ALT="$\vec{r}'(t)$"></SPAN>, the retarded potentials become the Liénard-Wiechert
+potentials<A ID="tex2html2"
+  HREF="footnode.html#foot1220"><SUP><SPAN CLASS="arabic">2</SPAN></SUP></A>:
+<P></P>
+<DIV CLASS="mathdisplay"><TABLE CLASS="equation" >
+<TR >
+<TD  style="text-align:right;"><SPAN CLASS="MATH"><IMG STYLE="height: 2.51ex; vertical-align: -0.68ex; " SRC="img30.svg"
+ ALT="$\displaystyle V(\vec{r}, t)$"></SPAN></TD>
+<TD  style="text-align:left;"><SPAN CLASS="MATH"><IMG STYLE="height: 5.42ex; vertical-align: -2.27ex; " SRC="img37.svg"
+ ALT="$\displaystyle = \frac{1}{4\pi\epsilon_0} \frac{q}{\left\vert {\mbox{$\resizebox...
+...raphics[trim= 1em 0 14em 0,clip]{fonts/BoldR}}$}}\cdot \vec{\beta} \right\vert}$"></SPAN></TD>
+<TD  style="text-align:right;"><SPAN CLASS="MATH"><IMG STYLE="height: 2.51ex; vertical-align: -0.68ex; " SRC="img32.svg"
+ ALT="$\displaystyle \vec{A}(\vec{r}, t)$"></SPAN></TD>
+<TD  style="text-align:left;"><SPAN CLASS="MATH"><IMG STYLE="height: 4.95ex; vertical-align: -2.27ex; " SRC="img38.svg"
+ ALT="$\displaystyle = \frac{\mu_0}{4\pi} \frac{q\vec{v}}{\left\vert {\mbox{$\resizebo...
+...ics[trim= 1em 0 14em 0,clip]{fonts/BoldR}}$}}\cdot \vec{\beta} \right\vert} \;,$"></SPAN></TD>
+<TD  CLASS="eqno" style="text-align:right">
+(<SPAN CLASS="arabic">8</SPAN>)</TD></TR>
+</TABLE></DIV>
+<P></P>
+where <!-- MATH
+ $\vec{\beta} = \vec{v}/c = \dot{\vec{r}}'(t_r)/c$
+ -->
+<SPAN CLASS="MATH"><IMG STYLE="height: 2.59ex; vertical-align: -0.68ex; " SRC="img39.svg"
+ ALT="$\vec{\beta} = \vec{v}/c = \dot{\vec{r}}'(t_r)/c$"></SPAN>. From the Liénard-Wiechert potentials, Griffiths used equation
+<A HREF="#eqn:pots">4</A> work out the fields for a point charge:
+<P></P>
+<DIV CLASS="mathdisplay"><TABLE CLASS="equation" >
+<TR >
+<TD  style="text-align:center;"><SPAN CLASS="MATH"><IMG STYLE="height: 5.42ex; vertical-align: -2.27ex; " SRC="img40.svg"
+ ALT="$\displaystyle \vec{E}(\vec{r}, t)= \frac{q}{4\pi\epsilon_0} \frac{{\mbox{$\resi...
+...graphics[trim= 1em 0 14em 0,clip]{fonts/BoldR}}$}}$}}\times \vec{E}(\vec{r}, t)$"></SPAN></TD>
+<TD  CLASS="eqno" style="text-align:right">
+<A ID="eqn:Erad">(<SPAN CLASS="arabic">9</SPAN>)</A></TD></TR>
+</TABLE></DIV>
+<P></P>
+where <!-- MATH
+ $\vec{u} = c {\mbox{$\hat {\mbox{$\resizebox{.09in}{.08in}{\includegraphics[trim= 1em 0 14em 0,clip]{fonts/BoldR}}$}}$}}- \vec{\beta}$
+ -->
+<SPAN CLASS="MATH"><IMG STYLE="height: 2.37ex; vertical-align: -0.55ex; " SRC="img41.svg"
+ ALT="$\vec{u} = c {\mbox{$\hat {\mbox{$\resizebox{.09in}{.08in}{\includegraphics[trim= 1em 0 14em 0,clip]{fonts/BoldR}}$}}$}}- \vec{\beta}$"></SPAN> and 
+<!-- MATH
+ $\vec{a}=\ddot{\vec{r}}'(t_r)$
+ -->
+<SPAN CLASS="MATH"><IMG STYLE="height: 2.59ex; vertical-align: -0.68ex; " SRC="img42.svg"
+ ALT="$\vec{a}=\ddot{\vec{r}}'(t_r)$"></SPAN>.  Importantly, these 
+fields are correct for relativistic particles, and as such they may be used to derive both the x-ray scattering
+amplitudes as well as the incident source fields created by x-ray free-electron lasers (XFELs) and synchrotrons.
+
+<P>
+
+<DIV CLASS="navigation"><HR>
+<!--Navigation Panel-->
+<A
+ HREF="node3.html">
+<IMG WIDTH="37" HEIGHT="24" ALT="next" SRC="next.png"></A> 
+<A
+ HREF="dipole.html">
+<IMG WIDTH="26" HEIGHT="24" ALT="up" SRC="up.png"></A> 
+<A
+ HREF="node1.html">
+<IMG WIDTH="63" HEIGHT="24" ALT="previous" SRC="prev.png"></A>   
+<BR>
+<B> Next:</B> <A
+ HREF="node3.html">Dipole radiation</A>
+<B> Up:</B> <A
+ HREF="dipole.html">Classical derivation of far-field</A>
+<B> Previous:</B> <A
+ HREF="node1.html">Overview</A></DIV>
+<!--End of Navigation Panel-->
+
+</BODY>
+</HTML>

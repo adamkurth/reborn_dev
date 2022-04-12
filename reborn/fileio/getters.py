@@ -81,6 +81,7 @@ class FrameGetter(ABC):
     history_index = 0
     init_params = None
     skip_empty_frames = True
+    _pandas_dataframe = None
 
     def __init__(self):
         pass
@@ -109,6 +110,17 @@ class FrameGetter(ABC):
         """
         pass
         return None
+
+    @property
+    def pandas_dataframe(self):
+        if self._pandas_dataframe is None:
+            import pandas
+            self._pandas_dataframe = pandas.DataFrame({'Frame #': np.arange(self.n_frames)})
+        return self._pandas_dataframe
+
+    @pandas_dataframe.setter
+    def pandas_dataframe(self, df):
+        self._pandas_dataframe = df
 
     def get_frame(self, frame_number=0, wrap_around=True, log_history=True):
         r""" Do not override this method. """

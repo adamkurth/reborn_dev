@@ -37,7 +37,7 @@ beam_diameter = 0.5e-6
 map_resolution = 0.2e-9  # Minimum resolution for 3D density map
 map_oversample = 2  # Oversampling factor for 3D density map
 cell = 200e-10  # Unit cell size (assume P1, cubic)
-pdb_file = '1SS8' #'3IYF' '1PCQ' '2LYZ' 'BDNA25_sp.pdb'
+pdb_file = '1SS8'  # '3IYF' '1PCQ' '2LYZ' 'BDNA25_sp.pdb'
 protein_concentration = 10  # Protein concentration in mg/ml = kg/m^3
 hit_frac = 0.01  # Hit fraction
 freq = 120  # XFEL frequency
@@ -55,7 +55,6 @@ n_shots = int(runtime * freq * hit_frac)
 wavelength = h * c / photon_energy
 beam = source.Beam(photon_energy=photon_energy, diameter_fwhm=beam_diameter, pulse_energy=pulse_energy)
 beam.save_json('beam.json')
-ddd
 fluence = beam.photon_number_fluence
 f_dens_water = atoms.xraylib_scattering_density('H2O', water_density, photon_energy, approximate=True)
 pads = detector.load_pad_geometry_list(pad_geometry_file)

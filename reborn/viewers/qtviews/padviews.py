@@ -64,7 +64,7 @@ class PADViewMainWindow(QtGui.QMainWindow):
 
 
 def ensure_dataframe(data, parent):
-    r""" Convert dictionaries to DataFrame instances. """
+    r""" Convert old-style dictionaries to proper DataFrame instances. """
     if not isinstance(parent, DataFrame):
         raise ValueError('parent must be a DataFrame')
     if isinstance(data, DataFrame):
@@ -107,6 +107,7 @@ class PADView(QtCore.QObject):
     scatter_plots = None
     plot_items = None
     rings = []
+    ring_pen = pg.mkPen([255, 255, 255], width=2)
     grid = None
     coord_axes = None
     scan_arrows = None
@@ -248,6 +249,7 @@ class PADView(QtCore.QObject):
 
     @dataframe.setter
     def dataframe(self, val):
+        self.debug()
         val = ensure_dataframe(val, self._dataframe)
         if self._dataframe_preprocessor is not None:
             val = self._dataframe_preprocessor(val)
@@ -347,7 +349,8 @@ class PADView(QtCore.QObject):
             return action
         file_menu = self.menubar.addMenu('File')
         add_menu(file_menu, 'Open file...', connect=self.open_data_file_dialog)
-        add_menu(file_menu, 'Save File...', connect=self.save_data_file_dialog)
+        add_menu(file_menu, 'Save file...', connect=self.save_data_file_dialog)
+        add_menu(file_menu, 'Save screenshot...', connect=self.save_screenshot_dialog)
         add_menu(file_menu, 'Exit', short='Ctrl+Q', connect=self.app.quit)
         data_menu = self.menubar.addMenu('Data')
         add_menu(data_menu, 'Frame navigator...', connect=lambda: self.run_plugin('frame_navigator'))
@@ -776,8 +779,8 @@ class PADView(QtCore.QObject):
         if len(roi) == 0:
             return None, None
         roi = roi[0]
-        pad_geometry = self.dataframe.get_pad_geometry()
-        p_vecs = np.vstack([p.position_vecs() for p in pad_geometry])
+        geom = self.dataframe.get_pad_geometry()
+        p_vecs = geom.position_vecs()
         v_vecs = self.vector_to_view_coords(p_vecs)[:, 0:2]
         if roi.name == 'rectangle':  # Find all pixels within the rectangle
             self.debug('\tGetting rectangle ROI indices', 1)
@@ -870,8 +873,8 @@ class PADView(QtCore.QObject):
             self.set_levels(levels[0], levels[1])
         self.histogram.regionChanged()
         self.set_title()
+        self.update_masks()
 
-    # FIXME: We also need an update_beam method.
     def update_pad_geometry(self, pad_geometry=None):
         r""" Update the PAD geometry.  Apply Qt transforms.  Also emits the sig_geometry_changed signal."""
         self.debug()
@@ -1040,47 +1043,73 @@ class PADView(QtCore.QObject):
             self.remove_rings()
             self.add_rings(**d)
 
-    # FIXME: Rings are dependent on beam and geometry.  They need to be updated when the beam changes.
-    # FIXME: Add option to put labels on rings that indicate resolution or q magnitudes.
-    def add_rings(self, radii=None, angles=None, q_mags=None, d_spacings=None, pens=None):
+    def add_rings(self, radii=None, angles=None, q_mags=None, d_spacings=None, pens=None, repeat=True):
         r""" Plot rings.  Note that these are in a plane located 1 meter from the sample position; calculate the radius
-        Needed for an equivalent detector at that distance.  If you know the scattering angle, the radius is
-        tan(theta)"""
+        needed for an equivalent detector at that distance.  If you know the scattering angle, the radius is
+        tan(theta).  The repeat keyword will include all rings for a given d-spacing."""
         self.debug()
-        qq = []
-        rr = []
-        if radii is not None:
-            radii = np.array(radii)
-            qq += [None for _ in radii]
-            rr += [r for r in radii]
-        if angles is not None:
-            angles = np.array(angles)
-            radii = np.tan(angles)
-            qq += [None for _ in radii]
-            rr += [r for r in radii]
-        if q_mags is not None:
-            q_mags = np.array(q_mags)
-            angles = 2*np.arcsin(q_mags*self.dataframe.get_beam().wavelength/(4*np.pi))
-            radii = np.tan(angles)
-            qq += [q for q in q_mags]
-            rr += [r for r in radii]
-        if d_spacings is not None:
-            d = np.array(d_spacings)
-            angles = 2*np.arcsin(self.dataframe.get_beam().wavelength / (2*d))
-            q_mags = 4*np.pi/d
-            radii = np.tan(angles)
-            qq += [q for q in q_mags]
-            rr += [r for r in radii]
-        n = len(rr)
         pens = utils.ensure_list(pens)
-        if pens is None or len(pens) < n:
-            pens = [pg.mkPen([255, 255, 255], width=2)]*n
-        for (r, p, i) in zip(rr, pens, range(n)):
-            ring = pg.CircleROI(pos=[-r, -r], size=2*r, pen=p, movable=False)
-            ring.q_mag = qq[i]
-            self.rings.append(ring)
-            self.viewbox.addItem(ring)
-        self.hide_ring_radius_handles()
+        # We allow various input types... so we must now ensure they are either list or None.
+        input = []
+        for d in [radii, angles, q_mags, d_spacings]:
+            if d is None:
+                input.append(None)
+                continue
+            if isinstance(d, np.ndarray):
+                d = [i for i in d]
+            d = utils.ensure_list(d)
+            input.append(d)
+        radii, angles, q_mags, d_spacings = input
+        if radii is not None:
+            pens *= int(len(radii)/len(pens))
+            for (r, p) in zip(radii, pens):
+                self.add_ring(radius=r, pen=p)
+            return True
+        if angles is not None:
+            pens *= int(len(angles)/len(pens))
+            for (r, p) in zip(angles, pens):
+                self.add_ring(angle=r, pen=p)
+            return True
+        if q_mags is not None:
+            pens *= int(len(q_mags)/len(pens))
+            for (r, p) in zip(q_mags, pens):
+                self.add_ring(q_mag=r, pen=p)
+            return True
+        if d_spacings is not None:
+            if repeat is True:
+                d_spacings = [d_spacings[0]/i for i in range(1, 21)]
+            pens *= int(len(d_spacings)/len(pens))
+            for (r, p) in zip(d_spacings, pens):
+                self.add_ring(d_spacing=r, pen=p)
+            return True
+        return False
+
+    def add_ring(self, radius=None, angle=None, q_mag=None, d_spacing=None, pen=None):
+        self.debug()
+        if angle is not None:
+            if angle >= np.pi:
+                return False
+            radius = np.tan(angle)
+        if q_mag is not None:
+            angle = 2*np.arcsin(q_mag*self.dataframe.get_beam().wavelength/(4*np.pi))
+            if angle >= np.pi:
+                return False
+            radius = np.tan(angle)
+        if d_spacing is not None:
+            angle = 2*np.arcsin(self.dataframe.get_beam().wavelength / (2*d_spacing))
+            if angle >= np.pi:
+                return False
+            q_mag = 4*np.pi/d_spacing
+            radius = np.tan(angle)
+        if pen is None:
+            pen = self.ring_pen
+        ring = pg.CircleROI(pos=[-radius, -radius], size=2*radius, pen=pen, movable=False)
+        ring.q_mag = q_mag
+        self.rings.append(ring)
+        self.viewbox.addItem(ring)
+        for handle in ring.handles:
+            ring.removeHandle(handle['item'])
+        return True
 
     def update_rings(self):
         r""" Update rings (needed if the |Beam| changes). """
@@ -1153,44 +1182,38 @@ class PADView(QtCore.QObject):
         for image in self.pad_image_items:
             image.setBorder(None)
 
-    # FIXME: This should be handled by the frame navigator
     def show_history_next(self):
         self.debug()
         self.dataframe = self.frame_getter.get_history_next()
         self.update_display_data()
 
-    # FIXME: This should be handled by the frame navigator
     def show_history_previous(self):
         self.debug()
         self.dataframe = self.frame_getter.get_history_previous()
         self.update_display_data()
 
-    # FIXME: This should be handled by the frame navigator
     def show_next_frame(self, skip=1):
         self.debug()
         self.dataframe = self.frame_getter.get_next_frame(skip=skip)
         self.update_display_data()
 
-    # FIXME: This should be handled by the frame navigator
     def show_previous_frame(self, skip=1):
         self.debug()
         self.dataframe = self.frame_getter.get_previous_frame(skip=skip)
         self.update_display_data()
 
-    # FIXME: This should be handled by the frame navigator
     def show_random_frame(self):
         self.debug()
         self.dataframe = self.frame_getter.get_random_frame()
         self.update_display_data()
 
-    # FIXME: This should be handled by the frame navigator
     def show_frame(self, frame_number=0):
         self.debug()
         self.dataframe = self.frame_getter.get_frame(frame_number=frame_number)
         self.debug(self.dataframe, level=2)
         self.update_display_data()
 
-    def update_display_data(self):
+    def update_display_data(self, dataframe=None):
         r"""
         Update display with new data, e.g. when moving to next frame.
 
@@ -1199,9 +1222,11 @@ class PADView(QtCore.QObject):
 
         Returns:
         """
+        if dataframe is not None:
+            self.dataframe = dataframe
         self.debug()
         self.update_pads()
-        self.remove_scatter_plots()
+        # self.remove_scatter_plots()
         if self.do_peak_finding is True:
             self.find_peaks()
             self.display_peaks()
@@ -1492,17 +1517,6 @@ class PADView(QtCore.QObject):
 
     def stop(self):
         self.debug()
-        # FIXME: Figure out how to make the main window close all other windows.
-        # # self.app.closeAllWindows()  Why doesn't this work?
-        # if self.plugins is not None:
-        #     for key in self.plugins.keys():
-        #         plugin = self.plugins[key]
-        #         if hasattr(plugin, 'widget'):
-        #             self.debug('Closing widget %s' % key, 1)
-        #             self.plugins[key] = None
-        #             # plugin.widget.close()
-        # self.app.quit()
-        # del self.app
 
     def show(self):
         self.debug()
@@ -1521,9 +1535,24 @@ class PADView(QtCore.QObject):
         if method is not None:
             method(*args, **kwargs)
 
+    def save_screenshot_dialog(self):
+        self.debug()
+        filepath, _ = self.save_file_dialog(title='Screenshot', default='padview_screenshot.jpg')
+        self.save_screenshot(filepath)
+
+    def save_screenshot(self, filename):
+        self.debug(':', filename)
+        p = self.main_window.grab()
+        p.save(filename)
+
+    def save_file_dialog(self, title='Filepath', default='file', types=None):
+        options = QtGui.QFileDialog.Options()
+        name, type = QtGui.QFileDialog.getSaveFileName(self.main_window, title, default, types, options=options)
+        return name, type
+
 
 def view_pad_data(pad_data=None, pad_geometry=None, show=True, title=None, **kwargs):
-    r""" Convenience function that creates a PADView2 instance and starts it. """
+    r""" Convenience function that creates a PADView instance and starts it. """
     pv = PADView(raw_data=pad_data, pad_geometry=pad_geometry, **kwargs)
     if title is not None:
         pv.set_title(title)
