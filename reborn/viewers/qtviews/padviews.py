@@ -382,6 +382,8 @@ class PADView(QtCore.QObject):
         beam_menu = self.menubar.addMenu('Beam')
         add_menu(beam_menu, 'Save beam...', connect=self.save_beam)
         add_menu(beam_menu, 'Load beam...', connect=self.load_beam)
+        analysis_menu = self.menubar.addMenu('Analysis')
+        add_menu(analysis_menu, 'Scattering profile...', connect=lambda: self.run_plugin('scattering_profile'))
         plugin_menu = self.menubar.addMenu('Plugins')
         self.plugin_names = []
         for plg in sorted(glob.glob(os.path.join(plugin_path, '*.py'))):
@@ -1027,7 +1029,7 @@ class PADView(QtCore.QObject):
         self.debug()
         text, ok = QtGui.QInputDialog.getText(self.main_window, "Enter ring radii (dict format)", "Ring radii",
                                               QtGui.QLineEdit.Normal,
-                                              '{"q_mags":[], "d_spacings":[], "radii":[], "angles":[], "pens":[]}')
+                                              '{"q_mags":[], "d_spacings":[], "radii":[], "angles":[], "pens":None}')
         if ok:
             d = json.loads(text)
             # if text == '':
@@ -1052,7 +1054,7 @@ class PADView(QtCore.QObject):
         # We allow various input types... so we must now ensure they are either list or None.
         input = []
         for d in [radii, angles, q_mags, d_spacings]:
-            if d is None:
+            if not d:
                 input.append(None)
                 continue
             if isinstance(d, np.ndarray):
@@ -1061,31 +1063,33 @@ class PADView(QtCore.QObject):
             input.append(d)
         radii, angles, q_mags, d_spacings = input
         if radii is not None:
-            pens *= int(len(radii)/len(pens))
+            # pens *= int(len(radii)/len(pens))
             for (r, p) in zip(radii, pens):
                 self.add_ring(radius=r, pen=p)
             return True
         if angles is not None:
-            pens *= int(len(angles)/len(pens))
+            # pens *= int(len(angles)/len(pens))
             for (r, p) in zip(angles, pens):
                 self.add_ring(angle=r, pen=p)
             return True
         if q_mags is not None:
-            pens *= int(len(q_mags)/len(pens))
+            self.debug('q_mags', q_mags, 'pens', pens)
+            # pens *= int(len(q_mags)/len(pens))
             for (r, p) in zip(q_mags, pens):
+
                 self.add_ring(q_mag=r, pen=p)
             return True
         if d_spacings is not None:
             if repeat is True:
                 d_spacings = [d_spacings[0]/i for i in range(1, 21)]
-            pens *= int(len(d_spacings)/len(pens))
+            # pens *= int(len(d_spacings)/len(pens))
             for (r, p) in zip(d_spacings, pens):
                 self.add_ring(d_spacing=r, pen=p)
             return True
         return False
 
     def add_ring(self, radius=None, angle=None, q_mag=None, d_spacing=None, pen=None):
-        self.debug()
+        self.debug(radius, angle, q_mag, d_spacing, pen)
         if angle is not None:
             if angle >= np.pi:
                 return False

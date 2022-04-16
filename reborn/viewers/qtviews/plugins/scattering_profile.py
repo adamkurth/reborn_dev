@@ -39,8 +39,10 @@ class Plugin():
         if self.profiler is None:
             self.profiler = reborn.detector.RadialProfiler(pad_geometry=pads, beam=beam, mask=mask)
         dat = pads.concat_data(padview.get_pad_display_data()).ravel()
-        dat /= pads.polarization_factors(beam=beam)
-        dat /= pads.solid_angles()
+        if self.widget.polarization_checkbox.isChecked():
+            dat /= pads.polarization_factors(beam=beam)
+        if self.widget.solid_angle_checkbox.isChecked():
+            dat /= pads.solid_angles()
         self.current_profile = self.profiler.get_mean_profile(dat)
         self.widget.plot_widget.plot(self.profiler.bin_centers/1e10, self.current_profile, clear=True)
         if self.water_profile is not None:
@@ -60,7 +62,7 @@ class Plugin():
                 self.water_profile = None
                 self.update_profile()
                 return
-        self.water_profile = reborn.simulate.solutions.get_water_profile(self.profiler.bin_centers)
+        self.water_profile = reborn.simulate.solutions.water_scattering_factor_squared(self.profiler.bin_centers)
         self.water_profile *= np.max(self.current_profile)/np.max(self.water_profile)
         self.widget.plot_widget.plot(self.profiler.bin_centers/1e10, self.water_profile, clear=False)
         pg.QtGui.QApplication.processEvents()
@@ -69,17 +71,30 @@ class Plugin():
 class Widget(QtGui.QMainWindow):
     def __init__(self, padview, plugin):
         super().__init__()
-        self.setWindowTitle('Scattering Profile')
-        self.hbox = QtGui.QHBoxLayout()
-        self.splitter = QtGui.QSplitter(QtCore.Qt.Vertical)
-        self.hbox.addWidget(self.splitter)
         self.padview = padview
         self.plugin = plugin
+        self.setWindowTitle('Scattering Profile')
+        vbox = QtGui.QVBoxLayout()
         self.plot_widget = pg.PlotWidget()
-        self.splitter.addWidget(self.plot_widget)
-        self.water_button = QtGui.QPushButton("Plot Water Profile")
-        self.water_button.clicked.connect(self.plugin.plot_water_profile)
-        self.splitter.addWidget(self.water_button)
-        self.main_widget = QtGui.QWidget()
-        self.main_widget.setLayout(self.hbox)
-        self.setCentralWidget(self.main_widget)
+        vbox.addWidget(self.plot_widget)
+        hbox = QtGui.QHBoxLayout()
+        h = QtGui.QHBoxLayout()
+        self.polarization_checkbox = QtGui.QCheckBox()
+        h.addWidget(self.polarization_checkbox, alignment=QtCore.Qt.AlignRight)
+        h.addWidget(QtGui.QLabel('Correct Polarization'))
+        hbox.addLayout(h)
+        h = QtGui.QHBoxLayout()
+        self.solid_angle_checkbox = QtGui.QCheckBox()
+        h.addWidget(self.solid_angle_checkbox, alignment=QtCore.Qt.AlignRight)
+        h.addWidget(QtGui.QLabel('Correct Solid Angles'))
+        hbox.addLayout(h)
+        b = QtGui.QPushButton("Update Profile")
+        b.clicked.connect(self.plugin.update_profile)
+        hbox.addWidget(b)
+        water_button = QtGui.QPushButton("Plot Water Profile")
+        water_button.clicked.connect(self.plugin.plot_water_profile)
+        hbox.addWidget(water_button)
+        vbox.addLayout(hbox)
+        main_widget = QtGui.QWidget()
+        main_widget.setLayout(vbox)
+        self.setCentralWidget(main_widget)
