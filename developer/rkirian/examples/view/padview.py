@@ -10,7 +10,7 @@ import pandas
 # np.random.seed(0)
 pdb = '1LYZ'
 geom = detector.cspad_pad_geometry_list(detector_distance=0.1)
-print(geom)
+# print(geom)
 # geom = crystfel.geometry_file_to_pad_geometry_list('../lcls/cxix53120/calib/jungfrau.geom')
 # geom.translate([0, 0, 0.1])
 beam = source.Beam(photon_energy=9500*eV, pulse_energy=1e-5, diameter_fwhm=100e-9)
@@ -45,13 +45,15 @@ def processor(dat):
     return dat
 
 frame_getter = MyFrameGetter()
-import pandas
-frame_getter.pandas_dataframe = pandas.DataFrame({'1': np.arange(1000)*2, '2': np.sin(np.arange(1000)/100)})
+# import pandas
+# frame_getter.pandas_dataframe = pandas.DataFrame({'1': np.arange(1000)*2, '2': np.sin(np.arange(
+#     1000)/100)})
 # frame_getter.view(debug_level=1)
 pv = PADView(frame_getter=frame_getter, debug_level=1, dataframe_preprocessor=processor)
 # pv.save_screenshot('/home/rkirian/Downloads/test.jpg')
 # pv.run_plugin('view_pandas_table')
-pv.run_plugin('scattering_profile')
+# pv.run_plugin('scattering_profile')
+pv.run_plugin('shift_detector')
 # pv.run_plugin('levels')
 # pv.add_rings(q_mags=3.567e10)
 # pv.show_all_geom_info()

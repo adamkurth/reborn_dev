@@ -13,7 +13,9 @@
 # You should have received a copy of the GNU General Public License
 # along with reborn.  If not, see <https://www.gnu.org/licenses/>.
 
+from reborn import detector
 import numpy as np
+import json
 from pyqtgraph import QtGui
 from functools import partial
 
@@ -28,6 +30,7 @@ class Plugin():
 
 
 class Widget(QtGui.QWidget):
+    editor_widget = None
     def __init__(self, padview):
         super().__init__()
         self.padview = padview
@@ -125,6 +128,11 @@ class Widget(QtGui.QWidget):
         self.zr_button.clicked.connect(partial(self.rotate_z, direction=1.0))
         self.layout.addWidget(self.zr_button, row, 4)
 
+        row += 1
+        self.direct_button = QtGui.QPushButton('Direct Edit Geometry')
+        self.direct_button.clicked.connect(self.open_editor)
+        self.layout.addWidget(self.direct_button, row, 1)
+
         self.setLayout(self.layout)
         QtGui.QShortcut(QtGui.QKeySequence('left'), self).activated.connect(partial(self.shift_x, direction=-1.0))
         QtGui.QShortcut(QtGui.QKeySequence('right'), self).activated.connect(partial(self.shift_x, direction=1.0))
@@ -181,3 +189,44 @@ class Widget(QtGui.QWidget):
         for p in pads:
             p.t_vec += np.array([xs, ys, zs])
         self.padview.update_pad_geometry(pads)
+
+    def open_editor(self):
+        if self.editor_widget is None:
+            self.editor_widget = DirectEditor(padview=self.padview)
+            self.editor_widget.show()
+
+
+class DirectEditor(QtGui.QWidget):
+    def __init__(self, padview=None):
+        super().__init__()
+        self.padview = padview
+        self.padview.sig_geometry_changed.connect(self.geometry_updated)
+        self.setWindowTitle("PAD Geometry Editor")
+        # self.resize(300,270)
+        self.editor = QtGui.QTextEdit()
+        self.geometry_updated()
+        self.update_button = QtGui.QPushButton("Update Geometry")
+        layout = QtGui.QVBoxLayout()
+        layout.addWidget(self.editor)
+        layout.addWidget(self.update_button)
+        self.setLayout(layout)
+        self.update_button.clicked.connect(self.update_geometry)
+
+    def update_geometry(self):
+        self.padview.debug()
+        txt = self.editor.toPlainText()
+        dicts = json.loads(txt)
+        pads = []
+        for d in dicts:
+            p = detector.PADGeometry()
+            p.from_dict(d)
+            pads.append(p)
+        self.padview.update_pad_geometry(pads)
+
+    def geometry_updated(self):
+        self.padview.debug()
+        txt = json.dumps([g.to_dict() for g in self.padview.dataframe.get_pad_geometry()], sort_keys=True, indent=0)
+        vsb = self.editor.verticalScrollBar()
+        old_pos_ratio = vsb.value()
+        self.editor.setPlainText(txt)
+        vsb.setValue(old_pos_ratio)
