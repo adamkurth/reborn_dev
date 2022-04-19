@@ -170,6 +170,14 @@ Mac OS notes
 The Linux notes mostly apply to Mac OS also.  Presumably you will need to install xcode and use homebrew, conda,
 or similar to get the gfortran compiler.
 
+To get pyopencl to recognize the CPU and GPU on a Mac (as of Apr 2022), run:
+
+.. code-block:: bash
+    conda install ocl_icd_wrapper_apple
+
+Details from this `site <https://documen.tician.de/pyopencl/misc.html#using-vendor-supplied-opencl-drivers-mainly-on-linux>`_.
+
+
 Windows 10 Notes
 ----------------
 
