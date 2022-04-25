@@ -325,3 +325,11 @@ class DataFrame:
     #
     # def set_bragg_peaks(self, bragg_peaks):
     #     pass
+
+import pickle
+def save_pickled_dataframe(df, filename):
+    with open(filename, 'wb') as f:
+        pickle.dump(df, f)
+def load_pickled_dataframe(filename):
+    with open(filename, 'rb') as f:
+        return pickle.load(f)
