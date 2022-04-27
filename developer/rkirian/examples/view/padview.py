@@ -1,3 +1,4 @@
+import sys, time
 import numpy as np
 import pyqtgraph as pg
 from reborn.external import crystfel

@@ -76,6 +76,7 @@ class FrameGetter(ABC):
 
     _n_frames = 1
     current_frame = 0
+    current_dataframe = None
     geom_dict = None
     history_length = 10000
     history = np.zeros(history_length, dtype=int)
@@ -175,18 +176,25 @@ class FrameGetter(ABC):
 
     def get_frame(self, frame_number=0, wrap_around=True, log_history=True):
         r""" Do not override this method. """
+        dat = None
         tic = time.time()
         if wrap_around:
             frame_number = frame_number % self.n_frames
         if frame_number >= self.n_frames:
             raise StopIteration
-        self.current_frame = frame_number
-        if log_history:
-            self._log_history()
-        self.debug(time.time()-tic, 'seconds to load frame', frame_number)
-        if self._cache_forward:
-            return self._get_data_cache_forward(frame_number=frame_number)
-        return self.get_data(frame_number=frame_number)
+        if self.current_frame == frame_number and self.current_dataframe is not None:
+            dat = self.current_dataframe
+        else:
+            self.current_frame = frame_number
+            if log_history:
+                self._log_history()
+            if self._cache_forward:
+                dat = self._get_data_cache_forward(frame_number=frame_number)
+            else:
+                dat = self.get_data(frame_number=frame_number)
+        self.current_dataframe = dat
+        self.debug(time.time() - tic, 'seconds to load frame', frame_number)
+        return dat
 
     def _log_history(self):
         r""" Do not override this method. """

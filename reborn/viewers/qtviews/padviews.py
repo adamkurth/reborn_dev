@@ -169,7 +169,7 @@ class PADView(QtCore.QObject):
                 self.debug('Found mask in frame_getter.')
             raw_data = None
             c = 0
-            while raw_data is None:
+            while raw_data is None:  # Some FrameGetters have empty frames... search for a valid frame...
                 raw_data = self.frame_getter.get_frame(c)
                 self.debug('frame', c, 'raw_data =', raw_data)
                 c += 1
@@ -207,8 +207,7 @@ class PADView(QtCore.QObject):
             if mask_data is None:
                 mask_data = [p.ones() for p in pad_geometry]
             self._dataframe = reborn.dataframe.DataFrame(raw_data=raw_data['pad_data'], pad_geometry=pad_geometry,
-                                                         beam=beam,
-                                                        mask=mask_data)
+                                                         beam=beam, mask=mask_data)
             self.frame_getter = DummyFrameGetter(self.dataframe)
 
         if not self.dataframe.validate():
