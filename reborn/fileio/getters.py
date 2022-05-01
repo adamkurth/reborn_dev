@@ -241,6 +241,13 @@ class FrameGetter(ABC):
             break
         return df
 
+    def get_first_frame(self):
+        r""" Get first frame (and skip empty frames if self.skip_empty_frames is True)."""
+        df = self.get_frame(frame_number=0)
+        if df is None:
+            df = self.get_next_frame()
+        return df
+
     def view(self, **kwargs):
         r""" Create a PADView instance and start it with this FrameGetter instance. """
         from ..viewers.qtviews.padviews import PADView
