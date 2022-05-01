@@ -97,7 +97,7 @@ class Widget(QtGui.QWidget):
             processed_data[i] = snr
         dataframe.set_processed_data(processed_data)
         self.padview.dataframe = dataframe
-        self.padview.update_display_data()
+        self.padview.update_display()
         if self.update_colorbar_button.isChecked():
             self.padview.set_levels(0, 10)
         self.padview.debug('%g seconds' % (time()-t,))

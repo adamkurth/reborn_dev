@@ -15,6 +15,7 @@
 
 # -*- coding: utf-8 -*-
 import os
+import time
 import glob
 import importlib
 import pickle
@@ -75,16 +76,6 @@ def ensure_dataframe(data, parent):
         return dataframe
 
 
-class DummyFrameGetter(FrameGetter):
-    r""" Makes a FrameGetter for a single DataFrame. """
-    def __init__(self, dataframe):
-        super().__init__()
-        self.dataframe = dataframe
-        dataframe.validate()
-    def get_data(self, frame_number=0):
-        return self.dataframe
-
-
 class PADView(QtCore.QObject):
 
     r"""
@@ -97,10 +88,11 @@ class PADView(QtCore.QObject):
     # not visible here.
     frame_getter = None
     _dataframe = None
-    debug_level = None  # Levels are 0: no messages, 1: basic messages, 2: more verbose, 3: extremely verbose
+    debug_level = 0  # Levels are 0: no messages, 1: basic messages, 2: more verbose, 3: extremely verbose
     pad_labels = None
     mask_image_items = None
     mask_color = [128, 0, 0]
+    _mask_rgba_arrays = None
     _mask_rois = None
     skip_empty_frames = True
     pad_image_items = None
@@ -117,113 +109,62 @@ class PADView(QtCore.QObject):
     _status_string_getter = " Frame 1 of 1 | "
     evt = None
     show_true_fast_scans = False
-    peak_finders = None
-    do_peak_finding = False
-    peaks_visible = True
     apply_filters = True
     plugins = None
-    _auto_percentiles = None
+    auto_percentiles = None
     _fixed_title = False
     _dataframe_preprocessor = None
-    _fixed_levels = None
+    fixed_levels = None
     hold_levels = True
+    _is_updating_display_data = False
+    _tic_level = -1
 
     status_bar_style = "background-color:rgb(30, 30, 30);color:rgb(255,0,255);font-weight:bold;font-family:monospace;"
-    peak_style = {'pen': pg.mkPen('g'), 'brush': None, 'width': 5, 'size': 10, 'pxMode': True}
+    scatterplot_style = {'pen': pg.mkPen('g'), 'brush': None, 'width': 5, 'size': 10, 'pxMode': True}
 
     sig_geometry_changed = QtCore.pyqtSignal()
     sig_beam_changed = QtCore.pyqtSignal()
     sig_dataframe_changed = QtCore.pyqtSignal()
 
-    def __init__(self, pad_geometry=None, mask_data=None, frame_getter=None, raw_data=None, pad_data=None,
+    def __init__(self, frame_getter=None, data=None, pad_geometry=None, mask=None,
                  beam=None, levels=None, percentiles=None, debug_level=0, main=True, dataframe_preprocessor=None,
-                 hold_levels=False):
+                 hold_levels=False, **kwargs):
         """
         Arguments:
-            pad_geometry (|PADGeometry| list): PAD geometry information.
-            mask_data (|ndarray| list): Data masks.
-            raw_data (|ndarray| or list of): The data arrays, or a dictionary with at least a 'pad_data' key.
+            frame_getter (|FrameGetter| subclass): The preferred way to flip through many frames.
+            data (|DataFrame| or |ndarray|): The data to be displayed.
+            pad_geometry (|PADGeometryList|): PAD geometry information.
+            mask (|ndarray|): Data masks.
             beam (|Beam|): X-ray beam parameters.
-            frame_getter (|FrameGetter| subclass): Optionally, a frame getter.
+            levels (tuple): The minimum and maximum levels for the colormap.
+            percentiles (tuple): The minimum and maximum percentages for the colormap.
+            debug_level (int): The debug level. Larger values are more verbose.
+            main (bool): Set to False if you don't want this window to close all other windows when it is closed.
+            hold_levels (bool): If True, do not attempt to re-scale the colormap for each frame.
+            dataframe_preprocessor (function): Experimental.
         """
+        self.debug('Initializing PADView instance.')
         super().__init__()
         self.debug_level = debug_level
-        self.debug()
         self.main = main
         self.hold_levels = hold_levels
         self._dataframe_preprocessor = dataframe_preprocessor
-        self._auto_percentiles = percentiles
-        self._fixed_levels = levels
-        self.debug('frame_getter:', frame_getter)
-        if frame_getter is not None:
-            self.frame_getter = frame_getter
-            # If so, does it have geometry, beam, and or mask information?
-            if hasattr(frame_getter, 'pad_geometry'):
-                pad_geometry = frame_getter.pad_geometry
-                self.debug('Found PAD geometry in frame_getter.')
-            if hasattr(frame_getter, 'beam'):
-                beam = frame_getter.beam
-                self.debug('Found beam info in frame_getter.')
-            if hasattr(frame_getter, 'mask_data'):
-                mask_data = frame_getter.mask_data
-                self.debug('Found mask in frame_getter.')
-            raw_data = None
-            c = 0
-            while raw_data is None:  # Some FrameGetters have empty frames... search for a valid frame...
-                raw_data = self.frame_getter.get_frame(c)
-                self.debug('frame', c, 'raw_data =', raw_data)
-                c += 1
-                if isinstance(raw_data, DataFrame):
-                    break
-            if isinstance(raw_data, DataFrame):
-                self._dataframe = raw_data
-
-        if self.dataframe is None:  # In case frame_getter does not return a DataFrame
-            self.debug('FrameGetter is not returning DataFrame type... you should fix this...')
-            # Handling of geometry info:
-            if pad_geometry is None:
-                self.debug('WARNING: Making up some *GARBAGE* PAD geometry; could not find PAD geometry.')
-                pad_geometry = []
-                shft = 0
-                for dat in raw_data['pad_data']:
-                    pad = detector.PADGeometry(distance=1.0, pixel_size=1.0, shape=dat.shape)
-                    pad.t_vec[0] += shft
-                    shft += pad.shape()[0]
-                    pad_geometry.append(pad)
-            pad_geometry = detector.PADGeometryList(pad_geometry)
-            # Handling of raw diffraction intensities:
-            if pad_data is not None:
-                raw_data = pad_data
-            if raw_data is not None:
-                if isinstance(raw_data, dict):
-                    pass
-                else:
-                    raw_data = {'pad_data': pad_geometry.split_data(raw_data)}
-            # Handling of beam info:
-            if beam is None:
-                self.debug('WARNING: Making up some *GARBAGE* beam information because you provided no specification.')
-                beam = source.Beam(photon_energy=9000*1.602e-19)
-            # Handling of mask info:
-            if mask_data is None:
-                mask_data = [p.ones() for p in pad_geometry]
-            self._dataframe = reborn.dataframe.DataFrame(raw_data=raw_data['pad_data'], pad_geometry=pad_geometry,
-                                                         beam=beam, mask=mask_data)
-            self.frame_getter = DummyFrameGetter(self.dataframe)
-
-        if not self.dataframe.validate():
-            print('DataFrame is not valid!')
+        self.auto_percentiles = percentiles
+        self.fixed_levels = levels
+        if frame_getter is None:
+            frame_getter = DummyFrameGetter(data=data, pad_geometry=pad_geometry, mask=mask, beam=beam, **kwargs)
+        self.frame_getter = frame_getter
         self.app = pg.mkQApp()
         self.setup_ui()
         self.setup_mouse_interactions()
         self.setup_shortcuts()
         self.setup_menubar()
         self.statusbar.setStyleSheet(self.status_bar_style)
-        self.setup_image_items()
-        self.show_frame()
+        self.show_first_frame()
         self.main_window.show()
         self.sig_beam_changed.connect(self.update_rings)
         # self.sig_geometry_changed.connect(self.update_rings)
-        self.debug('initialization complete')
+        self.debug('Initialization complete.')
 
     def debug(self, *args, level=1, **kwargs):
         r"""
@@ -249,6 +190,8 @@ class PADView(QtCore.QObject):
     @dataframe.setter
     def dataframe(self, val):
         self.debug()
+        if self._dataframe is None:
+            self._dataframe = val
         val = ensure_dataframe(val, self._dataframe)
         if self._dataframe_preprocessor is not None:
             val = self._dataframe_preprocessor(val)
@@ -277,11 +220,6 @@ class PADView(QtCore.QObject):
         # lay.addWidget(QtGui.QLabel('CMap min:'), 1, 1)
         # maxspin = QtGui.QSpinBox()
         # lay.addWidget(maxspin, 1, 2)
-        # box.setContentLayout(lay)
-        # self.side_panel_layout.addWidget(box)
-        # box = misc.CollapsibleBox('Peaks') ##############################
-        # lay = QtGui.QGridLayout()
-        # lay.addWidget(self.widget_peakfinder_config, 1, 1)
         # box.setContentLayout(lay)
         # self.side_panel_layout.addWidget(box)
         # box = misc.CollapsibleBox('Analysis') ###########################
@@ -438,10 +376,10 @@ class PADView(QtCore.QObject):
     def setup_histogram_tool(self):
         r""" Set up the histogram/colorbar/colormap tool that is located to the right of the PAD display. """
         self.debug()
-        self.set_preset_colormap('flame')
+        self.set_colormap('flame')
         self.histogram.setImageItems(self.pad_image_items)
 
-    def set_preset_colormap(self, preset='flame'):
+    def set_colormap(self, preset='flame'):
         r""" Change the colormap to one of the presets configured in pyqtgraph.  Right-click on the colorbar to find
         out what values are allowed.
         """
@@ -465,7 +403,7 @@ class PADView(QtCore.QObject):
         else:
             self.histogram.item.setLevels(min_value, max_value)
         if colormap is not None:
-            self.set_preset_colormap(colormap)
+            self.set_colormap(colormap)
 
     def set_levels_by_percentiles(self, percents=(1, 99), colormap=None):
         r""" Set upper and lower levels according to percentiles.  This is based on :func:`numpy.percentile`. """
@@ -669,23 +607,6 @@ class PADView(QtCore.QObject):
         trans.setMatrix(s[0], s[1], s[2], f[0], f[1], f[2], t[0], t[1], t[2])
         im.setTransform(trans)
 
-    def _make_mask_rgba(self, mask):
-        d = mask
-        mask_rgba = np.zeros((d.shape[0], d.shape[1], 4))
-        r = np.zeros_like(d)
-        r[d == 0] = self.mask_color[0]
-        g = np.zeros_like(d)
-        g[d == 0] = self.mask_color[1]
-        b = np.zeros_like(d)
-        b[d == 0] = self.mask_color[2]
-        t = np.zeros_like(d)
-        t[d == 0] = 255
-        mask_rgba[:, :, 0] = r
-        mask_rgba[:, :, 1] = g
-        mask_rgba[:, :, 2] = b
-        mask_rgba[:, :, 3] = t
-        return mask_rgba
-
     def choose_mask_color(self):
         self.debug()
         color = QtGui.QColorDialog.getColor()
@@ -698,19 +619,34 @@ class PADView(QtCore.QObject):
         self.mask_color[0] = color.red()
         self.mask_color[1] = color.green()
         self.mask_color[2] = color.blue()
+        self._mask_rgba_arrays = None
         self.update_masks()
 
     def update_masks(self, masks=None):
         r""" Update the data shown in mask image items. """
         self.debug()
-        if masks is None:
-            masks = self.dataframe.get_mask_list()
-        else:
-            self.dataframe.set_mask(masks)
-        for i in range(self.dataframe.n_pads):
-            # print(masks[i])
-            # pg.image(masks[i])
-            self.mask_image_items[i].setImage(self._make_mask_rgba(masks[i]))
+        self.tic()
+        self.debug('Getting mask list from dataframe...', level=2)
+        masks = self.dataframe.get_mask_list()
+        self.toc()
+        if self._mask_rgba_arrays is None:
+            self.tic('Initializing RGBA mask arrays...')
+            self._mask_rgba_arrays = []
+            for (i, mask) in enumerate(masks):
+                m = np.zeros((mask.shape[0], mask.shape[1], 4), dtype=np.uint8)
+                m[:, :, 0] = int(self.mask_color[0])
+                m[:, :, 1] = int(self.mask_color[1])
+                m[:, :, 2] = int(self.mask_color[2])
+                self._mask_rgba_arrays.append(m)
+            self.toc()
+        for (item, mask, rgba) in zip(self.mask_image_items, masks, self._mask_rgba_arrays):
+            self.tic('Updating RGBA mask array...')
+            rgba[:, :, 3] = 255
+            rgba[:, :, 3] -= mask.astype(np.uint8)*255
+            self.toc()
+            self.tic('Setting mask image...')
+            item.setImage(rgba)
+            self.toc()
 
     def hide_masks(self):
         self.debug()
@@ -812,20 +748,25 @@ class PADView(QtCore.QObject):
 
     def set_pad_display_data(self, data, auto_levels=False, update_display=True, levels=None, percentiles=None,
                              colormap=None):
-        if isinstance(data, dict):
-            data = data['pad_data']
         self.dataframe.set_processed_data(data)
+        if percentiles is not None:
+            self.auto_percentiles = percentiles
+        if auto_levels:
+            if self.auto_percentiles is None:
+                self.auto_percentiles = (2, 98)
+        if levels:
+            self.fixed_levels = levels
+        if colormap:
+            self.set_colormap(colormap)
         if update_display:
             self.update_pads()
-        if auto_levels:
-            self.set_levels_by_percentiles(percents=(2, 98))
         if (levels is not None) or (percentiles is not None):
             self.set_levels(levels=levels, percentiles=percentiles, colormap=colormap)
 
     def clear_processed_data(self):
         r""" Clear processed data and (show raw data). """
         self.dataframe._processed_data = None
-        self.update_display_data()
+        self.update_display()
 
     def setup_image_items(self):
         r""" Creates the PAD and mask ImageItems. Applies geometry transforms.  Sets data and colormap levels. """
@@ -847,34 +788,38 @@ class PADView(QtCore.QObject):
             self.viewbox.addItem(im)
         self.update_pad_geometry()
         self.update_pads()
-        self.update_masks()
+        # self.update_masks()
         self.setup_histogram_tool()
         self.set_levels_by_percentiles()
 
     def update_pads(self):
-        r""" Update the data that is displayed. """
+        r""" Update only the PAD data that is displayed, including colormap.  Usually you should run update_display
+        instead of this. """
         self.debug()
+        self.tic('Updating PAD displays.')
         if self.hold_levels:
             levels = self.get_levels()
         data = self.get_pad_display_data()
         if data is None:
             self.debug('get_pad_display_data returned None!')
             return
-        for i in range(self.dataframe.n_pads):
-            d = np.nan_to_num(data[i])
-            self.pad_image_items[i].setImage(d)
-        if self._auto_percentiles is not None:
+        if self.pad_image_items is None:
+            self.setup_image_items()
+        for (i, d) in enumerate(data):
+            self.pad_image_items[i].setImage(np.nan_to_num(d))
+        if self.auto_percentiles is not None:
             self.debug('auto_percentiles')
-            self.set_levels_by_percentiles(percents=self._auto_percentiles)
-        if self._fixed_levels is not None:
+            self.set_levels_by_percentiles(percents=self.auto_percentiles)
+        if self.fixed_levels is not None:
             self.debug('fixed_levels')
-            self.set_levels(self._fixed_levels[0], self._fixed_levels[1])
+            self.set_levels(self.fixed_levels[0], self.fixed_levels[1])
         if self.hold_levels:
             self.debug('hold_levels')
             self.set_levels(levels[0], levels[1])
+        self.tic('Updating histogram')
         self.histogram.regionChanged()
-        self.set_title()
-        self.update_masks()
+        self.toc()
+        self.toc()
 
     def update_pad_geometry(self, pad_geometry=None):
         r""" Update the PAD geometry.  Apply Qt transforms.  Also emits the sig_geometry_changed signal."""
@@ -904,8 +849,8 @@ class PADView(QtCore.QObject):
     def set_auto_level_percentiles(self, percents=(1, 99)):
         r""" Set to None if auto-scaling is not desired """
         self.debug()
-        self._auto_percentiles = percents
-        self.update_display_data()
+        self.auto_percentiles = percents
+        self.update_display()
 
     def save_pad_geometry(self):
         r""" Save list of pad geometry specifications in json format. """
@@ -1188,51 +1133,53 @@ class PADView(QtCore.QObject):
     def show_history_next(self):
         self.debug()
         self.dataframe = self.frame_getter.get_history_next()
-        self.update_display_data()
+        self.update_display()
 
     def show_history_previous(self):
         self.debug()
         self.dataframe = self.frame_getter.get_history_previous()
-        self.update_display_data()
+        self.update_display()
 
     def show_next_frame(self, skip=1):
         self.debug()
         self.dataframe = self.frame_getter.get_next_frame(skip=skip)
-        self.update_display_data()
+        self.update_display()
 
     def show_previous_frame(self, skip=1):
         self.debug()
         self.dataframe = self.frame_getter.get_previous_frame(skip=skip)
-        self.update_display_data()
+        self.update_display()
 
     def show_random_frame(self):
         self.debug()
         self.dataframe = self.frame_getter.get_random_frame()
-        self.update_display_data()
+        self.update_display()
 
     def show_frame(self, frame_number=0):
         self.debug()
         self.dataframe = self.frame_getter.get_frame(frame_number=frame_number)
         self.debug(self.dataframe, level=2)
-        self.update_display_data()
+        self.update_display()
 
-    def update_display_data(self, dataframe=None):
+    def show_first_frame(self):
+        self.debug()
+        self.dataframe = self.frame_getter.get_first_frame()
+        self.debug(self.dataframe, level=2)
+        self.update_display()
+
+    def update_display(self, dataframe=None):
         r"""
-        Update display with new data, e.g. when moving to next frame.
+        Update display, e.g. when moving to next frame.  This includes PADs, masks, title, rings, etc.
 
         Arguments:
-            dat: input dictionary with keys 'pad_data', 'peaks'
-
-        Returns:
+            dataframe (|DataFrame|): Optional input dataframe.  Will use self.dataframe otherwise.
         """
+        self.debug()
         if dataframe is not None:
             self.dataframe = dataframe
-        self.debug()
         self.update_pads()
-        # self.remove_scatter_plots()
-        if self.do_peak_finding is True:
-            self.find_peaks()
-            self.display_peaks()
+        self.update_masks()
+        self.set_title()
         self.update_status_string()
         self.mouse_moved(self.evt)
 
@@ -1333,117 +1280,11 @@ class PADView(QtCore.QObject):
     def panel_scatter_plot(self, panel_number, ss_coords, fs_coords, style=None):
         r""" Scatter plot points given coordinates (i.e. indices) corresponding to a particular panel.  This will
         take care of the re-mapping to the display coordinates."""
-        if style is None: style = self.peak_style
+        if style is None: style = self.scatterplot_style
         vecs = self.pad_geometry[panel_number].indices_to_vectors(ss_coords, fs_coords)
         vecs = self.vector_coords_to_2d_display_coords(vecs)
         self.add_scatter_plot(vecs[:, 0], vecs[:, 1], **style)
 
-    # FIXME: This goes into peak finding widget
-    def display_peaks(self):
-        r""" Scatter plot the peaks that are cached in the class instance. """
-        self.debug()
-        peaks = self.get_peak_data()
-        if peaks is None:
-            return
-        centroids = peaks['centroids']
-        for i in range(self.n_pads):
-            c = centroids[i]
-            if c is not None:
-                self.panel_scatter_plot(i, c[:, 1], c[:, 0])
-
-    # FIXME: This goes into peak finding widget
-    def show_peaks(self):
-        r""" Make peak scatter plots visible. """
-        self.debug()
-        self.display_peaks()
-        self.peaks_visible = True
-        # self.update_pads()
-
-    # FIXME: This goes into peak finding widget
-    def hide_peaks(self):
-        r""" Make peak scatter plots invisible. """
-        self.debug()
-        self.remove_scatter_plots()
-        self.peaks_visible = False
-        # self.update_pads()
-
-    # FIXME: This goes into peak finding widget
-    def toggle_peaks_visible(self):
-        r""" Toggle peak scatter plots visible/invisible. """
-        self.debug()
-        if self.peaks_visible == False:
-            self.display_peaks()
-            self.peaks_visible = True
-        else:
-            self.hide_peaks()
-            self.peaks_visible = False
-
-    # FIXME: This goes into peak finding widget
-    def get_peak_data(self):
-        r""" Fetch peak data, which might be stored in various places.
-        FIXME: Need to simplify the data structure so that it is not a hassle to find peaks."""
-        self.debug()
-        # if self.processed_data is not None:
-        #     self.debug('Getting processed peak data')
-        #     if 'peaks' in self.processed_data.keys():
-        #         return self.processed_data['peaks']
-        # if self.raw_data is not None:
-        #     self.debug('Getting raw peak data')
-        #     if 'peaks' in self.raw_data.keys():
-        #         return self.raw_data['peaks']
-        return None
-
-    # FIXME: Peakfinding stuff should be handled by a separate widget.
-    # def update_peakfinder_params(self):
-    #     r""" Reset the peak finders with new parameters.  This also launges a peakfinding job.
-    #     FIXME: Need to make this more intelligent so that unnecessary jobs are not launched."""
-    #     self.peakfinder_params = self.widget_peakfinder_config.get_values()
-    #     self.setup_peak_finders()
-    #     self.find_peaks()
-    #     self.hide_peaks()
-    #     if self.peakfinder_params['activate']:
-    #         self.show_peaks()
-    #     else:
-    #         self.hide_peaks()
-    #
-    # def find_peaks(self):
-    #     r""" Launch a peak-finding job, and cache the results.  This will not display anything. """
-    #     self.debug()
-    #     if self.peak_finders is None:
-    #         self.setup_peak_finders()
-    #     centroids = [None]*self.n_pads
-    #     n_peaks = 0
-    #     for i in range(self.n_pads):
-    #         pfind = self.peak_finders[i]
-    #         pfind.find_peaks(data=self.raw_data['pad_data'][i], mask=self.mask_data[i])
-    #         n_peaks += pfind.n_labels
-    #         centroids[i] = pfind.centroids
-    #     self.debug('Found %d peaks' % (n_peaks))
-    #     self.raw_data['peaks'] = {'centroids': centroids, 'n_peaks': n_peaks}
-    #
-    # def toggle_peak_finding(self):
-    #     r""" Toggle peakfinding on/off.  Set this to true if you want to automatically do peakfinding when a new
-    #     image data is displayed. """
-    #     self.debug()
-    #     if self.do_peak_finding is False:
-    #         self.do_peak_finding = True
-    #     else:
-    #         self.do_peak_finding = False
-    #     self.update_display_data()
-    #
-    # def setup_peak_finders(self):
-    #     r""" Create peakfinder class instances.  We use peakfinder classes rather than functions in order to tidy up
-    #     the data structure. """
-    #     self.debug()
-    #     self.peak_finders = []
-    #     a = self.peakfinder_params['inner']
-    #     b = self.peakfinder_params['center']
-    #     c = self.peakfinder_params['outer']
-    #     t = self.peakfinder_params['snr_threshold']
-    #     for i in range(self.n_pads):
-    #         self.peak_finders.append(PeakFinder(mask=self.mask_data[i], radii=(a, b, c), snr_threshold=t))
-
-    # FIXME: The entire plugin model needs to be considered more carefully.
     def import_plugin_module(self, module_name):
         self.debug()
         if module_name in self.plugins:
@@ -1553,6 +1394,17 @@ class PADView(QtCore.QObject):
         name, type = QtGui.QFileDialog.getSaveFileName(self.main_window, title, default, types, options=options)
         return name, type
 
+    def tic(self, *args, **kwargs):
+        level = kwargs.pop('level', 2)
+        self._tic_level += 1
+        self._tic_level = max(0, self._tic_level)
+        self.debug('\t'*self._tic_level, *args, *kwargs, level=level)
+        self.time = time.time()
+
+    def toc(self, level=2):
+        self.debug('\t'*self._tic_level, time.time()-self.time, 'seconds.', level=level)
+        self._tic_level -= 1
+
 
 def view_pad_data(pad_data=None, pad_geometry=None, show=True, title=None, **kwargs):
     r""" Convenience function that creates a PADView instance and starts it. """
@@ -1563,4 +1415,66 @@ def view_pad_data(pad_data=None, pad_geometry=None, show=True, title=None, **kwa
         pv.start()
 
 
-PADView2 = PADView  # For backward compatibility
+class DummyFrameGetter(FrameGetter):
+    r""" Makes a FrameGetter for a single DataFrame. """
+    def __init__(self, dataframe=None, data=None, pad_geometry=None, mask=None, beam=None, **kwargs):
+        r"""
+        Ideally, a |DataFrame| instance is provided, which has |PADGeometry|, |Beam|, etc. information.
+
+        Alternatively, data can be provided as a single |ndarray|, as a list of |ndarray|, or, for legacy purposes,
+        as a dictionary with the 'pad_data' key in it.  If so, then you should at least provide the |PADGeometry| and
+        |Beam| information, else some garbage numbers will be created for you.
+
+        Args:
+            dataframe:
+            data:
+            pad_geometry:
+        """
+        super().__init__()
+        if isinstance(data, DataFrame):
+            self.dataframe = data
+            self.dataframe.validate()
+        else:
+            # This is a mess.  It is exactly the reason why the |DataFrame| class was created...
+            if mask is None:
+                mask = kwargs.pop('mask_data', None)
+                if mask is not None:
+                    utils.depreciate('The "mask_data" keyword argument is no longer used.  Use "mask" instead.')
+            if data is None:
+                data = kwargs.pop('pad_data', None)
+                if data is not None:
+                    utils.depreciate('The "pad_data" keyword argument is no longer used.  Use "data" instead.')
+            if data is None:
+                data = kwargs.pop('raw_data', None)
+                if data is not None:
+                    utils.depreciate('The "raw_data" keyword argument is no longer used.  Use "data" instead.')
+            if data is None:
+                print('WARNING: No data was provided.  Making up some *GARBAGE* data.')
+                data = np.random.rand(100, 100)
+            if isinstance(data, dict):
+                data = data['pad_data']
+            if isinstance(data, np.ndarray):
+                data = [data]
+            if pad_geometry is None:
+                self.debug('WARNING: Making up some *GARBAGE* PAD geometry because you did not provide a geometry.')
+                pad_geometry = []
+                shft = 0
+                for dat in data:
+                    if len(dat.shape) == 1:
+                        print('WARNING: Your PAD data is a 1D array and you did not provide geometry information.')
+                    pad = detector.PADGeometry(distance=1.0, pixel_size=1.0, shape=dat.shape)
+                    pad.t_vec[0] += shft
+                    shft += pad.shape()[0]
+                    pad_geometry.append(pad)
+            pad_geometry = detector.PADGeometryList(pad_geometry)
+            # Handling of beam info:
+            if beam is None:
+                self.debug('WARNING: Making up some *GARBAGE* beam information because you provided no specification.')
+                beam = source.Beam(photon_energy=9000 * 1.602e-19)
+            # print(mask)
+            self.dataframe = reborn.dataframe.DataFrame(raw_data=data, pad_geometry=pad_geometry, beam=beam, mask=mask)
+            # print(self.dataframe.get_mask_flat(), np.min(self.dataframe.get_mask_flat()))
+        self.n_frames = 1
+
+    def get_data(self, frame_number=0):
+        return self.dataframe

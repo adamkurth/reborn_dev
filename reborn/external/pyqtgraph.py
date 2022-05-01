@@ -48,6 +48,38 @@ def image(*args, **kargs):
     return w
 
 
+def imview(image, hold=False):
+    r""" Makes an ImageView widget but adds some functionality that I commonly need.  A PlotItem is used as the
+    view so that there are axes, and by default the aspect ratio is unlocked so that the image is stretched to fill
+    the view.  The default colormap is set to 'flame'. The hold option keeps the window open, so that your script
+    will not exit and close your window a few milliseconds after opening it.  A Qt application is created if need be,
+    which avoids a common runtime error. """
+    app = pg.mkQApp()
+    plot = pg.PlotItem()
+    imv = pg.ImageView(view=plot)
+    plot.setAspectLocked(False)
+    imv.setImage(image)
+    imv.setPredefinedGradient('flame')
+    imv.show()
+    if hold:
+        app.exec_()
+    return imv
+
+
+
+class ImView(pg.ImageView):
+    def __init__(self, *args, **kwargs):
+        self.app = pg.mkQApp()
+        view = kwargs.pop('view', None)
+        title = kwargs.pop('title', 'ImView')
+        fs_lims = kwargs.pop('fs_lims', None)
+        ss_lims = kwargs.pop('ss_lims', None)
+        if view is None:
+            view = pg.PlotItem()
+
+
+
+
 class ImageWindow(pg.ImageView):
     """
     (deprecated; use ImageView instead)

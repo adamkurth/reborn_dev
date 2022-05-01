@@ -10,7 +10,8 @@ from reborn.const import eV
 import pandas
 # np.random.seed(0)
 pdb = '1LYZ'
-geom = detector.cspad_pad_geometry_list(detector_distance=0.1)
+# geom = detector.cspad_pad_geometry_list(detector_distance=0.1)
+geom = detector.rayonix_mx340_xfel_pad_geometry_list(detector_distance=0.1)
 # print(geom)
 # geom = crystfel.geometry_file_to_pad_geometry_list('../lcls/cxix53120/calib/jungfrau.geom')
 # geom.translate([0, 0, 0.1])
@@ -21,21 +22,32 @@ class MyFrameGetter(FrameGetter):
         self.n_frames = 1000
         self.init_params = {}
         self.pandas_dataframe = pandas.DataFrame({'Frame #': np.arange(self.n_frames)})
+        self.df = None
         # self.simulator = examples.PDBMoleculeSimulator(pdb_file=pdb, pad_geometry=geom, beam=beam)
     def get_data(self, frame_number=0):
         np.random.seed(frame_number)
         # g = geom.copy()
         # g.translate([0, 0, 0.05])
-        I = solutions.get_pad_solution_intensity(pad_geometry=geom, beam=beam, thickness=500e-6, poisson=True)
-        # profiler = detector.RadialProfiler(beam=beam, pad_geometry=geom)
-        # p = profiler.get_mean_profile(I)
-        # pg.plot(profiler.bin_centers, p)
-        # I = geom.q_mags(beam)
-        # I = self.simulator.next()
-        df = dataframe.DataFrame()
-        df.set_beam(beam)
-        df.set_pad_geometry(geom)
-        df.set_raw_data(I)
+        if self.df is None:
+            print('Simulating frame')
+            tic = time.time()
+            I = solutions.get_pad_solution_intensity(pad_geometry=geom, beam=beam, thickness=500e-6, poisson=True)
+            print(time.time()-tic, 'seconds')
+            # profiler = detector.RadialProfiler(beam=beam, pad_geometry=geom)
+            # p = profiler.get_mean_profile(I)
+            # pg.plot(profiler.bin_centers, p)
+            # I = geom.q_mags(beam)
+            # I = self.simulator.next()
+            df = dataframe.DataFrame()
+            df.set_beam(beam)
+            df.set_pad_geometry(geom)
+            df.set_raw_data(I)
+            self.df = df
+        df = self.df
+        if frame_number > 3:
+            m = df.get_pad_geometry()[0].ones()
+            m[0:500, 0:500] = 0
+            df.set_mask(m)
         # df.set_dataset_id(pdb)
         return df
 def processor(dat):
@@ -50,11 +62,13 @@ frame_getter = MyFrameGetter()
 # frame_getter.pandas_dataframe = pandas.DataFrame({'1': np.arange(1000)*2, '2': np.sin(np.arange(
 #     1000)/100)})
 # frame_getter.view(debug_level=1)
-pv = PADView(frame_getter=frame_getter, debug_level=1, dataframe_preprocessor=processor)
+pv = PADView(frame_getter=frame_getter, debug_level=2) #, dataframe_preprocessor=processor)
+# pv = PADView(data=frame_getter.get_first_frame().get_raw_data_list(), debug_level=2)
+# pv = PADView(data={'pad_data': frame_getter.get_first_frame().get_raw_data_list()}, debug_level=2)
 # pv.save_screenshot('/home/rkirian/Downloads/test.jpg')
 # pv.run_plugin('view_pandas_table')
 # pv.run_plugin('scattering_profile')
-pv.run_plugin('shift_detector')
+# pv.run_plugin('shift_detector')
 # pv.run_plugin('levels')
 # pv.add_rings(q_mags=3.567e10)
 # pv.show_all_geom_info()
