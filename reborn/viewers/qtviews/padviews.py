@@ -117,7 +117,7 @@ class PADView(QtCore.QObject):
     fixed_levels = None
     hold_levels = True
     _is_updating_display_data = False
-    _tic_level = -1
+    _tic_times = []
 
     status_bar_style = "background-color:rgb(30, 30, 30);color:rgb(255,0,255);font-weight:bold;font-family:monospace;"
     scatterplot_style = {'pen': pg.mkPen('g'), 'brush': None, 'width': 5, 'size': 10, 'pxMode': True}
@@ -143,9 +143,9 @@ class PADView(QtCore.QObject):
             hold_levels (bool): If True, do not attempt to re-scale the colormap for each frame.
             dataframe_preprocessor (function): Experimental.
         """
+        self.debug_level = debug_level
         self.debug('Initializing PADView instance.')
         super().__init__()
-        self.debug_level = debug_level
         self.main = main
         self.hold_levels = hold_levels
         self._dataframe_preprocessor = dataframe_preprocessor
@@ -166,7 +166,7 @@ class PADView(QtCore.QObject):
         # self.sig_geometry_changed.connect(self.update_rings)
         self.debug('Initialization complete.')
 
-    def debug(self, *args, level=1, **kwargs):
+    def debug(self, *args, level=1, caller=False, **kwargs):
         r"""
         Print debug messages according to the self.debug variable.
 
@@ -180,7 +180,10 @@ class PADView(QtCore.QObject):
         Returns: None
         """
         if self.debug_level >= level:
-            print('DEBUG:PADView.'+get_caller(1), *args, **kwargs)
+            c = ''
+            if caller:
+                c = get_caller(1)
+            print('DEBUG:PADView:'+c, *args, **kwargs)
 
     @property
     def dataframe(self):
@@ -624,9 +627,9 @@ class PADView(QtCore.QObject):
 
     def update_masks(self, masks=None):
         r""" Update the data shown in mask image items. """
-        self.debug()
-        self.tic()
-        self.debug('Getting mask list from dataframe...', level=2)
+        self.debug('update_masks')
+        self.tic('update_masks')
+        self.tic('Getting mask list from dataframe...')
         masks = self.dataframe.get_mask_list()
         self.toc()
         if self._mask_rgba_arrays is None:
@@ -647,6 +650,7 @@ class PADView(QtCore.QObject):
             self.tic('Setting mask image...')
             item.setImage(rgba)
             self.toc()
+        self.toc()
 
     def hide_masks(self):
         self.debug()
@@ -1396,14 +1400,14 @@ class PADView(QtCore.QObject):
 
     def tic(self, *args, **kwargs):
         level = kwargs.pop('level', 2)
-        self._tic_level += 1
-        self._tic_level = max(0, self._tic_level)
-        self.debug('\t'*self._tic_level, *args, *kwargs, level=level)
-        self.time = time.time()
+        self.debug('tic', '  '*len(self._tic_times), *args, *kwargs, level=level)
+        self._tic_times.append(time.time())
 
     def toc(self, level=2):
-        self.debug('\t'*self._tic_level, time.time()-self.time, 'seconds.', level=level)
-        self._tic_level -= 1
+        if len(self._tic_times) == 0:
+            print('Something is wrong with tic/toc')
+        tic = self._tic_times.pop()
+        self.debug('toc', '  '*len(self._tic_times), time.time()-tic, 'seconds.', level=level)
 
 
 def view_pad_data(pad_data=None, pad_geometry=None, show=True, title=None, **kwargs):

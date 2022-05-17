@@ -139,7 +139,7 @@ class UnitCell(object):
         s += '(alpha, beta, gamma) = (%.3g, %.3g, %.3g)\n' % (self.alpha, self.beta, self.gamma)
         s += 'Orth. Matrix:\n'
         s += self.o_mat.__str__()
-        s += '\n--------\n'
+        s += '\n========\n'
         return s
 
     @property
@@ -303,7 +303,7 @@ class SpaceGroup(object):
         if self.spacegroup_symbol is not None:
             s += self.spacegroup_symbol + '\n'
         for k in range(len(self.sym_rotations)):
-            s += 'operation %d\n' % (k,)
+            s += 'Operation #%d\n' % (k,)
             s += self.sym_translations[k].__str__() + '\n'
             s += self.sym_rotations[k].__str__() + '\n'
         s += '==========\n'
@@ -368,8 +368,8 @@ class CrystalStructure(object):
     pdb_dict = None
     _au_com = None
 
-    def __init__(self, pdb_file_path, no_warnings=False, expand_ncs_coordinates=False, tight_packing=False,
-                       unitcell=None, spacegroup=None, tempdir=None):
+    def __init__(self, pdb_file_path, no_warnings=False, expand_ncs_coordinates=False,
+                 create_bio_assembly=False, tight_packing=False, unitcell=None, spacegroup=None, tempdir=None):
         r"""
         This class is initialized with a PDB file.
 
@@ -378,7 +378,9 @@ class CrystalStructure(object):
         Arguments:
             pdb_file_path (string): Path to a pdb file (or just PDB ID if you want it auto-downloaded)
             no_warnings (bool): Suppress warnings concerning ambiguities in symmetry operations
-            expand_ncs_coordinates (bool): Choose whether or not to expand non-crystallographic symmetry (NCS) partners.
+            expand_ncs_coordinates (bool): Duplicate asymmetric unit to include non-crystallographic symmetry (NCS)
+                                           partners.
+            create_bio_assembly (bool): Duplicate asymmetric unit to include biological assembly model.
             tight_packing (bool): Choose whether or not to enable a physical arrangement of the asymmetric unit symmetry partners - No difference for inifinite crystals but makes sense for a finite crystal.
             unitcell (Unit Cell class): Specify a unit cell manually if needed.
             spacegroup (Space Group class): Specify a space group manually if needed.
@@ -463,6 +465,20 @@ class CrystalStructure(object):
         else:
             r_au = r
 
+        # Check for biological assembly.  Construct asymmetric unit from them.
+        if create_bio_assembly:
+            bio_partners = [r]
+            n_bio_partners = len(dic['bio_rotations'])
+            for i in range(n_bio_partners):
+                Z = np.concatenate([Z0, Z])
+                atomic_symbols = np.concatenate([atomic_symbols0, atomic_symbols])
+                R = dic['bio_rotations'][i]
+                T = dic['bio_translations'][i]
+                bio_partners.append(np.dot(r, R.T) + T)
+            r_au = np.vstack(bio_partners)
+        else:
+            r_au = r
+
         # Transform to fractional coordinates.
         x_au = np.dot(S, r_au.T).T # + U
 
@@ -498,6 +514,13 @@ class CrystalStructure(object):
 
         r_au_mod = np.dot(x_au, self.unitcell.o_mat.T)
         self.molecule = Molecule(coordinates=r_au_mod, atomic_symbols=atomic_symbols)
+
+    def __str__(self):
+        s = ''
+        s += self.unitcell.__str__()
+        s += '\n'
+        s += self.spacegroup.__str__()
+        return s
 
     @property
     def x_vecs(self):
@@ -1211,6 +1234,7 @@ def pdb_to_dict(pdb_file_path, ignore_waters=False):
     scale = np.zeros([3, 4])
     smtry = np.zeros([1000, 6])
     mtrix = np.zeros([10000, 4])
+    biomt = np.zeros([10000, 4])
     i_given = np.zeros([1000], dtype=int)
     a = b = c = None
     alpha = beta = gamma = None
@@ -1220,7 +1244,12 @@ def pdb_to_dict(pdb_file_path, ignore_waters=False):
     poorly_formatted_atoms = False
     smtry_index = 0
     mtrix_index = 0
+    biomt_index = 0
     atom_index = 0
+    ncs_rotations = []
+    ncs_translations = []
+    bio_rotations = []
+    bio_translations = []
 
     with open(pdb_file_path) as pdbfile:
 
@@ -1276,8 +1305,14 @@ def pdb_to_dict(pdb_file_path, ignore_waters=False):
                         i_given[mtrix_index] = int(line[59])
                     except ValueError:
                         i_given[mtrix_index] = 0
-
                 mtrix_index += 1
+
+            if line[0:18] == "REMARK 350   BIOMT":
+                biomt[biomt_index, 0] = float(line[23:33])
+                biomt[biomt_index, 1] = float(line[33:43])
+                biomt[biomt_index, 2] = float(line[43:54])
+                biomt[biomt_index, 3] = float(line[59:69])
+                biomt_index += 1
 
             if ignore_waters and ((line[17:20] == "HOH") or (line[17:20] == "TIP")):
                 continue
@@ -1303,8 +1338,6 @@ def pdb_to_dict(pdb_file_path, ignore_waters=False):
             if atom_index == atomic_coordinates.shape[0]:  # Make the array larger if need be.
                 atomic_coordinates = np.vstack([atomic_coordinates, np.zeros((atomic_coordinates.shape[0], 3))])
 
-    spacegroup_rotations = []
-    spacegroup_translations = []
     if smtry_index == 0:
         warn('No spacegroup operations found.')
         spacegroup_rotations.append(np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]]))
@@ -1314,14 +1347,16 @@ def pdb_to_dict(pdb_file_path, ignore_waters=False):
             spacegroup_rotations.append(smtry[i*3:i*3+3, 2:5])
             spacegroup_translations.append(smtry[i * 3:i * 3 + 3, 5])
 
-    ncs_rotations = []
-    ncs_translations = []
     i = 0
     for i in range(int(mtrix_index/3)):
         ncs_rotations.append(mtrix[i*3:i*3+3, 0:3])
         ncs_translations.append(mtrix[i*3:i*3+3, 3])
         i_given[i] = i_given[i*3]
     i_given = i_given[:i+1]
+
+    for i in range(int(biomt_index/3)):
+        bio_rotations.append(biomt[i*3:i*3+3, 0:3])
+        bio_translations.append(biomt[i*3:i*3+3, 3])
 
     dic = {'scale_matrix': scale[:, 0:3],
            'scale_translation': scale[:, 3],
@@ -1333,6 +1368,8 @@ def pdb_to_dict(pdb_file_path, ignore_waters=False):
            'spacegroup_translations': spacegroup_translations,
            'ncs_rotations': ncs_rotations,
            'ncs_translations': ncs_translations,
+           'bio_rotations': bio_rotations,
+           'bio_translations': bio_translations,
            'i_given': i_given
            }
 
