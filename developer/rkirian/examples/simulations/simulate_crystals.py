@@ -1,9 +1,9 @@
 import numpy as np
 from time import time
 from scipy import constants
-from reborn import detector, source, target
-from reborn.simulate.examples import CrystalSimulatorV1, cspad_geom_file, lysozyme_pdb_file
-from reborn.external.crystfel import geometry_file_to_pad_geometry_list
+from reborn import dataframe, source, target
+from reborn.simulate.examples import CrystalSimulatorV1, lysozyme_pdb_file
+from reborn.external.crystfel import geometry_file_to_pad_geometry_list, cspad_geom_file
 from reborn.viewers.qtviews.padviews import PADView
 from reborn.fileio.getters import FrameGetter
 
@@ -40,23 +40,20 @@ simulator = CrystalSimulatorV1(pad_geometry=pads, beam=beam, crystal_structure=c
                                approximate_shape_transform=True, expand_symmetry=False,
                                cl_double_precision=False, cl_group_size=32, poisson_noise=True)
 
-
 # FrameGetter is a class that helps create a unified interface for serving up XFEL events.  The underlying code could
 # read from a CXIDB file, an XTC file, from shared memory, or whatever else is convenient.  For this example, our
 # FrameGetter subclass will generate simulations on the fly.  Making a FrameGetter sub-class is easy: we just need to
 # override one method called "get_data(frame_number)".
 class MyFrameGetter(FrameGetter):
+    def __init__(self):
+        super().__init__()
+        self.dataframe = dataframe.DataFrame()
+        self.dataframe.set_pad_geometry(pads)
+        self.dataframe.set_beam(beam)
+        self.dataframe.set_mask(masks)
     def get_data(self, frame_number=1):
-        t = time()
-        dat = {'pad_data': simulator.generate_pattern()}
-        print('Simulation in %g seconds' % (time()-t,))
-        return dat
-
+        self.dataframe.set_raw_data(simulator.generate_pattern())
+        return self.dataframe
 
 frame_getter = MyFrameGetter()
-
-# PADView is a very basic viewer that is in development.  It can link up with a FrameGetter in order to serve up frames
-# from various file formats, or in this case it can be used to look at simulations one-by-one.
-padview = PADView(pad_geometry=pads, frame_getter=frame_getter, mask_data=masks)
-padview.set_levels(-1, 10)
-padview.start()
+frame_getter.view(levels=(-1, 10))

@@ -31,7 +31,8 @@ class MyFrameGetter(FrameGetter):
         if self.df is None:
             print('Simulating frame')
             tic = time.time()
-            I = solutions.get_pad_solution_intensity(pad_geometry=geom, beam=beam, thickness=500e-6, poisson=True)
+            I = solutions.get_pad_solution_intensity(pad_geometry=geom, beam=beam, thickness=500e-6, poisson=False)
+            self.I = I
             print(time.time()-tic, 'seconds')
             # profiler = detector.RadialProfiler(beam=beam, pad_geometry=geom)
             # p = profiler.get_mean_profile(I)
@@ -41,9 +42,9 @@ class MyFrameGetter(FrameGetter):
             df = dataframe.DataFrame()
             df.set_beam(beam)
             df.set_pad_geometry(geom)
-            df.set_raw_data(I)
             self.df = df
         df = self.df
+        df.set_raw_data(np.random.poisson(np.double(self.I) * (1 + 0.5 * np.random.rand())))
         if frame_number > 3:
             m = df.get_pad_geometry()[0].ones()
             m[0:500, 0:500] = 0

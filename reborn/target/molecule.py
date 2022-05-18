@@ -116,3 +116,9 @@ class Molecule(object):
         """
         import xraylib
         return np.array([xraylib.AtomicWeight(z) for z in self.atomic_numbers])*1e-3/avogadros_number
+
+    def view(self):
+        from ..viewers.qtviews import Scatter3D
+        v = Scatter3D()
+        v.add_points(self.coordinates)
+        v.show()
