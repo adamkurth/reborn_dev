@@ -192,9 +192,12 @@ class DataFrame:
         r""" See the corresponding get_frame_id method."""
         self._frame_id = frame_id
 
-    def get_beam(self):
+    def get_beam(self, copy=True):
         r""" Get the |Beam| instance, which contains x-ray wavelength, beam direction, etc."""
-        return self._beam.copy()
+        b = self._beam
+        if copy:
+            b = b.copy()
+        return b
 
     def set_beam(self, beam):
         r""" See the corresponding get_beam method."""
@@ -203,11 +206,14 @@ class DataFrame:
         beam = beam.copy()
         self._beam = beam
 
-    def get_pad_geometry(self):
+    def get_pad_geometry(self, copy=True):
         r""" Get the |PADGeometryList| of all PADs in the event.  A future version of this will likely accommodate
         multiple collections of PADs (e.g. when we have a SAXS detector and WAXS detector that are most reasonably
         analyzed separately.)."""
-        return self._pad_geometry.copy()
+        g = self._pad_geometry
+        if copy:
+            g = g.copy()
+        return g
 
     def set_pad_geometry(self, pads):
         r""" See the corresponding get_pad_geometry method. """
@@ -217,13 +223,16 @@ class DataFrame:
         # pads.validate()
         self._pad_geometry = pads
 
-    def get_raw_data_list(self):
+    def get_raw_data_list(self, copy=True):
         r""" Get the raw data as a list of 2D arrays."""
-        return self.split_data(self.get_raw_data_flat())
+        return self.split_data(self.get_raw_data_flat(copy=copy))
 
-    def get_raw_data_flat(self):
+    def get_raw_data_flat(self, copy=True):
         r""" Get the raw data as a contiguous 1D array, with all PADs concatenated."""
-        return self._raw_data.ravel()
+        d = self._raw_data.ravel()
+        if copy:
+            d = d.copy()
+        return d
 
     def set_raw_data(self, data):
         r""" Set the raw data.  You may pass a list or an |ndarray|.  Has the side effect of setting the 'writeable'
@@ -232,15 +241,18 @@ class DataFrame:
         self._raw_data.flags.writeable = False
         self._processed_data = None
 
-    def get_mask_list(self):
+    def get_mask_list(self, copy=True):
         r""" Get the mask as a list of 2D arrays."""
-        return self.split_data(self.get_mask_flat())
+        return self.split_data(self.get_mask_flat(copy=copy))
 
-    def get_mask_flat(self):
+    def get_mask_flat(self, copy=True):
         r""" Get the mask as a contiguous 1D array, with all PADs concatenated."""
         if self._mask is None:
             self.set_mask(np.ones(self.get_raw_data_flat().shape, dtype=int))
-        return self._mask.ravel()
+        m = self._mask.ravel()
+        if copy:
+            m = m.copy()
+        return m
 
     def set_mask(self, mask):
         r""" Set the mask.  You may pass a list or an |ndarray|."""
@@ -250,18 +262,22 @@ class DataFrame:
             self._mask = self.concat_data(mask)
         self._mask.flags.writeable = False
 
-    def get_processed_data_list(self):
-        r""" See corresponding _raw_ method."""
-        if self._processed_data is None:
-            self._processed_data = self._raw_data.copy()
-        return self.split_data(self.get_processed_data_flat())
-
-    def get_processed_data_flat(self):
+    def get_processed_data_list(self, copy=True):
         r""" See corresponding _raw_ method."""
         if self._processed_data is None:
             self._processed_data = self._raw_data.copy()
             self._processed_data.flags.writeable = False
-        return self._processed_data.ravel()
+        return self.split_data(self.get_processed_data_flat(copy=copy))
+
+    def get_processed_data_flat(self, copy=True):
+        r""" See corresponding _raw_ method."""
+        if self._processed_data is None:
+            self._processed_data = self._raw_data.copy()
+            self._processed_data.flags.writeable = False
+        d = self._processed_data.ravel()
+        if copy:
+            d = d.copy()
+        return d
 
     def set_processed_data(self, data):
         r""" See corresponding _raw_ method."""
@@ -274,35 +290,49 @@ class DataFrame:
         the raw data. """
         self._processed_data = None
 
-    def get_q_vecs(self):
+    def get_q_vecs(self, copy=True):
         r""" Get q vectors as an Nx3 array with all PADs concatenated. """
         if self._q_vecs is None:
             self._q_vecs = self._pad_geometry.q_vecs(self._beam)
             self._q_vecs.flags.writeable = False
-        return self._q_vecs.copy()
+        q = self._q_vecs
+        if copy:
+            q = q.copy()
+        return q
 
-    def get_q_mags_flat(self):
+    def get_q_mags_flat(self, copy=True):
         r""" Get q magnitudes as a flat array. """
         if self._q_mags is None:
             self._q_mags = self._pad_geometry.q_mags(self._beam)
             self._q_mags.flags.writeable = False
-        return self._q_mags.copy().ravel()
+        q = self._q_mags.ravel()
+        if copy:
+            q = q.copy()
+        return q
 
-    def get_q_mags_list(self):
+    def get_q_mags_list(self, copy=True):
         r""" Get q magnitudes as a list of 2D arrays. """
-        return self.split_data(self.get_q_mags_flat())
+        return self.split_data(self.get_q_mags_flat(copy=copy))
 
-    def get_solid_angles_flat(self):
+    def get_solid_angles_flat(self, copy=True):
         r""" Get pixel solid angles as flat array. """
         if self._sa is None:
             self._sa = self._pad_geometry.solid_angles()
-        return self._sa.copy().ravel()
+            self._sa.flags.writeable = False
+        s = self._sa.ravel()
+        if copy:
+            s = s.copy()
+        return s
 
-    def get_polarization_factors_flat(self):
+    def get_polarization_factors_flat(self, copy=True):
         r""" Get polarization factors as a flat array. """
         if self._pfac is None:
             self._pfac = self._pad_geometry.polarization_factors(beam=self._beam)
-        return self._pfac.copy().ravel()
+            self._pfac.flags.writeable = False
+        p = self._pfac.ravel()
+        if copy:
+            p = p.copy()
+        return p
 
     # def save(self, filename):
     #     np.savez(filename, dataset_id=self._dataset_id,
