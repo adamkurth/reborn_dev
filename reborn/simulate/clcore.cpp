@@ -480,9 +480,9 @@ kernel void mesh_interpolation(
     const dsfloat j_f = (qmod.y - q_min.y)/deltaQ.y;
     const dsfloat k_f = (qmod.z - q_min.z)/deltaQ.z;
     // Integer coordinates
-    const int i = (int)(floor(i_f));
-    const int j = (int)(floor(j_f));
-    const int k = (int)(floor(k_f));
+    const int i = (int)(floor(i_f+N.x));
+    const int j = (int)(floor(j_f+N.y));
+    const int k = (int)(floor(k_f+N.z));
     // Trilinear interpolation formula specified in paulbourke.net/miscellaneous/interpolation
     const int i0 = (i % N.x)*N.y*N.z;
     const int j0 = (j % N.y)*N.z;
