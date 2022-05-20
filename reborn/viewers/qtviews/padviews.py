@@ -1415,7 +1415,7 @@ class PADView(QtCore.QObject):
 
 def view_pad_data(pad_data=None, pad_geometry=None, show=True, title=None, **kwargs):
     r""" Convenience function that creates a PADView instance and starts it. """
-    pv = PADView(raw_data=pad_data, pad_geometry=pad_geometry, **kwargs)
+    pv = PADView(data=pad_data, pad_geometry=pad_geometry, **kwargs)
     if title is not None:
         pv.set_title(title)
     if show:
@@ -1424,7 +1424,7 @@ def view_pad_data(pad_data=None, pad_geometry=None, show=True, title=None, **kwa
 
 class DummyFrameGetter(FrameGetter):
     r""" Makes a FrameGetter for a single DataFrame. """
-    def __init__(self, dataframe=None, data=None, pad_geometry=None, mask=None, beam=None, **kwargs):
+    def __init__(self, data=None, pad_geometry=None, mask=None, beam=None, **kwargs):
         r"""
         Ideally, a |DataFrame| instance is provided, which has |PADGeometry|, |Beam|, etc. information.
 
@@ -1456,13 +1456,18 @@ class DummyFrameGetter(FrameGetter):
                 if data is not None:
                     utils.depreciate('The "raw_data" keyword argument is no longer used.  Use "data" instead.')
             if data is None:
+                # This should never happen...
                 print('WARNING: No data was provided.  Making up some *GARBAGE* data.')
-                data = np.random.rand(100, 100)
+                if pad_geometry is None:
+                    data = np.random.rand(100, 100)
+                else:
+                    pad_geometry = detector.PADGeometryList(pad_geometry)
+                    data = np.random.rand(pad_geometry.n_pixels)
             if isinstance(data, dict):
                 data = data['pad_data']
-            if isinstance(data, np.ndarray):
-                data = [data]
             if pad_geometry is None:
+                if isinstance(data, np.ndarray):
+                    data = [data]
                 self.debug('WARNING: Making up some *GARBAGE* PAD geometry because you did not provide a geometry.')
                 pad_geometry = []
                 shft = 0
@@ -1478,9 +1483,7 @@ class DummyFrameGetter(FrameGetter):
             if beam is None:
                 self.debug('WARNING: Making up some *GARBAGE* beam information because you provided no specification.')
                 beam = source.Beam(photon_energy=9000 * 1.602e-19)
-            # print(mask)
             self.dataframe = reborn.dataframe.DataFrame(raw_data=data, pad_geometry=pad_geometry, beam=beam, mask=mask)
-            # print(self.dataframe.get_mask_flat(), np.min(self.dataframe.get_mask_flat()))
         self.n_frames = 1
 
     def get_data(self, frame_number=0):
