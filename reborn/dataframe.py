@@ -223,10 +223,11 @@ class DataFrame:
 
     def get_raw_data_flat(self):
         r""" Get the raw data as a contiguous 1D array, with all PADs concatenated."""
-        return self._raw_data.copy().ravel()
+        return self._raw_data.ravel()
 
     def set_raw_data(self, data):
-        r""" Set the raw data.  You may pass a list or a concatentated 1D array."""
+        r""" Set the raw data.  You may pass a list or an |ndarray|.  Has the side effect of setting the 'writeable'
+        flag of the array to False. """
         self._raw_data = self.concat_data(data)
         self._raw_data.flags.writeable = False
         self._processed_data = None
@@ -239,14 +240,14 @@ class DataFrame:
         r""" Get the mask as a contiguous 1D array, with all PADs concatenated."""
         if self._mask is None:
             self.set_mask(np.ones(self.get_raw_data_flat().shape, dtype=int))
-        return self._mask.copy().ravel()
+        return self._mask.ravel()
 
     def set_mask(self, mask):
-        r""" Set the mask.  You may pass a list or a concatentated 1D array."""
+        r""" Set the mask.  You may pass a list or an |ndarray|."""
         if mask is None:
             self._mask = self._pad_geometry.ones(dtype=int)
         else:
-            self._mask = self.concat_data(mask.copy())
+            self._mask = self.concat_data(mask)
         self._mask.flags.writeable = False
 
     def get_processed_data_list(self):
@@ -259,11 +260,14 @@ class DataFrame:
         r""" See corresponding _raw_ method."""
         if self._processed_data is None:
             self._processed_data = self._raw_data.copy()
-        return self._processed_data.copy().ravel()
+            self._processed_data.flags.writeable = False
+        return self._processed_data.ravel()
 
     def set_processed_data(self, data):
         r""" See corresponding _raw_ method."""
-        self._processed_data = self.concat_data(data).astype(np.double)
+        d = self.concat_data(data)
+        d.flags.writeable = False
+        self._processed_data = d
 
     def clear_processed_data(self):
         r""" Clear the processed data.  After this operation, the get_processed_data method will return a copy of
@@ -325,3 +329,11 @@ class DataFrame:
     #
     # def set_bragg_peaks(self, bragg_peaks):
     #     pass
+
+import pickle
+def save_pickled_dataframe(df, filename):
+    with open(filename, 'wb') as f:
+        pickle.dump(df, f)
+def load_pickled_dataframe(filename):
+    with open(filename, 'rb') as f:
+        return pickle.load(f)

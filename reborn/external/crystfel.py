@@ -35,6 +35,7 @@ eV = const.value('electron volt')
 example_stream_file_path = pkg_resources.resource_filename('reborn', 'data/misc/test.stream')
 pnccd_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/pnccd_front.geom')
 epix10k_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/epix10k.geom')
+cspad_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/cspad.geom')
 
 # ------------------------------------------------
 # Stream file delimiters

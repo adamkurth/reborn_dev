@@ -23,6 +23,7 @@ class Plugin():
     widget = None
     profiler = None
     water_profile = None
+    water_plot = None
     def __init__(self, padview):
         self.padview = padview
         self.widget = Widget(padview, self)
@@ -44,9 +45,10 @@ class Plugin():
         if self.widget.solid_angle_checkbox.isChecked():
             dat /= pads.solid_angles()
         self.current_profile = self.profiler.get_mean_profile(dat)
-        self.widget.plot_widget.plot(self.profiler.bin_centers/1e10, self.current_profile, clear=True)
-        if self.water_profile is not None:
-            self.plot_water_profile(toggle=False)
+        self.current_q = self.profiler.bin_centers
+        self.widget.plot_widget.plot(self.current_q/1e10, self.current_profile, clear=True)
+        if self.widget.water_checkbox.isChecked():
+            self.plot_water_profile()
         pg.QtGui.QApplication.processEvents()
     def update_geometry(self):
         self.padview.debug()
@@ -55,16 +57,17 @@ class Plugin():
         mask = self.padview.dataframe.get_mask_list()
         self.profiler = reborn.detector.RadialProfiler(pad_geometry=pads, beam=beam, mask=mask)
         self.update_profile()
-    def plot_water_profile(self, toggle=True):
+    def plot_water_profile(self):
         self.padview.debug()
-        if toggle is True:
-            if self.water_profile is not None:  # Remove the water profile, else create the water profile
-                self.water_profile = None
-                self.update_profile()
-                return
         self.water_profile = reborn.simulate.solutions.water_scattering_factor_squared(self.profiler.bin_centers)
-        self.water_profile *= np.max(self.current_profile)/np.max(self.water_profile)
-        self.widget.plot_widget.plot(self.profiler.bin_centers/1e10, self.water_profile, clear=False)
+        w = np.where((self.current_q > 1.5e10)*(self.current_q < 2.5e10))
+        if len(w[0] > 0):  # Try to normalize on water ring peak
+            c = np.max(self.current_profile[w])/np.max(self.water_profile[w])
+        else:  # Normalize based on maximum
+            c = np.max(self.current_profile)/np.max(self.water_profile)
+        self.water_profile *= c
+        self.water_plot = self.widget.plot_widget.plot(self.profiler.bin_centers/1e10, self.water_profile, clear=False)
+        print(self.water_plot)
         pg.QtGui.QApplication.processEvents()
 
 
@@ -75,25 +78,34 @@ class Widget(QtGui.QMainWindow):
         self.plugin = plugin
         self.setWindowTitle('Scattering Profile')
         vbox = QtGui.QVBoxLayout()
+
         self.plot_widget = pg.PlotWidget()
         vbox.addWidget(self.plot_widget)
+
         hbox = QtGui.QHBoxLayout()
+
+        b = QtGui.QPushButton("Update Profile")
+        b.clicked.connect(self.plugin.update_profile)
+        hbox.addWidget(b)
+
         h = QtGui.QHBoxLayout()
         self.polarization_checkbox = QtGui.QCheckBox()
         h.addWidget(self.polarization_checkbox, alignment=QtCore.Qt.AlignRight)
         h.addWidget(QtGui.QLabel('Correct Polarization'))
         hbox.addLayout(h)
+
         h = QtGui.QHBoxLayout()
         self.solid_angle_checkbox = QtGui.QCheckBox()
         h.addWidget(self.solid_angle_checkbox, alignment=QtCore.Qt.AlignRight)
         h.addWidget(QtGui.QLabel('Correct Solid Angles'))
         hbox.addLayout(h)
-        b = QtGui.QPushButton("Update Profile")
-        b.clicked.connect(self.plugin.update_profile)
-        hbox.addWidget(b)
-        water_button = QtGui.QPushButton("Plot Water Profile")
-        water_button.clicked.connect(self.plugin.plot_water_profile)
-        hbox.addWidget(water_button)
+
+        h = QtGui.QHBoxLayout()
+        self.water_checkbox = QtGui.QCheckBox()
+        h.addWidget(self.water_checkbox, alignment=QtCore.Qt.AlignRight)
+        h.addWidget(QtGui.QLabel('Add Water Profile'))
+        hbox.addLayout(h)
+
         vbox.addLayout(hbox)
         main_widget = QtGui.QWidget()
         main_widget.setLayout(vbox)

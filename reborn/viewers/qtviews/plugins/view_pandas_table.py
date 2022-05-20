@@ -36,13 +36,13 @@ class Widget(QtGui.QWidget):
         self.layout = QtGui.QGridLayout()
         row = 0
         row += 1
-        self.pandas_widget = DFW(self.padview.main_window, self.padview.frame_getter.pandas_dataframe)
+        self.pandas_widget = DFW(self.padview.main_window, self.padview.frame_getter.pandas_dataframe) #.reset_index())
         self.pandas_widget.doubleClicked.connect(self.on_double_click)
         self.layout.addWidget(self.pandas_widget, row, 1)
         self.setLayout(self.layout)
 
     def on_double_click(self, model_index):
         row = model_index.row()
-        # column = model_index.column()
-        self.padview.show_frame(frame_number=row)
-
+        # index = self.pandas_widget._data_model.df['index'].iloc[row]
+        index = self.pandas_widget._data_model.df.index[row]
+        self.padview.show_frame(frame_number=index)

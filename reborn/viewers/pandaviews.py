@@ -24,6 +24,7 @@ Usage:
 
 """
 
+# Not sure of what this does
 # import sip
 # sip.setapi('QString', 2)
 # sip.setapi('QVariant', 2)
@@ -677,18 +678,16 @@ class DataFrameWidget(QtGui.QTableView):
         # GreaterThan/LessThan filter
         def _cmp_filter(s_col, op):
             return op(s_col, cell_val)
-        menu.addAction("Show Greater Than",
-                        partial(self._data_model.filterFunction, col_ix=col_ix,
-                                function=partial(_cmp_filter, op=operator.ge)))
-        menu.addAction("Show Less Than",
-                        partial(self._data_model.filterFunction, col_ix=col_ix,
-                                function=partial(_cmp_filter, op=operator.le)))
-        menu.addAction(self._icon('DialogResetButton'),
-                        "Clear Filter",
-                        self._data_model.reset)
+        menu.addAction("Show >= this value", partial(self._data_model.filterFunction, col_ix=col_ix,
+                                  function=partial(_cmp_filter, op=operator.ge)))
+        menu.addAction("Show > this value", partial(self._data_model.filterFunction, col_ix=col_ix,
+                                  function=partial(_cmp_filter, op=operator.gt)))
+        menu.addAction("Show <= this value", partial(self._data_model.filterFunction, col_ix=col_ix,
+                                  function=partial(_cmp_filter, op=operator.le)))
+        menu.addAction("Show < this value", partial(self._data_model.filterFunction, col_ix=col_ix,
+                                  function=partial(_cmp_filter, op=operator.lt)))
+        menu.addAction(self._icon('DialogResetButton'), "Clear Filter", self._data_model.reset)
         menu.addSeparator()
-
-
         return menu
 
     def contextMenuEvent(self, event):
@@ -724,7 +723,8 @@ class DataFrameWidget(QtGui.QTableView):
         menu.addAction(self._icon('TitleBarUnshadeButton'), "Sort Descending",
                        partial(self._data_model.sort, col_ix=col_ix, order=QtCore.Qt.DescendingOrder))
         menu.addSeparator()
-        menu.addAction("Plot Single Column", partial(self.plot_single_column, col_ix=col_ix))
+        menu.addAction("Plot Column", partial(self.plot_single_column, col_ix=col_ix))
+        menu.addAction("Custom Filter...", partial(self.custom_filter, col_ix=col_ix))
         menu.addSeparator()
         # Hide
         menu.addAction("Hide", partial(self.hideColumn, col_ix))
@@ -816,6 +816,8 @@ class DataFrameWidget(QtGui.QTableView):
                 if isinstance(d, WidgetedCell):
                     self.openPersistentEditor(idx)
 
+    def custom_filter(self, col_ix):
+        print('This is column', col_ix, '. Custom filter not yet implemented')
 
 # class DataFramePlotWidget(QtGui.QWidget):
 #     def __init__(self, df, col):

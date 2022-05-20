@@ -88,7 +88,7 @@ class Widget(QtGui.QWidget):
         self.setup_histogram_tool()
         m = max(self.get_levels())
         self.set_levels(levels=(-m, m))
-        self.set_preset_colormap('bipolar2')
+        self.set_colormap('bipolar2')
 
     def setup_histogram_tool(self):
         # self.debug(get_caller(), 1)
@@ -103,7 +103,7 @@ class Widget(QtGui.QWidget):
         trans.setMatrix(s[0], s[1], s[2], f[0], f[1], f[2], t[0], t[1], t[2])
         im.setTransform(trans)
 
-    def set_preset_colormap(self, preset='flame'):
+    def set_colormap(self, preset='flame'):
         r""" Change the colormap to one of the presets configured in pyqtgraph.  Right-click on the colorbar to find
         out what values are allowed.
         """
@@ -128,7 +128,7 @@ class Widget(QtGui.QWidget):
         r""" Set the minimum and maximum levels, same as sliding the yellow sliders on the histogram tool. """
         # self.debug(get_caller(), 1)
         if colormap is not None:
-            self.set_preset_colormap(colormap)
+            self.set_colormap(colormap)
         if levels is not None:
             min_value = levels[0]
             max_value = levels[1]

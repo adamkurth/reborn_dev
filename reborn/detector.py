@@ -923,6 +923,10 @@ class PADGeometryList(list):
             return True
         return False
 
+    def to_dict_list(self):
+        r""" Convert each |PADGeometry| to a dictionary, return as a list. """
+        return [p.to_dict() for p in self]
+
     def save(self, filename):
         r""" Save this PADGeometryList in default json format. """
         self.save_json(filename)

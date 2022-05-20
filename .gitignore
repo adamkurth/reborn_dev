@@ -26,6 +26,8 @@ log.txt
 *.cprof
 *.h5
 *.hdf5
+*.pkl
+.nfs*
 *.c
 .*.csv
 *.swp

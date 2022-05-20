@@ -77,6 +77,104 @@ class Widget(QtGui.QWidget):
         self.layout.addWidget(self.update_button, row, 1, 1, 2)
         self.setLayout(self.layout)
 
+    def display_peaks(self):
+        r""" Scatter plot the peaks that are cached in the class instance. """
+        self.debug()
+        peaks = self.get_peak_data()
+        if peaks is None:
+            return
+        centroids = peaks['centroids']
+        for i in range(self.n_pads):
+            c = centroids[i]
+            if c is not None:
+                self.panel_scatter_plot(i, c[:, 1], c[:, 0])
+
+    def show_peaks(self):
+        r""" Make peak scatter plots visible. """
+        self.debug()
+        self.display_peaks()
+        self.peaks_visible = True
+
+    def hide_peaks(self):
+        r""" Make peak scatter plots invisible. """
+        self.debug()
+        self.remove_scatter_plots()
+        self.peaks_visible = False
+
+    def toggle_peaks_visible(self):
+        r""" Toggle peak scatter plots visible/invisible. """
+        self.debug()
+        if self.peaks_visible == False:
+            self.display_peaks()
+            self.peaks_visible = True
+        else:
+            self.hide_peaks()
+            self.peaks_visible = False
+
+    # FIXME: This goes into peak finding widget
+    def get_peak_data(self):
+        r""" Fetch peak data, which might be stored in various places.
+        FIXME: Need to simplify the data structure so that it is not a hassle to find peaks."""
+        self.debug()
+        # if self.processed_data is not None:
+        #     self.debug('Getting processed peak data')
+        #     if 'peaks' in self.processed_data.keys():
+        #         return self.processed_data['peaks']
+        # if self.raw_data is not None:
+        #     self.debug('Getting raw peak data')
+        #     if 'peaks' in self.raw_data.keys():
+        #         return self.raw_data['peaks']
+        return None
+
+    def update_peakfinder_params(self):
+        r""" Reset the peak finders with new parameters.  This also launges a peakfinding job.
+        FIXME: Need to make this more intelligent so that unnecessary jobs are not launched."""
+        self.peakfinder_params = self.widget_peakfinder_config.get_values()
+        self.setup_peak_finders()
+        self.find_peaks()
+        self.hide_peaks()
+        if self.peakfinder_params['activate']:
+            self.show_peaks()
+        else:
+            self.hide_peaks()
+
+    def find_peaks(self):
+        r""" Launch a peak-finding job, and cache the results.  This will not display anything. """
+        self.debug()
+        if self.peak_finders is None:
+            self.setup_peak_finders()
+        centroids = [None]*self.n_pads
+        n_peaks = 0
+        for i in range(self.n_pads):
+            pfind = self.peak_finders[i]
+            pfind.find_peaks(data=self.raw_data['pad_data'][i], mask=self.mask_data[i])
+            n_peaks += pfind.n_labels
+            centroids[i] = pfind.centroids
+        self.debug('Found %d peaks' % (n_peaks))
+        self.raw_data['peaks'] = {'centroids': centroids, 'n_peaks': n_peaks}
+
+    def toggle_peak_finding(self):
+        r""" Toggle peakfinding on/off.  Set this to true if you want to automatically do peakfinding when a new
+        image data is displayed. """
+        self.debug()
+        if self.do_peak_finding is False:
+            self.do_peak_finding = True
+        else:
+            self.do_peak_finding = False
+        self.update_display_data()
+
+    def setup_peak_finders(self):
+        r""" Create peakfinder class instances.  We use peakfinder classes rather than functions in order to tidy up
+        the data structure. """
+        self.debug()
+        self.peak_finders = []
+        a = self.peakfinder_params['inner']
+        b = self.peakfinder_params['center']
+        c = self.peakfinder_params['outer']
+        t = self.peakfinder_params['snr_threshold']
+        for i in range(self.n_pads):
+            self.peak_finders.append(PeakFinder(mask=self.mask_data[i], radii=(a, b, c), snr_threshold=t))
+
     def do_action(self):
         self.padview.debug('PeakfinderConfigWidget.get_values()', 1)
         dat = {}

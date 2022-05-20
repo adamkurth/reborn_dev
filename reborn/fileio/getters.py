@@ -12,6 +12,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with reborn.  If not, see <https://www.gnu.org/licenses/>.
+import time, threading
 from abc import ABC, abstractmethod, abstractproperty
 import numpy as np
 
@@ -75,6 +76,7 @@ class FrameGetter(ABC):
 
     _n_frames = 1
     current_frame = 0
+    current_dataframe = None
     geom_dict = None
     history_length = 10000
     history = np.zeros(history_length, dtype=int)
@@ -82,6 +84,10 @@ class FrameGetter(ABC):
     init_params = None
     skip_empty_frames = True
     _pandas_dataframe = None
+    _getter_thread = None
+    _cached_data = None
+    _cache_forward = False
+    _debug = 0
 
     def __init__(self):
         pass
@@ -103,12 +109,58 @@ class FrameGetter(ABC):
             pass
         self._n_frames = n_frames
 
+    def debug(self, *args, **kwargs):
+        if self._debug:
+            print('DEBUG:FrameGetterABC:', *args, **kwargs)
+
     @abstractmethod
     def get_data(self, frame_number=0):
         r"""
         This is the only method you should override when making a subclass.
         """
         pass
+        return None
+
+    def _get_data_cache_forward(self, frame_number=0):
+        r"""
+        Experimental.  This will return the requested frame from cache if it is available, and launch a thread to
+        fetch the next frame.
+
+        Args:
+            frame_number:
+
+        Returns:
+
+        """
+        # Initialize the data to return:
+        dat = None
+        # If a thread has been launched already, make sure it is done processing:
+        if self._getter_thread is not None:
+            self.debug('joining thread')
+            self._getter_thread.join()
+        # If data has been cached by the thread, check if it is the data we want:
+        if self._cached_data is not None:
+            if self._cached_data['frame_number'] == frame_number:
+                self.debug('found cached data for frame', frame_number)
+                dat = self._cached_data['data']
+        # If there is no cached data (or the wrong data), then we must fetch it now (and wait for it...):
+        if dat is None:
+            self.debug('fetching data directly')
+            dat = self.get_data(frame_number)
+        # Launch a thread to fetch the next frame:
+        next_frame = frame_number + 1
+        if next_frame < self.n_frames:  # If we expect another frame...
+            self.debug('launching thread for frame', next_frame)
+            self._getter_thread = threading.Thread(target=self._threaded_get_data, args=(next_frame,))
+            self._getter_thread.start()
+        else:  # If there are no more frames to fetch...
+            self._getter_thread = None
+            self._cached_data = None
+        return dat
+
+    def _threaded_get_data(self, frame_number=0):
+        r""" Gets data, but returns a dictionary that also has frame number."""
+        self._cached_data = {'frame_number': frame_number, 'data': self.get_data(frame_number=frame_number)}
         return None
 
     @property
@@ -124,14 +176,25 @@ class FrameGetter(ABC):
 
     def get_frame(self, frame_number=0, wrap_around=True, log_history=True):
         r""" Do not override this method. """
+        dat = None
+        tic = time.time()
         if wrap_around:
             frame_number = frame_number % self.n_frames
         if frame_number >= self.n_frames:
             raise StopIteration
-        self.current_frame = frame_number
-        if log_history:
-            self._log_history()
-        return self.get_data(frame_number=frame_number)
+        if self.current_frame == frame_number and self.current_dataframe is not None:
+            dat = self.current_dataframe
+        else:
+            self.current_frame = frame_number
+            if log_history:
+                self._log_history()
+            if self._cache_forward:
+                dat = self._get_data_cache_forward(frame_number=frame_number)
+            else:
+                dat = self.get_data(frame_number=frame_number)
+        self.current_dataframe = dat
+        self.debug(time.time() - tic, 'seconds to load frame', frame_number)
+        return dat
 
     def _log_history(self):
         r""" Do not override this method. """
@@ -176,6 +239,13 @@ class FrameGetter(ABC):
             if (df is None) and self.skip_empty_frames:
                 continue
             break
+        return df
+
+    def get_first_frame(self):
+        r""" Get first frame (and skip empty frames if self.skip_empty_frames is True)."""
+        df = self.get_frame(frame_number=0)
+        if df is None:
+            df = self.get_next_frame()
         return df
 
     def view(self, **kwargs):
