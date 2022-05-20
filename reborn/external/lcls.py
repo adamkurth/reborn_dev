@@ -32,7 +32,7 @@ except ImportError:
     psana = None
 
 
-debug = False
+debug = True
 
 
 def debug_message(*args, caller=True, **kwargs):
@@ -60,6 +60,7 @@ def pad_to_asic_data_split(data, n, m):
     Returns:
         pads (list): List of separated PADs.
     """
+    data = utils.atleast_3d(data)
     pads = []
     for a in data:
         b = np.vsplit(a, n)
@@ -87,7 +88,14 @@ def get_pad_pixel_coordinates(pad_det, run_number, splitter):
         y (list)
         z (list)
     """
-    n_panels, n_ss, n_fs = pad_det.shape()
+    s = pad_det.shape()
+    if len(s) == 3:
+        n_panels, n_ss, n_fs = pad_det.shape()
+    elif len(s) == 2:
+        n_panels = 1
+        n_ss, n_fs = pad_det.shape()
+    else:
+        raise RuntimeError('Cannot figure out what kind of detector this is.')
     xdc, ydc, zdc = pad_det.coords_xyz(run_number)
 
     if xdc.size != n_panels * n_ss * n_fs:
@@ -229,6 +237,8 @@ class AreaDetector(object):
             self.splitter = lambda data: pad_to_asic_data_split(data, 1, 2)
         if self.detector_type == 'epix10k2m':
             self.splitter = lambda data: pad_to_asic_data_split(data, 2, 2)
+        if self.detector_type == 'epix100a':
+            self.splitter = lambda data: pad_to_asic_data_split(data, 2, 2)
 
         if isinstance(geometry, str):
             try:  # Check if it is a reborn geometry file
@@ -279,6 +289,7 @@ class AreaDetector(object):
     def get_detector_type(self):
         """ The psana detector fails to provide reliable information on detector type. """
         detector_id = self.detector.source.__str__()
+        #print('='*70, '\n', detector_id, '='*70, '\n')
         if re.match(r'.*cspad', detector_id, re.IGNORECASE) is not None:
             detector_type = 'cspad'
         elif re.match(r'.*pnccd.*', detector_id, re.IGNORECASE) is not None:
@@ -287,6 +298,8 @@ class AreaDetector(object):
             detector_type = 'epix10k2m'
         elif re.match(r'.*rayonix.*', detector_id, re.IGNORECASE) is not None:
             detector_type = 'rayonix'
+        elif re.match(r'.*Epix100a.*', detector_id, re.IGNORECASE) is not None:
+            detector_type = 'epix100a'
         else:
             detector_type = 'unknown'
         return detector_type
@@ -342,7 +355,7 @@ class LCLSFrameGetter(reborn.fileio.getters.FrameGetter):
     event = None
     event_codes = None
 
-    def __init__(self, experiment_id, run_number, pad_detectors, max_events=1e6, psana_dir=None, beam=None, idx=True):
+    def __init__(self, experiment_id, run_number, pad_detectors, max_events=1e6, psana_dir=None, beam=None, idx=True, evr='evr0'):
         debug_message('Initializing superclass')
         super().__init__()  # initialize the superclass
         self.init_params = {"experiment_id": experiment_id,
@@ -374,7 +387,11 @@ class LCLSFrameGetter(reborn.fileio.getters.FrameGetter):
         self.events = self.run.events()
         self.previous_frame = 0
         self.ebeam_detector = psana.Detector('EBeam')
-        self.evr = psana.Detector('evr0')
+        try:
+            self.evr = psana.Detector(evr)
+        except:
+            print('WARNING:', evr, 'not found.  Cannot determine if x-rays and optical laser are activated.')
+            self.evr = None
         self.detectors = [AreaDetector(**p, run_number=self.run_number, accept_missing=True) for p in pad_detectors]
         self.beam = beam
         if beam is None:
@@ -406,9 +423,13 @@ class LCLSFrameGetter(reborn.fileio.getters.FrameGetter):
         if event is None:
             debug_message('The event is None!')
             return None
-        self.event_codes = self.evr.eventCodes(event)
-        xray_on = 40 in self.event_codes   # FIXME: This number might differ from one experiment to the next
-        laser_on = 41 in self.event_codes  # FIXME: This number might differ from one experiment to the next
+        if self.evr is not None:
+            self.event_codes = self.evr.eventCodes(event)
+            xray_on = 40 in self.event_codes   # FIXME: This number might differ from one experiment to the next
+            laser_on = 41 in self.event_codes  # FIXME: This number might differ from one experiment to the next
+        else:
+            xray_on = True
+            laser_on = False
         photon_energy = None
         try:
             photon_energy = self.ebeam_detector.get(event).ebeamPhotonEnergy()*reborn.const.eV
