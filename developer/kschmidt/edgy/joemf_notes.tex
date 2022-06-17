@@ -1,0 +1,240 @@
+\documentclass[12pt]{article}
+\usepackage[margin=2.7cm]{geometry}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{url}
+\begin{document}
+\let\xxxhat\hat
+\let\xxxvec\vec
+\renewcommand{\hat}[1]{{\boldsymbol {\xxxhat {#1}} }}
+\renewcommand{\vec}[1]{\boldsymbol {#1}}
+
+
+\section{Introduction}
+These are
+notes on the article by Schmidt et al.\footnote{
+Ella M. Schmidt, Johnathan M. Bulled and Andrew L. Goodwin,
+ ``Efficient fitting of single-crystal diffuse scattering in
+interaction space: a mean-field approach,'' IUCrJ {\bf 9}, 21-30 (2022)
+\url{https://doi.org/10.1107/S2052252521009982}.
+}
+and it's relationship to our paper\footnote{
+Shape transform phasing of edgy nanocrystals
+J. P. J. Chen, J. J. Donatelli, K. E. Schmidt and R. A. Kirian,
+Acta Cryst {\bf A75}, 239-259 (2019).
+}.
+
+
+They define a Hamiltonian in their Eq.\ (1) as
+\begin{equation}
+H = \frac{1}{2} \sum_{jk} \sum_{\alpha\beta} \mu^j_\alpha J_{\alpha\beta}^{jk}
+\mu_\beta^k
+\end{equation}
+where I use
+greek letters for lattice positions and roman letters for orientation,
+as in our paper.
+
+At a given lattice site $\alpha$, $\mu_\alpha^j$
+is $1$ if the molecule is in the $j$
+orientation and zero otherwise. For a particular crystal $n$, we see that
+\begin{equation}
+\mu^j_\alpha = w_{j\alpha n}
+\end{equation}
+where $w_{j\alpha n}$ is the occupancy in our paper. We can immediately
+identify the $k$ component of their $\vec \mu_{\vec q}$ in their Eq. 3
+as our $S_{kn}(\vec q)$,
+\begin{equation}
+\mu^k_{\vec q} = S_{kn}(\vec q) \,.
+\end{equation}
+Their $\langle \rangle$ average in their Eq. 3, is our $\langle \rangle_n$
+average, and we can identify our $C$ in our Eq. 15
+with their $\mu$ correlation
+\begin{equation}
+C_{k\ell}(\vec q) = \langle \mu^{k}_{\vec q} \mu^{\ell *}_{\vec q}\rangle
+\end{equation}
+where they have apparently made an additional assumption that 
+$\mu^k_{\vec q}$ is real.
+
+The molecular units described by $\mu$ or $w$ are
+assumed to be rigid, so that in our paper we write a rotated and shifted
+amplitude as
+\begin{equation}
+F_k(\vec q) = F(\vec R_k \vec q) e^{-\vec q\cdot \vec s_k}
+\end{equation}
+our Eq. 7 is
+\begin{equation}
+I(\vec q) = \sum_{\alpha,\beta,k,\ell} W_{k\alpha \ell \beta}
+F_\ell^*(\vec q) F_k(\vec q) e^{-i\vec q \cdot (\vec r_\alpha-\vec r_\beta}
+\end{equation}
+where
+\begin{equation}
+W_{k\alpha \ell \beta} = \langle w_{k\alpha n} w_{\ell\beta n} \rangle_n
+\end{equation}
+and in Eq. 15 we define
+\begin{equation}
+C_{k\ell}(\vec q) =\sum_\alpha\sum_\beta W_{k\alpha\ell\beta}
+e^{-\vec q \cdot (\vec r_\alpha-r_\beta)} \,.
+\end{equation}
+The average intensity is given in our Eq. 14
+\begin{equation}
+I(\vec q) = \sum_{k\ell} C_{k\ell}(\vec q) F^*_\ell(\vec q) F_k(\vec q)
+\,.
+\end{equation}
+Comparing their Eq. 3
+\begin{equation}
+I(\vec q) \propto {\rm tr}
+\left \{ \vec F\langle \vec \mu_{\vec q} \cdot \vec \mu_{\vec q}\rangle \right\}
+\,,
+\end{equation}
+with our Eq. 20
+\begin{equation}
+I(\vec q) = F^\dagger(\vec q) C(\vec q) F(\vec q) \,,
+\end{equation}
+we see that their $F$ matrix is the outer
+product of our $\vec F(\vec q)$ vectors,
+$F^*_\ell(\vec q) F_k(\vec q)$.
+
+\section{Random phase approximation formulism}
+One way to imagine doing the forward simulation is to sample
+occupancies from the Boltzmann distribution $e^{-\beta H}$. The correct
+method would, of course, be to assume some $J$ values,
+sample the physical occupancies, and
+calculate the corresponding averages to get $C_{k\ell}(\vec q)$.
+We could imagine sampling the occupancies uniformly and weighting
+them with the Boltzmann factor. The quantities of interest are the
+correlations of the Fourier transformed occupancies
+$S_{kn}(\vec q)$ averaged over $n$. As stated in our paper,
+an independent set of these are the $\vec q$ values in the first Brillouin
+zone. Therefore,
+\begin{equation}
+w_{k\alpha n} = \frac{1}{N} \sum_{\vec q} S_{kn}(\vec q)
+e^{i\vec q \cdot\cdot \vec r_\alpha}
+\end{equation}
+with the sum over the first Brillouin zone, and $N$ the number of lattice
+points. In the thermodynamic limit this goes over to an integral in the
+usual way.
+
+We can write the Hamiltonian as
+\begin{equation}
+E_n = \frac{1}{2N^2}\sum_{\alpha\beta jk}
+\sum_{\vec q} S^*_{jn}(\vec q) e^{-i\vec q\cdot \vec r_\alpha}
+J^{jk}_{\alpha\beta} \sum_{\vec q'} S_{kn}(\vec q')
+e^{i\vec q'\cdot\vec r_\beta}
+\end{equation}
+with $\vec q$ sums over the first Brillouin zone. The translational
+invariance of $J$ (i.e. adding the same lattice vector to both
+$\vec r_\alpha$ and $\vec r_\beta$ does not change $J$) gives
+$\delta_{\vec q,\vec q'}$,
+and
+\begin{equation}
+\sum_{\alpha\beta} J^{k\ell}_{\alpha\beta}
+e^{-i\vec q\cdot(\vec r_\alpha-\vec r_\beta)}
+= N\sum_\alpha J^{k\ell}_{\alpha,0} e^{-i\vec q\cdot\vec r_\alpha}
+N J^{jk}(\vec q) \,.
+\end{equation}
+We find
+\begin{equation}
+E_n = \frac{1}{2N}\sum_{\vec q k\ell}
+S^*_{jn}(\vec q) J^{jk}(\vec q) S_{kn}(\vec q) \,.
+\end{equation}
+
+Thinking about implementing our sampling, for a sample $n$
+we would randomly choose a $k$ value for each $\alpha$ for which
+$w_{k\alpha n}$ is 1, and the other $k$ values give zero.
+
+The initial sampling has no correlations so
+\begin{equation}
+\begin{split}
+m_k &=\langle w_{k\alpha n} \rangle_n
+\\
+M_{kj} &= \langle w_{k\alpha n}w_{j\beta n}\rangle_n-m_k m_j =
+\delta_{\alpha\beta}
+\left (m_k \delta_{kj}-m_k m_j\right ) \,.
+\end{split}
+\end{equation}
+In the usual case where
+the orientations are {\em a priori} equally probable, $m_k = \frac{1}{K}$
+where $K$ is the number of orientations. If they are not equally
+probable, the $m_k$ values can be chosen to indicate this.
+Alternatively a linear term in
+the occupations of each type could be included in the Hamiltonian.
+
+In the random phase approximation,
+\begin{equation}
+S_{kn}(\vec q) = \sum_\alpha w_{k\alpha n} e^{-i\vec q \cdot \vec r_\alpha}
+\end{equation}
+has real and imaginary parts that are
+sums of random values. We approximate
+\begin{equation}
+\begin{split}
+\langle S_{kn}(\vec q)\rangle_n &= 0
+\\
+\langle S_{kn}(\vec q)S^*_{jn}(\vec q)\rangle_n &= 
+\sum_{\alpha\beta} \langle w_{k\alpha n} w_{k\beta n}\rangle_n
+e^{-i\vec q \cdot 
+(\vec r_\alpha-\vec r_\beta)} = NM_{jk}
+\end{split}
+\end{equation}
+
+The central limit theorem then gives
+$S_{k}(\vec q)$ values distributed according to the probability density
+\begin{equation}
+P\left (S_{1}(\vec q),...,S_{K}(\vec q)\right ) \propto
+e^{-\frac{1}{2N}\sum_{kj} S_j(\vec q)M_{jk}^{-1} S_k^*(\vec q)} \,.
+\end{equation}
+Normalizing gives their Eq. 8.
+
+This analysis says that using the random phase approximation, we can
+approximately
+replace the sum over the occupation numbers with an integral over
+the Fourier components $S_k(\vec q)$ multiplied by the gaussian
+distribution above.
+
+We can then calculate $C_{kl}(\vec q)$ as
+\begin{equation}
+\begin{split}
+C_{kl}(\vec q) &=
+\langle S^*_\ell(\vec q) S_m(\vec q)\rangle
+\\
+&=
+\frac{
+\int \left [\prod_k dS_k(\vec q)\right ]
+e^{-\frac{1}{2N}\sum_{kj} S_k^*(\vec q)M_{kj}^{-1} S_j(\vec q)}
+e^{-\beta \frac{1}{2N} S_k^*(\vec w)J^{kj}S_j(\vec q)}
+S^*_\ell(\vec q) S_m(\vec q)
+}
+{\int \left [\prod_k dS_k(\vec q)\right ]
+e^{-\frac{1}{2N}\sum_{kj} S_k^*(\vec q)M_{kj}^{-1} S_j(\vec q)}
+e^{-\beta \frac{1}{2N} S_k^*(\vec w)J^{kj}S_j(\vec q)}
+}
+\\
+&=N\left [ M^{-1}+\beta J\right ]^{-1}_{\ell m} \,.
+\end{split}
+\end{equation}
+We can rewrite the correlation matrix as
+\begin{equation}
+\left [ M^{-1}+\beta J\right ]^{-1}
+=  
+\left [ M^{-1}+\beta J\right ]^{-1} M^{-1} M
+\end{equation}
+and use $(AB)^{-1} = B^{-1}A^{-1}$ to write
+\begin{equation}
+\left [ M^{-1}+\beta J\right ]^{-1} M^{-1}
+= \left [M M^{-1}+\beta M J\right ]^{-1} = \left [1+\beta MJ\right ]^{-1}
+\end{equation}
+so that
+\begin{equation}
+C_{kl}(\vec q) = N \left [\left (1+\beta M J\right)^{-1} M \right ]_{kl}
+\end{equation}
+and substituting into the intensity equation gives Eq. 4 of the Schmidt et al.
+paper.
+
+I have not been careful about the complex variables. For all the gaussian
+integrals, the exponents should divide into real parts squared
+and imaginary parts squared. The $\vec q = 0$ variable is real. For the
+others, we can combine the $\vec q$ and $-\vec q$ to produce two real
+variables, and the $\vec q$ values should extend over half the first
+Brillouin zone. Given the separation of $\vec q$ values.
+
+\end{document}
