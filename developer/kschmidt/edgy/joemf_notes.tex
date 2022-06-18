@@ -42,7 +42,7 @@ orientation and zero otherwise. For a particular crystal $n$, we see that
 \mu^j_\alpha = w_{j\alpha n}
 \end{equation}
 where $w_{j\alpha n}$ is the occupancy in our paper. We can immediately
-identify the $k$ component of their $\vec \mu_{\vec q}$ in their Eq. 3
+identify the $k$ component of their $\mu_{\vec q}$ in their Eq. 3
 as our $S_{kn}(\vec q)$,
 \begin{equation}
 \mu^k_{\vec q} = S_{kn}(\vec q) \,.
@@ -65,7 +65,7 @@ F_k(\vec q) = F(\vec R_k \vec q) e^{-\vec q\cdot \vec s_k}
 our Eq. 7 is
 \begin{equation}
 I(\vec q) = \sum_{\alpha,\beta,k,\ell} W_{k\alpha \ell \beta}
-F_\ell^*(\vec q) F_k(\vec q) e^{-i\vec q \cdot (\vec r_\alpha-\vec r_\beta}
+F_\ell^*(\vec q) F_k(\vec q) e^{-i\vec q \cdot (\vec r_\alpha-\vec r_\beta)}
 \end{equation}
 where
 \begin{equation}
@@ -74,7 +74,7 @@ W_{k\alpha \ell \beta} = \langle w_{k\alpha n} w_{\ell\beta n} \rangle_n
 and in Eq. 15 we define
 \begin{equation}
 C_{k\ell}(\vec q) =\sum_\alpha\sum_\beta W_{k\alpha\ell\beta}
-e^{-\vec q \cdot (\vec r_\alpha-r_\beta)} \,.
+e^{-i \vec q \cdot (\vec r_\alpha-r_\beta)} \,.
 \end{equation}
 The average intensity is given in our Eq. 14
 \begin{equation}
@@ -91,8 +91,8 @@ with our Eq. 20
 \begin{equation}
 I(\vec q) = F^\dagger(\vec q) C(\vec q) F(\vec q) \,,
 \end{equation}
-we see that their $F$ matrix is the outer
-product of our $\vec F(\vec q)$ vectors,
+we see that their $\vec F$ matrix is the outer
+product of our $ F(\vec q)$ vectors,
 $F^*_\ell(\vec q) F_k(\vec q)$.
 
 \section{Random phase approximation formulism}
@@ -109,7 +109,7 @@ an independent set of these are the $\vec q$ values in the first Brillouin
 zone. Therefore,
 \begin{equation}
 w_{k\alpha n} = \frac{1}{N} \sum_{\vec q} S_{kn}(\vec q)
-e^{i\vec q \cdot\cdot \vec r_\alpha}
+e^{i\vec q \cdot \vec r_\alpha}
 \end{equation}
 with the sum over the first Brillouin zone, and $N$ the number of lattice
 points. In the thermodynamic limit this goes over to an integral in the
@@ -131,7 +131,8 @@ and
 \sum_{\alpha\beta} J^{k\ell}_{\alpha\beta}
 e^{-i\vec q\cdot(\vec r_\alpha-\vec r_\beta)}
 = N\sum_\alpha J^{k\ell}_{\alpha,0} e^{-i\vec q\cdot\vec r_\alpha}
-N J^{jk}(\vec q) \,.
+=
+N J^{k \ell}(\vec q) \,.
 \end{equation}
 We find
 \begin{equation}
@@ -194,19 +195,19 @@ distribution above.
 We can then calculate $C_{kl}(\vec q)$ as
 \begin{equation}
 \begin{split}
-C_{kl}(\vec q) &=
+C_{\ell m}(\vec q) &=
 \langle S^*_\ell(\vec q) S_m(\vec q)\rangle
 \\
 &=
 \frac{
 \int \left [\prod_k dS_k(\vec q)\right ]
 e^{-\frac{1}{2N}\sum_{kj} S_k^*(\vec q)M_{kj}^{-1} S_j(\vec q)}
-e^{-\beta \frac{1}{2N} S_k^*(\vec w)J^{kj}S_j(\vec q)}
+e^{-\beta \frac{1}{2N} S_k^*(\vec q)J^{kj}S_j(\vec q)}
 S^*_\ell(\vec q) S_m(\vec q)
 }
 {\int \left [\prod_k dS_k(\vec q)\right ]
 e^{-\frac{1}{2N}\sum_{kj} S_k^*(\vec q)M_{kj}^{-1} S_j(\vec q)}
-e^{-\beta \frac{1}{2N} S_k^*(\vec w)J^{kj}S_j(\vec q)}
+e^{-\beta \frac{1}{2N} S_k^*(\vec q)J^{kj}S_j(\vec q)}
 }
 \\
 &=N\left [ M^{-1}+\beta J\right ]^{-1}_{\ell m} \,.
@@ -226,6 +227,7 @@ and use $(AB)^{-1} = B^{-1}A^{-1}$ to write
 so that
 \begin{equation}
 C_{kl}(\vec q) = N \left [\left (1+\beta M J\right)^{-1} M \right ]_{kl}
+\label{eq_CtoJ}
 \end{equation}
 and substituting into the intensity equation gives Eq. 4 of the Schmidt et al.
 paper.
@@ -236,5 +238,13 @@ and imaginary parts squared. The $\vec q = 0$ variable is real. For the
 others, we can combine the $\vec q$ and $-\vec q$ to produce two real
 variables, and the $\vec q$ values should extend over half the first
 Brillouin zone. Given the separation of $\vec q$ values.
+
+Equation~(\ref{eq_CtoJ}) can be rearranged for $J$ and $M$ to give
+\begin{align}
+\beta J &= M^{-1} \left(N M C^{-1}(\vec{q}) - 1 \right)
+\\
+M &=  \left( N C^{-1}(\vec{q}) - \beta J \right)^{-1}
+\end{align}
+Our algorithm is able to estimate $C(\vec{q})$ from the measured intensities, $I(\vec{q})$, so given either $M$ or $J$ we can recover the one that we don't have.
 
 \end{document}
