@@ -9,32 +9,24 @@ plt.close('all')
 # Todo: make samples not depend on num of particles
 
 #================================
-n_part = 40 # number of particles
-n_samp = 100
+n_part = 30 # number of particles
 
-a = 0.2e-6 # particle spacing
-r_max = 8e-6 #0.5e-3 # X-ray beam spatial coherence width 
-lamb = 1e-6
-r = np.linspace(0, r_max, n_samp)
+r_max = 0.5e-3
+lamb = 100e-6
+r = np.linspace(0, r_max, n_part)
 
 #================================
 
 def position_molecule(r, lamb, A=1):
-	# r_part = r.copy() # The original position is zero (origin)
+	r_part = r.copy() # The original position is zero (origin)
 
 	pressure = A*np.cos(2*np.pi/lamb * r)
 
 	pressure_gradient = -A*2*np.pi/lamb * np.sin(2*np.pi/lamb * r)
-	scale = 0.5*lamb*(lamb/(2*np.pi)) #5e-5
+	scale = (lamb/(A*2*np.pi))**2#5e-5
 
-	r_part = np.zeros(n_part)
 	for i in range(n_part):
-		r_part[i] = a * i
 		r_part[i] += scale*pressure_gradient[i]
-
-		# print(r_part[i])
-		# if i == 2:
-		# 	yay
 
 	return r_part, pressure
 
@@ -53,9 +45,9 @@ for i in range(n_part):
 """
 
 
-r_part0, pressure0 = position_molecule(r, lamb=1e-8, A=0)
 r_part, pressure = position_molecule(r, lamb=lamb, A=1)
-# r_part2 = r.copy()
+# r_part2, pressure2 = position_molecule(r, lamb=1e-8, A=1)
+r_part2 = r.copy()
 
 
 # plt.figure()
@@ -93,20 +85,21 @@ for i in range(n_part):
 # Calculate the diffraction
 
 q_max = 2*np.pi/lamb * 10
-q = np.linspace(0, q_max, n_samp)
+q = np.linspace(0, q_max, n_part)
+num_q = len(q)
 
 
 def calc_FT(r, f, q):
-	F = np.zeros(n_samp, dtype=np.complex128)
+	F = np.zeros(num_q, dtype=np.complex128)
 
-	for j in range(n_samp):
-		print(j/n_samp)
+	for j in range(num_q):
+		print(j/num_q)
 		for i in range(n_part):
 			F[j] += f[i] * np.exp(1j * q[j] * r[i])
 	return F
 
 F = calc_FT(r=r_part, f=f, q=q)
-F0 = calc_FT(r=r_part0, f=f, q=q)
+F2 = calc_FT(r=r_part2, f=f, q=q)
 
 # plt.figure()
 # plt.plot(q, np.abs(F), 'o-')
@@ -130,12 +123,12 @@ axs[1, 0].grid()
 # axs[1, 0].set_title("shares x with main")
 
 
-axs[0, 1].plot(r_part0, np.zeros(n_part), 'o')
+axs[0, 1].plot(r_part2, np.zeros(n_part), 'o')
 # axs[0, 1].plot(r_part2, f, '-')
 # axs[0, 1].plot(r, pressure2, '--', color='tab:orange')
 axs[0, 1].grid()
 
-axs[1, 1].plot(q, np.abs(F0)**2, '-')
+axs[1, 1].plot(q, np.abs(F2)**2, '-')
 axs[1, 1].grid()
 # axs[1, 0].set_title("shares x with main")
 
