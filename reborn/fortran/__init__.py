@@ -101,7 +101,7 @@ def import_f90(source_file, extra_args='', hash=True, verbose=False, with_omp=Fa
         debug('md5_check', md5_check)
     source = open(source_file, "rb").read()
     compile_args = {'modulename': modulename, 'extension': '.f90', 'extra_args': extra_args,
-                    'verbose': verbose, 'full_output': False}
+                    'verbose': verbose}#, 'full_output': False}
     if do_compile:
         debug('Compiling...', source, 'to', modulename)
         fp = numpy.f2py.compile(source, **compile_args)
