@@ -371,7 +371,7 @@ kernel void phase_factor_qrf_global(
     const int twopi           // Multiply q by 2 pi
 ){
     const int gi = get_global_id(0); /* Global index */
-    const int li = get_local_id(0);  /* Local group index */
+//    const int li = get_local_id(0);  /* Local group index */
     dsfloat4 qmod = (dsfloat4)(0.0f,0.0f,0.0f,0.0f);
     dsfloat2 a_sum = (dsfloat2)(0.0f,0.0f);
     // If the pixel index is not out of bounds, move the global scattering vector to private memory
