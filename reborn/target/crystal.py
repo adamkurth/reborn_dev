@@ -369,7 +369,7 @@ class CrystalStructure(object):
     _au_com = None
 
     def __init__(self, pdb_file_path, no_warnings=False, expand_ncs_coordinates=False,
-                 create_bio_assembly=False, tight_packing=False, unitcell=None, spacegroup=None, tempdir=None):
+                 create_bio_assembly=0, tight_packing=False, unitcell=None, spacegroup=None, tempdir=None):
         r"""
         This class is initialized with a PDB file.
 
@@ -380,7 +380,7 @@ class CrystalStructure(object):
             no_warnings (bool): Suppress warnings concerning ambiguities in symmetry operations
             expand_ncs_coordinates (bool): Duplicate asymmetric unit to include non-crystallographic symmetry (NCS)
                                            partners.
-            create_bio_assembly (bool): Duplicate asymmetric unit to include biological assembly model.
+            create_bio_assembly (int): Duplicate asymmetric unit to include biological assembly model. The integer specifies the desired biological assembly to create. See the BIOMOLECULE label of the REMARK section of the PDB (accurate as of Jun 2022)
             tight_packing (bool): Choose whether or not to enable a physical arrangement of the asymmetric unit symmetry partners - No difference for inifinite crystals but makes sense for a finite crystal.
             unitcell (Unit Cell class): Specify a unit cell manually if needed.
             spacegroup (Space Group class): Specify a space group manually if needed.
@@ -465,19 +465,68 @@ class CrystalStructure(object):
         else:
             r_au = r
 
-        # Check for biological assembly.  Construct asymmetric unit from them.
+
+
+
+
+
+        #-------------------------------
+        # Check for biological assembly.  Construct asymmetric units from them.
+
+        # For backward compatibility since we moved away from the Boolean variables
+        if create_bio_assembly == True:
+            create_bio_assembly = 1 
+        else:
+            create_bio_assembly = 0
+
+
         if create_bio_assembly:
-            bio_partners = [r]
-            n_bio_partners = len(dic['bio_rotations'])
-            for i in range(n_bio_partners):
+            # The few lines of code below is to make a list of the start and end indices that we will then use 
+            # to access the appropriate rotation, translation operations stored in 
+            # dic['bio_rotations'] and dic['bio_translations'].
+            # bio_assembly_sta_end_indices is of the form: [[bioassem1_sta,bioassem1_end], [bioassem2_sta,bioassem2_end],...]
+            # For example, if dic['bio_indices'] equals [1,2,1],
+            # then bio_assembly_sta_end_indices becomes [[0,1+1], [2,2+1]] 
+            # The +1 is for Python indexing
+            # The length of the bio_assembly_sta_end_indices list is the number of bio-assemblies.
+            bio_assembly_sta_end_indices = []
+            sta = 0
+            end = 1
+            for i in range(1,len(dic['bio_indices'])):
+                if dic['bio_indices'][i] == 1:
+                    bio_assembly_sta_end_indices.append([sta,end])
+                    sta = end
+                end += 1
+            bio_assembly_sta_end_indices.append([sta,end])
+
+            
+            # Select the desired bio-assembly using the user input
+            i_bio_assembly = create_bio_assembly - 1 # minus 1 for Python indexing
+
+            # Extract the indices
+            sta_bio_assembly = bio_assembly_sta_end_indices[i_bio_assembly][0]
+            end_bio_assembly = bio_assembly_sta_end_indices[i_bio_assembly][1]
+
+            # Now apply the bio-assembly operations to the atomic coordinates of the asymmetric unit to generate the coordinates for the bio_partners           
+            Z = []
+            atomic_symbols = []
+            bio_partners = []
+            for i in range(sta_bio_assembly,end_bio_assembly):
                 Z = np.concatenate([Z0, Z])
                 atomic_symbols = np.concatenate([atomic_symbols0, atomic_symbols])
+
                 R = dic['bio_rotations'][i]
                 T = dic['bio_translations'][i]
+                
                 bio_partners.append(np.dot(r, R.T) + T)
             r_au = np.vstack(bio_partners)
+
         else:
-            r_au = r
+            r_au = r # Don't do anything if create_bio_assembly is False or 0
+        #-------------------------------
+
+
+
 
         # Transform to fractional coordinates.
         x_au = np.dot(S, r_au.T).T # + U
@@ -1234,7 +1283,7 @@ def pdb_to_dict(pdb_file_path, ignore_waters=False):
     scale = np.zeros([3, 4])
     smtry = np.zeros([1000, 6])
     mtrix = np.zeros([10000, 4])
-    biomt = np.zeros([10000, 4])
+    biomt = np.zeros([10000, 5])
     i_given = np.zeros([1000], dtype=int)
     a = b = c = None
     alpha = beta = gamma = None
@@ -1250,6 +1299,7 @@ def pdb_to_dict(pdb_file_path, ignore_waters=False):
     ncs_translations = []
     bio_rotations = []
     bio_translations = []
+    bio_indices = []
 
     with open(pdb_file_path) as pdbfile:
 
@@ -1312,7 +1362,13 @@ def pdb_to_dict(pdb_file_path, ignore_waters=False):
                 biomt[biomt_index, 1] = float(line[33:43])
                 biomt[biomt_index, 2] = float(line[43:54])
                 biomt[biomt_index, 3] = float(line[59:69])
+                biomt[biomt_index, 4] = float(line[20:23]) # Indexes the operators for the bio-assembly
                 biomt_index += 1
+
+                # biomt[biomt_index, 4] is really an int but since biomt is doubles, 
+                # it will get casted to a float, if we try to convert it here.
+                # So we will convert it into an int later.
+
 
             if ignore_waters and ((line[17:20] == "HOH") or (line[17:20] == "TIP")):
                 continue
@@ -1357,6 +1413,7 @@ def pdb_to_dict(pdb_file_path, ignore_waters=False):
     for i in range(int(biomt_index/3)):
         bio_rotations.append(biomt[i*3:i*3+3, 0:3])
         bio_translations.append(biomt[i*3:i*3+3, 3])
+        bio_indices.append(int(biomt[i*3, 4]))
 
     dic = {'scale_matrix': scale[:, 0:3],
            'scale_translation': scale[:, 3],
@@ -1370,6 +1427,7 @@ def pdb_to_dict(pdb_file_path, ignore_waters=False):
            'ncs_translations': ncs_translations,
            'bio_rotations': bio_rotations,
            'bio_translations': bio_translations,
+           'bio_indices': bio_indices,
            'i_given': i_given
            }
 
