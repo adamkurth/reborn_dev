@@ -135,6 +135,37 @@ def test_08():
             assert np.sum(np.abs(dat2 - dat1)) == 0
 
 
+def test_09():
+
+    # Make sure that the bio assemblies are generated properly
+    # Tests to see that the number of the atoms divided by the number of bio assemblies
+    # should equal the number of atomic symbols in the original pdb.
+    for pdb in ['2W0O', '4BED', '2LYZ']:
+        cryst = crystal.CrystalStructure(pdb)
+        assert int(cryst.fractional_coordinates.shape[0]/cryst.n_bio_partners) == len(cryst.pdb_dict['atomic_symbols'])
+
+        cryst = crystal.CrystalStructure(pdb, create_bio_assembly=0)
+        assert int(cryst.fractional_coordinates.shape[0]/cryst.n_bio_partners) == len(cryst.pdb_dict['atomic_symbols'])
+
+        cryst = crystal.CrystalStructure(pdb, create_bio_assembly=1)
+        assert int(cryst.fractional_coordinates.shape[0]/cryst.n_bio_partners) == len(cryst.pdb_dict['atomic_symbols'])
+
+    for pdb in ['1SS8']:
+        cryst = crystal.CrystalStructure(pdb)
+        assert int(cryst.fractional_coordinates.shape[0]/cryst.n_bio_partners) == len(cryst.pdb_dict['atomic_symbols'])
+
+        cryst = crystal.CrystalStructure(pdb, create_bio_assembly=0)
+        assert int(cryst.fractional_coordinates.shape[0]/cryst.n_bio_partners) == len(cryst.pdb_dict['atomic_symbols'])
+
+        cryst = crystal.CrystalStructure(pdb, create_bio_assembly=1)
+        assert int(cryst.fractional_coordinates.shape[0]/cryst.n_bio_partners) == len(cryst.pdb_dict['atomic_symbols'])
+
+        cryst = crystal.CrystalStructure(pdb, create_bio_assembly=2)
+        assert int(cryst.fractional_coordinates.shape[0]/cryst.n_bio_partners) == len(cryst.pdb_dict['atomic_symbols'])
+
+
+
+
 def test_spacegroup():
 
     hmsymb = 'I 41/a -3 2/d'

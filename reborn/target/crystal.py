@@ -442,13 +442,18 @@ class CrystalStructure(object):
         # These are the initial coordinates with strange origin, angstrom units (!!!!)
         r = dic['atomic_coordinates']
         
+        # These are the initial atmomic numbers and symbols for the atoms.
         Z0 = atoms.atomic_symbols_to_numbers(dic['atomic_symbols'])
         atomic_symbols0 = dic['atomic_symbols']
 
+
+        #-------------------------------
         # Initialisations for generating NCS partners
         Z = Z0.copy()
         atomic_symbols = atomic_symbols0.copy()
 
+
+        #-------------------------------
         # Check for non-crystallographic symmetry.  Construct asymmetric unit from them.
         if expand_ncs_coordinates:
             ncs_partners = [r]
@@ -462,12 +467,10 @@ class CrystalStructure(object):
                     T = dic['ncs_translations'][i]
                     ncs_partners.append(np.dot(r, R.T) + T)
             r_au = np.vstack(ncs_partners)
+            self.n_ncs_partners = n_ncs_partners
         else:
             r_au = r
-
-
-
-
+            self.n_ncs_partners = 1 # There is always at least 1 ncs partner (the molecule itself).
 
 
         #-------------------------------
@@ -479,16 +482,15 @@ class CrystalStructure(object):
         else:
             create_bio_assembly = 0
 
-
         if create_bio_assembly:
             # The few lines of code below is to make a list of the start and end indices that we will then use 
             # to access the appropriate rotation, translation operations stored in 
             # dic['bio_rotations'] and dic['bio_translations'].
-            # bio_assembly_sta_end_indices is of the form: [[bioassem1_sta,bioassem1_end], [bioassem2_sta,bioassem2_end],...]
+            # bio_assembly_sta_end_indices is of the form: [[bioasm1_sta,bioasm1_end], [bioasm2_sta,bioasm2_end],...]
             # For example, if dic['bio_indices'] equals [1,2,1],
             # then bio_assembly_sta_end_indices becomes [[0,1+1], [2,2+1]] 
             # The +1 is for Python indexing
-            # The length of the bio_assembly_sta_end_indices list is the number of bio-assemblies.
+            # The length of the bio_assembly_sta_end_indices list is the number of different biologiacl assemblies
             bio_assembly_sta_end_indices = []
             sta = 0
             end = 1
@@ -498,7 +500,7 @@ class CrystalStructure(object):
                     sta = end
                 end += 1
             bio_assembly_sta_end_indices.append([sta,end])
-
+            
             
             # Select the desired bio-assembly using the user input
             i_bio_assembly = create_bio_assembly - 1 # minus 1 for Python indexing
@@ -507,7 +509,13 @@ class CrystalStructure(object):
             sta_bio_assembly = bio_assembly_sta_end_indices[i_bio_assembly][0]
             end_bio_assembly = bio_assembly_sta_end_indices[i_bio_assembly][1]
 
-            # Now apply the bio-assembly operations to the atomic coordinates of the asymmetric unit to generate the coordinates for the bio_partners           
+            # This is the total number of biological partners in this biological assembly
+            # Just happens to equal the end_bio_assembly index.
+            self.n_bio_partners = end_bio_assembly
+
+
+            # Now apply the bio-assembly operations to the atomic coordinates of the asymmetric unit to generate the 
+            # coordinates for the bio_partners           
             Z = []
             atomic_symbols = []
             bio_partners = []
@@ -523,9 +531,8 @@ class CrystalStructure(object):
 
         else:
             r_au = r # Don't do anything if create_bio_assembly is False or 0
+            self.n_bio_partners = 1 # There is always at least one bio molecule
         #-------------------------------
-
-
 
 
         # Transform to fractional coordinates.
