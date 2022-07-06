@@ -5,7 +5,7 @@ todo
 from jugnfrau pull out smallest q - that will give the full q range
 
 Date Created: 28 Jun 2022
-Last Modified: 4 Jul 2022
+Last Modified: 6 Jul 2022
 Author: RAK, JC
 """
 
@@ -55,13 +55,15 @@ cell = 100e-10 #200e-10  # Unit cell size (assume P1, cubic)
 pdb_file = '2W0O' #'1SS8' #'4BED'#'1SS8'  # '3IYF' '1PCQ' '2LYZ' 'BDNA25_sp.pdb'
 create_bio_assembly = 1
 
-protein_concentration = 10  # Protein concentration in mg/ml = kg/m^3
-hit_frac = 0.01  # Hit fraction
-freq = 120  # XFEL frequency
-runtime = 0.1 * 3600  # Run time in seconds
+# protein_concentration = 10 #10  # Protein concentration in mg/ml = kg/m^3
+# hit_frac = 0.01  # Hit fraction
+# freq = 120  # XFEL frequency
+# runtime = 0.1 * 3600  # Run time in seconds
 random_seed = 2022  # Seed for random number generator (choose None to make it random)
 gpu_double_precision = True
 gpu_group_size = 32
+
+
 
 #########################################################################
 # Program setup
@@ -132,24 +134,25 @@ q_min = dmap.q_min
 q_max = dmap.q_max
 
 
-#------------------------
-# n_shots = int(runtime * freq * hit_frac)
-n_shots = 1000 #10000
+# #------------------------
+# # n_shots = int(runtime * freq * hit_frac)
+# n_shots = 1000 #1000 #10000
 #------------------------
 
-#------------------------
-# protein_number_density = protein_concentration/cryst.molecule.get_molecular_weight()
-# n_proteins_per_drop = int(protein_number_density*4/3*np.pi*drop_radius**3)
+# #------------------------
+# # protein_number_density = protein_concentration/cryst.molecule.get_molecular_weight()
+# # n_proteins_per_drop = int(protein_number_density*4/3*np.pi*drop_radius**3)
 
-n_proteins_per_drop = 1
-#------------------------
+# n_proteins_per_drop = 1
+# #------------------------
 
 protein_diameter = cryst.molecule.max_atomic_pair_distance  # Nominal particle size
 
-print('N Shots:', n_shots)
-print('Molecules per drop:', n_proteins_per_drop)
+# print('N Shots:', n_shots)
+# print('Molecules per drop:', n_proteins_per_drop)
 print('Particle diameter:', protein_diameter)
 print('Density map grid size: (%d, %d, %d)' % tuple(dmap.shape))
+print('f_dens_water: ', f_dens_water)
 
 
 
@@ -168,7 +171,7 @@ print('Visualising molecule in real space')
 from skimage.measure import marching_cubes
 from mpl_toolkits.mplot3d import Axes3D
 
-iso_val=0.0
+iso_val = 0.0
 verts, faces, _, _ = marching_cubes(np.fft.fftshift(np.real(rho)), 
                                     iso_val, 
                                     spacing=(0.1, 0.1, 0.1))
@@ -231,16 +234,19 @@ show_projection(disp_map, disp_str)
 ################################################################################
 # FXS Convergence study
 ################################################################################
+print('Begin convergence study')
 
 s = 2  # Oversampling
 d = 8e-10 #8e-10  # Autocorrelation ring resolution
 q = 2 * np.pi / d  # q magnitude of autocorrelation ring (2pi/d)
+
 n_phi = int(2 * np.pi * s * protein_diameter / d)  # Num angular bins in ring
 n_phi += (n_phi % 2)
 print('Nphi (num angular bins):', n_phi)
 
-dphi = 2 * np.pi / n_phi  # Angular step in phi
+dphi = 2*np.pi / n_phi  # Angular step in phi
 phi = np.arange(n_phi) * dphi
+
 dtheta = wavelength / s / protein_diameter  # Angular step in theta
 theta = 2 * np.arcsin(q * wavelength / 4 / np.pi)
 print(f'2 theta (deg): {2 * theta * 180 / np.pi:.3f}')
@@ -252,54 +258,83 @@ q_ring = 2 * np.pi / wavelength * np.vstack(
 q_ring_gpu = clcore.to_device(q_ring)
 a_ring = clcore.to_device(shape=(n_phi,), dtype=clcore.complex_t) # This initialises zeros on the GPU of shape=shape
 
-acf_sum_noisy = np.zeros(n_phi)
-acf_sum = np.zeros(n_phi)
-
-for i in range(n_shots):
-    if ((i + 1) % 100) == 0:
-        print(i + 1)
-    
-    p_vecs = placer.particles_in_a_sphere(sphere_diameter=drop_radius * 2, n_particles=n_proteins_per_drop, particle_diameter=protein_diameter)
-    
-    for p in range(n_proteins_per_drop):
-        add = 1  # Default: add amplitudes of protein diffraction
-        if p == 0:  # For the first molecule, do not add amplitudes.  Overwrite the GPU memory buffer instead.
-            add = 0
-        R = Rotation.random().as_matrix()
-        U = p_vecs[p, :]
-        clcore.mesh_interpolation(F_gpu, 
-                                  q_ring_gpu, 
-                                  N=dmap.shape, 
-                                  q_min=q_min, 
-                                  q_max=q_max, 
-                                  R=R, 
-                                  U=U, 
-                                  a=a_ring,
-                                  add=add) # This is where a_ring gets modified
-    I_ring = np.abs(a_ring.get()) ** 2
-    I_ring *= sa * r_e ** 2 * fluence
-
-    # I_ring_noisy = np.random.poisson(I_ring).astype(np.float64)
-
-    I_ring -= np.mean(I_ring)
-    acf_sum += np.real(ifft(np.abs(fft(I_ring))**2))
-
-    # I_ring_noisy -= np.mean(I_ring_noisy)
-    # acf_sum_noisy += np.real(ifft(np.abs(fft(I_ring_noisy))**2))
 
 
+def autocorr_do(n_shots, n_proteins_per_drop):
 
-plt.figure()
-plt.plot(acf_sum_noisy)
-plt.show(block=False)
+    # acf_sum_noisy = np.zeros(n_phi)
+    acf_sum = np.zeros(n_phi)
+
+    for i in range(n_shots):
+        if ((i + 1) % 100) == 0:
+            print(i + 1)
+        
+        p_vecs = placer.particles_in_a_sphere(sphere_diameter=drop_radius * 2, n_particles=n_proteins_per_drop, particle_diameter=protein_diameter)
+        
+        for p in range(n_proteins_per_drop):
+            add = 1  # Default: add amplitudes of protein diffraction
+            if p == 0:  # For the first molecule, do not add amplitudes.  Overwrite the GPU memory buffer instead.
+                add = 0
+            R = Rotation.random().as_matrix()
+            U = p_vecs[p, :]
+            clcore.mesh_interpolation(F_gpu, 
+                                      q_ring_gpu, 
+                                      N=dmap.shape, 
+                                      q_min=q_min, 
+                                      q_max=q_max, 
+                                      R=R, 
+                                      U=U, 
+                                      a=a_ring,
+                                      add=add) # This is where a_ring gets modified
+        I_ring = np.abs(a_ring.get()) ** 2
+        I_ring *= sa * r_e ** 2 * fluence
+
+        # I_ring_noisy = np.random.poisson(I_ring).astype(np.float64)
+
+        I_ring -= np.mean(I_ring)
+        acf_sum += np.real(ifft(np.abs(fft(I_ring))**2))
+
+        # I_ring_noisy -= np.mean(I_ring_noisy)
+        # acf_sum_noisy += np.real(ifft(np.abs(fft(I_ring_noisy))**2))
 
 
+    # Normalizations
+    acf_sum /= n_shots
+    acf_sum -= np.median(acf_sum)
+
+
+    return acf_sum
+
+
+
+"""
+n_proteins_per_drop1 = 1
+n_shots1 = 10000
+acf_sum1 = autocorr_do(n_shots=n_shots1, n_proteins_per_drop=n_proteins_per_drop1)
+
+
+print('Doing the convergence study')
+n_proteins_per_drop2 = 10
+n_shots2 = 100
+acf_sum2 = autocorr_do(n_shots=n_shots2, n_proteins_per_drop=n_proteins_per_drop2)
+
+n_proteins_per_drop3 = 10
+n_shots3 = 1000
+acf_sum3 = autocorr_do(n_shots=n_shots3, n_proteins_per_drop=n_proteins_per_drop3)
+
+n_proteins_per_drop4 = 10
+n_shots4 = 10000
+acf_sum4 = autocorr_do(n_shots=n_shots4, n_proteins_per_drop=n_proteins_per_drop4)
 
 # m = int(n_phi / 2)
 m = n_phi
+phis = phi[1:m] * 180 / np.pi # Phi-s for plotting
 
 plt.figure()
-plt.plot(phi[1:m] * 180 / np.pi, acf_sum[1:m], '-k', label='noiseless')
+plt.plot(phis, acf_sum2[1:m], '-', color='tab:orange', label=f'num prot per drop: {n_proteins_per_drop2:d}, num shots: {n_shots2:d}')
+plt.plot(phis, acf_sum3[1:m], '-', color='tab:red', label=f'num prot per drop: {n_proteins_per_drop3:d}, num shots: {n_shots3:d}')
+plt.plot(phis, acf_sum4[1:m], '-', color='tab:green', label=f'num prot per drop: {n_proteins_per_drop4:d}, num shots: {n_shots4:d}')
+plt.plot(phis, acf_sum1[1:m], '--', lw=2, color='black', label=f'num prot per drop: {n_proteins_per_drop1:d}, num shots: {n_shots1:d}')
 # acf_sum_noisy += np.mean(acf_sum[1:m]) - np.mean(acf_sum_noisy[1:m])
 # plt.plot(phi[1:m] * 180 / np.pi, acf_sum_noisy[1:m], '.r')
 plt.xlabel(r'$\Delta \phi$ (degrees)')
@@ -307,60 +342,150 @@ plt.ylabel(r'$C(q, q, \Delta\phi)$')
 plt.grid()
 plt.legend()
 plt.show(block=False)
-# view_pad_data(pad_data=np.log10(I_sphere + 1), pad_geometry=pads, show=True)
-# view_pad_data(pad_data=np.random.poisson(np.log10(I_prot + 1)), pad_geometry=pads, show=True)
+"""
 
-# yay4
+#--------------------------
+# Convergence calculations
 
-
-
-if 0:
-    #------------------
-    # np.savez(file='nshot=1e4_water=n_d=15e-10_n-proteins-per-drop=1',
-    #          phi=phi,
-    #          acf_sum=acf_sum)
-
-    dat = np.load('nshot=1e4_water=n_d=8e-10_n-proteins-per-drop=1.npz')
-
-    plt.figure(3)
-    plt.plot(phi[1:m] * 180 / np.pi, acf_sum[1:m], '-', lw=2, label='with water')
-    plt.plot(phi[1:m] * 180 / np.pi, dat['acf_sum'][1:m], '-', lw=2, label='without water')
-    plt.xlabel(r'$\Delta \phi$ (degrees)', fontsize=12)
-    plt.ylabel(r'$C(q, q, \Delta\phi)$', fontsize=12)
-    plt.title(f'Ring autocorrelation, no Poisson noise, pdb={pdb_file}, n_shots={n_shots}, resolution={d}, n_proteins_per_drop={n_proteins_per_drop}')
-    plt.grid()
-    plt.ylim([-0.015, 0.06])
-    plt.legend()
-    plt.show(block=False)
-
-    #------------------
+print('calculating reference')
+n_shots_ref = 500
+acf_avg_ref = autocorr_do(n_shots=n_shots_ref, n_proteins_per_drop=1)
 
 
+print('calculating convergence errors')
+n_shots_tot = 500
+protein_concentration = np.array([10, 20, 30]) #np.array([10, 100, 1000]) #10  # Protein concentration in mg/ml = kg/m^3
+n_shot_mod = 100 # Calculate error every this many shots
 
 
-if 0:
-    fig = plt.figure()
-    fig.add_subplot(2, 3, 1)
-    I = np.abs(I).astype(np.float64)
-    rho = np.abs(rho).astype(np.float64)
-    dispim = np.log10(I[int(dmap.shape[0] / 2), :, :] + 10)
-    plt.imshow(dispim, interpolation='nearest', cmap='gray')
-    fig.add_subplot(2, 3, 4)
-    dispim = np.sum(rho, axis=0)
-    plt.imshow(dispim, interpolation='nearest', cmap='gray')
-    fig.add_subplot(2, 3, 2)
-    dispim = np.log10(I[:, int(dmap.shape[1] / 2), :] + 10)
-    plt.imshow(dispim, interpolation='nearest', cmap='gray')
-    fig.add_subplot(2, 3, 5)
-    dispim = np.sum(rho, axis=1)
-    plt.imshow(dispim, interpolation='nearest', cmap='gray')
-    fig.add_subplot(2, 3, 3)
-    dispim = np.log10(I[:, :, int(dmap.shape[2] / 2)] + 10)
-    plt.imshow(dispim, interpolation='nearest', cmap='gray')
-    fig.add_subplot(2, 3, 6)
-    dispim = np.sum(rho, axis=2)
-    plt.imshow(dispim, interpolation='nearest', cmap='gray')
-    plt.show(block=False)
-    # pg.mkQApp().exec_()
+protein_number_density = protein_concentration/cryst.molecule.get_molecular_weight()
+num_proteins_per_drop_vec = np.round(protein_number_density*4/3*np.pi*drop_radius**3).astype(int)
+
+# #------------
+# # Insert a 1 at the start
+# index = 0
+# value = 1
+# num_proteins_per_drop_vec = np.insert(num_proteins_per_drop_vec, index, value)
+# print(num_proteins_per_drop_vec)
+# #------------
+
+protein_concentration_len = len(num_proteins_per_drop_vec)
+
+n_errors = int(n_shots_tot / n_shot_mod)
+errors = np.zeros((n_errors, protein_concentration_len))
+
+for i_proteins_per_drop in range(protein_concentration_len):
+    print(f'Doing {num_proteins_per_drop_vec[i_proteins_per_drop]} proteins')
+    n_proteins_per_drop = num_proteins_per_drop_vec[i_proteins_per_drop]
+    
+
+    acf_sum = np.zeros(n_phi)
+    
+
+    ind = 0 # error index
+    for i_shots in range(n_shots_tot):
+        
+        p_vecs = placer.particles_in_a_sphere(sphere_diameter=drop_radius * 2, n_particles=n_proteins_per_drop, particle_diameter=protein_diameter)
+        
+
+        for p in range(n_proteins_per_drop):
+            add = 1  # Default: add amplitudes of protein diffraction
+            if p == 0:  # For the first molecule, do not add amplitudes.  Overwrite the GPU memory buffer instead.
+                add = 0
+            R = Rotation.random().as_matrix()
+            U = p_vecs[p, :]
+            clcore.mesh_interpolation(F_gpu, 
+                                      q_ring_gpu, 
+                                      N=dmap.shape, 
+                                      q_min=q_min, 
+                                      q_max=q_max, 
+                                      R=R, 
+                                      U=U, 
+                                      a=a_ring,
+                                      add=add) # This is where a_ring gets modified
+        I_ring = np.abs(a_ring.get()) ** 2
+        I_ring *= sa * r_e ** 2 * fluence
+
+        # I_ring_noisy = np.random.poisson(I_ring).astype(np.float64)
+
+        I_ring -= np.mean(I_ring)
+        acf_sum += np.real(ifft(np.abs(fft(I_ring))**2))
+
+        # I_ring_noisy -= np.mean(I_ring_noisy)
+        # acf_sum_noisy += np.real(ifft(np.abs(fft(I_ring_noisy))**2))
+
+
+        # Calculate the difference every n_shot_mod shots
+        if ((i_shots + 1) % n_shot_mod) == 0:
+            print(i_shots + 1)
+
+            # Normalizations
+            acf_avg_curr = acf_sum/(i_shots+1) # plus 1 because Python starts counting at 0
+            acf_avg_curr -= np.median(acf_avg_curr)
+
+            # plt.figure()
+            # plt.plot(acf_avg_curr[10:-10])
+            # plt.plot(acf_avg_ref[10:-10], 'k--')
+            # plt.grid()
+            # plt.show(block=False)
+            # yay
+
+            errors[ind, i_proteins_per_drop] = (np.sum((acf_avg_curr[10:-10] - acf_avg_ref[10:-10])**2))
+            ind += 1
+
+errors = np.sqrt(errors) / np.sqrt(np.sum(acf_avg_ref[10:-10]**2))
+
+
+# plt.figure()
+# for i_proteins_per_drop in range(protein_concentration_len):
+#     plt.plot(np.arange(1,len(errors)+1)*100, (errors[:,i_proteins_per_drop]), '-', label=f'protein concentration: {protein_concentration[i_proteins_per_drop]} mg/ml')
+# plt.xlabel('Num shots')
+# plt.ylabel('Root mean squared error')
+# # plt.ylim([0,50])
+# plt.grid()
+# plt.legend()
+# plt.show(block=False)
+
+
+np.savez(file=f'autocorr_dat1',
+         n_shots_ref=n_shots_ref,
+         n_shots_tot=n_shots_tot,
+         protein_concentration=protein_concentration,
+         n_shot_mod=n_shot_mod,
+         errors=errors,
+         water_density=water_density)
+
+
+
+
+
+
+"""
+# Load code
+dat = np.load('autocorr_dat1.npz')
+
+n_shots_ref = dat['n_shots_ref']
+n_shots_tot = dat['n_shots_tot']
+protein_concentration = dat['protein_concentration']
+n_shot_mod = dat['n_shot_mod']
+errors = dat['errors']
+water_density = dat['water_density']
+
+protein_concentration_len = len(protein_concentration)
+
+
+plt.figure()
+for i_proteins_per_drop in range(protein_concentration_len):
+    plt.plot(np.arange(1,len(errors)+1)*100, (errors[:,i_proteins_per_drop]), '-', label=f'protein concentration: {protein_concentration[i_proteins_per_drop]} mg/ml')
+plt.xlabel('Num shots')
+plt.ylabel('Root mean squared error')
+# plt.ylim([0,50])
+plt.grid()
+plt.legend()
+plt.show(block=False)
+"""
+
+
+
 
 
