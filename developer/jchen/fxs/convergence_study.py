@@ -346,13 +346,13 @@ plt.show(block=False)
 # Convergence calculations
 
 print('calculating reference')
-n_shots_ref = 500
+n_shots_ref = 1000
 acf_avg_ref = autocorr_do(n_shots=n_shots_ref, n_proteins_per_drop=1)
 
 
 print('calculating convergence errors')
-n_shots_tot = 500
-protein_concentration = np.array([10, 20, 30]) #np.array([10, 100, 1000]) #10  # Protein concentration in mg/ml = kg/m^3
+n_shots_tot = 1000
+protein_concentration = np.array([10, 20, 30, 40, 50]) #np.array([10, 100, 1000]) #10  # Protein concentration in mg/ml = kg/m^3
 n_shot_mod = 100 # Calculate error every this many shots
 
 
@@ -460,6 +460,9 @@ np.savez(file=f'autocorr_dat1',
 
 """
 # Load code
+import numpy as np
+import matplotlib.pyplot as plt
+
 dat = np.load('autocorr_dat1.npz')
 
 n_shots_ref = dat['n_shots_ref']
