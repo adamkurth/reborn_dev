@@ -159,6 +159,7 @@ print('f_dens_water: ', f_dens_water)
 #########################################################################
 # Visualising molecule in real space
 #########################################################################
+"""
 print('Visualising molecule in real space')
 
 # pyqtgraph
@@ -229,7 +230,7 @@ show_projection(disp_map, disp_str)
 #----------------------
 
 
-
+"""
 # yay1
 ################################################################################
 # FXS Convergence study
