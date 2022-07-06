@@ -195,9 +195,6 @@ Ny_cent = int(np.round(Ny/2))
 Nz_cent = int(np.round(Nz/2))
 
 def show_projection(disp_map, disp_str):
-    """
-    Projection
-    """
     fig = plt.figure()
     ax = fig.add_subplot(131)
     im = ax.imshow(np.sum(disp_map, axis=0), origin='lower')
