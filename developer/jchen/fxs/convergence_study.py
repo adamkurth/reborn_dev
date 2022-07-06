@@ -238,6 +238,7 @@ print('Begin convergence study')
 
 s = 2  # Oversampling
 d = 8e-10 #8e-10  # Autocorrelation ring resolution
+
 q = 2 * np.pi / d  # q magnitude of autocorrelation ring (2pi/d)
 
 n_phi = int(2 * np.pi * s * protein_diameter / d)  # Num angular bins in ring
@@ -354,7 +355,7 @@ acf_avg_ref = autocorr_do(n_shots=n_shots_ref, n_proteins_per_drop=1)
 
 print('calculating convergence errors')
 n_shots_tot = 1000
-protein_concentration = np.array([10, 20, 30]) #np.array([10, 100, 1000]) #10  # Protein concentration in mg/ml = kg/m^3
+protein_concentration = np.array([10, 20, 30, 40, 50]) #np.array([10, 100, 1000]) #10  # Protein concentration in mg/ml = kg/m^3
 n_shot_mod = 100 # Calculate error every this many shots
 
 
@@ -453,6 +454,8 @@ np.savez(file=savefile_name,
          protein_concentration=protein_concentration,
          n_shot_mod=n_shot_mod,
          errors=errors,
+         ring_oversampling=s,
+         ring_res=d,
          water_density=water_density,
          pad_binning = pad_binning,
          photon_energy = photon_energy,
@@ -476,7 +479,7 @@ np.savez(file=savefile_name,
 import numpy as np
 import matplotlib.pyplot as plt
 
-dat = np.load('autocorr_dat1.npz')
+dat = np.load('autocorr_1.npz')
 
 n_shots_ref = dat['n_shots_ref']
 n_shots_tot = dat['n_shots_tot']
