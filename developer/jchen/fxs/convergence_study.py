@@ -42,6 +42,8 @@ rad90 = np.pi/2
 #######################################################################
 # Configurations
 #######################################################################
+savefile_name = 'autocorr_1'
+
 pad_geometry_file = detector.jungfrau4m_geom_file #detector.epix100_geom_file
 pad_binning = 4
 photon_energy = 7000 * eV
@@ -352,7 +354,7 @@ acf_avg_ref = autocorr_do(n_shots=n_shots_ref, n_proteins_per_drop=1)
 
 print('calculating convergence errors')
 n_shots_tot = 1000
-protein_concentration = np.array([10, 20, 30, 40, 50]) #np.array([10, 100, 1000]) #10  # Protein concentration in mg/ml = kg/m^3
+protein_concentration = np.array([10, 20, 30]) #np.array([10, 100, 1000]) #10  # Protein concentration in mg/ml = kg/m^3
 n_shot_mod = 100 # Calculate error every this many shots
 
 
@@ -445,16 +447,27 @@ errors = np.sqrt(errors) / np.sqrt(np.sum(acf_avg_ref[10:-10]**2))
 # plt.show(block=False)
 
 
-np.savez(file=f'autocorr_dat1',
+np.savez(file=savefile_name,
          n_shots_ref=n_shots_ref,
          n_shots_tot=n_shots_tot,
          protein_concentration=protein_concentration,
          n_shot_mod=n_shot_mod,
          errors=errors,
-         water_density=water_density)
-
-
-
+         water_density=water_density,
+         pad_binning = pad_binning,
+         photon_energy = photon_energy,
+         detector_distance = detector_distance,
+         pulse_energy = pulse_energy,
+         drop_radius = drop_radius,
+         beam_diameter = beam_diameter,
+         map_resolution = map_resolution,
+         map_oversample = map_oversample,
+         cell = cell,
+         pdb_file = pdb_file,
+         create_bio_assembly = create_bio_assembly,
+         random_seed = random_seed,
+         gpu_double_precision = gpu_double_precision,
+         gpu_group_size = gpu_group_size)
 
 
 
