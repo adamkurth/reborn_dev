@@ -137,4 +137,4 @@ peaks_f = import_f90(os.path.join(dir, 'peaks'), autocompile=autocompile, extra_
 omp_test_f = import_f90(os.path.join(dir, 'omp_test'), autocompile=autocompile, extra_args=omp_args)
 density_f = import_f90(os.path.join(dir, 'density'), autocompile=autocompile, extra_args=omp_args)
 scatter_f = import_f90(os.path.join(dir, 'scatter'), autocompile=autocompile, extra_args=omp_args)
-
+polar_f = import_f90(os.path.join(dir, 'polar'), autocompile=autocompile, extra_args=omp_args)
