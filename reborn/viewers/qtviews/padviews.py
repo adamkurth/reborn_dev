@@ -980,78 +980,85 @@ class PADView(QtCore.QObject):
         self.debug()
         text, ok = QtGui.QInputDialog.getText(self.main_window, "Enter ring radii (dict format)", "Ring radii",
                                               QtGui.QLineEdit.Normal,
-                                              '{"q_mags":[], "d_spacings":[], "radii":[], "angles":[], "pens":None}')
+                                              '{"q_mags":[], "d_spacings":[1e-10, 5e-10], "radii":[], "angles":[], '
+                                              '"pens":[]}')
         if ok:
             d = json.loads(text)
-            # if text == '':
-            #     self.remove_rings()
-            #     return
-            # r = text.split(',')
-            # rad = []
-            # for i in range(0, len(r)):
-            #     try:
-            #         rad.append(float(r[i].strip()))
-            #     except:
-            #         pass
-            self.remove_rings()
+            # # if text == '':
+            # #     self.remove_rings()
+            # #     return
+            # # r = text.split(',')
+            # # rad = []
+            # # for i in range(0, len(r)):
+            # #     try:
+            # #         rad.append(float(r[i].strip()))
+            # #     except:
+            # #         pass
+            # self.remove_rings()
             self.add_rings(**d)
 
-    def add_rings(self, radii=None, angles=None, q_mags=None, d_spacings=None, pens=None, repeat=True):
+    def add_rings(self, radii=None, angles=None, q_mags=None, d_spacings=None, pens=None, repeat=False):
         r""" Plot rings.  Note that these are in a plane located 1 meter from the sample position; calculate the radius
         needed for an equivalent detector at that distance.  If you know the scattering angle, the radius is
         tan(theta).  The repeat keyword will include all rings for a given d-spacing."""
-        self.debug()
+        self.debug('add_rings')
         pens = utils.ensure_list(pens)
+        if len(pens) < 1:
+            pens = [None]
         # We allow various input types... so we must now ensure they are either list or None.
         input = []
         for d in [radii, angles, q_mags, d_spacings]:
-            if isinstance(d, np.ndarray):
-                d = [i for i in d]
             if not d:
                 input.append(None)
                 continue
+            if isinstance(d, np.ndarray):
+                d = [i for i in d]
             d = utils.ensure_list(d)
             input.append(d)
         radii, angles, q_mags, d_spacings = input
         if radii is not None:
-            # pens *= int(len(radii)/len(pens))
+            pens *= int(len(radii) / len(pens))
+            self.debug('add_rings:radii', radii, ', pens', pens)
             for (r, p) in zip(radii, pens):
                 self.add_ring(radius=r, pen=p)
             return True
         if angles is not None:
-            # pens *= int(len(angles)/len(pens))
+            pens *= int(len(angles) / len(pens))
+            self.debug('add_rings:angles', angles, ', pens', pens)
             for (r, p) in zip(angles, pens):
                 self.add_ring(angle=r, pen=p)
             return True
         if q_mags is not None:
-            self.debug('q_mags', q_mags, 'pens', pens)
-            # pens *= int(len(q_mags)/len(pens))
+            pens *= int(len(q_mags) / len(pens))
+            self.debug('add_rings:q_mags', q_mags, ', pens', pens)
             for (r, p) in zip(q_mags, pens):
-
                 self.add_ring(q_mag=r, pen=p)
             return True
         if d_spacings is not None:
+            pens *= int(len(d_spacings) / len(pens))
+            self.debug('add_rings:d_spacings', d_spacings, ', pens', pens)
             if repeat is True:
                 d_spacings = [d_spacings[0]/i for i in range(1, 21)]
-            # pens *= int(len(d_spacings)/len(pens))
             for (r, p) in zip(d_spacings, pens):
                 self.add_ring(d_spacing=r, pen=p)
             return True
         return False
 
     def add_ring(self, radius=None, angle=None, q_mag=None, d_spacing=None, pen=None):
-        self.debug(radius, angle, q_mag, d_spacing, pen)
+        self.debug('add_ring', radius, angle, q_mag, d_spacing, pen)
         if angle is not None:
             if angle >= np.pi:
                 return False
             radius = np.tan(angle)
         if q_mag is not None:
-            angle = 2*np.arcsin(q_mag*self.dataframe.get_beam().wavelength/(4*np.pi))
+            a = q_mag*self.dataframe.get_beam().wavelength/(4*np.pi)
+            angle = 2*np.arcsin(a)
             if angle >= np.pi:
                 return False
             radius = np.tan(angle)
         if d_spacing is not None:
-            angle = 2*np.arcsin(self.dataframe.get_beam().wavelength / (2*d_spacing))
+            a = self.dataframe.get_beam().wavelength / (2*d_spacing)
+            angle = 2*np.arcsin(a)
             if angle >= np.pi:
                 return False
             q_mag = 4*np.pi/d_spacing
@@ -1068,7 +1075,7 @@ class PADView(QtCore.QObject):
 
     def update_rings(self):
         r""" Update rings (needed if the |Beam| changes). """
-        self.debug()
+        self.debug('update_rings')
         if self.rings:
             for ring in self.rings:
                 if ring.q_mag:
@@ -1076,32 +1083,32 @@ class PADView(QtCore.QObject):
                     ring.setState({"pos": [-r, -r], "size": 2*r, "angle": 0})
 
     def hide_ring_radius_handles(self):
-        self.debug()
+        self.debug('hide_ring_radius_handles')
         for circ in self.rings:
             for handle in circ.handles:
                 circ.removeHandle(handle['item'])
 
     def remove_rings(self):
-        self.debug()
+        self.debug('remove_rings')
         if self.rings is None:
             return
         for i in range(0, len(self.rings)):
             self.viewbox.removeItem(self.rings[i])
 
     def show_grid(self):
-        self.debug()
+        self.debug('show_grid')
         if self.grid is None:
             self.grid = pg.GridItem()
         self.viewbox.addItem(self.grid)
 
     def hide_grid(self):
-        self.debug()
+        self.debug('hide_grid')
         if self.grid is not None:
             self.viewbox.removeItem(self.grid)
             self.grid = None
 
     def toggle_grid(self):
-        self.debug()
+        self.debug('toggle_grid')
         if self.grid is None:
             self.show_grid()
         else:
