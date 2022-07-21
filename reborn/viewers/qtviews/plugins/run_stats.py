@@ -43,6 +43,7 @@ class Widget(QtGui.QWidget):
         self.layout.addWidget(QtGui.QLabel('Start Frame'), row, 1)
         self.start_frame_spinbox = QtGui.QSpinBox()
         self.start_frame_spinbox.setMinimum(0)
+        self.stop_frame_spinbox.setMaximum(self.padview.frame_getter.n_frames)
         self.start_frame_spinbox.setValue(0)
         self.layout.addWidget(self.start_frame_spinbox, row, 2)
         row += 1
@@ -139,9 +140,9 @@ class Worker(QtCore.QThread):
         self.parent.show_button.setEnabled(False)
         self.parent.stop_button.setEnabled(True)
         self.parent.stats = padstats(*self.args, **self.kwargs)
-        self.parent.show_padstats()
         self.parent.start_button.setEnabled(True)
         self.parent.show_button.setEnabled(True)
         self.parent.stop_button.setEnabled(False)
+        self.parent.show_padstats()
         # self.quit()
         # self.wait()
