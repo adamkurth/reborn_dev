@@ -31,7 +31,7 @@ def view_runstats(run_number=1, n_processes=1, max_frames=None):
     
 if __name__ == '__main__':
     from config import config
-    run_number = 86
+    run_number = config.get('default_run', 1)
     if len(sys.argv) > 1:
         run_number = int(sys.argv[1])
-    view_runstats(run_number=run_number, n_processes=16, max_frames=1000)
+    view_runstats(run_number=run_number, n_processes=16, max_frames=1e6)
