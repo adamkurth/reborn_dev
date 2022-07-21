@@ -56,14 +56,14 @@ def padstats(framegetter=None, start=0, stop=None, parallel=False, n_processes=N
                                                              verbose=verbose)
                                                              for i in range(n_processes))
         tot = out[0]
-        for i in np.linspace(1, len(out), 1, dtype=int):
-            if out[i]['sum'] is None:
+        for o in out[1:]:
+            if o['sum'] is None:
                 continue
-            tot['sum'] += out[i]['sum']
-            tot['sum2'] += out[i]['sum2']
-            tot['min'] = np.minimum(tot['min'], out[i]['min'])
-            tot['max'] = np.minimum(tot['max'], out[i]['max'])
-            tot['n_frames'] += out[i]['n_frames']
+            tot['sum'] += o['sum']
+            tot['sum2'] += o['sum2']
+            tot['min'] = np.minimum(tot['min'], o['min'])
+            tot['max'] = np.minimum(tot['max'], o['max'])
+            tot['n_frames'] += o['n_frames']
         return tot
     if isinstance(framegetter, dict):
         framegetter = framegetter['framegetter'](**framegetter['kwargs'])

@@ -13,20 +13,32 @@
 ! You should have received a copy of the GNU General Public License
 ! along with reborn.  If not, see <https://www.gnu.org/licenses/>.
 
-subroutine polar_binning(nq, np, qindex, pindex, data, dsum, count)
+subroutine polar_binning(nq, qbin_size, qmin, np, pbin_size, pmin, qs, phis, data, mask, dsum, count)
     implicit none
+    real(kind=8), parameter :: pi = 4.d0 * datan(1.d0)
     integer(kind=8), intent(in) :: nq, np
-    integer(kind=8), intent(in) :: qindex(:), pindex(:)
-    real(kind=8), intent(in) :: data(:)
+    real(kind=8), intent(in) :: qbin_size, qmin, pbin_size, pmin
+    real(kind=8), intent(in) :: qs(:), phis(:), data(:), mask(:)
     integer(kind=8), intent(out), dimension(nq * np) :: count
     real(kind=8), intent(out), dimension(nq * np) :: dsum
-    integer(kind=8) :: i, ii, q, p
-    dsum = 0
-    count = 0
+    integer(kind=8) :: i, ii, q_index, p_index
+    real(kind=8) :: q, p
+    dsum = 0.d0
+    count = 0.d0
     do i = 1, size(data)
-        q = qindex(i)
-        p = pindex(i)
-        ii = q + nq * p
+        if (mask(i) == 0) cycle
+        ! compute q index
+        q = qs(i)
+        q_index = int(floor((q - qmin) / qbin_size))
+        if (q_index < 0) cycle
+        if (q_index >= nq) cycle
+        ! compute phi index
+        p = modulo(phis(i), 2 * pi)
+        p_index = int(floor((p - pmin) / pbin_size))
+        if (p_index < 0) cycle
+        if (p_index >= np) cycle
+        ! bin data
+        ii = np * q_index + p_index + 1
         count(ii) = count(ii) + 1
         dsum(ii) = dsum(ii) + data(i)
     end do
