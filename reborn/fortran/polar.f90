@@ -33,8 +33,10 @@ subroutine polar_binning(nq, qbin_size, qmin, np, pbin_size, pmin, qs, phis, dat
         if (q_index < 0) cycle
         if (q_index >= nq) cycle
         ! compute phi index
-        p = modulo(phis(i), 2 * pi)
-        p_index = int(floor((p - pmin) / pbin_size))
+        ! p = modulo(phis(i), 2 * pi)
+        ! p_index = int(floor((p - pmin) / pbin_size))
+        p = phis(i)
+        p_index = modulo(int(floor((p - pmin) / pbin_size)), np)
         if (p_index < 0) cycle
         if (p_index >= np) cycle
         ! bin data
