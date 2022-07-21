@@ -1600,18 +1600,14 @@ class PolarPADAssembler:
         self.q_mags = q_mags
         self.phis = pad_geometry.azimuthal_angles(beam=beam)
         self.pad_geometry = pad_geometry
+        self.polar_shape = (self.n_q_bins, self.n_phi_bins)
 
-    def get_mean(self, data, mask=None):
+    def _py_mean(self, data, mask):
         r""" Create the mean polar-binned average intensities.
         Arguments:
-            data (list or |ndarray|): The PAD data to be binned.
-            mask (list or |ndarray|): A mask to indicate ignored pixels.
+            data (|ndarray|): The PAD data to be binned.
+            mask (|ndarray|): A mask to indicate ignored pixels.
         """
-        data = self.pad_geometry.concat_data(data)
-        if mask is None:
-            mask = np.ones_like(data)
-        mask = detector.concat_pad_data(mask)
-        polar_shape = (self.n_q_bins, self.n_phi_bins)
         _p = self.phis % (2 * np.pi)
         _pi = np.floor((_p - self.phi_min) / self.phi_bin_size)
         _qi = np.floor((self.q_mags - self.q_min) / self.q_bin_size)
@@ -1631,21 +1627,49 @@ class PolarPADAssembler:
         pk = p_index[keepers]
         dk = data[keepers]
         # calculate average binned pixel
-        if polar_f is None:
-            sum_ = np.zeros(polar_shape)
-            cnt = np.zeros(polar_shape, dtype=int)
-            for q, p, d in zip(qk, pk, dk):
-                cnt[q, p] += 1
-                sum_[q, p] += d
-            # vectorized code below is not equivalent to for loop above
-            # because slicing only works with unique values
-            # cnt[qk, pk] += 1
-            # sum_[qk, pk] += data[keepers]
+        sum_ = np.zeros(self.polar_shape)
+        cnt = np.zeros(self.polar_shape, dtype=int)
+        for q, p, d in zip(qk, pk, dk):
+            cnt[q, p] += 1
+            sum_[q, p] += d
+        return sum_, cnt
+
+    def _f_mean(self, data, mask):
+        r""" Create the mean polar-binned average intensities.
+        Arguments:
+            data (|ndarray|): The PAD data to be binned.
+            mask (|ndarray|): A mask to indicate ignored pixels.
+        """
+        psum, count = polar_f.polar_binning(self.polar_shape[0],
+                                            self.q_bin_size,
+                                            self.q_min,
+                                            self.polar_shape[1],
+                                            self.phi_bin_size,
+                                            self.phi_min,
+                                            self.q_mags,
+                                            self.phis, data, mask)
+        cnt = count.reshape(self.polar_shape).astype(int)
+        sum_ = psum.reshape(self.polar_shape).astype(float)
+        return sum_, cnt
+
+    def get_mean(self, data, mask=None, py=False):
+        r""" Create the mean polar-binned average intensities.
+        Arguments:
+            data (list or |ndarray|): The PAD data to be binned.
+            mask (list or |ndarray|): A mask to indicate ignored pixels.
+        """
+        data = self.pad_geometry.concat_data(data)
+        if mask is None:
+            mask = np.ones_like(data)
+        mask = detector.concat_pad_data(mask)
+        # calculate average binned pixel
+        if py:
+            sum_, cnt = self._py_mean(data, mask)
         else:
-            n_q, n_p = polar_shape
-            psum, count = polar_f.polar_binning(n_q, n_p, qk, pk, dk)
-            cnt = count.reshape(polar_shape).astype(int).T
-            sum_ = psum.reshape(polar_shape).T
+            if polar_f is None:
+                sum_, cnt = self._py_mean(data, mask)
+            else:
+                sum_, cnt = self._f_mean(data, mask)
         mean_ = np.divide(sum_, cnt, out=np.zeros_like(sum_), where=cnt != 0)
         return mean_, cnt
 
