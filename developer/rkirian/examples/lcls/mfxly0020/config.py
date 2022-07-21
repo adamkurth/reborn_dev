@@ -1,5 +1,6 @@
 """ These are all the relevant global configurations for the experiment analysis """
 config = dict()
+config['default_run'] = 86
 config['experiment_id'] = 'mfxly0020'
 config['results_directory'] = 'results/'
 config['geometry'] = None

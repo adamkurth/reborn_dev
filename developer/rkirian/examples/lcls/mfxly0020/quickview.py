@@ -2,7 +2,7 @@
 import sys
 from reborn.external.lcls import LCLSFrameGetter
 from config import config
-run_number = 86
+run_number = config.get('default_run', 1)
 if len(sys.argv) > 1:
     run_number = int(sys.argv[1])
 fg = LCLSFrameGetter(experiment_id=config['experiment_id'], run_number=run_number,

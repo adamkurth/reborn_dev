@@ -8,6 +8,7 @@ build
 builds
 old
 temp
+results
 .cache
 .pytest_cache
 __pycache__

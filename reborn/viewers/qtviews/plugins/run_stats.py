@@ -32,6 +32,7 @@ class Widget(QtGui.QWidget):
 
     stats = None
     worker = None
+    # sig_worker_done = QtCore.pyqtSignal()
 
     def __init__(self, padview):
         super().__init__()
@@ -43,7 +44,7 @@ class Widget(QtGui.QWidget):
         self.layout.addWidget(QtGui.QLabel('Start Frame'), row, 1)
         self.start_frame_spinbox = QtGui.QSpinBox()
         self.start_frame_spinbox.setMinimum(0)
-        self.stop_frame_spinbox.setMaximum(self.padview.frame_getter.n_frames)
+        self.start_frame_spinbox.setMaximum(self.padview.frame_getter.n_frames)
         self.start_frame_spinbox.setValue(0)
         self.layout.addWidget(self.start_frame_spinbox, row, 2)
         row += 1
@@ -109,8 +110,9 @@ class Widget(QtGui.QWidget):
         #                       n_processes=np, verbose=1)
         self.worker = Worker(self, framegetter=self.padview.frame_getter, start=start, stop=stop, parallel=parallel,
                               n_processes=np, verbose=1)
-        self.start_button.setEnabled(False)
-        self.stop_button.setEnabled(True)
+        #self.start_button.setEnabled(False)
+        #self.stop_button.setEnabled(True)
+        #self.show_button.setEnabled(False)
         self.worker.start()
 
     def show_padstats(self):
@@ -143,6 +145,8 @@ class Worker(QtCore.QThread):
         self.parent.start_button.setEnabled(True)
         self.parent.show_button.setEnabled(True)
         self.parent.stop_button.setEnabled(False)
-        self.parent.show_padstats()
+        print('DEBUG:pad_stats:Worker: Thread is done')
+        # self.parent.sig_worker_done.emit()
+        # self.parent.show_padstats()
         # self.quit()
         # self.wait()
