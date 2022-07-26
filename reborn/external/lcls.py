@@ -213,8 +213,10 @@ class AreaDetector(object):
     motions = None  # Allow for some translation operations based on epics pvs
     _home_geometry = None  # This is the initial geometry, before translations/rotations
     _funky_cheetah_cspad = False
+    adu_per_photon = None
 
-    def __init__(self, pad_id=None, geometry=None, mask=None, data_type='calib', motions=None, run_number=1, **kwargs):
+    def __init__(self, pad_id=None, geometry=None, mask=None, data_type='calib', motions=None, run_number=1, 
+                        adu_per_photon=None, **kwargs):
         r"""
         Instantiate with same arguments you would use to instantiate a psana.Detector instance.
         Usually this means to supply a psana.DataSource instance.
@@ -328,6 +330,11 @@ class AreaDetector(object):
             data = np.double(self.detector.calib(event))
         elif self.data_type == 'raw':
             data = np.double(self.detector.raw(event))
+        elif self.data_type == 'photons':
+            if self.adu_per_photon is None:
+                print('You did not set adu_per_photon; setting it to some garbage number.')
+                self.adu_per_photon = 35
+            data = np.double(self.detector.photons(event, adu_per_photon=self.adu_per_photon))
         else:
             data = None
         if not isinstance(data, np.ndarray):
