@@ -20,9 +20,8 @@ import pyqtgraph as pg
 
 def keep_open():
     r"""
-    Simple helper that keeps qtgraph window open when you run a script from the terminal.
+    Simple helper that keeps a pyqtgraph window open when you run a script from the terminal.
     """
-
     pg.QtGui.QApplication.instance().exec_()
 
 
@@ -142,23 +141,16 @@ class MultiHistogramLUTWidget(pg.GraphicsView):
 
     def __init__(self, parent=None, *args, **kargs):
         background = kargs.get('background', 'default')
-        pg.GraphicsView.__init__(
-            self,
-            parent,
-            useOpenGL=False,
-            background=background)
+        pg.GraphicsView.__init__(self, parent, useOpenGL=False, background=background)
         self.item = MultiHistogramLUTItem(*args, **kargs)
         self.setCentralItem(self.item)
-        self.setSizePolicy(
-            pg.QtGui.QSizePolicy.Preferred,
-            pg.QtGui.QSizePolicy.Expanding)
+        self.setSizePolicy(pg.QtGui.QSizePolicy.Preferred, pg.QtGui.QSizePolicy.Expanding)
         self.setMinimumWidth(100)
 
     def sizeHint(self):
         r"""
         Undocumented pyqtgraph method.
         """
-
         return pg.QtCore.QSize(115, 200)
 
     def __getattr__(self, attr):

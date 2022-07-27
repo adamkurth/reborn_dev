@@ -210,9 +210,9 @@ def load_padstats_from_h5(h5_file_path):
         stats['run_number'] = hf['meta/run_number'][()]
         stats['dataset_id'] = hf['meta/dataset_id'][()].decode('utf-8')
         for ss in save_stats_scalar:
-            stats[ss] = hf[f'data/{ss}'][()]
+            stats[ss] = hf[f'padstats/{ss}'][()]
         for ss in save_stats_arrays:
-            stats[ss] = hf[f'data/{ss}'][:]
+            stats[ss] = hf[f'padstats/{ss}'][:]
     return stats
 
 

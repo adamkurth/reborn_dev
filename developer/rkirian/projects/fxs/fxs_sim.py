@@ -27,17 +27,21 @@ rad90 = np.pi/2
 ##########################################################################
 # Configurations
 #######################################################################
-pad_geometry_file = detector.epix100_geom_file
+# pad_geometry_file = detector.epix100_geom_file
+pad_geometry_file = detector.jungfrau4m_geom_file
 pad_binning = 4
 photon_energy = 7000 * eV
-detector_distance = 2.4
-pulse_energy = 0.5e-3
+detector_distance = 0.58
+pulse_energy = 1e-3
 drop_radius = 100e-9 / 2
 beam_diameter = 0.5e-6
 map_resolution = 0.2e-9  # Minimum resolution for 3D density map
 map_oversample = 2  # Oversampling factor for 3D density map
 cell = 200e-10  # Unit cell size (assume P1, cubic)
-pdb_file = '1SS8'  # '3IYF' '1PCQ' '2LYZ' 'BDNA25_sp.pdb'
+pdb_file = '1SS8'
+# pdb_file = '3IYF' #'1PCQ' '2LYZ'
+# pdb_file = 'BDNA25_sp.pdb'
+
 protein_concentration = 10  # Protein concentration in mg/ml = kg/m^3
 hit_frac = 0.01  # Hit fraction
 freq = 120  # XFEL frequency
@@ -45,6 +49,8 @@ runtime = 0.1 * 3600  # Run time in seconds
 random_seed = 2022  # Seed for random number generator (choose None to make it random)
 gpu_double_precision = True
 gpu_group_size = 32
+poisson = False
+
 
 #########################################################################
 # Derived parameters
@@ -82,7 +88,7 @@ amps_gpu = clcore.to_device(shape=pads.n_pixels, dtype=clcore.complex_t)
 q_min = dmap.q_min
 q_max = dmap.q_max
 protein_number_density = protein_concentration/cryst.molecule.get_molecular_weight()
-n_proteins_per_drop = int(protein_number_density*4/3*np.pi*drop_radius**3)
+n_proteins_per_drop = 1 #int(protein_number_density*4/3*np.pi*drop_radius**3)
 protein_diameter = cryst.molecule.max_atomic_pair_distance  # Nominal particle size
 print('N Shots:', n_shots)
 print('Molecules per drop:', n_proteins_per_drop)
@@ -95,10 +101,10 @@ print('Density map grid size: (%d, %d, %d)' % tuple(dmap.shape))
 class DropletGetter(FrameGetter):
     def __init__(self):
         super().__init__()
-        self.n_frames = np.inf
+        self.n_frames = 1e6
     def get_data(self, frame_number=0):
         dd = drop_radius*2 #+ (np.random.rand()-0.5)*drop_radius/5
-        nppd = int(protein_number_density*4/3*np.pi*(dd/2)**3)
+        nppd = n_proteins_per_drop # int(protein_number_density*4/3*np.pi*(dd/2)**3)
         p_vecs = placer.particles_in_a_sphere(sphere_diameter=dd, n_particles=nppd, particle_diameter=protein_diameter)
         add = False
         for p in range(nppd):
@@ -110,13 +116,14 @@ class DropletGetter(FrameGetter):
         sff = f_dens_water*sphere_form_factor(radius=dd/2, q_mags=q_mags)
         I = np.abs(amps_gpu.get()+sff)**2*r_e**2*solid_angles*polarization_factors*fluence
         I = np.abs(amps_gpu.get()) ** 2 * r_e ** 2 * solid_angles * polarization_factors * fluence
-        I = np.random.poisson(I)
+        if poisson:
+            I = np.random.poisson(I)
         df = dataframe.DataFrame(pad_geometry=pads, beam=beam, raw_data=I)
         return df
 fg = DropletGetter()
 pv = PADView(frame_getter=fg)
 pv.start()
-# sys.exit()
+sys.exit()
 
 ################################################################################
 # FXS Simulation

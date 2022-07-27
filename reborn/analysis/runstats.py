@@ -22,7 +22,7 @@ except ImportError:
 from ..dataframe import DataFrame
 from ..fileio.getters import ListFrameGetter
 from ..source import Beam
-
+from ..viewers.qtviews.padviews import PADView
 
 def padstats(framegetter=None, start=0, stop=None, parallel=False, n_processes=None, process_id=None, verbose=False):
     r""" EXPERIMENTAL!!!  Since we often need to loop over a series of dataframes and fetch the mean, variance, min
@@ -56,14 +56,14 @@ def padstats(framegetter=None, start=0, stop=None, parallel=False, n_processes=N
                                                              verbose=verbose)
                                                              for i in range(n_processes))
         tot = out[0]
-        for i in np.linspace(1, len(out), 1, dtype=int):
-            if out[i]['sum'] is None:
+        for o in out[1:]:
+            if o['sum'] is None:
                 continue
-            tot['sum'] += out[i]['sum']
-            tot['sum2'] += out[i]['sum2']
-            tot['min'] = np.minimum(tot['min'], out[i]['min'])
-            tot['max'] = np.minimum(tot['max'], out[i]['max'])
-            tot['n_frames'] += out[i]['n_frames']
+            tot['sum'] += o['sum']
+            tot['sum2'] += o['sum2']
+            tot['min'] = np.minimum(tot['min'], o['min'])
+            tot['max'] = np.minimum(tot['max'], o['max'])
+            tot['n_frames'] += o['n_frames']
         return tot
     if isinstance(framegetter, dict):
         framegetter = framegetter['framegetter'](**framegetter['kwargs'])
@@ -80,11 +80,15 @@ def padstats(framegetter=None, start=0, stop=None, parallel=False, n_processes=N
     beam_wavelength = 0
     beam_frames = 0
     n_frames = 0
+    dataset_id = None
+    pad_geometry = None
+    mask = None
     for (n, i) in enumerate(frame_ids):
         if verbose:
             print(f'Frame {i:6d} ({n / len(frame_ids) * 100:0.2g})')
         dat = framegetter.get_frame(frame_number=i)
         if dat is None:
+            print(f'Frame {i:6d} is None!!!')
             continue
         rdat = dat.get_raw_data_flat()
         if rdat is None:
@@ -105,15 +109,21 @@ def padstats(framegetter=None, start=0, stop=None, parallel=False, n_processes=N
         sum_pad2 += rdat ** 2
         min_pad = np.minimum(min_pad, rdat)
         max_pad = np.maximum(max_pad, rdat)
+        if dataset_id is None:
+            dataset_id = dat.get_dataset_id()
+        if pad_geometry is None:
+            pad_geometry = dat.get_pad_geometry()
+        if mask is None:
+            mask = dat.get_mask_flat()
         n_frames += 1
     if beam_frames == 0:
         beam = None
     else:
         avg_wavelength = beam_wavelength / beam_frames
         beam = Beam(wavelength=avg_wavelength)
-    return {'dataset_id': dat.get_dataset_id(),
-            'pad_geometry': dat.get_pad_geometry(),
-            'mask': dat.get_mask_flat(),
+    return {'dataset_id': dataset_id,
+            'pad_geometry': pad_geometry,
+            'mask': mask,
             'n_frames': n_frames,
             'sum': sum_pad,
             'min': min_pad,
@@ -159,4 +169,6 @@ def padstats_framegetter(stats):
 
 def view_padstats(stats):
     fg = padstats_framegetter(stats)
-    fg.view()
+    pv = PADView(frame_getter=fg, percentiles=[1, 99])
+    pv.start()
+    # fg.view()
