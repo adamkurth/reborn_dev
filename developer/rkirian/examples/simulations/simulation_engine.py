@@ -17,4 +17,3 @@ for i in range(1000):
     intensity = engine.generate_pattern()
 
 padviews.view_pad_data(pad_geometry=pads, pad_data=intensity)
-
