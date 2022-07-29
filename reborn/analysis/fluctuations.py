@@ -224,12 +224,14 @@ class FXS:
                 if self._run_sum is None:
                     self._run_sum = self._frame_data
                 else:
-                    self._run_sum += self._frame_data
+                    for i, fd in enumerate(self._frame_data):
+                        self._run_sum[i] += fd
 
                 if self._run_sum2 is None:
-                    self._run_sum2 = self._frame_data ** 2
+                    self._run_sum2 = [fd ** 2 for fd in self._frame_data]
                 else:
-                    self._run_sum2 += self._frame_data ** 2
+                    for i, fd in enumerate(self._frame_data):
+                        self._run_sum2[i] += fd ** 2
             else:
                 print("Dataframe not valid, skipping ..." + 4 * "\t", end="\r")
         else:
