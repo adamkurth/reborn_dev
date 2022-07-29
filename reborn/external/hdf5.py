@@ -258,3 +258,35 @@ def load_analysis_from_h5(analysis_key, h5_file_path):
         for k in analysis_key:
             data[k] = hf[f'analysis/{k}'][:]
     return data
+
+
+def save_fxs_as_h5(fxs, filename, **kwargs):
+    analysis_dict = fxs.to_dict()
+    analysis_dict.update(kwargs)
+    if filename[-4:] == 'hdf5':
+        with h5py.File(filename, 'a') as hf:
+            for k, v in analysis_dict.items():
+                if v is None:
+                    continue
+                else:
+                    hf.create_dataset(k, data=v)
+    else:
+        print('Only hdf5 files can be saved at this time.')
+    print(f'Saved : {filename}', end='\r')
+
+
+def load_fxs_as_h5(filename):
+    fxs_dict = dict()
+    bkeys = ['meta', 'analysis/kam_correlations/', 'analysis/geometry/']
+    okeys = ['analysis/saxs', 'analysis/n_patterns',
+             'analysis/run_max', 'analysis/run_min',
+             'analysis/run_sum', 'analysis/run_sum2']
+    if filename[-4:] == 'hdf5':
+        with h5py.File(filename, 'r') as hf:
+            fxs_dict.update({k: hf[f'{k}'][()] for k in okeys})
+            for sec in bkeys:
+                sec_keys = list(hf[f'{sec}'])
+                fxs_dict.update({k: hf[f'{sec}/{k}'][()] for k in sec_keys})
+    else:
+        print('Only hdf5 files can be loaded at this time.')
+    return fxs_dict

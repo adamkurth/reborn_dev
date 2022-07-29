@@ -15,6 +15,8 @@
 
 import numpy as np
 
+import reborn.dataframe
+
 
 def correlate(s1, s2=None, cached=False):
     r"""
@@ -29,7 +31,7 @@ def correlate(s1, s2=None, cached=False):
     Arguments:
         s1 (|ndarray|): signal 1
         s2 (|ndarray|): signal 2
-        cache (bool): provide ffts instead of computing
+        cached (bool): provide ffts instead of computing
     Returns:
         correlation (|ndarray|): correlation of s1 and s2
     """
@@ -73,7 +75,7 @@ def data_correlation(n, data, mask, cached=False):
         n (int): number of q rings to shift
         data (|ndarray|): data
         mask (|ndarray|): mask (i.e. data to ignore)
-        cache (bool): provide ffts instead of computing
+        cached (bool): provide ffts instead of computing
     Returns:
         ccf (|ndarray|): cross correlation function of data
     """
@@ -111,3 +113,162 @@ def compute_data_correlations(data, mask):
                                         mask=mask, cached=True)
                     for n in range(q_range)}
     return correlations
+
+
+class FXS:
+    _experiment_id = None
+    _frame_beam = None
+    _frame_data = None
+    _frame_geom = None
+    _frame_mask = None
+    _frame_correlations = None
+    _frame_polar_data = None
+    _frame_polar_mask = None
+    _n_patterns = None
+    _polar_assembler = None
+    _radial_profiler = None
+    _run_id = None
+    _run_max = None
+    _run_min = None
+    _run_sum = None
+    _run_sum2 = None
+    _run_correlations = None
+
+    def __init__(self, experiment_id=None, run_id=None, polar_assembler=None, radial_profiler=None):
+        self._experiment_id = experiment_id
+        self._run_id = run_id
+        self._polar_assembler = polar_assembler
+        self._radial_profiler = radial_profiler
+        self._n_patterns = 0
+
+    @property
+    def experiment_id(self):
+        return self._experiment_id
+
+    @property
+    def run_id(self):
+        return self._run_id
+
+    @property
+    def n_patterns(self):
+        return self._n_patterns
+
+    @property
+    def run_correlations(self):
+        return self._run_correlations
+
+    @property
+    def run_max(self):
+        return self._run_max
+
+    @property
+    def run_min(self):
+        return self._run_min
+
+    @property
+    def run_sum(self):
+        return self._run_sum
+
+    @property
+    def run_var(self):
+        return self._run_sum2 - self._run_sum ** 2
+
+    def __str__(self):
+        out = "Fluctuation X-ray Scattering\n"
+        out += f"    Experiment ID: {self.experiment_id}\n"
+        out += f"           Run ID: {self.run_id}\n"
+        if self._polar_assembler is None:
+            out += f"  Polar Assembler: None\n"
+        else:
+            out += f"  Polar Assembler: Assigned\n"
+        if self._radial_profiler is None:
+            out += f"  Radial Profiler: None\n"
+        else:
+            out += f"  Radial Profiler: Assigned\n"
+        out += f"Averaged Patterns: {self.n_patterns}\n"
+        return out
+
+    def __add__(self, dataframe):
+        self.add_frame(dataframe)
+
+    def add_frame(self, dataframe):
+        if isinstance(dataframe, reborn.dataframe.DataFrame):
+            if dataframe.validate():
+                print("Dataframe is valid, adding to analysis ..." + 4 * "\t", end="\r")
+                self._n_patterns += 1
+                self._frame_geom = dataframe.get_pad_geometry()
+                self._frame_beam = dataframe.get_beam()
+                self._frame_data = dataframe.get_raw_data_list()
+                self._frame_mask = dataframe.get_mask_list()
+
+                self._frame_polar_data, self._frame_polar_mask = self._polar_assembler.get_mean(data=self._frame_data,
+                                                                                                mask=self._frame_mask)
+                self._frame_correlations = compute_data_correlations(self._frame_polar_data,
+                                                                     self._frame_polar_mask)
+                if self._run_correlations is None:
+                    self._run_correlations = self._frame_correlations
+                else:
+                    for k, v in self._frame_correlations.items():
+                        self._run_correlations[k] += v / self._n_patterns
+
+                if self._run_max is None:
+                    self._run_max = self._frame_data
+                else:
+                    self._run_max = np.maximum(self._run_max, self._frame_data)
+
+                if self._run_min is None:
+                    self._run_min = self._frame_data
+                else:
+                    self._run_min = np.minimum(self._run_min, self._frame_data)
+
+                if self._run_sum is None:
+                    self._run_sum = self._frame_data
+                else:
+                    self._run_sum += self._frame_data
+
+                if self._run_sum2 is None:
+                    self._run_sum2 = self._frame_data ** 2
+                else:
+                    self._run_sum2 += self._frame_data ** 2
+            else:
+                print("Dataframe not valid, skipping ..." + 4 * "\t", end="\r")
+        else:
+            print("Only dataframe addition is supported at this time.", end="\r")
+
+    def get_run_correlations(self):
+        return self._run_correlations
+
+    def get_auto_correlations(self):
+        return self._run_correlations[0]
+
+    def get_saxs(self, pattern, statistic=np.mean):
+        if self._radial_profiler is None:
+            p = None
+        else:
+            p = self._radial_profiler.get_profile_statistic(pattern, statistic=statistic)
+        return p
+
+    def to_dict(self):
+        base_keys = [f'analysis/kam_correlations/{k}' for k in self.run_correlations.keys()] + \
+                    ['analysis/saxs', 'analysis/n_patterns',
+                     'analysis/run_max', 'analysis/run_min',
+                     'analysis/run_sum', 'analysis/run_sum2',
+                     'analysis/geometry/n_q_bins', 'analysis/geometry/n_phi_bins',
+                     'analysis/geometry/q_max', 'analysis/geometry/q_min',
+                     'analysis/geometry/phi_max', 'analysis/geometry/phi_min',
+                     'meta/experiment_id', 'meta/run_id']
+        nq = self._polar_assembler.n_q_bins
+        nphi = self._polar_assembler.n_phi_bins
+        qs = self._polar_assembler.q_mags
+        phis = self._polar_assembler.phis
+        sxs = self.get_saxs(pattern=self.run_sum / self.n_patterns, statistic=np.mean)
+        if sxs is None:
+            saxs = 'None'
+        else:
+            saxs = sxs
+        base_vals = [v for v in self.run_correlations.values()] + \
+                    [saxs, self.n_patterns,
+                     self.run_max, self.run_min, self.run_sum, self._run_sum2,
+                     nq, nphi, qs[-1], qs[0], phis[-1], phis[0],
+                     self.experiment_id, self.run_id]
+        return dict(zip(base_keys, base_vals))
