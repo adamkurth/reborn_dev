@@ -59,10 +59,10 @@ def subtract_masked_data_mean(data, mask):
     d_sum = np.sum(data, axis=1)
     count = np.sum(mask, axis=1)
     d_zro = np.zeros_like(d_sum)
-    data -= np.divide(d_sum, count, out=d_zro, where=count != 0)
-    data /= np.max(data)  # normalization
-    data *= mask  # re-zero masked pixels
-    return data
+    d = data - np.divide(d_sum, count, out=d_zro, where=count != 0)
+    d /= np.max(d)  # normalization
+    d *= mask  # re-zero masked pixels
+    return d
 
 
 def data_correlation(n, data, mask, cached=False):
