@@ -302,7 +302,8 @@ class FXS:
         nphi = self._polar_assembler.n_phi_bins
         qs = self._polar_assembler.q_mags
         phis = self._polar_assembler.phis
-        sxs = self.get_saxs(pattern=self.run_sum / self.n_patterns, statistic=np.mean)
+        rsum = np.array(self._run_sum)
+        sxs = self.get_saxs(pattern=rsum / self.n_patterns, statistic=np.mean)
         if sxs is None:
             saxs = 'None'
         else:
