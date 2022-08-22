@@ -172,6 +172,10 @@ class FXS:
         return self._run_sum
 
     @property
+    def run_sum2(self):
+        return self._run_sum2
+
+    @property
     def run_var(self):
         return self._run_sum2 - self._run_sum ** 2
 
