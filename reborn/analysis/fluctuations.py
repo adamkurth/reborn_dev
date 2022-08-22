@@ -275,7 +275,8 @@ class FXS:
             print("Only merging FXS objects is supported at this time.", end="\r")
 
     def get_run_correlations(self):
-        return self._run_sum_correlations / self._n_patterns
+        n = self._n_patterns
+        return {k: v / n for k, v in self._run_sum_correlations.items()}
 
     def get_auto_correlations(self):
         return self._run_sum_correlations[0] / self._n_patterns
