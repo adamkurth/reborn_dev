@@ -106,18 +106,31 @@ def geometry_dict_to_pad_geometry_list(geometry_dict):
         pad.crystfel_max_fs = p['max_fs']
         pad.crystfel_min_ss = p['min_ss']
         pad.crystfel_min_fs = p['min_fs']
+        pad.crystfel_dim_structure = p.get('dim_structure', None)
         pads.append(pad)
 
     pads = detector.PADGeometryList(pads)
     maxfs = 0
     maxss = 0
+    max3 = 0
     for p in pads:
         maxfs = max(maxfs, p.crystfel_max_fs)
         maxss = max(maxss, p.crystfel_max_ss)
-    pds = (maxss+1, maxfs+1)
+        # This is a dirty hack... assumes that dim_structure is either ['%', int, 'ss', fs'] or [int, 'ss', 'fs'] or ['ss', 'fs'] 
+        for d in p.crystfel_dim_structure:
+            if isinstance(d, int):
+                max3 = max(d, max3)
     for p in pads:
-        p.parent_data_shape = pds
-        p.parent_data_slice = np.s_[p.crystfel_min_ss:p.crystfel_max_ss + 1, p.crystfel_min_fs:p.crystfel_max_fs + 1]
+        if max3 <= 0:
+            p.parent_data_shape = (maxss+1, maxfs+1)
+            p.parent_data_slice = np.s_[p.crystfel_min_ss:p.crystfel_max_ss + 1, p.crystfel_min_fs:p.crystfel_max_fs + 1]    
+        else:
+            p.parent_data_shape = (max3+1, maxss+1, maxfs+1)
+            d = 0
+            for di in p.crystfel_dim_structure:
+                if isinstance(di, int):
+                    d = di
+            p.parent_data_slice= np.s_[d, p.crystfel_min_ss:p.crystfel_max_ss + 1, p.crystfel_min_fs:p.crystfel_max_fs + 1]
     return pads
 
 
