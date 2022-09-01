@@ -77,7 +77,7 @@ class EuXFELFrameGetter(reborn.fileio.getters.FrameGetter):
         for i, (k, v) in enumerate(train_shots.items()):
             fnums = np.arange(v)
             vals = np.ones(v) * k
-            if i == 1:
+            if i == 0:
                 a = 0
             else:
                 a = list(self.frames)[-1]
