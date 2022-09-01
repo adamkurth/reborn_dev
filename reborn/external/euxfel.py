@@ -26,10 +26,7 @@ import numpy as np
 import reborn
 from .. import utils, detector
 from . import crystfel, cheetah
-try:
-    import exta_data
-except ImportError:
-    exta_data = None
+import extra_data
 
 
 debug = True
