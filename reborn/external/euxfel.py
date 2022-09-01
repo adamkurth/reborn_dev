@@ -90,7 +90,7 @@ class EuXFELFrameGetter(reborn.fileio.getters.FrameGetter):
         debug_message()
 
         tid, fn = self.frames[frame_number]
-        train_id, train_data = self.selection.train_by_id(tid)
+        train_id, train_data = self.selection.train_from_id(tid)
         stacked = stack_detector_data(train_data, 'image.data')
         stacked_pulse = stacked[fn][0]
         
