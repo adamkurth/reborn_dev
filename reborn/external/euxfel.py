@@ -67,7 +67,10 @@ class EuXFELFrameGetter(reborn.fileio.getters.FrameGetter):
         self.beam = beam
 
         sources = run.all_sources
-        detectors = [s if '/DET/' in s for s in sources]
+        detectors = list()
+        for s in sources:
+            if if '/DET/' in s:
+                detectors.append(s)
         trains_shot = dict()
         for d in detectors:
             t_shots = run[d, 'image.data'].data_counts()
