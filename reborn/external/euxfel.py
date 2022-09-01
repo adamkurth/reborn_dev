@@ -59,7 +59,7 @@ class EuXFELFrameGetter(reborn.fileio.getters.FrameGetter):
         self.experiment_id = experiment_id
         self.run_id = run_id
         self.pad_detectors = pad_detectors
-        run = exta_data.open_run(proposal=self.experiment_id, run=self.run_id)
+        run = extra_data.open_run(proposal=self.experiment_id, run=self.run_id)
         self.selection = run.select(self.pad_detectors, 'image.data', require_all=True)
         self.beam = beam
 
