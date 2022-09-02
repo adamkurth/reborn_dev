@@ -98,15 +98,13 @@ class EuXFELFrameGetter(reborn.fileio.getters.FrameGetter):
             train_id, train_data = self.selection.train_from_id(train_id)
             stacked = extra_data.stack_detector_data(train_data, 'image.data')
         stacked_pulse = stacked[fn][0]
-
         df = reborn.dataframe.DataFrame()
         df.set_dataset_id(f'{self.pad_detectors} run:{self.run_id}')
         df.set_frame_id(frame_number)
         df.set_frame_index(frame_number)
         df.set_pad_geometry(self.geom)
         df.set_raw_data(stacked_pulse)
-        
-        pe = self.photon_energies.train_from_id(tid)
+        pe = self.photon_energies.train_from_id(train_id)
         self.beam = Beam(wavelength=pe[1] * 1e-9)
         df.set_beam(self.beam)
         debug_message('returning', df)
