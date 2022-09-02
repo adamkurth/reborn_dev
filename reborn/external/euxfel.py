@@ -24,6 +24,7 @@ Note that there is documentation on
 import re
 import numpy as np
 import reborn
+from rebonr.source import Beam
 from .. import utils, detector
 from . import crystfel, cheetah
 import extra_data
@@ -60,7 +61,7 @@ class EuXFELFrameGetter(reborn.fileio.getters.FrameGetter):
         self.pad_detectors = pad_detectors
         run = extra_data.open_run(proposal=self.experiment_id, run=self.run_id)
         self.selection = run.select(self.pad_detectors, 'image.data', require_all=True)
-        self.beam = beam
+        self.beam = None
 
         sources = run.all_sources
         detectors = list()
@@ -100,9 +101,8 @@ class EuXFELFrameGetter(reborn.fileio.getters.FrameGetter):
         df.set_pad_geometry(self.geom)
         df.set_raw_data(stacked_pulse)
         
-        beam = self.beam
         pe = self.photon_energies.train_from_id(tid)
-        beam.photon_energy = pe[1] * 1e-9
-        df.set_beam(beam)
+        self.beam = Beam(wavelength=pe[1] * 1e-9)
+        df.set_beam(self.beam)
         debug_message('returning', df)
         return df
