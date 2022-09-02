@@ -24,7 +24,7 @@ Note that there is documentation on
 import re
 import numpy as np
 import reborn
-from rebonr.source import Beam
+from reborn.source import Beam
 from .. import utils, detector
 from . import crystfel, cheetah
 import extra_data
