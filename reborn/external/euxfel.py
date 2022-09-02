@@ -28,7 +28,6 @@ from .. import utils, detector
 from . import crystfel, cheetah
 import extra_data
 
-
 debug = True
 
 
@@ -91,7 +90,7 @@ class EuXFELFrameGetter(reborn.fileio.getters.FrameGetter):
 
         tid, fn = self.frames[frame_number]
         train_id, train_data = self.selection.train_from_id(tid)
-        stacked = stack_detector_data(train_data, 'image.data')
+        stacked = extra_data.stack_detector_data(train_data, 'image.data')
         stacked_pulse = stacked[fn][0]
         
         geometry = reborn.detector.PADGeometryList(self.geom_file)
