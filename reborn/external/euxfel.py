@@ -81,7 +81,7 @@ class EuXFELFrameGetter(reborn.fileio.getters.FrameGetter):
                 a = 0
             else:
                 a = list(self.frames)[-1]
-            f = dict(zip(fnums + a, zip(fnums, vals)))
+            f = dict(zip(fnums + a, zip(vals, fnums)))
             self.frames.update(f)
         self.photon_energies = run['SA1_XTD2_XGM/XGM/DOOCS', 'pulseEnergy.wavelengthUsed.value']
         self.geom_file = geom
