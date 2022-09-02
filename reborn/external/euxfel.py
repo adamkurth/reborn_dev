@@ -43,7 +43,8 @@ def debug_message(*args, caller=True, **kwargs):
 
 class EuXFELFrameGetter(reborn.fileio.getters.FrameGetter):
     # SPB_DET_AGIPD1M-1/DET/*CH0:xtdf
-
+    current_train_stack = None
+    current_train_id = None
     def __init__(self, experiment_id, run_id,
                  pad_detectors='*/DET/*', geom=None, max_events=1e6,
                  beam=None):
@@ -87,23 +88,24 @@ class EuXFELFrameGetter(reborn.fileio.getters.FrameGetter):
 
     def get_data(self, frame_number=0):
         debug_message()
-
-        tid, fn = self.frames[frame_number]
-        train_id, train_data = self.selection.train_from_id(tid)
-        stacked = extra_data.stack_detector_data(train_data, 'image.data')
+        stacked = None
+        train_id, fn = self.frames[frame_number]
+        if self.current_train_stack is not None:
+            if train_id == self.current_train_id:
+                stacked = self.current_train_stack
+        else:
+            train_id, train_data = self.selection.train_from_id(train_id)
+            stacked = extra_data.stack_detector_data(train_data, 'image.data')
         stacked_pulse = stacked[fn][0]
-        
         geometry = reborn.detector.PADGeometryList(self.geom_file)
-        
         df = reborn.dataframe.DataFrame()
         df.set_dataset_id(f'{self.pad_detectors} run:{self.run_id}')
         df.set_frame_id(frame_number)
         df.set_frame_index(frame_number)
         df.set_pad_geometry(geometry)
         df.set_raw_data(stacked_pulse)
-        
         beam = self.beam
-        pe = self.photon_energies.train_from_id(tid)
+        pe = self.photon_energies.train_from_id(train_id)
         beam.photon_energy = pe[1] * 1e-9
         df.set_beam(beam)
         debug_message('returning', df)
