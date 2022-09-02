@@ -275,7 +275,7 @@ def save_fxs_as_h5(fxs, filename, **kwargs):
     print(f'Saved : {filename}', end='\r')
 
 
-def load_fxs_as_h5(filename):
+def load_fxs_from_h5(filename):
     fxs_dict = dict()
     bkeys = ['meta', 'analysis/kam_correlations/', 'analysis/geometry/']
     okeys = ['analysis/saxs', 'analysis/n_patterns',
@@ -290,3 +290,26 @@ def load_fxs_as_h5(filename):
     else:
         print('Only hdf5 files can be loaded at this time.')
     return fxs_dict
+
+
+def save_run_profile_stats_as_h5(pstats, h5_file_path):
+    r"""
+    Save profile runstats in an HDF5 file format in a standardized way.
+
+    Arguments:
+        beam (|Beam|): beam to save
+        h5_file_path (str): filename
+    """
+    with h5py.File(h5_file_path, 'a') as hf:
+        for k, v in pstats.items():
+            hf.create_dataset(f'pstats/{k}', data=np.array(v))
+    print(f'Saved run profile stats: {h5_file_path}')
+
+
+def load_run_profile_stats_from_h5(filename):
+    stat_keys = ['median', 'mean', 'sum', 'sum2', 'counts', 'q_bins']
+    pstats = dict()
+    with h5py.File(h5_file_path, 'a') as hf:
+        for k in stat_keys:
+            pstats[k] = hf[f'pstats/{k}'][:]
+    return pstats
