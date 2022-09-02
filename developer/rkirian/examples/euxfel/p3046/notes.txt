@@ -1,0 +1,8 @@
+Log into desy machine:
+ssh kirian@max-display.desy.de
+
+Move to experiment directory:
+cd /gpfs/exfel/exp/SPB/202202/p003046/scratch/rkirian/reborn/developer/rkirian/examples/euxfel/p3046
+
+Run the setup script:
+source setup.sh
