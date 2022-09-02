@@ -24,6 +24,7 @@ Note that there is documentation on
 import re
 import numpy as np
 import reborn
+from reborn.source import Beam
 from .. import utils, detector
 from . import crystfel, cheetah
 import extra_data
@@ -61,7 +62,7 @@ class EuXFELFrameGetter(reborn.fileio.getters.FrameGetter):
         self.pad_detectors = pad_detectors
         run = extra_data.open_run(proposal=self.experiment_id, run=self.run_id)
         self.selection = run.select(self.pad_detectors, 'image.data', require_all=True)
-        self.beam = beam
+        self.beam = None
 
         sources = run.all_sources
         detectors = list()
@@ -80,11 +81,11 @@ class EuXFELFrameGetter(reborn.fileio.getters.FrameGetter):
             if i == 0:
                 a = 0
             else:
-                a = list(self.frames)[-1]
+                a = list(self.frames.keys())[-1]
             f = dict(zip(fnums + a, zip(vals, fnums)))
             self.frames.update(f)
         self.photon_energies = run['SA1_XTD2_XGM/XGM/DOOCS', 'pulseEnergy.wavelengthUsed.value']
-        self.geom_file = geom
+        self.geom = geom
 
     def get_data(self, frame_number=0):
         debug_message()
@@ -97,16 +98,16 @@ class EuXFELFrameGetter(reborn.fileio.getters.FrameGetter):
             train_id, train_data = self.selection.train_from_id(train_id)
             stacked = extra_data.stack_detector_data(train_data, 'image.data')
         stacked_pulse = stacked[fn][0]
-        geometry = reborn.detector.PADGeometryList(self.geom_file)
+
         df = reborn.dataframe.DataFrame()
         df.set_dataset_id(f'{self.pad_detectors} run:{self.run_id}')
         df.set_frame_id(frame_number)
         df.set_frame_index(frame_number)
-        df.set_pad_geometry(geometry)
+        df.set_pad_geometry(self.geom)
         df.set_raw_data(stacked_pulse)
-        beam = self.beam
-        pe = self.photon_energies.train_from_id(train_id)
-        beam.photon_energy = pe[1] * 1e-9
-        df.set_beam(beam)
+        
+        pe = self.photon_energies.train_from_id(tid)
+        self.beam = Beam(wavelength=pe[1] * 1e-9)
+        df.set_beam(self.beam)
         debug_message('returning', df)
         return df
