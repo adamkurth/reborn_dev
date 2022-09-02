@@ -1601,6 +1601,7 @@ class PolarPADAssembler:
         self.phis = pad_geometry.azimuthal_angles(beam=beam)
         self.pad_geometry = pad_geometry
         self.polar_shape = (self.n_q_bins, self.n_phi_bins)
+        self.solid_angles = pad_geometry.solid_angles()
 
     def _py_mean(self, data, mask):
         r""" Create the mean polar-binned average intensities.
@@ -1658,10 +1659,12 @@ class PolarPADAssembler:
             data (list or |ndarray|): The PAD data to be binned.
             mask (list or |ndarray|): A mask to indicate ignored pixels.
         """
-        data = self.pad_geometry.concat_data(data)
+        sa = self.pad_geometry.concat_data(self.solid_angles)
         if mask is None:
             mask = np.ones_like(data)
-        mask = detector.concat_pad_data(mask)
+        data = self.pad_geometry.concat_data(data) * sa
+        mask = detector.concat_pad_data(mask) * sa
+
         # calculate average binned pixel
         if py:
             sum_, cnt = self._py_mean(data, mask)
