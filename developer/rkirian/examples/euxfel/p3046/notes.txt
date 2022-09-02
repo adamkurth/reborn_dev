@@ -1,4 +1,7 @@
-Log into desy machine:
+Synchronize local to DESY machine:
+./synchronize.sh
+
+Log into DESY machine:
 ssh kirian@max-display.desy.de
 
 Move to experiment directory:
