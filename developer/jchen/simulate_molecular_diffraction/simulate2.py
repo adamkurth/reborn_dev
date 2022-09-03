@@ -120,7 +120,7 @@ for n in range(N_patterns):
 
     # Finally, display the pattern:
     dispim = [np.log10(d+1) for d in intensities]
-    view_pad_data(pad_data=dispim, pad_geometry=pads)
+    view_pad_data(data=dispim, pad_geometry=pads)
 
     # Append each simulated pattern into a list
     intensities_list.append(intensities)

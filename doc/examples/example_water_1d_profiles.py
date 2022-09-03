@@ -23,33 +23,30 @@ Contributed by Kosta Karpos
 """
 
 import numpy as np
-import pylab as plt
+import matplotlib.pyplot as plt
 from reborn.simulate.solutions import water_scattering_factor_squared
 
+q_range = [0, 3.2]
+temperatures = [273, 280, 320]
 
-config = {'q_range': [0, 3.2], # 1/Angstrom
-            'temperatures': [273, 280, 320] # Kelvin
-            }
-
+# %%
 # Setup q_range in SI units (meters)
-q_range = np.linspace(0, config['q_range'], 1000) * 1e10
+q_range = np.linspace(0, q_range, 1000) * 1e10
 
+# %%
 # Get the mean radial profiles for each temperature
-means = [water_scattering_factor_squared(q_range, temperature=t) for t in config['temperatures']]
+means = [water_scattering_factor_squared(q_range, temperature=t) for t in temperatures]
 
+# %%
 # It's plottin' time
-for i, r in enumerate(means):
-    plt.plot(q_range*1e-10, r, label=config['temperatures'][i])
+for t, r in zip(temperatures, means):
+    print(t)
+    plt.plot(q_range * 1e-10, r, label=t.__str__())
+    break
 
 plt.legend(title="Temperatures")
-plt.grid(alpha=0.5)
+# plt.grid(alpha=0.5)
 plt.title("Water Radial Profiles")
 plt.xlabel(r"q = 4$\pi \sin{ \theta} / \lambda$ [$\AA^{-1}$]")
 plt.ylabel("I(q)")
 plt.show()
-
-
-
-
-
-

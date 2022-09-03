@@ -2094,113 +2094,129 @@ def load_pad_masks(file_name):
     return masks
 
 
-def pnccd_pad_geometry_list(detector_distance=0.1):
+def pnccd_pad_geometry_list(detector_distance=0.1, binning=None):
     r"""
     Generate a list of :class:`PADGeometry <reborn.detector.PADGeometry>` instances that are inspired by
     the `pnCCD <https://doi.org/10.1016/j.nima.2009.12.053>`_ detector.
 
-    Returns: List of |PADGeometry| instances
+    Arguments:
+        detector_distance (float): Detector distance in SI units
+        binning (int): Binning factor (to make smaller arrays with bigger pixels)
+
+    Returns: |PADGeometryList|
     """
     pads = load_pad_geometry_list(pnccd_geom_file)
-    for p in pads:
-        p.t_vec[2] = detector_distance
+    pads.translate([0, 0, detector_distance])
+    if binning is not None:
+        pads = pads.binned(binning=binning)
     return pads
 
 
-def cspad_pad_geometry_list(detector_distance=0.1):
+def cspad_pad_geometry_list(detector_distance=0.1, binning=None):
     r"""
     Generate a list of |PADGeometry| instances that are inspired by the |CSPAD| detector.
 
     Arguments:
         detector_distance (float): Detector distance in SI units
+        binning (int): Binning factor (to make smaller arrays with bigger pixels)
 
-    Returns: List of |PADGeometry| instances
+    Returns: |PADGeometryList|
     """
     pads = load_pad_geometry_list(cspad_geom_file)
-    for p in pads:
-        p.t_vec[2] = detector_distance
+    pads.translate([0, 0, detector_distance])
+    if binning is not None:
+        pads = pads.binned(binning=binning)
     return pads
 
 
-def cspad_2x2_pad_geometry_list(detector_distance=2.4):
+def cspad_2x2_pad_geometry_list(detector_distance=2.4, binning=None):
     r"""
     Generate a list of |PADGeometry| instances that are inspired by the |CSPAD| detector.
 
     Arguments:
         detector_distance (float): Detector distance in SI units
+        binning (int): Binning factor (to make smaller arrays with bigger pixels)
 
-    Returns: List of |PADGeometry| instances
+    Returns: |PADGeometryList|
     """
     pads = load_pad_geometry_list(cspad_2x2_geom_file)
-    for p in pads:
-        p.t_vec[2] = detector_distance
+    pads.translate([0, 0, detector_distance])
+    if binning is not None:
+        pads = pads.binned(binning=binning)
     return pads
 
 
-def jungfrau4m_pad_geometry_list(detector_distance=0.1):
+def jungfrau4m_pad_geometry_list(detector_distance=0.1, binning=None):
     r"""
     Generate a list of |PADGeometry| instances that are inspired by the |Jungfrau| 4M detector.
 
     Arguments:
         detector_distance (float): Detector distance in SI units
+        binning (int): Binning factor (to make smaller arrays with bigger pixels)
 
-    Returns: List of |PADGeometry| instances
+    Returns: |PADGeometryList|
     """
     pads = load_pad_geometry_list(jungfrau4m_geom_file)
-    for p in pads:
-        p.t_vec[2] = detector_distance
+    pads.translate([0, 0, detector_distance])
+    if binning is not None:
+        pads = pads.binned(binning=binning)
     return pads
 
 
-def epix10k_pad_geometry_list(detector_distance=0.1):
+def epix10k_pad_geometry_list(detector_distance=0.1, binning=None):
     r"""
     Generate a list of |PADGeometry| instances that are inspired by the epix10k detector.
 
     Arguments:
         detector_distance (float): Detector distance in SI units.
+        binning (int): Binning factor (to make smaller arrays with bigger pixels)
 
-    Returns:
-        (list): List of |PADGeometry| instances.
+    Returns: |PADGeometryList|
     """
     pads = load_pad_geometry_list(epix10k_geom_file)
-    for p in pads:
-        p.t_vec[2] = detector_distance
+    pads.translate([0, 0, -0.1])
+    pads.translate([0, 0, detector_distance])
+    if binning is not None:
+        pads = pads.binned(binning=binning)
     return pads
 
 
-def epix100_pad_geometry_list(detector_distance=0.1):
+def epix100_pad_geometry_list(detector_distance=0.1, binning=None):
     r"""
     Generate a list of |PADGeometry| instances that are inspired by the epix100 detector.
 
     Arguments:
         detector_distance (float): Detector distance in SI units.
+        binning (int): Binning factor (to make smaller arrays with bigger pixels)
 
-    Returns:
-        (list): List of |PADGeometry| instances.
+    Returns: |PADGeometryList|
     """
     pads = load_pad_geometry_list(epix100_geom_file)
-    for p in pads:
-        p.t_vec[2] = detector_distance
+    pads.translate([0, 0, detector_distance])
+    if binning is not None:
+        pads = pads.binned(binning=binning)
     return pads
 
 
-def mpccd_pad_geometry_list(detector_distance=0.1):
+def mpccd_pad_geometry_list(detector_distance=0.1, binning=None):
     r"""
     Generate a list of |PADGeometry| instances that are inspired by SACLA's MPCCD detector.
 
     Arguments:
         detector_distance (float): Detector distance in SI units.
+        binning (int): Binning factor (to make smaller arrays with bigger pixels)
 
-    Returns:
-        (list): List of |PADGeometry| instances.
+    Returns: |PADGeometryList|
     """
     pads = load_pad_geometry_list(mpccd_geom_file)
-    for p in pads:
-        p.t_vec[2] = detector_distance
+    pads.translate([0, 0, -0.056])
+    pads.translate([0, 0, detector_distance])
+    if binning is not None:
+        pads = pads.binned(binning=binning)
     return pads
 
 
-def rayonix_mx340_xfel_pad_geometry_list(detector_distance=0.1, return_mask=False):
+def rayonix_mx340_xfel_pad_geometry_list(detector_distance=0.1, binning=None, return_mask=False):
     r"""
     Generate a list of |PADGeometry| instances that are inspired by the Rayonix MX340-XFEL detector.
 
@@ -2212,8 +2228,9 @@ def rayonix_mx340_xfel_pad_geometry_list(detector_distance=0.1, return_mask=Fals
     Returns: |PADGeometryList|
     """
     pads = load_pad_geometry_list(rayonix_mx340_xfel_geom_file)
-    for p in pads:
-        p.t_vec[2] = detector_distance
+    pads.translate([0, 0, detector_distance])
+    if binning is not None:
+        pads = pads.binned(binning=binning)
     if return_mask:
         mask = pads.ones()
         xyz = pads[0].position_vecs()

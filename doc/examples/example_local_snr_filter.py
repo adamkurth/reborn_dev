@@ -82,12 +82,12 @@ a.flat[np.random.choice(np.arange(a.size), 50)] = 0
 # %%
 # Here is the whole detector.  Can you spot the messed-up pixels?  The dead pixels may be hard to spot.
 
-view_pad_data(pad_geometry=pads, pad_data=intensity)
+view_pad_data(pad_geometry=pads, data=intensity)
 
 # %%
 # Here are 4 of the detectors alone
 
-view_pad_data(pad_geometry=pads[0:4], pad_data=intensity[0:4], pad_numbers=True)
+view_pad_data(pad_geometry=pads[0:4], data=intensity[0:4], pad_numbers=True)
 
 # %%
 # Now we seek to find all the messed-up pixels.  First let's correct for the polarization factor and subtract off
@@ -101,7 +101,7 @@ intmod = radial_profiler.subtract_profile(intmod, statistic=np.median)
 # %%
 # The intensities should be very flat now, except for the outlier pixels:
 
-view_pad_data(pad_geometry=pads, pad_data=intmod)
+view_pad_data(pad_geometry=pads, data=intmod)
 
 # %%
 # Note that there is a little subtlety that we should pay attention to.  The above intmod array
@@ -126,7 +126,7 @@ print(type(intmod))
 mask = [np.ones_like(d) for d in intmod]
 snr = snr_filter(intmod, mask, 0, 5, 12, threshold=6, mask_negative=True, max_iterations=3)
 snr = [np.abs(d) for d in snr]
-view_pad_data(pad_geometry=pads[0:4], pad_data=snr[0:4], vmax=6)
+view_pad_data(pad_geometry=pads[0:4], data=snr[0:4], vmax=6)
 
 # %%
 # To be clear, one can also use a simple threshold to identify outlier pixels, but the downside to that method is that
@@ -142,5 +142,5 @@ for i in range(len(pads)):
     s = snr[i]
     m[s > 6] = 0
 
-view_pad_data(pad_geometry=pads[0:4], pad_data=mask[0:4], cmap='gray')
+view_pad_data(pad_geometry=pads[0:4], data=mask[0:4], cmap='gray')
 

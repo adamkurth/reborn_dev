@@ -150,7 +150,7 @@ f_henke = atoms.henke_scattering_factors(z, E)
 
 max_theta = np.pi/2
 theta = np.arange(0, max_theta, max_theta / 1000)
-f_xraylib = np.zeros((len(E), len(theta)), dtype=np.complex)
+f_xraylib = np.zeros((len(E), len(theta)), dtype=complex)
 for i in range(len(E)):
     this_E = E[i]
     for j in range(len(theta)):

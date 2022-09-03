@@ -66,7 +66,7 @@ water_pattern = solutions.get_pad_solution_intensity(pad_geometry=rayonix_geom,
 # Let's display the pattern so we can get an idea of what the pattern looks like.
 from reborn.viewers.mplviews import view_pad_data
 
-view_pad_data(pad_geometry=rayonix_geom, pad_data=water_pattern)
+view_pad_data(pad_geometry=rayonix_geom, data=water_pattern)
 
 # %%
 # Now that we have our basic setup, we can calculate our radial profiles.

@@ -33,7 +33,7 @@ Imports, constants:
 import numpy as np
 import matplotlib.pyplot as plt
 import time
-from reborn.target.density import trilinear_interpolation
+from reborn.misc.interpolate import trilinear_interpolation
 import reborn.target.crystal as crystal
 import reborn.simulate.clcore
 from scipy import constants as const

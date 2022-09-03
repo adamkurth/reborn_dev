@@ -23,7 +23,7 @@ Demonstration of how to work with Pixel Array Detectors using the reborn tools.
 
 Contributed by Richard Kirian.
 
-Edited by Konstantinos Karpos
+Edited by Konstantinos Karpos.
 
 """
 
@@ -61,7 +61,7 @@ import matplotlib.pyplot as plt
 from scipy.ndimage import gaussian_filter
 import reborn
 from reborn import detector, source, temp_dir
-from reborn.viewers.mplviews import view_pad_data
+from reborn.viewers.qtviews import view_pad_data
 
 pad = detector.PADGeometry()
 print(pad)
@@ -109,7 +109,7 @@ pad = detector.PADGeometry(distance=detector_distance, shape=(100, 200), pixel_s
 
 # %%
 # The above function assumes that the beam detector_distance refers to the "z" coordinate, and it also assumes that the
-# x-ray beam is incident on the center of the PAD.
+# x-ray beam is incident at the center of the PAD.
 #
 # Now that we have a |PADGeometry| set up, we can use it to get useful quantities.  For example, the solid angles of the
 # pixels are
@@ -205,7 +205,7 @@ print(pads[0])
 # %%
 # The reborn package provides tools to view lists of data arrays, provided matching lists of |PADGeometry| instances:
 
-view_pad_data(pad_data=data, pad_geometry=pads, pad_numbers=True)
+view_pad_data(data=data, pad_geometry=pads, pad_numbers=True)
 
 # %%
 # We now have a list of data arrays along with corresponding PAD geometry information.  We could write analysis code
@@ -213,13 +213,13 @@ view_pad_data(pad_data=data, pad_geometry=pads, pad_numbers=True)
 
 for (p, d) in zip(pads, data):
     d /= p.polarization_factors(beam=beam)
-view_pad_data(pad_data=data, pad_geometry=pads, pad_numbers=True)
+view_pad_data(data=data, pad_geometry=pads, pad_numbers=True)
 
 # %%
 # The above is in essence how one must handle multiple PADs.  Looping over multiple PADs is inescapable fact of life
 # for folks who analyze XFEL data.  It is a nuisance, but reborn attempts to make the process less annoying.
 #
-# The |PADGeometryList| class in reborn is a sub-class of the built-in python list class, so it has all the
+# The |PADGeometryList| class in reborn is a subclass of the built-in python list class, so it has all the
 # features of a python list instance, but it adds a few methods that are specific to lists of |PADGeometry|.  This is
 # perhaps easiest to explain by doing the same operations as the above:
 
@@ -232,7 +232,7 @@ print(data.shape)
 # list.  This is a concatenated data array, and it is particularly useful for array operations that benefit from
 # vectorization, such as the simple multiplication we did above.  We can display the data as we did before:
 
-view_pad_data(pad_data=data, pad_geometry=pads, pad_numbers=True)
+view_pad_data(data=data, pad_geometry=pads, pad_numbers=True)
 
 # %%
 # Note that, because the view_pad_data function was given a |PADGeometryList|, it was able to split up the data even
@@ -255,11 +255,11 @@ print(data_concat.shape)
 
 for i in range(len(data_split)):
     data_split[i] = gaussian_filter(data_split[i], sigma=4)
-view_pad_data(pad_data=data_split, pad_geometry=pads, pad_numbers=True)
+view_pad_data(data=data_split, pad_geometry=pads, pad_numbers=True)
 
 # %%
-# The |PADGeometryList| class attempts to provide all of the generalizations to the corresponding |PADGeometry| methods
-# that you'd hope for:
+# The |PADGeometryList| class attempts to provide generalizations to the corresponding |PADGeometry| methods in an
+# intuitive way:
 
 if pads.validate():
     print('Good job.')
@@ -278,23 +278,26 @@ print(p_vecs.shape)
 # -----------------------------
 
 # %%
-# `reborn` provides multiple detector geometries that are ready for use. Say your experiment used the MPCCD 
+# `reborn` provides multiple detector geometries that are ready for use. Say your experiment used the SACLA MPCCD
 # detector and you would like to display a 2D pattern. The `reborn.detector.mpccd_pad_geometry_list()` function 
 # will provide that detector as a |PADGeometryList| object, which can be manipulated using the methods described above.
 
-mpccd_geom = detector.mpccd_pad_geometry_list(detector_distance=0.05)
+mpccd_geom = detector.mpccd_pad_geometry_list(detector_distance=0.1, binning=10)
+print(mpccd_geom[0].t_vec)
 data = [np.random.random(p.n_pixels)*p.polarization_factors(beam=beam) for p in mpccd_geom]
 
-view_pad_data(pad_geometry=mpccd_geom, pad_data=data)
+view_pad_data(pad_geometry=mpccd_geom, data=data)
 
 # %%
-# Note the use of multiple panels here. Changing panel properties is easy from here. As as example,
+# Note the use of multiple panels here. Changing panel properties is easy from here. For example,
 # say you would like to rotate your detector by 45 degrees. 
 
 theta = 45 * np.pi / 180  # reborn uses radians by default
 
 # define your rotation matrix
-R = np.array([[np.cos(theta), 0, np.sin(theta)], [0, 1, 0], [-np.sin(theta), 0, np.cos(theta)]])
+R1 = np.array([[np.cos(theta), np.sin(theta), 0], [-np.sin(theta), np.cos(theta), 0], [0, 0, 1]])
+R2 = np.array([[np.cos(theta), 0, np.sin(theta)], [0, 1, 0], [-np.sin(theta), 0, np.cos(theta)]])
+R = R1.dot(R2)
 
 # %%
 # Let's see what this looks like with one panel, first.
@@ -303,10 +306,10 @@ geom_1 = mpccd_geom.copy()  # make a copy of the pad geometry so you don't mess 
 geom_1[0].fs_vec = np.dot(geom_1[0].fs_vec, R.T)
 geom_1[0].ss_vec = np.dot(geom_1[0].ss_vec, R.T)
 
-view_pad_data(pad_geometry=geom_1, pad_data=data)
+view_pad_data(pad_geometry=geom_1, data=data)
 
 # %%
-# Cool, so the bottom left panel was rotated by 45 degrees! Note that the `view_pad_data()`
+# The bottom left panel was rotated by 45 degrees.  Note that the `view_pad_data()`
 # function is a projection operation, so although it looks like it simply shrunk, the panel 
 # shows a 2D projected rotation.
 
@@ -321,7 +324,11 @@ for pad in geom_2:
     pad.t_vec = np.dot(pad.t_vec, R.T)
 
 # view the rotation
-view_pad_data(pad_geometry=geom_2, pad_data=data)
+view_pad_data(pad_geometry=geom_2, data=data)
+
+# Now one more time, but we use the convenience function:
+geom_3 = geom_1.rotate(R)
+view_pad_data(pad_geometry=geom_2, data=data)
 
 # %%
 # Dealing with Multiple Detectors
@@ -333,8 +340,8 @@ view_pad_data(pad_geometry=geom_2, pad_data=data)
 # detectors to combine both high-resolution and low-resolution data. For this example, we'll use the Rayonix MX340 and
 # the Epix 10K detectors. Note that all detector distances are in meters.
 
-rayonix_geom = detector.rayonix_mx340_xfel_pad_geometry_list(detector_distance=0.5)
-epix_geom = detector.epix10k_pad_geometry_list(detector_distance=0.1)
+rayonix_geom = detector.rayonix_mx340_xfel_pad_geometry_list(detector_distance=0.5, binning=10)
+epix_geom = detector.epix10k_pad_geometry_list(detector_distance=0.1, binning=10)
 
 # Offset the epix detector to visualize them side by side
 
@@ -353,7 +360,7 @@ c_geom = detector.PADGeometryList(rayonix_geom + epix_geom)
 
 # Create some arbitrary data
 data = [np.random.random(p.n_pixels)*p.polarization_factors(beam=beam) for p in c_geom]
-view_pad_data(pad_geometry=c_geom, pad_data=data)
+view_pad_data(pad_geometry=c_geom, data=data)
 
 # %%
 # Data slicing for non-contiguous PADs
@@ -380,10 +387,10 @@ print(pads[0])
 # in the normal way:
 
 sa = pads.solid_angles()
-view_pad_data(pad_geometry=pads, pad_data=sa)
+view_pad_data(pad_geometry=pads, data=sa)
 
 # %%
-# Now let's see how the data looks in it's original format:
+# Now let's see how the data looks in its original format:
 
 sa2 = pads.reshape(sa)
 plt.imshow(sa2)
@@ -398,4 +405,4 @@ plt.show()
 # generalized to an arbitrary number of PADs.  It is not very painful once you know how to make use of the reborn tools.
 #
 # If you think you need further examples, please let Rick know and he will add them here.  Similarly, if you feel that
-# functionality is missing, request that it be added.  Most requests are added within a day.
+# functionality is missing, request that it be added.

@@ -106,4 +106,4 @@ for i in range(len(pads)):
 # Here is the final result, viewed on a log scale:
 
 dispim = [np.log10(a + 1) for a in intensities]
-view_pad_data(pad_data=dispim, pad_geometry=pads)
+view_pad_data(data=dispim, pad_geometry=pads)

@@ -89,7 +89,7 @@ df = my_framegetter.get_next_frame()
 print(df.get_frame_index())
 
 # %
-# We an loop through frames as we would with any other iterator:
+# We can loop through frames as we would with any other iterator:
 
 for df in my_framegetter:
     print(df.get_frame_index())

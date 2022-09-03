@@ -28,6 +28,6 @@ gas_intensity = beam.photon_number_fluence * n_gas_molecules * r_e**2 * np.inter
 if poisson:
     gas_intensity = np.random.poisson(gas_intensity).astype(np.double)
 total_intensity = h2o_intensity + gas_intensity
-pv = PADView(pad_geometry=pads, raw_data=total_intensity)
+pv = PADView(pad_geometry=pads, data=total_intensity)
 pv.add_rings(q_mags=[2.1e10])
 pv.start()

@@ -38,7 +38,7 @@ dat = pads.solid_angles()
 # %%
 # Here's the convenience function for viewing a PAD.  It doesn't have many features, but should suffice to
 # have a quick look at your geometry:
-view_pad_data(pad_data=dat, pad_geometry=pads, pad_numbers=True, show_coords=True, show_scans=True)
+view_pad_data(data=dat, pad_geometry=pads, pad_numbers=True, show_coords=True, show_scans=True)
 # %%
 # Note that the `show_scans=True` option displays arrows to indicate the locations of the corners of the 2D numpy
 # arrays and the directions of the "fast scan" vectors.  The `show_coords` keyword will display the coordinate

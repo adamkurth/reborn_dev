@@ -45,7 +45,7 @@ import pylab as plt
 import reborn
 from reborn.detector import RadialProfiler
 from reborn.simulate import gas
-from reborn.viewers.mplviews import view_pad_data
+from reborn.viewers.qtviews import view_pad_data
 
 # %%
 # Now define a config dictionary that holds all the simulation parameters and constants. This format is not exactly
@@ -73,8 +73,7 @@ beam = reborn.source.Beam(photon_energy=config['photon_energy'])
 # Next we define our detector with the |PADGeometry| class. For simplicity, we'll use the Rayonix MX340 detector. Since
 # this detector is rather large, this example also shows how to use the `PADGeometry.binned()` method to bin the pixels.
 
-pad = reborn.detector.rayonix_mx340_xfel_pad_geometry_list(detector_distance=config['detector_distance'])
-pad = pad.binned(10)
+pad = reborn.detector.jungfrau4m_pad_geometry_list(detector_distance=config['detector_distance'], binning=10)
 
 # %%
 # For now, we will consider the gas propagating through the entire detector distance. In reality, there exists some path
@@ -159,7 +158,7 @@ for step in iter_list:
 # %%
 # Cool, so now let's plot the final results.
 
-view_pad_data(pad_data=I_total, pad_geometry=pad, vmin=0, vmax=2e4)
+view_pad_data(data=I_total, pad_geometry=pad, vmin=0, vmax=2e4)
 
 # %%
 # Radials
@@ -178,20 +177,19 @@ mask[pad.scattering_angles(beam) < theta] = 0
 # simply ignore those index values.  For now, the `view_pad_data()` function does not have a way to work with the masks,
 # future versions will include this.
 
-view_pad_data(pad_data=I_total * mask, pad_geometry=pad, vmin=0, vmax=2e4)
+view_pad_data(data=I_total * mask, pad_geometry=pad, vmin=0, vmax=2e4)
 
 # define the q_range
 q_mags = pad.q_mags(beam=beam)
-q_range = np.linspace(np.min(q_mags), np.max(q_mags), 1000)
 
 # Make a RadialProfiler class instance
-profiler = RadialProfiler(beam=beam, pad_geometry=pad, n_bins=1000, q_range=[q_range[0], q_range[-1]], mask=mask)
+profiler = RadialProfiler(beam=beam, pad_geometry=pad, n_bins=200, mask=mask)
 
 # calculate the mean radial profile
 mean_radial = profiler.get_mean_profile(I_total)
 
 plt.figure(figsize=(12, 5))
-plt.plot(np.array(q_range)*1e-10, mean_radial)
+plt.plot(profiler.q_bin_centers*1e-10, mean_radial)
 plt.xlabel(r'q = 4$\pi$ $\sin$($\theta$) / $\lambda$   [$\AA^{-1}$]')
 plt.ylabel(r'I(q)  [photons/pixel]')
 plt.show()

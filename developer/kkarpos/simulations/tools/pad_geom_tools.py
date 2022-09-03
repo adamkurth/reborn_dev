@@ -108,7 +108,7 @@ class PADTools:
         if viewer == 'pyqt':
             PADView2(pad_geometry=self.pad_geometry, raw_data=mask)
         elif viewer == 'mpl':
-            view_pad_data(pad_geometry=self.pad_geometry, pad_data=mask)
+            view_pad_data(pad_geometry=self.pad_geometry, data=mask)
         else:
             raise ValueError("Incorrect choice for mask viewer. Current options are 'mpl' or 'pyqt'")
 
@@ -134,7 +134,7 @@ class PADTools:
             PADView2(pad_geometry=pads, raw_data=raw_data, mask_data=mask)
         elif viewer == 'mpl':
             print("mpl viewer does not accommodate masks.")
-            view_pad_data(pad_geometry=pads, pad_data=raw_data)
+            view_pad_data(pad_geometry=pads, data=raw_data)
         else:
             raise ValueError("Incorrect choice for mask viewer. Current options are 'mpl' or 'pyqt'")
 

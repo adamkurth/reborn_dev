@@ -68,15 +68,15 @@ rho = np.abs(rho)
 fig = plt.figure()
 dispargs = {'interpolation': 'nearest', 'cmap': 'gray'}
 fig.add_subplot(2, 3, 1)
-plt.imshow(np.log10(I[np.floor(dmap.shape[0] / 2).astype(np.int), :, :] + 10), **dispargs)
+plt.imshow(np.log10(I[np.floor(dmap.shape[0] / 2).astype(int), :, :] + 10), **dispargs)
 fig.add_subplot(2, 3, 4)
 plt.imshow(np.sum(rho, axis=0), **dispargs)
 fig.add_subplot(2, 3, 2)
-plt.imshow(np.log10(I[:, np.floor(dmap.shape[1] / 2).astype(np.int), :] + 10),  **dispargs)
+plt.imshow(np.log10(I[:, np.floor(dmap.shape[1] / 2).astype(int), :] + 10),  **dispargs)
 fig.add_subplot(2, 3, 5)
 plt.imshow(np.sum(rho, axis=1), **dispargs)
 fig.add_subplot(2, 3, 3)
-plt.imshow(np.log10(I[:, :, np.floor(dmap.shape[2] / 2).astype(np.int)] + 10),  **dispargs)
+plt.imshow(np.log10(I[:, :, np.floor(dmap.shape[2] / 2).astype(int)] + 10),  **dispargs)
 fig.add_subplot(2, 3, 6)
 plt.imshow(np.sum(rho, axis=2), **dispargs)
 plt.show()
@@ -97,7 +97,7 @@ q = pad.q_vecs(beam=beam)
 h = cryst.unitcell.q2h(q)
 # %%
 # Now we do the trilinear interpolation:
-I_slice = reborn.target.density.trilinear_interpolation(densities=I.copy(), vectors=h, corners=dmap.h_limits[:, 0],
+I_slice = reborn.misc.interpolate.trilinear_interpolation(densities=I.copy(), vectors=h, corners=dmap.h_limits[:, 0],
                                                         deltas=(dmap.h_max-dmap.h_min)/(dmap.shape-1))
 I_slice = pad.reshape(I_slice)
 # %%

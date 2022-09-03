@@ -72,4 +72,4 @@ for i in range(len(pads)):
 print('# photons total: %d' % np.round(np.sum(detector.concat_pad_data(intensities))))
 
 dispim = [np.log10(d+0) for d in intensities]
-view_pad_data(pad_data=dispim, pad_geometry=pads)
+view_pad_data(data=dispim, pad_geometry=pads)

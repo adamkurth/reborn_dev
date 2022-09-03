@@ -66,7 +66,6 @@ class PADViewMainWindow(QtGui.QMainWindow):
 
 def ensure_dataframe(data, parent=None):
     r""" Convert old-style dictionaries to proper DataFrame instances. """
-    print(parent)
     if parent is None:
         parent = DataFrame()
     if not isinstance(parent, DataFrame):
@@ -1420,9 +1419,9 @@ class PADView(QtCore.QObject):
         self.debug('toc', '  '*len(self._tic_times), time.time()-tic, 'seconds.', level=level)
 
 
-def view_pad_data(pad_data=None, pad_geometry=None, show=True, title=None, **kwargs):
+def view_pad_data(data=None, pad_geometry=None, show=True, title=None, **kwargs):
     r""" Convenience function that creates a PADView instance and starts it. """
-    pv = PADView(data=pad_data, pad_geometry=pad_geometry, **kwargs)
+    pv = PADView(data=data, pad_geometry=pad_geometry, **kwargs)
     if title is not None:
         pv.set_title(title)
     if show:

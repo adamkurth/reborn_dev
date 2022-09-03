@@ -21,7 +21,7 @@ Simple simulation of diffraction from a liquid sheet containing spherical scatte
 
 Contributed by Richard Kirian.
 
-We start by defining all of the relevant parameters.  As always, everything in reborn is in SI units.
+We start by defining all the relevant parameters.  As always, everything in reborn is in SI units.
 """
 
 import sys
@@ -73,12 +73,12 @@ mask = pad.beamstop_mask(beam=beam, min_angle=beam_divergence)
 
 # %%
 # reborn has tabulated scattering factors for water, which come from the work of Greg Hura et al..  These tabulations
-# correspond to individual water molecules -- that is, we have a scattering cross section :math:`f_w(q)` *per molecule*.
+# correspond to individual water molecules -- that is, we have a scattering cross-section :math:`f_w(q)` *per molecule*.
 # So we need to count the number of water molecules :math:`N_w` in order to estimate the actual scattering intensity
 # :math:`I_w(q) \propto N_w |f_w(q)|^2`.
 
 n_water_molecules = water_thickness * np.pi * (beam.diameter_fwhm / 2) ** 2 * solutions.water_number_density()
-F_water = solutions.get_water_profile(q_mags)
+F_water = solutions.water_scattering_factor_squared(q_mags)
 F2_water = F_water**2*n_water_molecules
 
 # %%
@@ -92,7 +92,7 @@ n = protein_concentration / m_protein  # Number density of spherical proteins
 n_protein_molecules = water_thickness * np.pi * (beam.diameter_fwhm / 2) ** 2 * n
 
 # %%
-# The scattering cross section of a sphere comes from the Fourier transform, and the resulting formula is included in
+# The scattering cross-section of a sphere comes from the Fourier transform, and the resulting formula is included in
 # reborn's form factors module.
 
 F_sphere = form_factors.sphere_form_factor(radius=protein_radius, q_mags=q_mags)

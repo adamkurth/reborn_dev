@@ -87,7 +87,7 @@ plt.show()
 # Let's check:
 
 b = a
-print(b)
+print(b[0:3])
 
 # %%
 # The above code block also shows what happens when you add a print statement into a separate block of code.

@@ -20,9 +20,10 @@ from reborn.detector import concat_pad_data, PADGeometryList
 from reborn import utils
 
 
-def view_pad_data(pad_data, pad_geometry, pad_numbers=False, beam_center=False, show_scans=False, show_coords=False,
-                  show=True, vmin=None, vmax=None, background_color=None, cmap='viridis', title=None, 
-                  colorbar=False, figsize=(5,5), cbar_title=None, cbar_fontsize=12):
+def view_pad_data(data=None, pad_geometry=None, pad_numbers=False, beam_center=False, show_scans=False,
+                  show_coords=False,
+                  show=True, vmin=None, vmax=None, background_color=None, cmap='viridis', title=None,
+                  colorbar=False, figsize=(5,5), cbar_title=None, cbar_fontsize=12, **kwargs):
     r"""
     Very simple function to show pad data with matplotlib.  This will take a list of data arrays along with a list
     of |PADGeometry| instances and display them with a decent geometrical layout.
@@ -32,8 +33,10 @@ def view_pad_data(pad_data, pad_geometry, pad_numbers=False, beam_center=False, 
     Returns:
         axis
     """
+    if 'pad_data' in kwargs.keys():
+        utils.warn("Don't use pad_data keyword argument; use data instead.")
     pads = PADGeometryList(pad_geometry)
-    data = pads.split_data(pad_data)
+    data = pads.split_data(data)
     plt.figure(figsize=figsize)
     ax = plt.gca()
     ax.set_aspect('equal')
@@ -41,7 +44,7 @@ def view_pad_data(pad_data, pad_geometry, pad_numbers=False, beam_center=False, 
     if background_color is not None:
         ax.set_facecolor(background_color)
 
-    pad_data_concated = pads.concat_data(pad_data)
+    pad_data_concated = pads.concat_data(data)
 
     if vmin == None:
         vmin = np.min(pad_data_concated)

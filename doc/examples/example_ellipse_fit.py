@@ -37,13 +37,13 @@ from scipy import constants as const
 import matplotlib.pyplot as plt
 from reborn import source, detector
 from reborn.analysis import optimize
-from reborn.simulate import examples
+from reborn.simulate import solutions
 
 r_e = const.value('classical electron radius')
 eV = const.value('electron volt')
 
 # Configure the detector
-detector_shape = [200, 200]
+detector_shape = (200, 200)
 beam_center = np.array([110, 105], dtype=np.double)
 pixel_size = 750e-6
 detector_distance = 0.1
@@ -53,7 +53,7 @@ photon_energy = 8000*eV
 beam_diameter = 5e-6
 # Configure water
 water_thickness = 1e-6
-water_ring_thresh = 2000000
+water_ring_thresh = 50000
 
 # %%
 # Set up the PAD geometry:
@@ -65,8 +65,8 @@ pad.t_vec[1] = -beam_center[1]*pixel_size
 beam = source.Beam(photon_energy=photon_energy, diameter_fwhm=beam_diameter, pulse_energy=n_photons*photon_energy)
 # %%
 # Simulate the water scatter.  We use a built-in example based on experimental lookup table of water scatter.  Note that
-# this includes scattering cross section, polarization, pixel solid angles.
-I = pad.reshape(examples.simulate_water(pad_geometry=pad, beam=beam, water_thickness=100e-6)[0])
+# this includes scattering cross-section, polarization, pixel solid angles.
+I = pad.reshape(solutions.get_pad_solution_intensity(pad_geometry=pad, beam=beam, thickness=100e-6)[0])
 # %%
 # Fit an ellipse to pixel coordinates above a water-ring threshold:
 mask = I > water_ring_thresh

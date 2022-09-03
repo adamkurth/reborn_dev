@@ -18,5 +18,5 @@ plt.imshow(np.log10(meen+1), aspect='auto', interpolation='none',
            extent=[pc[0]/2/np.pi, pc[-1]/2/np.pi, qc[0]/1e10, qc[-1]/1e10])
 plt.xlabel(r'$\phi/2\pi$')
 plt.ylabel(r'$q$ [${\AA}^{-1}$]')
-view_pad_data(pad_geometry=pads, pad_data=[np.log10(p+1) for p in data], show=False)
+view_pad_data(pad_geometry=pads, data=[np.log10(p + 1) for p in data], show=False)
 plt.show()

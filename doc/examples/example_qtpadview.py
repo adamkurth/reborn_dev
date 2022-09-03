@@ -39,7 +39,7 @@ dat = np.double(np.random.poisson(dat))
 # %%
 # The simplest way to display the data is as follows:
 
-view_pad_data(pad_data=dat, pad_geometry=pads, beam=beam)
+view_pad_data(data=dat, pad_geometry=pads, beam=beam)
 
 # %%
 # Although the above function exists for convenience, a better way is to create an instance of the PADView class.
@@ -48,7 +48,7 @@ view_pad_data(pad_data=dat, pad_geometry=pads, beam=beam)
 # z: blue), the PAD names (or numbers) are overlaid on the pads, and the fast-scan directions are indicated by the
 # red arrows.
 
-pv = PADView(pad_data=dat, pad_geometry=pads, beam=beam)
+pv = PADView(data=dat, pad_geometry=pads, beam=beam)
 pv.show_coordinate_axes()
 pv.show_fast_scan_directions()
 pv.show_pad_labels()
@@ -60,7 +60,7 @@ del pv
 #
 # PADView has a mechanism to create plugins for processing data.  You can retrieve the list of plugins as follows:
 
-pv = PADView(pad_data=dat, pad_geometry=pads, beam=beam)
+pv = PADView(data=dat, pad_geometry=pads, beam=beam)
 for p in pv.list_plugins():
     print(p)
 
@@ -88,7 +88,7 @@ del pv
 # %%
 # A more advanced plugin can also offer a separate Qt widget.  This is the case for the masking utility in PADView:
 
-pv = PADView(pad_data=dat, pad_geometry=pads, beam=beam)
+pv = PADView(data=dat, pad_geometry=pads, beam=beam)
 pv.run_plugin('mask_editor')
 pv.start()
 del pv
