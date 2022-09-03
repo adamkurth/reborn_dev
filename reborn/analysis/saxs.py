@@ -16,9 +16,21 @@ import numpy as np
 from joblib import delayed
 from joblib import Parallel
 from reborn.detector import RadialProfiler
+from reborn import utils
+
+debug = True
 
 
-def get_profile_stats(dataframe, n_bins, q_range, verbose=False):
+def debug_message(*args, caller=True, **kwargs):
+    r""" Standard debug message, which includes the function called. """
+    if debug:
+        s = ''
+        if caller:
+            s = utils.get_caller(1)
+        print('DEBUG:'+s+':', *args, **kwargs)
+
+
+def get_profile_stats(dataframe, n_bins, q_range):
     r"""
     Operates on one raw diffraction pattern and returns a dictionary with the following:
     
@@ -41,24 +53,20 @@ def get_profile_stats(dataframe, n_bins, q_range, verbose=False):
         dataframe (DataFrame): A reborn dataframe instance. Has raw data, geometry, beam, etc.
         n_bins (float): Number of q bin in radial profile.
         q_range (list-like): The minimum and maximum of the centers of the q bins.
-        verbose (bool): Prints statements while processing. Default is False.
     
     Returns:
         dict
     """
     beam = dataframe.get_beam()
     geom = dataframe.get_pad_geometry().copy()
-    if verbose:
-        print(geom)
-        print('gathering data')
+    debug_message('gathering data')
     data = dataframe.get_raw_data_flat()
     mask = dataframe.get_mask_flat()
     pfac = dataframe.get_polarization_factors_flat()
     sa = dataframe.get_solid_angles_flat()
     sa *= 1e6  # Set the units to micro steradian solid angles
     data /= pfac * sa   # normalize our the polarization factors
-    if verbose:
-        print('computing profiles')
+    debug_message('computing profiles')
     profiler = RadialProfiler(pad_geometry=geom, mask=mask, beam=beam,
                               n_bins=n_bins, q_range=q_range)
     out_keys = ['median', 'mean', 'sum', 'sum2', 'counts', 'q_bins']
@@ -70,7 +78,7 @@ def get_profile_stats(dataframe, n_bins, q_range, verbose=False):
 
 def get_profile_runstats(framegetter=None, n_bins=1000, q_range=None,
                          start=0, stop=None, parallel=False,
-                         n_processes=None, process_id=None, verbose=False):
+                         n_processes=None, process_id=None):
     r""" 
     Parallelized version of get_profile_stats.
 
@@ -110,8 +118,7 @@ def get_profile_runstats(framegetter=None, n_bins=1000, q_range=None,
                                                                          stop=stop,
                                                                          parallel=False,
                                                                          n_processes=n_processes,
-                                                                         process_id=i,
-                                                                         verbose=verbose)
+                                                                         process_id=i)
                                                                          for i in range(n_processes))
         pmedian = np.concatenate([o['median'] for o in out])
         pmean = np.concatenate([o['mean'] for o in out])
@@ -135,17 +142,14 @@ def get_profile_runstats(framegetter=None, n_bins=1000, q_range=None,
     pcounts = np.zeros((frame_ids.size, n_bins))
     pq_bin = np.zeros((frame_ids.size, n_bins))
     for (n, i) in enumerate(frame_ids):
-        if verbose:
-            print(f'Frame {i:6d} ({n / len(frame_ids) * 100:0.2g})', end='\r')
+        debug_message(f'Frame {i:6d} ({n / len(frame_ids) * 100:0.2g})', end='\r')
         dat = framegetter.get_frame(frame_number=i)
         if dat is None:
-            if verbose:
-                print(f'Frame {i:6d} is None!!!')
+            debug_message(f'Frame {i:6d} is None!!!')
             continue
         pstats = get_profile_stats(dataframe=dat,
                                    n_bins=n_bins,
-                                   q_range=q_range,
-                                   verbose=verbose)
+                                   q_range=q_range)
         pmedian[n, :] = pstats['median'].copy()
         pmean[n, :] = pstats['mean'].copy()
         psum[n, :] = pstats['sum'].copy()
