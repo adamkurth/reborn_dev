@@ -21,12 +21,11 @@ Note that there is documentation on
 `LCLS PAD geometry <https://confluence.slac.stanford.edu/display/PSDM/Detector+Geometry>`_.
 """
 
-import re
 import numpy as np
 import reborn
+from reborn import utils
+from reborn.const import eV
 from reborn.source import Beam
-from .. import utils, detector
-from . import crystfel, cheetah
 import extra_data
 
 debug = True
@@ -38,8 +37,7 @@ def debug_message(*args, caller=True, **kwargs):
         s = ''
         if caller:
             s = utils.get_caller(1)
-        print('DEBUG:lcls.'+s+':', *args, **kwargs)
-
+        print('DEBUG:euxfel.'+s+':', *args, **kwargs)
 
 
 class EuXFELFrameGetter(reborn.fileio.getters.FrameGetter):
@@ -47,7 +45,7 @@ class EuXFELFrameGetter(reborn.fileio.getters.FrameGetter):
     current_train_stack = None
     current_train_id = None
     def __init__(self, experiment_id, run_id,
-                 pad_detectors='*/DET/*', geom=None, max_events=1e6,
+                 pad_detectors='*/DET/*', geom=None, max_events=None,
                  beam=None):
         debug_message('Initializing superclass')
         super().__init__()
@@ -60,11 +58,15 @@ class EuXFELFrameGetter(reborn.fileio.getters.FrameGetter):
         self.experiment_id = experiment_id
         self.run_id = run_id
         self.pad_detectors = pad_detectors
-        run = extra_data.open_run(proposal=self.experiment_id, run=self.run_id)
+        debug_message('gathering run data')
+        run = extra_data.open_run(proposal=self.experiment_id, run=self.run_id, data='proc')
+        debug_message('run selection')
         self.selection = run.select(self.pad_detectors, 'image.data', require_all=True)
+        debug_message('finding sources')
         self.beam = None
 
         sources = run.all_sources
+        debug_message('building detector index')
         detectors = list()
         for s in sources:
             if '/DET/' in s:
@@ -74,30 +76,44 @@ class EuXFELFrameGetter(reborn.fileio.getters.FrameGetter):
             t_shots = run[d, 'image.data'].data_counts()
             train_shots.update(t_shots.to_dict())
         self.n_frames = np.sum(list(train_shots.values()))
-        self.frames = dict()
-        for i, (k, v) in enumerate(train_shots.items()):
+        debug_message('building frame index')
+        self.frames = list()
+        for k, v in train_shots.items():
             fnums = np.arange(v)
             vals = np.ones(v) * k
-            if i == 0:
-                a = 0
-            else:
-                a = list(self.frames.keys())[-1]
-            f = dict(zip(fnums + a, zip(vals, fnums)))
-            self.frames.update(f)
-        self.photon_energies = run['SA1_XTD2_XGM/XGM/DOOCS', 'pulseEnergy.wavelengthUsed.value']
+            self.frames.extend(list(zip(vals, fnums)))
+        debug_message('enforcing max_events')
+        if max_events is not None:
+            self.n_frames = min(max_events, self.n_frames)
+        debug_message('gather photon energy')
+        run_raw = extra_data.open_run(proposal=self.experiment_id, run=self.run_id, data='raw')
+        self.photon_energies = run_raw['SA1_XTD2_XGM/XGM/DOOCS', 'pulseEnergy.wavelengthUsed.value']
+        debug_message('setting geometry')
         self.geom = geom
+
+    def _get_train_stack(self, train_id):
+        train_id, train_data = self.selection.train_from_id(train_id)
+        stack = extra_data.stack_detector_data(train_data, 'image.data')
+        return np.double(stack)
 
     def get_data(self, frame_number=0):
         debug_message()
         stacked = None
+        debug_message('loading train')
         train_id, fn = self.frames[frame_number]
         if self.current_train_stack is not None:
             if train_id == self.current_train_id:
                 stacked = self.current_train_stack
+            else:
+                stacked = self._get_train_stack(train_id)
+                self.current_train_id = train_id
+                self.current_train_stack = stacked
         else:
-            train_id, train_data = self.selection.train_from_id(train_id)
-            stacked = extra_data.stack_detector_data(train_data, 'image.data')
-        stacked_pulse = stacked[fn][0]
+            stacked = self._get_train_stack(train_id)
+            self.current_train_id = train_id
+            self.current_train_stack = stacked
+        stacked_pulse = stacked[fn]
+        debug_message('building dataframe')
         df = reborn.dataframe.DataFrame()
         df.set_dataset_id(f'{self.pad_detectors} run:{self.run_id}')
         df.set_frame_id(frame_number)

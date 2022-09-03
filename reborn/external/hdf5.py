@@ -171,7 +171,7 @@ def save_padstats_as_h5(experiment_id, run, stats, h5_file_path):
     save_mask_as_h5(stats['mask'], h5_file_path)
     save_beam_as_h5(stats['beam'], h5_file_path)
     with h5py.File(h5_file_path, 'a') as hf:
-        hf.create_dataset('meta/experiment_id', data=experiment_id)
+        hf.create_dataset('meta/experiment_id', data=f'{experiment_id}')
         hf.create_dataset('meta/run_number', data=run)
         hf.create_dataset('meta/dataset_id', data=stats['dataset_id'])
         for ss in save_stats:
