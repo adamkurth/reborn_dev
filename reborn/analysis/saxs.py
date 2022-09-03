@@ -12,6 +12,10 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with reborn.  If not, see <https://www.gnu.org/licenses/>.
+import numpy as np
+from joblib import delayed
+from joblib import Parallel
+from reborn.detector import RadialProfiler
 
 
 def get_profile_stats(dataframe, n_bins, q_range, verbose=False):
@@ -110,11 +114,11 @@ def get_profile_runstats(framegetter=None, n_bins=1000, q_range=None,
                                                                          verbose=verbose)
                                                                          for i in range(n_processes))
         pmedian = np.concatenate([o['median'] for o in out])
-        pmedian = np.concatenate([o['mean'] for o in out])
-        pmedian = np.concatenate([o['sum'] for o in out])
-        pmedian = np.concatenate([o['sum2'] for o in out])
-        pmedian = np.concatenate([o['counts'] for o in out])
-        pmedian = np.concatenate([o['q_bins'] for o in out])
+        pmean = np.concatenate([o['mean'] for o in out])
+        psum = np.concatenate([o['sum'] for o in out])
+        psum2 = np.concatenate([o['sum2'] for o in out])
+        pcounts = np.concatenate([o['counts'] for o in out])
+        pq_bin = np.concatenate([o['q_bins'] for o in out])
         out_vals = [pmedian, pmean, psum, psum2, pcounts, pq_bin]
         return dict(zip(out_keys, out_vals))
     if isinstance(framegetter, dict):
@@ -130,7 +134,6 @@ def get_profile_runstats(framegetter=None, n_bins=1000, q_range=None,
     psum2 = np.zeros((frame_ids.size, n_bins))
     pcounts = np.zeros((frame_ids.size, n_bins))
     pq_bin = np.zeros((frame_ids.size, n_bins))
-    first = True
     for (n, i) in enumerate(frame_ids):
         if verbose:
             print(f'Frame {i:6d} ({n / len(frame_ids) * 100:0.2g})', end='\r')
@@ -173,12 +176,12 @@ def normalize_profile_stats(stats, q_range=None):
     run_pmedian = stats['median'].copy()
     run_pmean = stats['mean'].copy()
     run_psum = stats['sum'].copy()
-    run_sum2 = stats['sum2'].copy()
+    run_psum2 = stats['sum2'].copy()
     qmin = q_range[0]
     qmax = q_range[1]
     w = np.where((q > qmin) * (q < qmax))
     s = np.mean(run_pmean[:, w[0]], axis=1)
-    out_vals = [(run_median.T / s).T, (run_pmean.T / s).T,
+    out_vals = [(run_pmedian.T / s).T, (run_pmean.T / s).T,
                 (run_psum.T / s).T, (run_psum2.T / s ** 2).T,
                 stats["counts"].copy(), stats["q_bins"].copy()]
     return dict(zip(out_keys, out_vals))
