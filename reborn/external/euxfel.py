@@ -14,17 +14,15 @@
 # along with reborn.  If not, see <https://www.gnu.org/licenses/>.
 
 r"""
-Utilities for working with LCLS data.  Most of what you need is already in the psana package.  I don't know where the
-official psana documentation is but if you work with LCLS data you should at least skim through all of the material in
-the `LCLS Data Analysis Confluence pages <https://confluence.slac.stanford.edu/display/PSDM/LCLS+Data+Analysis>`_.
-Note that there is documentation on
-`LCLS PAD geometry <https://confluence.slac.stanford.edu/display/PSDM/Detector+Geometry>`_.
+Utilities for working with EuXFEL data. Uses EuXFEL's extra_data package.
+Documentation: https://rtd.xfel.eu/docs/data-analysis-user-documentation/en/latest/index.html
+               https://extra-data.readthedocs.io/en/latest/index.html
+Source Code: https://github.com/European-XFEL/EXtra-data
 """
 
 import numpy as np
 import reborn
 from reborn import utils
-from reborn.const import eV
 from reborn.source import Beam
 import extra_data
 
@@ -37,59 +35,81 @@ def debug_message(*args, caller=True, **kwargs):
         s = ''
         if caller:
             s = utils.get_caller(1)
-        print('DEBUG:euxfel.'+s+':', *args, **kwargs)
+        print(f'DEBUG:euxfel.{s}:', *args, **kwargs)
 
 
 class EuXFELFrameGetter(reborn.fileio.getters.FrameGetter):
-    # SPB_DET_AGIPD1M-1/DET/*CH0:xtdf
+    r"""
+    EuXFELFrameGetter to retrieve detector data from EuXFEL endstations in the standard way.
+
+    EuXFEL saves a series of exposures each corresponding to an individual x-ray pulse together,
+    indexed by the pulse_train. This framegetter handles that for you so you can iterate directly through
+    frames as if they were globally indexed as in (LCLS or SACLA). The trains are cached so the
+    data is not reloaded if the next frame is within the same train.
+
+    Args:
+        experiment_id (int): Experiment proposal number.
+        run_id (int): Experiment run number.
+        pad_detectors (str): pad detector data path in H5 (example='SPB_DET_AGIPD1M-1/DET/*CH0:xtdf, default='*/DET/*').
+        geom (|PADGeometryList|): reborn.detector.PADGeometryList instance with the experiment geometry.
+        max_events (int): Maximum number of frames to retrieve.
+        beam (|Beam|): reborn.source.Beam instance with the x-ray details for the run.
+    """
     current_train_stack = None
     current_train_id = None
+    beam = None
+
     def __init__(self, experiment_id, run_id,
-                 pad_detectors='*/DET/*', geom=None, max_events=None,
-                 beam=None):
+                 geom=None, beam=None, pad_detectors='*/DET/*',
+                 max_events=None):
         debug_message('Initializing superclass')
         super().__init__()
-        self.init_params = {"experiment_id": experiment_id,
-                            "run_id": run_id,
-                            "pad_detectors": pad_detectors,
-                            "geom": geom,
-                            "max_events": max_events,
-                            "beam": beam}
+        self.init_params = {'experiment_id': experiment_id,
+                            'run_id': run_id,
+                            'pad_detectors': pad_detectors,
+                            'geom': geom,
+                            'max_events': max_events,
+                            'beam': beam}
         self.experiment_id = experiment_id
         self.run_id = run_id
         self.pad_detectors = pad_detectors
+        debug_message('setting geometry')
+        self.geom = geom
+        # extra data first loads a run
+        # in the background this is opening an HDF5 file
+        # we are loading the processed data (dark calibrated)
         debug_message('gathering run data')
         run = extra_data.open_run(proposal=self.experiment_id, run=self.run_id, data='proc')
+        # here we select the type of data we want (pad detector exposures)
         debug_message('run selection')
         self.selection = run.select(self.pad_detectors, 'image.data', require_all=True)
         debug_message('finding sources')
-        self.beam = None
-
+        # data is saved for each individual panel
+        # so there N files for a detector with N pads
+        # this finds all the files needed to stitch together a single exposure
         sources = run.all_sources
+        # build a mapping from the trains to individual exposures
         debug_message('building detector index')
-        detectors = list()
-        for s in sources:
-            if '/DET/' in s:
-                detectors.append(s)
+        detectors = [s for s in sources if '/DET/' in s]
         train_shots = dict()
         for d in detectors:
             t_shots = run[d, 'image.data'].data_counts()
             train_shots.update(t_shots.to_dict())
-        self.n_frames = np.sum(list(train_shots.values()))
+        self.n_frames = np.sum(list(train_shots.values()))  # count the number of frames
         debug_message('building frame index')
         self.frames = list()
         for k, v in train_shots.items():
-            fnums = np.arange(v)
-            vals = np.ones(v) * k
-            self.frames.extend(list(zip(vals, fnums)))
+            f_num = np.arange(v)
+            t_ids = np.ones(v) * k
+            self.frames.extend(list(zip(t_ids, f_num)))
+        # set maximum number of frames to work with (if specified)
         debug_message('enforcing max_events')
         if max_events is not None:
             self.n_frames = min(max_events, self.n_frames)
+        # the photon wavelength is easily accessible by opening the raw data
         debug_message('gather photon energy')
         run_raw = extra_data.open_run(proposal=self.experiment_id, run=self.run_id, data='raw')
-        self.photon_energies = run_raw['SA1_XTD2_XGM/XGM/DOOCS', 'pulseEnergy.wavelengthUsed.value']
-        debug_message('setting geometry')
-        self.geom = geom
+        self.photon_data = run_raw['SA1_XTD2_XGM/XGM/DOOCS', 'pulseEnergy.wavelengthUsed.value']
 
     def _get_train_stack(self, train_id):
         train_id, train_data = self.selection.train_from_id(train_id)
@@ -98,9 +118,10 @@ class EuXFELFrameGetter(reborn.fileio.getters.FrameGetter):
 
     def get_data(self, frame_number=0):
         debug_message()
-        stacked = None
+        # load the data from the HDF5 file
         debug_message('loading train')
         train_id, fn = self.frames[frame_number]
+        # cache current train stack
         if self.current_train_stack is not None:
             if train_id == self.current_train_id:
                 stacked = self.current_train_stack
@@ -115,13 +136,14 @@ class EuXFELFrameGetter(reborn.fileio.getters.FrameGetter):
         stacked_pulse = stacked[fn]
         debug_message('building dataframe')
         df = reborn.dataframe.DataFrame()
-        df.set_dataset_id(f'{self.pad_detectors} run:{self.run_id}')
-        df.set_frame_id(frame_number)
+        df.set_dataset_id(f'run:{self.run_id} (Calibrated Data)')
+        df.set_frame_id(f'run:{self.run_id}:{frame_number}')
         df.set_frame_index(frame_number)
         df.set_pad_geometry(self.geom)
         df.set_raw_data(stacked_pulse)
-        pe = self.photon_energies.train_from_id(train_id)
-        self.beam = Beam(wavelength=pe[1] * 1e-9)
+        debug_message('retrieving x-ray data')
+        _, wavelength = self.photon_data.train_from_id(train_id)
+        self.beam = Beam(wavelength=wavelength * 1e-9)
         df.set_beam(self.beam)
         debug_message('returning', df)
         return df
