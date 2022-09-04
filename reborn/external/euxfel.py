@@ -131,22 +131,22 @@ class EuXFELFrameGetter(reborn.fileio.getters.FrameGetter):
         debug_message('gather photon energy')
         run_raw = extra_data.open_run(proposal=self.experiment_id, run=self.run_id, data='raw')
         self.photon_data = run_raw[xray_wavelength_detector, 'pulseEnergy.wavelengthUsed.value']
-        self.pad_detector_motor_position = run_raw[pad_detector_motor, 'actualPosition.value']
+        pad_detector_motor_position = run_raw[pad_detector_motor, 'actualPosition.value']
+        detector_position = pad_detector_motor_position.as_single_value()  # result is in mm
+        vec = np.array([0, 0, 1e-3 * detector_position])  # convert to m (reborn is in SI)
+        self.pad_geometry = self.update_detector_distance(vector=vec)
 
-    def update_detector_distance(self, offset=0.125, vector=np.array([0, 0, 1e-3])):
+    def update_detector_distance(self, vector=np.array([0, 0, 1e-3])):
         r"""
         Modify the PADGeometryList.
 
         Arguments:
-            offset (float): Motor position to interaction region offset in meters (typically 120-130mm)
             vector (|ndarray|): This is the vector indicating the direction and step size. The stage
                                 offset and vector are added and set to the PADGeometry.t_vec
         """
         pads = self.pad_geometry.copy()
-        for p in pads:
-            p.t_vec[2] = offset
         pads.translate(vector)
-        debug_message(f'Shifted detector to {offset + vector}')
+        debug_message(f'Shifted detector by {vector}')
         return pads
 
     def _get_train_stack(self, train_id):
@@ -179,11 +179,8 @@ class EuXFELFrameGetter(reborn.fileio.getters.FrameGetter):
         df.set_frame_id(f'run:{self.run_id}:{frame_number}')
         df.set_frame_index(frame_number)
         debug_message('getting detector stage position')
-        _, detector_position = self.pad_detector_motor_position.train_from_id(train_id)  # result is in mm
-        vec = np.array([0, 0, 1e-3 * detector_position])  # convert to m (reborn is in SI)
-        pads = self.update_detector_distance(offset=0.125, vector=vec)
         debug_message('setting PADGeometry')
-        df.set_pad_geometry(pads)
+        df.set_pad_geometry(self.pad_geometry)
         df.set_raw_data(stacked_pulse)
         debug_message('retrieving x-ray data')
         _, wavelength = self.photon_data.train_from_id(train_id)  # result is in nm
