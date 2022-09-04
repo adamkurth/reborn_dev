@@ -80,6 +80,8 @@ class EuXFELFrameGetter(reborn.fileio.getters.FrameGetter):
 
     def __init__(self, experiment_id, run_id,
                  geom=None, beam=None, pad_detectors='*/DET/*',
+                 pad_detector_motor='SPB_IRU_AGIPD1M/MOTOR/Z_STEPPER',
+                 xray_wavelength_detector='SA1_XTD2_XGM/XGM/DOOCS',
                  max_events=None):
         debug_message('Initializing superclass')
         super().__init__()
@@ -93,7 +95,7 @@ class EuXFELFrameGetter(reborn.fileio.getters.FrameGetter):
         self.run_id = run_id
         self.pad_detectors = pad_detectors
         debug_message('setting geometry')
-        self.geom = geom
+        self.pad_geometry = geom
         # extra data first loads a run
         # in the background this is opening an HDF5 file
         # we are loading the processed data (dark calibrated)
@@ -128,8 +130,24 @@ class EuXFELFrameGetter(reborn.fileio.getters.FrameGetter):
         # the photon wavelength is easily accessible by opening the raw data
         debug_message('gather photon energy')
         run_raw = extra_data.open_run(proposal=self.experiment_id, run=self.run_id, data='raw')
-        self.photon_data = run_raw['SA1_XTD2_XGM/XGM/DOOCS', 'pulseEnergy.wavelengthUsed.value']
-        self.pad_detector_motor_position = run_raw['', 'actualPosition.value']
+        self.photon_data = run_raw[xray_wavelength_detector, 'pulseEnergy.wavelengthUsed.value']
+        self.pad_detector_motor_position = run_raw[pad_detector_motor, 'actualPosition.value']
+
+    def update_detector_distance(self, offset=0.125, vector=np.array([0, 0, 1e-3])):
+        r"""
+        Modify the PADGeometryList.
+
+        Arguments:
+            offset (float): Motor position to interaction region offset in meters (typically 120-130mm)
+            vector (|ndarray|): This is the vector indicating the direction and step size. The stage
+                                offset and vector are added and set to the PADGeometry.t_vec
+        """
+        pads = self.pad_geometry.copy()
+        for p in pads:
+            p.t_vec[2] = offset
+        pads.translate(vector)
+        debug_message(f'Shifted detector to {offset + vector}')
+        return pads
 
     def _get_train_stack(self, train_id):
         train_id, train_data = self.selection.train_from_id(train_id)
@@ -156,13 +174,20 @@ class EuXFELFrameGetter(reborn.fileio.getters.FrameGetter):
         stacked_pulse = stacked[fn]
         debug_message('building dataframe')
         df = reborn.dataframe.DataFrame()
+        debug_message('setting calibrated pad detector data')
         df.set_dataset_id(f'run:{self.run_id} (Calibrated Data)')
         df.set_frame_id(f'run:{self.run_id}:{frame_number}')
         df.set_frame_index(frame_number)
-        df.set_pad_geometry(self.geom)
+        debug_message('getting detector stage position')
+        _, detector_position = self.pad_detector_motor_position.train_from_id(train_id)  # result is in mm
+        vec = np.array([0, 0, 1e-3 * detector_position])  # convert to m (reborn is in SI)
+        pads = self.update_detector_distance(offset=0.125, vector=vec)
+        debug_message('setting PADGeometry')
+        df.set_pad_geometry(pads)
         df.set_raw_data(stacked_pulse)
         debug_message('retrieving x-ray data')
-        _, wavelength = self.photon_data.train_from_id(train_id)
+        _, wavelength = self.photon_data.train_from_id(train_id)  # result is in nm
+        debug_message('setting Beam')
         self.beam = Beam(wavelength=wavelength * 1e-9)
         df.set_beam(self.beam)
         debug_message('returning', df)
