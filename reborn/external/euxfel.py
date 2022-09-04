@@ -38,6 +38,25 @@ def debug_message(*args, caller=True, **kwargs):
         print(f'DEBUG:euxfel.{s}:', *args, **kwargs)
 
 
+def inspect_available_data(experiment_id, run_id, source=None):
+    r"""
+    Prints out available data sources for a specific proposal & run.
+    If given a data source, it will also print out the keys for that data source.
+
+    Args:
+        experiment_id (int): Experiment proposal number.
+        run_id (int): Experiment run number.
+        source (str): data source (example='SPB_XTD9_XGM/XGM/DOOCS').
+    """
+    debug_message('opening run')
+    run = extra_data.open_run(proposal=experiment_id, run=run_id, data='raw')
+    debug_message('gathering sources')
+    print(f'Data Sources:\n\n{run.all_sources}\n\n')
+    if source is not None:
+        source_data = run[source]
+        print(f'Data source keys:\n\n{source_data.keys()}\n\n')
+
+
 class EuXFELFrameGetter(reborn.fileio.getters.FrameGetter):
     r"""
     EuXFELFrameGetter to retrieve detector data from EuXFEL endstations in the standard way.
@@ -50,7 +69,7 @@ class EuXFELFrameGetter(reborn.fileio.getters.FrameGetter):
     Args:
         experiment_id (int): Experiment proposal number.
         run_id (int): Experiment run number.
-        pad_detectors (str): pad detector data path in H5 (example='SPB_DET_AGIPD1M-1/DET/*CH0:xtdf, default='*/DET/*').
+        pad_detectors (str): pad detector data path in H5 (example='SPB_DET_AGIPD1M-1/DET/*CH0:xtdf', default='*/DET/*').
         geom (|PADGeometryList|): reborn.detector.PADGeometryList instance with the experiment geometry.
         max_events (int): Maximum number of frames to retrieve.
         beam (|Beam|): reborn.source.Beam instance with the x-ray details for the run.
@@ -110,6 +129,7 @@ class EuXFELFrameGetter(reborn.fileio.getters.FrameGetter):
         debug_message('gather photon energy')
         run_raw = extra_data.open_run(proposal=self.experiment_id, run=self.run_id, data='raw')
         self.photon_data = run_raw['SA1_XTD2_XGM/XGM/DOOCS', 'pulseEnergy.wavelengthUsed.value']
+        self.pad_detector_motor_position = run_raw['', 'actualPosition.value']
 
     def _get_train_stack(self, train_id):
         train_id, train_data = self.selection.train_from_id(train_id)
