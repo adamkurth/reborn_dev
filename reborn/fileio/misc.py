@@ -14,6 +14,8 @@
 # along with reborn.  If not, see <https://www.gnu.org/licenses/>.
 
 import pickle
+import numpy as np
+from .. import target
 
 
 def load_pickle(pickle_file):
@@ -34,3 +36,16 @@ def save_pickle(data, pickle_file):
     """
     with open(pickle_file, 'wb') as f:
         pickle.dump(data, f)
+
+
+def load_xyz(fname):
+    r""" Load an "xyz" file.
+
+    Arguments:
+        fname (str): Path to the xyz file.
+
+    Returns: dict with keys "position_vecs" and "atomic_numbers"
+    """
+    r = np.genfromtxt('files/C60.xyz', skip_header=2)[:, 1:] * 1e-10
+    z = target.atoms.atomic_symbols_to_numbers(np.genfromtxt('files/C60.xyz', skip_header=2, dtype=str)[:, :1].ravel())
+    return {'atomic_numbers': z, 'position_vecs': r}

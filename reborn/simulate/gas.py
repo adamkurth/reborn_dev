@@ -72,14 +72,8 @@ def air_intensity_profile(q_mags=None, beam=None):
     return n2_profile*0.79 + o2_profile*0.21
 
 
-def get_gas_background(pad_geometry,
-                        beam,
-                        path_length=[0.0, 1.0],
-                        gas_type='he',
-                        temperature=293.15,
-                        pressure=101325.0,
-                        n_simulation_steps=20,
-                        poisson=False):
+def get_gas_background(pad_geometry, beam, path_length=[0.0, 1.0], gas_type='helium', temperature=293.15,
+                       pressure=101325.0, n_simulation_steps=20, poisson=False):
     r"""
     Given a list of |PADGeometry| instances along with a |Beam| instance, calculate the scattering intensity
     :math:`I(q)` of a helium of given path length.
@@ -87,8 +81,8 @@ def get_gas_background(pad_geometry,
     Args:
         pad_geometry (list of |PADGeometry| instances): PAD geometry info.
         beam (|Beam|): X-ray beam parameters.
-        path_length (list of |float|): Path length of gas the beam is 'propagating' through
-        liquid (str): We can only do "water" at this time.
+        path_length (list of float): Path length of gas the beam is 'propagating' through
+        gas_type (str): One of the following: 'helium', or 'air'.
         temperature (float): Temperature of the gas.
         poisson (bool): If True, add Poisson noise (default=True)
 

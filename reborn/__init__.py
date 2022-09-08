@@ -27,5 +27,6 @@ from . import target
 from . import fileio
 from . import misc
 from . import fortran
+from . import const
 
 temp_dir = os.path.join(tempfile.gettempdir(), 'reborn')

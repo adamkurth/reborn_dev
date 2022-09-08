@@ -133,9 +133,7 @@ def henke_scattering_factors(atomic_numbers, photon_energies):
     """
     atomic_numbers = np.array(atomic_numbers).ravel()
     photon_energies = np.array(photon_energies).ravel()
-    f = np.zeros([atomic_numbers.size, photon_energies.size], dtype=complex)#.reshape([atomic_numbers.size,
-                                                                             #            photon_energies.size])
-    # Yes the reshape above shouldn't be necessary, obviously, but this is a quirky feature of numpy...
+    f = np.zeros([atomic_numbers.size, photon_energies.size], dtype=complex)
     for z in np.unique(atomic_numbers):
         dat = _get_henke_data(z)
         w = np.where(atomic_numbers == z)

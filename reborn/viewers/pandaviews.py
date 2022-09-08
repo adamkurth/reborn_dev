@@ -5,23 +5,23 @@ DataFrameTable
 Modified by R.A. Kirian from original source:
 https://gist.github.com/jsexauer/f2bb0cc876828b54f2ed
 
-Quick and Dirty Qt app to view pandas DataFrames.  Includes sorting,
-filterting, and plotting.
+Quick and Dirty Qt app to view pandas DataFrames.  Includes sorting, filterting, and plotting.
 
 Based on qtpandas in pandas sandbox module, by Jev Kuznetsov
 
-Usage:
- - To quickly display a dataframe, just use DataFrameApp(df)
- # >>> import sys, pandas
- # >>> from DataFrameGUI import DataFrameApp
- # >>> df = pandas.DataFrame([1,2,3])
- # >>> root = QtGui.QApplication(sys.argv)
- # >>> app = DataFrameApp(df)
- # >>> app.show()
- # >>> root.exec_()
+To quickly display a dataframe, use DataFrameApp(df)
 
- - To build your own widget, subclass DataFrameWidget
+.. code-block:: python
 
+    import sys, pandas
+    from DataFrameGUI import DataFrameApp
+    df = pandas.DataFrame([1,2,3])
+    root = QtGui.QApplication(sys.argv)
+    app = DataFrameApp(df)
+    app.show()
+    root.exec_()
+
+To build your own widget, subclass DataFrameWidget
 """
 
 # Not sure of what this does
@@ -41,15 +41,16 @@ from functools import partial
 class WidgetedCell(object):
     """Set as the value of an element in a pandas DataFrame to create a widget
     NOTE: You may also want your widget to implement the getWidgetedCellState and setWidgetedCellState
-    methods so that interactions with the controlls persist.
+    methods so that interactions with the controls persist.
     """
     def __init__(self, widget):
-        """Create a widget in the DataFrameWidget's cell
+        """
+        Create a widget in the DataFrameWidget's cell
+
         Args:
-            widget (subclass of QWidget)
-                Widget to display in cell.  The constructor of `widget` must
-                accept only one argument, the parent widget to
-                build `widget` inside of
+            widget (subclass of QWidget):  Widget to display in cell.  The constructor of `widget` must accept only
+            one argument, the parent widget to build `widget` inside.
+
         """
         self.widget = widget
 

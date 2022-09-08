@@ -26,7 +26,11 @@ import reborn
 from reborn import utils
 from reborn.const import eV
 from reborn.source import Beam
-import extra_data
+try:
+    import extra_data
+except:
+    extra_data = None
+    print('You do not have the extra_data python package installed.')
 
 debug = True
 

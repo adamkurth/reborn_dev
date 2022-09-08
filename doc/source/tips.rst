@@ -12,3 +12,4 @@ This is the page for miscellaneous tips that might be helpful when using reborn.
    tips/pyqtgraph
    tips/profiling_code
    tips/windows
+   tips/research_computing

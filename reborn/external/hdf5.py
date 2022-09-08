@@ -152,18 +152,8 @@ def save_padstats_as_h5(experiment_id, run, stats, h5_file_path):
     FIXME: There is a sphinx warning caused by this doc string.
 
     Arguments:
-        stats (dict): dict to save
-                      with keys: 'dataset_id'
-                                 'pad_geometry'
-                                 'mask'
-                                 'n_frames'
-                                 'sum'
-                                 'min'
-                                 'max'
-                                 'sum2'
-                                 'beam'
-                                 'start'
-                                 'stop'
+        stats (dict): dict to save with keys: 'dataset_id', 'pad_geometry', 'mask', 'n_frames', 'sum', 'min', 'max',
+                      'sum2', 'beam', 'start', 'stop'
         h5_file_path (str): filename
     """
     save_stats = ['n_frames', 'max', 'min', 'sum', 'sum2', 'start', 'stop']

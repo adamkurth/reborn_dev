@@ -211,16 +211,13 @@ def error(*args, caller=0, **kwargs):
 
 def random_rotation():
     r"""
-    This function has been removed.  Use scipy instead:
+    Create a random rotation matrix.
 
     .. code-block:: python
 
         from scipy.spatial.transform import Rotation
         rotmat = Rotation.random().as_matrix()'
     """
-    depreciate('reborn.utils.random_rotation has been removed.  Use scipy for this:\n'
-               'from scipy.spatial.transform import Rotation\n'
-               'rotmat = Rotation.random().as_matrix()')
     return Rotation.random().as_matrix()
 
 

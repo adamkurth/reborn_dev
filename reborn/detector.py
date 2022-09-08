@@ -1709,7 +1709,7 @@ class RadialProfiler:
                                 you get a weighted average).
             n_bins (int): Number of radial bins you desire.
             q_range (list-like): The minimum and maximum of the *centers* of the q bins.
-            pad_geometry (list of |PADGeometry| instances):  Optional.  Will be used to generate q magnitudes.  You must
+            pad_geometry (|PADGeometryList|):  Optional.  Will be used to generate q magnitudes.  You must
                                                              provide beam if you provide this.
             beam (|Beam| instance): Optional, unless pad_geometry is provided.  Wavelength and beam direction are
                                      needed in order to calculate q magnitudes.
