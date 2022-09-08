@@ -296,7 +296,7 @@ def save_run_profile_stats_as_h5(pstats, h5_file_path):
     print(f'Saved run profile stats: {h5_file_path}')
 
 
-def load_run_profile_stats_from_h5(filename):
+def load_run_profile_stats_from_h5(h5_file_path):
     stat_keys = ['median', 'mean', 'sum', 'sum2', 'counts', 'q_bins']
     pstats = dict()
     with h5py.File(h5_file_path, 'a') as hf:
