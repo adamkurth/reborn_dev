@@ -23,11 +23,11 @@ Contributed by Richard A. Kirian.
 
 Imports:
 """
-import random
 import numpy as np
 import reborn
 from reborn.simulate.clcore import ClCore
 from reborn.viewers.qtviews import PADView
+np.random.seed(0)
 # %%
 # Our agenda here is to simulate atomistic diffraction from multiple C60 molecules.  We begin by creating the |ClCore|
 # class instance that handles the GPU configurations:
@@ -50,7 +50,7 @@ r_vecs_gpu = simcore.to_device(r_vecs)
 amps_gpu = simcore.to_device(shape=(geom.n_pixels,), dtype=simcore.complex_t)
 # %%
 # We first simulate the atomistic diffraction assuming atomic scattering factors are all :math:`f(q)=1`.
-simcore.phase_factor_qrf(q_vecs, r_vecs, a=amps_gpu)
+simcore.phase_factor_qrf(q_vecs_gpu, r_vecs_gpu, a=amps_gpu)
 # %%
 # Since all the atoms are carbon, we can take a shortcut and multiply the amplitudes by the carbon scattering factor
 # :math:`f(q)`.  There are various sources of scattering factors -- here we will combine the |Cromer1968| form factors
@@ -79,13 +79,12 @@ pv.start()
 # %%
 # Now that we have done all of the above, it is straightforward to sum up amplitudes from many molecules in different
 # positions and orientations.  The GPU functions can accept translation vectors and rotation matrices:
-random.seed(0)
 amps_gpu *= 0
 n_molecules = 5
 for i in range(n_molecules):
     R = reborn.utils.random_rotation()
     U = np.random.normal(size=3)*10e-10
-    simcore.phase_factor_qrf(q_vecs, r_vecs, a=amps_gpu, R=R, U=U, add=True)  # Note the add=True, to add amplitudes
+    simcore.phase_factor_qrf(q_vecs_gpu, r_vecs_gpu, a=amps_gpu, R=R, U=U, add=True)
 amps_gpu = amps_gpu*f_gpu
 # %%
 # For convenience, the Thompson scattering cross-section, solid angles, etc. are combined in the f2phot method of
@@ -96,4 +95,4 @@ intensity = np.abs(amps_gpu.get())**2 * geom.f2phot(beam=beam)
 pv = PADView(data=np.log10(intensity), beam=beam, pad_geometry=geom, title='test')
 pv.start()
 # %%
-# On my IBM Thinkpad laptop it takes about 1-3 milliseconds per molecule.
+# On my IBM Thinkpad laptop it takes about 1 millisecond per molecule.
