@@ -5,7 +5,7 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
     apt-get -q -y autoremove && \
     apt-get -q -y clean
 RUN export DEBIAN_FRONTEND=noninteractive && \
-    apt-get -q -y install texlive-latex-base texlive-fonts-recommended texlive-latex-extra latex2html
+    apt-get -q -y install texlive-latex-base texlive-latex-extra texlive-fonts-recommended texlive-science latex2html
 RUN mkdir /tmp/reborn
 COPY environment.yml /tmp/reborn/environment.yml
 RUN export DEBIAN_FRONTEND=noninteractive && \
