@@ -15,6 +15,7 @@ __pycache__
 .metadata
 .DS_Store
 log.txt
+*_html
 *.pdb
 *.pdf
 *.egg*

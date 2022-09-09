@@ -13,3 +13,10 @@ div.sphx-glr-download a {
   padding: 1ex;
   text-align: center;
 }
+
+.math {
+    text-align: left;
+}
+.eqno {
+    float: right;
+}

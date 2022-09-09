@@ -1,5 +1,5 @@
-reborn Home
-===========
+Home
+====
 
 Welcome to the home page of the reborn python package.
 

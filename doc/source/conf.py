@@ -74,7 +74,7 @@ rst_epilog = """
 .. |bash| replace:: `bash <https://www.gnu.org/software/bash/manual/html_node/What-is-Bash_003f.html>`__
 .. |f2py| replace:: `f2py <https://numpy.org/doc/stable/f2py/>`__
 
-.. |dipole_notes|  replace:: `dipole scattering notes <files/dipole.pdf>`__
+.. |dipole_notes|  replace:: `diffraction notes <_static/files/dipole.pdf>`__
 
 .. |GriffithsEM|  replace:: `Griffiths E&M <https://www.cambridge.org/core/books/introduction-to-electrodynamics/3AB220820DBB628E5A43D52C4B011ED4>`__
 .. |Cromer1968|  replace:: `Cromer et al. (1968) <https://doi.org/10.1107/S0567739468000550>`__
@@ -89,6 +89,9 @@ rst_epilog = """
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 # sys.path.insert(0, os.path.abspath('../../reborn'))
 sys.path.insert(0, os.path.abspath('../..'))
+
+def setup(app):
+    app.add_css_file('css/custom.css')
 
 # -- General configuration ------------------------------------------------
 

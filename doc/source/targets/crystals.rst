@@ -23,6 +23,7 @@ matrix*.   The columns of the orthogonalization matrix are the basis vectors :ma
 :math:`\mathbf{a}_3` of the crystal:
 
 .. math:: \mathbf{O} = \begin{bmatrix}  | & |  & | \\ \mathbf{a}_1 &  \mathbf{a}_2 & \mathbf{a}_3 \\ | & | & | \end{bmatrix}
+    :label: eq:pfx
 
 In reciprocal space, we have analogous mathematics for the *reciprocal coordinates* :math:`\mathbf{g} = \mathbf{q}/2\pi`
 and *fractional Miller indices* :math:`\mathbf{h}`.  They are related by the matrix
