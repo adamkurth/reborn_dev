@@ -15,8 +15,11 @@
 
 r"""
 Utilities for working with EuXFEL data. Uses EuXFEL's extra_data package.
-Documentation: https://rtd.xfel.eu/docs/data-analysis-user-documentation/en/latest/index.html
-               https://extra-data.readthedocs.io/en/latest/index.html
+Documentation:
+
+* https://rtd.xfel.eu/docs/data-analysis-user-documentation/en/latest/index.html
+* https://extra-data.readthedocs.io/en/latest/index.html
+
 Source Code: https://github.com/European-XFEL/EXtra-data
 """
 
@@ -73,7 +76,8 @@ class EuXFELFrameGetter(reborn.fileio.getters.FrameGetter):
     Args:
         experiment_id (int): Experiment proposal number.
         run_id (int): Experiment run number.
-        pad_detectors (str): pad detector data path in H5 (example='SPB_DET_AGIPD1M-1/DET/*CH0:xtdf', default='*/DET/*').
+        pad_detectors (str): pad detector data path in H5 (example='SPB_DET_AGIPD1M-1/DET/\*CH0:xtdf',
+        default='\*/DET/\*').
         geom (|PADGeometryList|): reborn.detector.PADGeometryList instance with the experiment geometry.
         max_events (int): Maximum number of frames to retrieve.
         beam (|Beam|): reborn.source.Beam instance with the x-ray details for the run.

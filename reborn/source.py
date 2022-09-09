@@ -90,7 +90,7 @@ class Beam:
     @property
     def hash(self):
         r"""
-        Hash the |Beam| instance in order to determine if the beam instance has changed.
+        Hash the |Beam| instance in order to determine if the beam properties have changed.
 
         Returns:
             int
@@ -132,18 +132,18 @@ class Beam:
 
     @property
     def e1_vec(self):
-        r""" The principle polarization vector.  See docs for polarization_vec property. """
+        r""" The principle polarization vector :math:`\hat{E}_1`. """
         return self._polarization_vec.copy()
 
     @property
     def e2_vec(self):
-        r""" The complementary polarization vector.  See docs for polarization_vec property. """
+        r""" The secondary polarization vector :math:`\hat{E}_2 = \hat{k}_0 \times \hat{E}_1`. """
         return np.cross(self.beam_vec, self.e1_vec)
 
     @property
     def polarization_weight(self):
         r""" The fraction of f of energy that goes into the principle polarization vector specified by the
-        polarization_vec attriute.  The fraction of the energy in the complementary polarization is of course (1-f). """
+        polarization_vec attribute.  The fraction of the energy in the complementary polarization is of course (1-f). """
         return self._polarization_weight
 
     @polarization_weight.setter
@@ -214,7 +214,7 @@ class Beam:
                 }
 
     def from_dict(self, dictionary):
-        r""" Loads geometry from dictionary.  This goes along with the to_dict method."""
+        r""" Loads beam from dictionary.  This goes along with the to_dict method."""
         for k in list(dictionary.keys()):
             setattr(self, k, dictionary[k])
 

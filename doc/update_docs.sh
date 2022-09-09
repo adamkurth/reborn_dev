@@ -7,6 +7,12 @@
 #
 # https://rkirian.gitlab.io/reborn
 
+home=$(pwd)
+cd latex/dipole
+make html
+cp -r dipole_html ../../source/_static
+cd $home
+
 export PYTHONPATH=$(pwd)/source:$PYTHONPATH  # Needed for qtgallery
 pwd
 [ -d source/api ] && rm -r source/api
@@ -21,10 +27,6 @@ cat tmp.rst >> source/api/modules.rst
 rm tmp.rst &> /dev/null
 make doctest
 make html
-prev=$(pwd)
-cd latex/dipole
-make
-cd $prev
 cp -r source/files build/html
 sed -i.bak '/>*Submodules</d' build/html/api/modules.html
 sed -i.bak '/>Module contents</d' build/html/api/modules.html

@@ -44,30 +44,26 @@ def kabsch(A, A0):
 
 class Rotate3D:
     r"""
-     Base class to rotate a 3D array of double precision complex numbers in
-     3-dimensions.  The function works by rotating each 2D sections of
-     the 3D array via three shears, as described by Unser et al. (1995)
-     "Convolution-based interpolation for fast, high-quality rotation of images."
-     IEEE Transactions on Image Processing, 4:1371.
+    Base class to rotate a 3D array of double precision complex numbers in
+    3-dimensions.  The function works by rotating each 2D sections of
+    the 3D array via three shears, as described by Unser et al. (1995)
+    "Convolution-based interpolation for fast, high-quality rotation of images."
+    IEEE Transactions on Image Processing, 4:1371.
 
-     Note 1: The input array must be 3d, double complex, and have all three
-             dimension sizes equal. Otherwise it raises a ValueError exception.
+    Note 1: The input array must be 3d, double complex, and have all three
+         dimension sizes equal. Otherwise, it raises a ValueError exception.
 
-     Note 2: If you don't want wrap arounds, make sure the input array, f,
-             is zero-padded to at least sqrt(2) times the largest dimension
-             of the desired object.
+    Note 2: If you don't want wrap-arounds, make sure the input array, f,
+         is zero-padded to at least sqrt(2) times the largest dimension
+         of the desired object.
 
-     Arguments:
-         f (*3D |ndarray|*) : The 3D input array. f is the corresponding
-         class member for output.
+    Arguments:
+        f (*3D |ndarray|*) : The 3D input array. f is the corresponding
+        class member for output.
 
-         keep_last_even_k (bool) : default False. The last k for even N has an ambiguous
-         sign. Keeping one sign only, makes real data become complex, so
-         this is always False for real data.
-
-
-     Methods:
-       rotation(R): R is a rotation specified as a scipy.spatial.transform.Rotation
+        keep_last_even_k (bool) : default False. The last k for even N has an ambiguous
+        sign. Keeping one sign only, makes real data become complex, so
+        this is always False for real data.
     """
 
     def __init__(self, f3d, keep_last_even_k=False):
@@ -100,6 +96,7 @@ class Rotate3D:
                     "rotate3D: f3d must have all dimensions equal to N")
 
     def rotation(self, R):
+        r""" R is a rotation specified as a scipy.spatial.transform.Rotation. """
         euler = R.as_euler('xyx')
         if self.dtf == np.float64 or self.dtf == np.float32:
             self._rotate3Dxr(euler[0])
@@ -238,27 +235,23 @@ class Rotate3D:
 
 class Rotate3DLinearShear:
     r"""
-     Same as Rotate3D but with the shears done with linear interpolation instead of FFTs.
-     No _rotate3Dxr and _rotate3Dyr
+    Same as Rotate3D but with the shears done with linear interpolation instead of FFTs.
+    No _rotate3Dxr and _rotate3Dyr
 
-     Note 1: The input array must be 3d, double complex, and have all three
-             dimension sizes equal. Otherwise it raises a ValueError exception.
+    Note 1: The input array must be 3d, double complex, and have all three
+         dimension sizes equal. Otherwise, it raises a ValueError exception.
 
-     Note 2: If you don't want wrap arounds, make sure the input array, f,
-             is zero-padded to at least sqrt(2) times the largest dimension
-             of the desired object.
+    Note 2: If you don't want wrap-arounds, make sure the input array, f,
+         is zero-padded to at least sqrt(2) times the largest dimension
+         of the desired object.
 
-     Arguments:
-         f (*3D |ndarray|*) : The 3D input array. f is the corresponding
-         class member for output.
+    Arguments:
+     f (*3D |ndarray|*) : The 3D input array. f is the corresponding
+     class member for output.
 
-         keep_last_even_k (bool) : default False. The last k for even N has an ambiguous
-         sign. Keeping one sign only, makes real data become complex, so
-         this is always False for real data.
-
-
-     Methods:
-       rotation(R): R is a rotation specified as a scipy.spatial.transform.Rotation
+     keep_last_even_k (bool) : default False. The last k for even N has an ambiguous
+     sign. Keeping one sign only, makes real data become complex, so
+     this is always False for real data.
     """
 
     def __init__(self, f3d, keep_last_even_k=False):
@@ -291,6 +284,7 @@ class Rotate3DLinearShear:
                     "rotate3D: f3d must have all dimensions equal to N")
 
     def rotation(self, R):
+        r""" R is a rotation specified as a scipy.spatial.transform.Rotation. """
         euler = R.as_euler('xyx')
         self._rotate3Dx(euler[0])
         self._rotate3Dy(euler[1])

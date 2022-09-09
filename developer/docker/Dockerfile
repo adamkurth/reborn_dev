@@ -4,7 +4,8 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
     apt-get -q -y install apt-utils curl make gfortran pocl-opencl-icd libgl1-mesa-glx && \
     apt-get -q -y autoremove && \
     apt-get -q -y clean
-RUN apt-get -q -y install texlive-latex-base texlive-fonts-recommended texlive-latex-extra
+RUN export DEBIAN_FRONTEND=noninteractive && \
+    apt-get -q -y install texlive-latex-base texlive-fonts-recommended texlive-latex-extra latex2html
 RUN mkdir /tmp/reborn
 COPY environment.yml /tmp/reborn/environment.yml
 RUN export DEBIAN_FRONTEND=noninteractive && \
@@ -19,4 +20,5 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
 RUN ln -s /etc/OpenCL/vendors/pocl.icd /usr/local/miniconda/envs/reborn/etc/OpenCL/vendors/pocl.icd
 RUN /usr/local/miniconda/envs/reborn/bin/python -c 'import PyQt5, OpenGL, pyopencl; print(pyopencl.get_platforms())'
 # The following is for the sphinx-gallery qt scraper.  Hopefully we can remove the dependency.
-RUN apt-get -q -y install xvfb
+RUN export DEBIAN_FRONTEND=noninteractive && \
+    apt-get -q -y install xvfb

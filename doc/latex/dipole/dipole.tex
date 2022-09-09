@@ -3,6 +3,7 @@
 \usepackage{amssymb}
 \usepackage{graphicx}
 \usepackage{geometry}
+\usepackage{physics}
 %\usepackage{enumitem}
 \geometry{
 a4paper,
@@ -24,7 +25,7 @@ bottom=20mm,
 \renewcommand{\vec}[1]{\boldsymbol{#1}}
 \newcommand{\hvec}[1]{\hat{\vec{#1}}}
 \newcommand{\avg}[1]{\left\langle #1 \right\rangle}
-\newcommand{\abs}[1]{\left| #1 \right|}
+% \newcommand{\abs}[1]{\left| #1 \right|}
 % Griffiths "script r"
 \def\rcurs{{\mbox{$\resizebox{.09in}{.08in}{\includegraphics[trim= 1em 0 14em 0,clip]{fonts/ScriptR}}$}}}
 \def\brcurs{{\mbox{$\resizebox{.09in}{.08in}{\includegraphics[trim= 1em 0 14em 0,clip]{fonts/BoldR}}$}}}
@@ -39,19 +40,20 @@ bottom=20mm,
 \maketitle
 
 \section{Overview}
-
-There are multiple ways to develop the theory of x-ray diffraction.  In order to make this guide 
-accessible to motivated undergraduates, we will build upon the most popular
-undergraduate electrodynamics textbook by David Griffiths\cite{Griffiths2018}.  The main result we derive is
-the diffraction intensity equation:
+ 
+The main result we derive here is the diffraction intensity equation
 \begin{align}\label{eqn:key}
-    I(\vec{q}) = J_0 r_e^2 \Delta \Omega \mathcal{P}(\vec{q})  \abs{\int  
-\rho(\vec{r}) e^{-i \vec{q}\cdot\vec{r}} d^3 r }^2 \;.
+    I(\vec{q}) = J_0 r_e^2 \Delta \Omega \mathcal{P}(\vec{q})  \qty|\int  
+\rho(\vec{r}) e^{-i \vec{q}\cdot\vec{r}} d^3 r |^2 \;.
 \end{align}
-The above result assumes (1) perfect plane-wave illumination with wavelength $\lambda$, (2) far-field measurements (the
-distance to the detector is \emph{much} greater than the size of the object)
-and (3) the first-order Born approximation, which loosely means that the scattering amplitudes are very weak
-compared to the incident amplitudes. The quantities in equation \ref{eqn:key} are as follows:
+starting with the equations developed in the popular undergraduate 
+electrodynamics textbook by David Griffiths\cite{Griffiths2018}.
+We will assume (1) perfect plane-wave illumination with wavelength 
+$\lambda$, (2) far-field measurements (i.e. that the distance to the detector is
+\emph{much} greater than the size of the object), and (3) the first-order Born 
+approximation, which loosely means that the scattered wave amplitudes are very 
+weak compared to the incident amplitudes. The quantities in equation 
+\ref{eqn:key} are as follows:
 \begin{itemize}
 \item $I(\vec{q})$ is the x-ray diffraction signal in a pixel (power per 
 pixel)
@@ -85,17 +87,19 @@ the electron density.
 
 \section{Electromagnetic fields from a moving point charge}
 
-Here we briefly outline how the electromagnetic 
-fields from a moving point charge were derived by Griffiths, starting with Maxwell's equations
-in vacuum:
+Here we briefly outline how the electromagnetic fields from a moving point 
+charge were derived by Griffiths, starting with Maxwell's equations in vacuum:
 \begin{align}
-\nabla \cdot \vec{E} &= \rho/\epsilon_0  &\ \nabla\times\vec{E} &= -\frac{\partial\vec{B}}{\partial t} \\
-\nabla \cdot \vec{B} &= 0  & \nabla\times\vec{B} &= \mu_0 \vec{J}+\mu_0 \epsilon_0 \frac{\partial\vec{E}}{\partial t}\;.
+\nabla \cdot \vec{E} &= \rho/\epsilon_0  &\ \nabla\times\vec{E} 
+&= -\frac{\partial\vec{B}}{\partial t} \\
+\nabla \cdot \vec{B} &= 0  & \nabla\times\vec{B} 
+&= \mu_0 \vec{J}+\mu_0 \epsilon_0 \frac{\partial\vec{E}}{\partial t}\;.
 \end{align}
-As developed in Griffiths chapter 10, Maxwell's equations may be written in terms of the scalar
-and vector potentials that are defined as
+As developed in Griffiths chapter 10, Maxwell's equations may be written in 
+terms of the scalar and vector potentials that are defined as
 \begin{align}\label{eqn:pots}
-\vec{B} &= \nabla \times \vec{A}\;, & \vec{E} &= -\nabla V -\frac{\partial \vec{A}}{\partial t} \;.
+\vec{B} &= \nabla \times \vec{A}\;, & \vec{E} &= -\nabla V -
+\frac{\partial \vec{A}}{\partial t} \;.
 \end{align}
 When working in the Lorenz gauge, namely
 \begin{align}
@@ -105,14 +109,17 @@ Maxwell's equations are reduced to a set of four inhomogeneous wave equations:
 \begin{align}
 \nabla^2 V - \mu_0\epsilon_0 \frac{\partial^2 V}{\partial t^2} &= -\rho / \epsilon_0 & \nabla^2 \vec{A} - \mu_0\epsilon_0 \frac{\partial^2 \vec{A}}{\partial t^2} &= -\mu_0 \vec{J} \;.\label{eqn:ihA}
 \end{align}
-The inhomogeneous wave equations may be solved using Green's method\footnote{See
-Appendix \ref{appendix:inhomogeneous}.}, which yields the retarded potentials:
+The inhomogeneous wave equations may be solved using Green's method (see
+appendix \ref{appendix:inhomogeneous}), which yields the retarded potentials:
 \begin{align}
-V(\vec{r}, t) &= \frac{1}{4\pi\epsilon_0}\int \frac{\rho(\vec{r}', t_r)}{\rcurs}d^3r' & \vec{A}(\vec{r}, t) &= \frac{\mu_0}{4\pi}\int \frac{\vec{J}(\vec{r}', t_r)}{\rcurs}d^3r'
+V(\vec{r}, t) &= \frac{1}{4\pi\epsilon_0}\int \frac{\rho(\vec{r}', t_r)}{\rcurs}
+d^3r' & \vec{A}(\vec{r}, t) &= \frac{\mu_0}{4\pi}\int 
+\frac{\vec{J}(\vec{r}', t_r)}{\rcurs}d^3r'
 \end{align}
-where $\brcurs = \vec{r} - \vec{r}'(t_r)$ and the retarded time is $t_r = t -\rcurs/c$.  For a \emph{point charge} 
-moving on the \emph{trajectory} $\vec{r}'(t)$, the retarded potentials become the Li\'enard-Wiechert
-potentials\footnote{See Appenxix \ref{appendix:lienard}}:
+where $\brcurs = \vec{r} - \vec{r}'(t_r)$ and the retarded time is 
+$t_r = t -\rcurs/c$.  For a \emph{point charge} moving on the \emph{trajectory} 
+$\vec{r}'(t)$, the retarded potentials become the Li\'enard-Wiechert
+potentials (see appenxix \ref{appendix:lienard})
 \begin{align}
 V(\vec{r}, t) &= \frac{1}{4\pi\epsilon_0}    \frac{q}{\left| \rcurs - \brcurs \cdot \vec{\beta} \right|} &
 \vec{A}(\vec{r}, t) &= \frac{\mu_0}{4\pi}    \frac{q\vec{v}}{\left| \rcurs - \brcurs \cdot \vec{\beta} \right|} \;,
@@ -125,9 +132,10 @@ where $\vec{\beta} = \vec{v}/c = \dot{\vec{r}}'(t_r)/c$. From the Li\'enard-Wiec
 = \frac{1}{c}\hrcurs \times \vec{E}(\vec{r}, t)
 \end{align}
 where $\vec{u} = c \hrcurs - \vec{\beta}$ and 
-$\vec{a}=\ddot{\vec{r}}'(t_r)$.  Importantly, these 
-fields are correct for relativistic particles, and as such they may be used to derive both the x-ray scattering
-amplitudes as well as the incident source fields created by x-ray free-electron lasers (XFELs) and synchrotrons.
+$\vec{a}=\ddot{\vec{r}}'(t_r)$.  These fields are correct for classical 
+relativistic particles, and as such they may be used to derive both the x-ray 
+scattering amplitudes as well as the incident source fields created by 
+synchrotrons and x-ray free-electron lasers (XFELs).
 
 
 \section{Dipole radiation}
@@ -140,7 +148,8 @@ and the radiation field:
 E_{\text{rad}}(\vec r, t) \;.
 \end{align}
 The
-radiation field in equation \ref{eqn:Erad} dominates because it falls off in proportion to $1/\rcurs$ whereas the generalized
+radiation field in equation \ref{eqn:Erad} dominates because it falls off in 
+proportion to $1/\rcurs$ whereas the generalized
 Coulomb field falls off in proportion to $1/\rcurs^2$.  We therefore focus on the
 radiation field
 \begin{align}
@@ -172,12 +181,14 @@ The magnetic field is
 \begin{align}
 \vec{B}_{\text{dip}} =  \frac{1}{c} \hvec{r} \times \vec{E}_{\text{dip}} 
 \end{align}
-and the Poynting vector is
+and the Poynting vector (energy flux density) is
 \begin{align}
-\vec{S} =  \frac{1}{\mu_0} \vec{E}_{\text{dip}}\times\vec{B}_{\text{dip}} =  \frac{1}{\mu_0c} E_{\text{dip}}^2\hvec{r} 
-= \frac{\mu_0}{16 \pi^2 cr^2} |\hvec{r} \times    \ddot{\vec{p}}|^2\hvec{r} \;.\\
+\vec{S} =  \frac{1}{\mu_0} \vec{E}_{\text{dip}}\times\vec{B}_{\text{dip}} =  
+\frac{1}{\mu_0c} E_{\text{dip}}^2\hvec{r} 
+= \frac{\mu_0}{16 \pi^2 cr^2} |\hvec{r} \times    \ddot{\vec{p}}|^2\hvec{r} \;.
 \end{align}
-The differential power radiated through a differential area $d\vec{a} = r^2 \sin\theta d\theta d\phi \hvec{r} = r^2 d\Omega \hvec{r}$ is
+The differential power radiated through a differential area $d\vec{a} = r^2 
+\sin\theta d\theta d\phi \hvec{r} = r^2 d\Omega \hvec{r}$ is
 \begin{align}
 dP = \vec{S}\cdot d\vec{a} = \frac{\mu_0 }{16\pi^2 c} |\hvec{r} \times    \ddot{\vec{p}}|^2 d\Omega \; .
 \end{align}

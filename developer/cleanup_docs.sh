@@ -5,10 +5,11 @@ if [[ ! $(basename "$(pwd)") = 'developer' ]]; then
     exit
 fi
 
-
+docdir=$(pwd)/../doc
 echo cleaning docs
-rm -r ../doc/build ../doc/source/api ../doc/source/auto_examples &> /dev/null
-latexdir=$(pwd)/../doc/latex
+rm -r $docdir/source/_static/dipole_html
+rm -r $docdir/build $docdir/source/api $docdir/source/auto_examples &> /dev/null
+latexdir=$docdir/latex
 cd $latexdir/dipole
 make clean
 cd $latexdir/blocks
