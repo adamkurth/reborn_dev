@@ -22,6 +22,7 @@ try:
     test_core = ClCore(context=None, queue=None, group_size=1, double_precision=True)
 except:
     test_core = ClCore(context=None, queue=None, group_size=1, double_precision=False)
+from reborn.misc import interpolate
 
 def test_nothing():
     assert test_core is not None
@@ -104,6 +105,29 @@ def test_interpolations_03():
     assert np.max(np.abs(dens2)) > 0
     assert np.max(np.abs((dens1 - dens2)/dens1)) < 1e-2
 
+
+def test_interpolations_04():
+    core = ClCore(context=None, queue=None, group_size=1, double_precision=False)
+    q_min = np.array([1, 2, 3])
+    q_max = q_min + 1
+    shape = np.array([2, 2, 2])
+    dq = (q_max-q_min)/(shape-1)
+    qx = np.arange(shape[0]) * dq[0] + q_min[0]
+    qy = np.arange(shape[1]) * dq[1] + q_min[1]
+    qz = np.arange(shape[2]) * dq[2] + q_min[2]
+    qxx, qyy, qzz = np.meshgrid(qx, qy, qz, indexing='ij')
+    q = np.vstack([qxx.ravel(), qyy.ravel(), qzz.ravel()]).T.copy()
+    r = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
+    R = np.array([[0, 1, 0], [-1, 0, 0], [0, 0, 1]])
+    U = np.array([1, 2, 3])
+    f = np.array([1, 2, 5])
+    amps = core.phase_factor_mesh(r, f, q_min=q_min, q_max=q_max, N=shape, R=R, U=U)
+    amps = amps.reshape(shape)
+    interp1 = core.mesh_interpolation(a_map=amps, q=q, N=shape, q_min=q_min, q_max=q_max, dq=dq)
+    # Check that GPU code agrees with CPU code
+    interp2 = interpolate.trilinear_interpolation(amps.astype(np.complex128), q, corners=None, deltas=dq, x_min=q_min,
+                                                  x_max=q_max)
+    assert(np.max(np.abs(interp1-interp2)) == 0)
 
 # def test_insertions_01():
 #

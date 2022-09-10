@@ -182,8 +182,7 @@ def test_phase_factors(double_precision=False):
     f = np.array([1, 2, 5])
     amps1 = core.phase_factor_mesh(r, f, q_min=q_min, q_max=q_max, N=shape, R=R, U=U)
     amps2 = core.phase_factor_qrf(q, r, f, R=R, U=U)
-    assert amps1[0] == amps2[0]
-
+    assert(amps1[0] == amps2[0])
     rp = np.dot(r, R.T)+U
     amps0 = 0
     for n in range(r.shape[0]):
