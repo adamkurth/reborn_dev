@@ -13,38 +13,24 @@
 # You should have received a copy of the GNU General Public License
 # along with reborn.  If not, see <https://www.gnu.org/licenses/>.
 
-"""
-Test the clcore simulation engine in reborn.simulate. 
-> python broken_test_simulate_clcore.py
-If you want to view results just add the keyword "view" 
-> python broken_test_simulate_clcore.py view
-"""
-
-import sys
-sys.path.append('..')
+import pyopencl
 import numpy as np
-import reborn as ba
-from reborn import utils
-
+from reborn import source, detector, utils
+from reborn.misc import interpolate
 from reborn.simulate import clcore
-from pyopencl import array as clarray
-cl_array = clarray.Array
-try:
-    test_core = clcore.ClCore(context=None, queue=None, group_size=1, double_precision=True)
-except:
-    test_core = clcore.ClCore(context=None, queue=None, group_size=1, double_precision=False)
-if test_core.double_precision:
-    have_double = True
-else:
-    have_double = False
+
+
+test_core = clcore.ClCore()
+have_double = test_core.double_precision_is_available()
 ctx = clcore.create_some_gpu_context()
 
-from reborn.utils import rotation_about_axis
 
-view = False
+def func(vecs):
+    return vecs[:, 0].ravel().copy()
 
-if len(sys.argv) > 1:
-    view = True
+
+def func1(vecs):
+    return np.sin(vecs[:, 0]/10.0) + np.cos(3*vecs[:, 1]/10.) + np.cos(2*vecs[:, 2]/10.)
 
 
 def test_clcore_float():
@@ -59,6 +45,37 @@ def test_clcore_double():
     _clcore(double_precision=True)
     _test_rotations(double_precision=True)
     # _test_ridiculous_sum(double_precision=True)
+
+
+def test_clmath():
+
+    ctx = clcore.create_some_gpu_context()
+
+    q = pyopencl.CommandQueue(ctx)
+
+    a = np.random.random((5, 5)).astype(np.complex64)
+    a_gpu = pyopencl.array.to_device(q, a)
+
+    b = np.random.random((5, 5)).astype(np.complex64)
+    b_gpu = pyopencl.array.to_device(q, b)
+
+    # Test addition
+    c = a + b
+    c_gpu = a_gpu + b_gpu
+    c_gpu = c_gpu.get()
+    assert np.max(np.abs(c - c_gpu)) < 1e-6
+
+    # Test multiplication
+    c = a * b
+    c_gpu = a_gpu * b_gpu
+    c_gpu = c_gpu.get()
+    assert np.max(np.abs(c - c_gpu)) < 1e-6
+
+    # Test exponentiation
+    c = a ** 2
+    c_gpu = a_gpu ** 2
+    c_gpu = c_gpu.get()
+    assert np.max(np.abs(c - c_gpu)) < 1e-6
 
 
 def _clcore(double_precision=False):
@@ -82,10 +99,11 @@ def _clcore(double_precision=False):
     # TODO: check that the amplitudes are correct
     ###########################################################################
 
-    pad = ba.detector.PADGeometry(shape=(4, 4), pixel_size=1, distance=1)
+    beam = source.Beam(wavelength=1e-10)
+    pad = detector.PADGeometry(shape=(4, 4), pixel_size=1, distance=1)
     n_atoms = 10
     rot = np.eye(3, dtype=core.real_t)
-    q = pad.q_vecs(beam_vec=[0, 0, 1], wavelength=1)
+    q = pad.q_vecs(beam=beam)
     
     r_vecs = np.random.random([n_atoms, 3])
     f = np.random.random([n_atoms])*1j
@@ -164,7 +182,7 @@ def _clcore(double_precision=False):
     a = core.to_device(shape=(np.prod(n_mesh),), dtype=core.complex_t)
 
     amps = core.phase_factor_mesh(r_vecs, f, N=n_mesh, q_min=q_min, q_max=q_max, a=a)
-    assert(type(amps) is cl_array)
+    assert(type(amps) is pyopencl.array.Array)
 
     del n_atoms, n_mesh, q_min, q_max, r_vecs, f, amps, a
 
@@ -180,9 +198,9 @@ def _clcore(double_precision=False):
     r_vecs = np.random.random([n_atoms, 3])
     f = np.random.random([n_atoms]) * 1j
     
-    pad = ba.detector.PADGeometry(shape=(4, 4), pixel_size=1, distance=1)
+    pad = detector.PADGeometry(shape=(4, 4), pixel_size=1, distance=1)
     rot = np.eye(3, dtype=core.real_t)
-    q = pad.q_vecs(beam_vec=[0, 0, 1], wavelength=1)
+    q = pad.q_vecs(beam=beam)
 
     amps = core.phase_factor_mesh(r_vecs, f, N=n_mesh, q_min=q_min, q_max=q_max)
     amps2 = core.mesh_interpolation(amps, q, N=n_mesh, q_min=q_min, q_max=q_max)
@@ -197,8 +215,8 @@ def _clcore(double_precision=False):
 
     amps = core.phase_factor_mesh(r_vecs, f, N=n_mesh, q_min=q_min, q_max=q_max, a=a)
     amps2 = core.mesh_interpolation(a, q, N=n_mesh, q_min=q_min, q_max=q_max, R=rot, a=a_out)
-    assert(type(amps) is cl_array)
-    assert(type(amps2) is cl_array)
+    assert(type(amps) is pyopencl.array.Array)
+    assert(type(amps2) is pyopencl.array.Array)
 
     del n_atoms, n_mesh, q_min, q_max, r_vecs, f, amps, amps2, a, q, a_out
 
@@ -206,10 +224,10 @@ def _clcore(double_precision=False):
     # Check phase_factor_qrf_chunk_r
     ###########################################################################
 
-    pad = ba.detector.PADGeometry(shape=(4, 4), pixel_size=1, distance=1)
+    pad = detector.PADGeometry(shape=(4, 4), pixel_size=1, distance=1)
     n_atoms = 10
     rot = np.eye(3, dtype=core.real_t)
-    q = pad.q_vecs(beam_vec=[0, 0, 1], wavelength=1)
+    q = pad.q_vecs(beam=beam)
     r_vecs = np.random.random([n_atoms, 3])
     f = np.random.random([n_atoms]) * 1j
     q_dev = core.to_device(q, dtype=core.real_t)
@@ -261,11 +279,11 @@ def _clcore(double_precision=False):
     pixel_size = 300e-6
     distance = 0.5
     wavelength = 2e-10
-    pad = ba.detector.PADGeometry(shape=(n_pixels, n_pixels), pixel_size=pixel_size, distance=distance)
-    beam = ba.source.Beam(wavelength=wavelength)
+    pad = detector.PADGeometry(shape=(n_pixels, n_pixels), pixel_size=pixel_size, distance=distance)
+    beam = source.Beam(wavelength=wavelength)
     q = pad.q_vecs(beam=beam)
 
-    rot = rotation_about_axis(0.1, [1, 1, 0]).astype(core.real_t)
+    rot = utils.rotation_about_axis(0.1, [1, 1, 0]).astype(core.real_t)
     trans = (np.array([1, 0, 1])*1e-9).astype(core.real_t)
 
     np.random.seed(0)
@@ -362,6 +380,273 @@ def _test_rotations(double_precision=False):
     assert np.max(np.abs(vec2 - vec_pred)) < 1e-6
 
 
+def test_rotations(double_precision=False):
+
+    core = clcore.ClCore(context=None, queue=None, group_size=1, double_precision=double_precision)
+
+    theta = 25*np.pi/180.
+    sin = np.sin(theta)
+    cos = np.cos(theta)
+
+    rot = np.array([[cos, sin, 0],
+                    [-sin, cos, 0],
+                    [0, 0, 1]], dtype=core.real_t)
+    trans = np.array([1, 2, 3], dtype=core.real_t)
+    vec1 = np.array([1, 2, 0], dtype=core.real_t)
+
+    vec2 = core.test_rotate_vec(rot, trans, vec1)
+    vec3 = np.dot(vec1, rot.T) + trans
+
+    # Rotation on gpu and rotation with utils.rotate should do the same thing
+    assert np.max(np.abs(vec2-vec3)) <= 1e-6
+
+    vec1 = np.array([1, 2, 0], dtype=core.real_t)
+    vec2 = core.test_rotate_vec(rot, trans, vec1)
+    vec4 = np.random.rand(10, 3).astype(core.real_t)
+    vec4[0, :] = vec1
+    vec3 = np.dot(vec4, rot.T) + trans
+    vec3 = vec3[0, :]
+
+    # Rotation on gpu and rotation with utils.rotate should do the same thing (even for many vectors; shape Nx3)
+    assert(np.max(np.abs(vec2-vec3)) <= 1e-6)
+
+    rot = np.array([[0, 1.0, 0],
+                    [-1.0, 0, 0],
+                    [0, 0, 1.0]])
+    trans = np.zeros((3,), dtype=core.real_t)
+    vec1 = np.array([1.0, 0, 0], dtype=core.real_t)
+    vec2 = core.test_rotate_vec(rot, trans, vec1)
+    vec3 = np.dot(vec1, rot.T) + trans
+    vec_pred = np.array([0, -1.0, 0])
+
+    # Check that results are as expected
+    assert np.max(np.abs(vec2 - vec3)) < 1e-6
+    assert np.max(np.abs(vec2 - vec_pred)) < 1e-6
+
+
+def test_phase_factors(double_precision=False):
+
+    r"""
+    Check that phase_factor_qrf gives the same results as phase_factor_mesh, as per documentation.
+
+    Args:
+        double_precision (bool): Check that double precision works if available
+    """
+
+    core = clcore.ClCore(context=None, queue=None, group_size=1, double_precision=double_precision)
+
+    q_min = np.array([1, 2, 3])
+    q_max = q_min + 1
+    shape = np.array([2, 2, 2])
+    dq = (q_max-q_min)/(shape-1)
+    qx = np.arange(shape[0]) * dq[0] + q_min[0]
+    qy = np.arange(shape[1]) * dq[1] + q_min[1]
+    qz = np.arange(shape[2]) * dq[2] + q_min[2]
+    qxx, qyy, qzz = np.meshgrid(qx, qy, qz, indexing='ij')
+    q = np.vstack([qxx.ravel(), qyy.ravel(), qzz.ravel()]).T.copy()
+    r = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
+    R = np.array([[0, 1, 0], [-1, 0, 0], [0, 0, 1]])
+    U = np.array([1, 2, 3])
+    f = np.array([1, 2, 5])
+    amps1 = core.phase_factor_mesh(r, f, q_min=q_min, q_max=q_max, N=shape, R=R, U=U)
+    amps2 = core.phase_factor_qrf(q, r, f, R=R, U=U)
+    assert(amps1[0] == amps2[0])
+    rp = np.dot(r, R.T)+U
+    amps0 = 0
+    for n in range(r.shape[0]):
+        amps0 += f[n]*np.exp(-1j*np.dot(q[0, :], rp[n, :]))
+    assert np.abs(amps0 - amps2[0])/np.abs(amps0) < 1e-4
+
+
+def test_interpolations_01():
+
+    # if ClCore is None:
+    #     return
+
+    core = clcore.ClCore(group_size=32)
+    shape = (6, 7, 8)
+    dens = np.ones(shape, dtype=core.real_t)
+    corners = np.array([0, 0, 0], dtype=core.real_t)
+    deltas = np.array([1, 1, 1], dtype=core.real_t)
+    vectors = np.ones((shape[0], 3), dtype=core.real_t)
+    vectors[:, 0] = np.arange(0, shape[0]).astype(core.real_t)
+    dens_gpu = core.to_device(dens)
+    vectors_gpu = core.to_device(vectors)
+    dens2 = core.mesh_interpolation(dens_gpu, vectors_gpu, q_min=corners, dq=deltas, N=shape)
+    assert np.max(np.abs(dens2)) > 0
+    assert np.max(np.abs(dens2[:] - 1)) < 1e-6
+
+
+def test_interpolations_02():
+
+    # if ClCore is None:
+    #     return
+
+    core = clcore.ClCore(group_size=32)
+    shape = (6, 7, 8)
+    corners = np.array([0, 0, 0], dtype=core.real_t)
+    deltas = np.array([1, 1, 1], dtype=core.real_t)
+    x, y, z = np.meshgrid(np.arange(0, shape[0]), np.arange(0, shape[1]), np.arange(0, shape[2]), indexing='ij')
+    vectors0 = (np.vstack([x.ravel(), y.ravel(), z.ravel()])).T.copy().astype(core.real_t)
+    dens = func(vectors0).reshape(shape)
+    x, y, z = np.meshgrid(np.arange(1, shape[0]-2), np.arange(1, shape[1]-2), np.arange(1, shape[2]-2), indexing='ij')
+    vectors = (np.vstack([x.ravel(), y.ravel(), z.ravel()])).T.copy().astype(core.real_t) + 0.1
+    dens1 = func(vectors)
+    dens2 = np.zeros_like(dens1)
+    dens2_gpu = core.to_device(dens2)
+    core.mesh_interpolation(dens, vectors, q_min=corners, dq=deltas, N=shape, a=dens2_gpu)
+    dens2 = dens2_gpu.get()
+    assert np.max(np.abs(dens1)) > 0
+    assert np.max(np.abs(dens2)) > 0
+    assert np.max(np.abs((dens1 - dens2)/dens1)) < 1e-6
+
+
+def test_interpolations_03():
+
+    # if ClCore is None:
+    #     return
+
+    core = clcore.ClCore(group_size=32)
+    nx, ny, nz = 6, 7, 8
+    corners = np.array([0, 0, 0], dtype=core.real_t)
+    deltas = np.array([1, 1, 1], dtype=core.real_t)
+    x, y, z = np.meshgrid(np.arange(0, nx), np.arange(0, ny), np.arange(0, nz), indexing='ij')
+    vectors0 = (np.vstack([x.ravel(), y.ravel(), z.ravel()])).T.copy().astype(core.real_t)
+    dens = func1(vectors0).reshape([nx, ny, nz])
+    x, y, z = np.meshgrid(np.arange(1, nx-2), np.arange(1, ny-2), np.arange(1, nz-2), indexing='ij')
+    vectors = (np.vstack([x.ravel(), y.ravel(), z.ravel()])).T.copy().astype(core.real_t) + 0.1
+    dens1 = func1(vectors)
+    dens2 = np.zeros_like(dens1)
+    dens2_gpu = core.to_device(dens2, dtype=core.real_t)
+    core.mesh_interpolation(dens, vectors, q_min=corners, dq=deltas, N=dens.shape, a=dens2_gpu)
+    dens2 = dens2_gpu.get()
+    assert np.max(np.abs(dens1)) > 0
+    assert np.max(np.abs(dens2)) > 0
+    assert np.max(np.abs((dens1 - dens2)/dens1)) < 1e-2
+
+
+def test_interpolations_04():
+    core = clcore.ClCore(context=None, queue=None, group_size=1, double_precision=False)
+    q_min = np.array([1, 2, 3])
+    q_max = q_min + 1
+    shape = np.array([2, 2, 2])
+    dq = (q_max-q_min)/(shape-1)
+    qx = np.arange(shape[0]) * dq[0] + q_min[0]
+    qy = np.arange(shape[1]) * dq[1] + q_min[1]
+    qz = np.arange(shape[2]) * dq[2] + q_min[2]
+    qxx, qyy, qzz = np.meshgrid(qx, qy, qz, indexing='ij')
+    q = np.vstack([qxx.ravel(), qyy.ravel(), qzz.ravel()]).T.copy()
+    r = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
+    R = np.array([[0, 1, 0], [-1, 0, 0], [0, 0, 1]])
+    U = np.array([1, 2, 3])
+    f = np.array([1, 2, 5])
+    amps = core.phase_factor_mesh(r, f, q_min=q_min, q_max=q_max, N=shape, R=R, U=U)
+    amps = amps.reshape(shape)
+    interp1 = core.mesh_interpolation(a_map=amps, q=q, N=shape, q_min=q_min, q_max=q_max, dq=dq)
+    # Check that GPU code agrees with CPU code
+    interp2 = interpolate.trilinear_interpolation(amps.astype(np.complex128), q, corners=None, deltas=dq, x_min=q_min,
+                                                  x_max=q_max)
+    assert(np.max(np.abs(interp1-interp2)) == 0)
+
+# def test_insertions_01():
+#
+#     if ClCore is None:
+#         return
+#
+#     clcore = ClCore(group_size=32)
+#     shape = (6, 7, 8)
+#     densities = np.zeros(shape, dtype=clcore.real_t)
+#     weights = np.zeros(shape, dtype=clcore.real_t)
+#     corner = np.array([0, 0, 0], dtype=clcore.real_t)
+#     deltas = np.array([1, 1, 1], dtype=clcore.real_t)
+#     vecs = np.array([[2, 3, 4], [3, 4, 4], [4, 4, 4]], dtype=clcore.real_t)
+#     vals = func1(vecs).astype(clcore.real_t)
+#     densities_gpu = clcore.to_device(densities, dtype=clcore.real_t)
+#     weights_gpu = clcore.to_device(weights, dtype=clcore.real_t)
+#     vecs_gpu = clcore.to_device(vecs, dtype=clcore.real_t)
+#     vals_gpu = clcore.to_device(vals, dtype=clcore.real_t)
+#     clcore.mesh_insertion(densities_gpu, weights_gpu, vecs_gpu, vals_gpu, shape=shape, deltas=deltas, corner=corner)
+#     densities = densities_gpu.get()
+#     assert np.max(np.abs(densities)) > 0
+#     assert np.max(np.abs((vals[0] - densities[2, 3, 4]) / vals)) < 1e-8
+
+
+# def test_insertions_02():
+#
+#     if ClCore is None:
+#         return
+#
+#     clcore = ClCore(group_size=32)
+#     shape = (6, 7, 8)
+#     densities = np.zeros(shape, dtype=clcore.real_t)
+#     weights = np.zeros(shape, dtype=clcore.real_t)
+#     corner = np.array([0, 0, 0], dtype=clcore.real_t)
+#     deltas = np.array([1, 1, 1], dtype=clcore.real_t)
+#     vecs = np.array([[2, 3, 4], [2.1, 3.1, 4.1], [1.9, 2.9, 3.9]], dtype=clcore.real_t)
+#     vals = func1(vecs)
+#     densities_gpu = clcore.to_device(densities, dtype=clcore.real_t)
+#     weights_gpu = clcore.to_device(weights, dtype=clcore.real_t)
+#     vecs_gpu = clcore.to_device(vecs, dtype=clcore.real_t)
+#     vals_gpu = clcore.to_device(vals, dtype=clcore.real_t)
+#     clcore.mesh_insertion(densities_gpu, weights_gpu, vecs_gpu, vals_gpu, shape=shape, corner=corner, deltas=deltas)
+#     densities = densities_gpu.get()
+#     weights = weights_gpu.get()
+#     assert np.max(np.abs(densities)) > 0
+#     assert np.max(np.abs((vals[0] - densities[2, 3, 4]/weights[2, 3, 4]) / vals[0])) < 1e-3
+
+
+# def test_insertions_03():
+#
+#     if ClCore is None:
+#         return
+#
+#     clcore = ClCore(group_size=32)
+#     np.random.seed(0)
+#     shape = (6, 7, 8)
+#     densities = np.zeros(shape, dtype=clcore.real_t)
+#     weights = np.zeros(shape, dtype=clcore.real_t)
+#     corner = np.array([0, 0, 0], dtype=clcore.real_t)
+#     deltas = np.array([1, 1, 1], dtype=clcore.real_t)
+#     vecs = np.random.rand(1000, 3) * (np.array(shape)-1).astype(clcore.real_t)
+#     vecs = np.floor(vecs)
+#     vals = func(vecs)
+#     densities_gpu = clcore.to_device(densities, dtype=clcore.real_t)
+#     weights_gpu = clcore.to_device(weights, dtype=clcore.real_t)
+#     vecs_gpu = clcore.to_device(vecs, dtype=clcore.real_t)
+#     vals_gpu = clcore.to_device(vals, dtype=clcore.real_t)
+#     clcore.mesh_insertion(densities_gpu, weights_gpu, vecs_gpu, vals_gpu, shape=shape, corner=corner, deltas=deltas)
+#     val = func(np.array([[2, 3, 4]], dtype=clcore.real_t))
+#     densities = densities_gpu.get()
+#     weights = weights_gpu.get()
+#     assert np.max(np.abs(densities)) > 0
+#     assert (np.abs((val - densities[2, 3, 4]/weights[2, 3, 4]) / val)) < 1e-8
+
+
+# def test_insertions_04():
+#
+#     if ClCore is None:
+#         return
+#
+#     clcore = ClCore(group_size=32)
+#     np.random.seed(0)
+#     shape = (6, 7, 8)
+#     densities = np.zeros(shape, dtype=clcore.real_t)
+#     weights = np.zeros(shape, dtype=clcore.real_t)
+#     corner = np.array([0, 0, 0], dtype=clcore.real_t)
+#     deltas = np.array([1, 1, 1], dtype=clcore.real_t)
+#     vecs = (np.random.rand(10000, 3) * (np.array(shape)-1)).astype(clcore.real_t)
+#     vals = func1(vecs)
+#     densities_gpu = clcore.to_device(densities, dtype=clcore.real_t)
+#     weights_gpu = clcore.to_device(weights, dtype=clcore.real_t)
+#     vecs_gpu = clcore.to_device(vecs, dtype=clcore.real_t)
+#     vals_gpu = clcore.to_device(vals, dtype=clcore.real_t)
+#     clcore.mesh_insertion(densities_gpu, weights_gpu, vecs_gpu, vals_gpu, shape=shape, corner=corner, deltas=deltas)
+#     val = func1(np.array([[2, 3, 4]], dtype=clcore.real_t))
+#     densities = densities_gpu.get()
+#     weights = weights_gpu.get()
+#     assert np.max(np.abs(densities)) > 0
+#     assert (np.abs((val - densities[2, 3, 4]/weights[2, 3, 4]) / val)) < 1e-2
+
 # def _test_ridiculous_sum(double_precision=False):
 #
 #     core = clcore.ClCore(context=None, queue=None, group_size=1, double_precision=double_precision)
@@ -386,3 +671,45 @@ def _test_rotations(double_precision=False):
 #         else:
 #             assert(np.abs(b - c)/np.abs(c) < 1e-5)
 #             # assert(np.abs(b - d)/np.abs(d) < 1e-5)
+
+# def test_atomics_01():
+#     core = clcore.ClCore(group_size=32)
+#     n = 3
+#     a = np.zeros(n)
+#     b = np.arange(n)
+#     a_gpu = core.to_device(a, dtype=core.real_t)
+#     b_gpu = core.to_device(b, dtype=core.real_t)
+#     core.test_atomic_add_real(a_gpu, b_gpu)
+#     assert a_gpu.get()[0] - np.sum(b) * n == 0
+#
+# def test_atomics_02():
+#     core = clcore.ClCore(group_size=32)
+#     n = 101
+#     a = np.zeros(n)
+#     b = np.arange(n)
+#     a_gpu = core.to_device(a, dtype=core.int_t)
+#     b_gpu = core.to_device(b, dtype=core.int_t)
+#     core.test_atomic_add_int(a_gpu, b_gpu)
+#     assert a_gpu.get()[0] - np.sum(b) * n == 0
+#
+# def test_atomics_03():
+#     core = clcore.ClCore(group_size=32)
+#     n = 100
+#     a = np.zeros(n)
+#     b = np.arange(n)
+#     a_gpu = core.to_device(a, dtype=core.real_t)
+#     b_gpu = core.to_device(b, dtype=core.real_t)
+#     core.test_atomic_add_real(a_gpu, b_gpu)
+#     assert a_gpu.get()[0] - np.sum(b) * n == 0
+#
+# def test_atomics_04():
+#     core = clcore.ClCore(group_size=32)
+#     n = 100
+#     a = np.zeros(n)
+#     b = np.arange(n)
+#     a_gpu = core.to_device(a, dtype=core.real_t)
+#     b_gpu = core.to_device(b, dtype=core.real_t)
+#     m = 5
+#     for _ in range(m):
+#         core.test_atomic_add_real(a_gpu, b_gpu)
+#     assert a_gpu.get()[0] - np.sum(b) * n * m == 0

@@ -33,14 +33,10 @@ case it is important that the relative coordinates of all panels is known very w
 # First we import the needed modules and configure the simulation parameters:
 
 import numpy as np
-from scipy import constants as const
-import matplotlib.pyplot as plt
-from reborn import source, detector
+from reborn import source, detector, const
+from reborn.viewers.qtviews import PADView
 from reborn.analysis import optimize
 from reborn.simulate import solutions
-
-r_e = const.value('classical electron radius')
-eV = const.value('electron volt')
 
 # Configure the detector
 detector_shape = (200, 200)
@@ -49,7 +45,7 @@ pixel_size = 750e-6
 detector_distance = 0.1
 # Configure x-ray beam
 n_photons = 1e12
-photon_energy = 8000*eV
+photon_energy = 8000*const.eV
 beam_diameter = 5e-6
 # Configure water
 water_thickness = 1e-6
@@ -77,6 +73,5 @@ beam_center_fit = optimize.ellipse_center(optimize.fit_ellipse(y, x))
 print('True beam center:', beam_center)
 print('Beam center from ellipse fit:', beam_center_fit)
 print('Fractional errors:', np.abs(beam_center-beam_center_fit)/beam_center)
-plt.imshow(I*mask, cmap='gray')
-plt.title('Water scatter (only pixels above threshold)')
-plt.show()
+pv = PADView(data=I, mask=mask, pad_geometry=pad)
+pv.start()

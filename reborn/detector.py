@@ -28,7 +28,7 @@ except ImportError:
     polar_f = None
 
 
-pnccd_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/pnccd_front_geometry.json')
+pnccd_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/pnccd_geometry.json')
 cspad_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/cspad_geometry.json')
 cspad_2x2_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/cspad_2x2_geometry.json')
 epix100_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/epix100_geometry.json')
@@ -490,6 +490,34 @@ class PADGeometry:
         """
         return self.t_vec + (self.n_fs - 1) * self.fs_vec / 2.0 + (self.n_ss - 1) * self.ss_vec / 2.0
 
+    def average_detector_distance(self, beam):
+        r"""
+        Get the average detector distance, which is equal to the dot product between the beam direction vector and the
+        vector pointing to the center of the PAD.
+
+        Args:
+            beam (|Beam|): Beam parameters.
+
+        Returns:
+            float
+        """
+        return beam.beam_vec.dot(self.center_pos_vec())
+
+    def set_average_detector_distance(self, distance, beam):
+        r"""
+        Set the average detector distance.  The translation moves along the beam direction by default.
+
+        Args:
+            distance (float): The desired distance
+            beam (|Beam|): Beam properties (the direction is needed).
+
+        Returns:
+            None
+        """
+        t = self.average_detector_distance(beam)*beam.beam_vec
+        self.translate(-t)
+        self.translate(distance*beam.beam_vec)
+
     def norm_vec(self, beam=None):
         r"""
         The vector that is normal to the PAD plane.
@@ -528,7 +556,7 @@ class PADGeometry:
         Returns: |ndarray|
         """
         if beam is None:
-            utils.warn('You need to define the beam.', caller=1)
+            utils.warn('You need to define the beam.')
             beam_vec = dict_default(kwargs, 'beam_vec', None)
             beam = source.Beam(beam_vec=beam_vec)
         return self.s_vecs() - beam.beam_vec
@@ -547,11 +575,11 @@ class PADGeometry:
 
         Returns: |ndarray|
         """
-        if beam is None:
-            utils.warn('You need to define the beam.', caller=1)
-            beam_vec = dict_default(kwargs, 'beam_vec', None)
-            wavelength = dict_default(kwargs, 'wavelength', None)
-            beam = source.Beam(beam_vec=beam_vec, wavelength=wavelength)
+        # if beam is None:
+        #     utils.warn('You need to define the beam.')
+        #     beam_vec = dict_default(kwargs, 'beam_vec', None)
+        #     wavelength = dict_default(kwargs, 'wavelength', None)
+        #     beam = source.Beam(beam_vec=beam_vec, wavelength=wavelength)
         return (2 * np.pi / beam.wavelength) * self.ds_vecs(beam=beam)
 
     def ds_mags(self, beam=None, **kwargs):
@@ -564,7 +592,7 @@ class PADGeometry:
         Returns: |ndarray|
         """
         if beam is None:
-            utils.warn('You need to define the beam.', caller=1)
+            utils.warn('You need to define the beam.')
             beam_vec = dict_default(kwargs, 'beam_vec', None)
             beam = source.Beam(beam_vec=beam_vec)
         return utils.vec_mag(self.ds_vecs(beam=beam))
@@ -580,7 +608,7 @@ class PADGeometry:
         Returns: |ndarray|
         """
         if beam is None:
-            utils.warn('You need to define the beam.', caller=1)
+            utils.warn('You need to define the beam.')
             beam_vec = dict_default(kwargs, 'beam_vec', None)
             wavelength = dict_default(kwargs, 'wavelength', None)
             beam = source.Beam(beam_vec=beam_vec, wavelength=wavelength)
@@ -673,7 +701,7 @@ class PADGeometry:
         Returns: |ndarray|
         """
         if beam is None:
-            utils.warn('You need to define the beam.', caller=1)
+            utils.warn('You need to define the beam.')
             beam_vec = dict_default(kwargs, 'beam_vec', None)
             beam = source.Beam(beam_vec=beam_vec)
         return np.arccos(utils.vec_norm(self.position_vecs()).dot(beam.beam_vec.ravel()))
@@ -1103,6 +1131,16 @@ class PADGeometryList(list):
     def position_vecs(self):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
         return self.concat_vecs([p.position_vecs() for p in self])
+
+    def average_detector_distance(self, beam):
+        r""" Same as the matching method in |PADGeometry|, but averaged over all PADs. """
+        return np.mean(np.array([d.average_detector_distance(beam) for d in self]))
+
+    def set_average_detector_distance(self, distance, beam):
+        r""" Same as the matching method in |PADGeometry|. """
+        t = self.average_detector_distance(beam) * beam.beam_vec
+        self.translate(-t)
+        self.translate(distance * beam.beam_vec)
 
     def s_vecs(self):
         r""" Concatenates the output of the matching method in |PADGeometry|"""

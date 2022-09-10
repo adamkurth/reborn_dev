@@ -17,25 +17,19 @@
 Some simple examples for testing purposes.  Don't build any of this into your code.
 """
 
-import pkg_resources
 import numpy as np
 from scipy.spatial.transform import Rotation
-from .. import detector, source
+from .. import detector, source, const
 from ..fileio.getters import FrameGetter
 from ..utils import rotation_about_axis, random_unit_vector, random_beam_vector, max_pair_distance, ensure_list
 from ..target import atoms
 from . import solutions
 from ..target.crystal import CrystalStructure
 from .clcore import ClCore
-from scipy import constants as const
 
-hc = const.h*const.c
-r_e = const.value('classical electron radius')
 
-lysozyme_pdb_file = pkg_resources.resource_filename('reborn', 'data/pdb/2LYZ.pdb')
-psi_pdb_file = pkg_resources.resource_filename('reborn', 'data/pdb/1jb0.pdb')
-pnccd_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/pnccd_front_geometry.json')
-cspad_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/cspad_geometry.json')
+lysozyme_pdb_file = '2LYZ'
+psi_pdb_file = '1jb0'
 
 
 def simulate_water(pad_geometry=None, beam=None, water_thickness=1e-6):
@@ -59,7 +53,7 @@ def simulate_water(pad_geometry=None, beam=None, water_thickness=1e-6):
     SA = detector.concat_pad_data([p.solid_angles() for p in pads])
     F_water = detector.concat_pad_data(solutions.water_scattering_factor_squared(q_mags))
     F2_water = F_water ** 2 * n_water_molecules
-    I = r_e ** 2 * J * P * SA * F2_water
+    I = const.r_e ** 2 * J * P * SA * F2_water
     return detector.split_pad_data(pads, I)
 
 
@@ -75,14 +69,11 @@ def lysozyme_molecule(pad_geometry=None, wavelength=1.5e-10, random_rotation=Tru
     Returns: dictionary with {'pad_geometry': pads, 'intensity': data_list}
     """
 
-    photon_energy = hc / wavelength
-
-    # if pad_geometry is None:
-    #     pad_geometry = crystfel.geometry_file_to_pad_geometry_list(cspad_geom_file)
+    photon_energy = const.hc / wavelength
 
     sim = ClCore(group_size=32, double_precision=False)
 
-    cryst = CrystalStructure(lysozyme_pdb_file)
+    cryst = CrystalStructure('2LYZ')
     r = cryst.r
     f = atoms.get_scattering_factors(cryst.Z, photon_energy=photon_energy)
     q = [pad.q_vecs(beam_vec=[0, 0, 1], wavelength=wavelength) for pad in pad_geometry]
@@ -120,11 +111,6 @@ class PDBMoleculeSimulator(object):
             random_rotation (bool): True or False
         """
 
-        # if pdb_file is None:
-        #     pdb_file = lysozyme_pdb_file
-
-        # if pad_geometry is None:
-        #     pad_geometry = crystfel.geometry_file_to_pad_geometry_list(cspad_geom_file)
         self.random_rotation = random_rotation
 
         if beam is None:
@@ -179,7 +165,7 @@ class MoleculeSimulatorV1(object):
         self.oversample = oversample
         self.q_vecs = pad.q_vecs(beam=beam)
         self.f = molecule.get_scattering_factors(beam=beam)
-        self.intensity_prefactor = pad.reshape(beam.photon_number_fluence * r_e ** 2 * pad.solid_angles() *
+        self.intensity_prefactor = pad.reshape(beam.photon_number_fluence * const.r_e ** 2 * pad.solid_angles() *
                                           pad.polarization_factors(beam=beam))
         self.resolution = pad.max_resolution(beam=beam)
         self.mol_size = max_pair_distance(molecule.coordinates)
@@ -254,7 +240,7 @@ class CrystalSimulatorV1(object):
             self.qmag.append(p.q_mags(beam=beam))
             # self.sa.append(p.solid_angles())
             # self.pol.append(p.polarization_factors(beam=beam))
-            ipf = self.beam.photon_number_fluence*r_e**2*p.solid_angles()*p.polarization_factors(beam=beam)
+            ipf = self.beam.photon_number_fluence*const.r_e**2*p.solid_angles()*p.polarization_factors(beam=beam)
             self.ipf.append(p.reshape(ipf))
 
         if expand_symmetry:
@@ -317,7 +303,7 @@ class CrystalSimulatorV1(object):
             # Random incoming beam vector
             b_in = random_beam_vector(beam.beam_divergence_fwhm)
             # Random wavelength
-            wav = hc / np.random.normal(beam.photon_energy, beam.photon_energy_fwhm / 2.354820045)
+            wav = const.hc / np.random.normal(beam.photon_energy, beam.photon_energy_fwhm / 2.354820045)
             # Random crystal mosaic domain rotation
             rot = np.dot(rotation_about_axis(cryst.mosaicity_fwhm/2.354820045*np.random.normal(), random_unit_vector()),
                          rotation_matrix)
@@ -348,7 +334,7 @@ class LysozymeFrameGetter(FrameGetter):
 
     def __init__(self, pad_geometry=None, beam=None):
         super().__init__()
-        self.molsim = PDBMoleculeSimulator(pdb_file=lysozyme_pdb_file, pad_geometry=pad_geometry,
+        self.molsim = PDBMoleculeSimulator(pdb_file='2LYZ', pad_geometry=pad_geometry,
                                             beam=beam, random_rotation=True)
         self.pad_geometry = pad_geometry
 

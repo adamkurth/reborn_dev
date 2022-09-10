@@ -14,7 +14,7 @@
 # along with reborn.  If not, see <https://www.gnu.org/licenses/>.
 
 import numpy as np
-from reborn.simulate.examples import lysozyme_pdb_file, psi_pdb_file
+from reborn.data import lysozyme_pdb_file, psi_pdb_file
 from reborn.target import crystal, density
 
 

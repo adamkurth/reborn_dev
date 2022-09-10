@@ -29,7 +29,7 @@ from reborn.source import Beam
 from reborn.target import atoms
 from reborn.simulate.form_factors import sphere_form_factor
 from reborn.detector import jungfrau4m_pad_geometry_list
-from reborn.viewers.mplviews import view_pad_data
+from reborn.viewers.qtviews import view_pad_data
 import scipy.constants as const
 
 # %%

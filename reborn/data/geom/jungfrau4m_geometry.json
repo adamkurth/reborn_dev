@@ -7,6 +7,9 @@
 ],
 "n_fs": 1024,
 "n_ss": 512,
+"name": "None",
+"parent_data_shape": null,
+"parent_data_slice": null,
 "ss_vec": [
 0.0,
 7.5e-05,
@@ -15,7 +18,7 @@
 "t_vec": [
 -0.07361249999999998,
 -0.0853125,
-0.1
+0.0
 ]
 },
 {
@@ -26,6 +29,9 @@
 ],
 "n_fs": 1024,
 "n_ss": 512,
+"name": "None",
+"parent_data_shape": null,
+"parent_data_slice": null,
 "ss_vec": [
 0.0,
 7.5e-05,
@@ -34,7 +40,7 @@
 "t_vec": [
 -0.07361249999999998,
 -0.044212499999999995,
-0.1
+0.0
 ]
 },
 {
@@ -45,6 +51,9 @@
 ],
 "n_fs": 1024,
 "n_ss": 512,
+"name": "None",
+"parent_data_shape": null,
+"parent_data_slice": null,
 "ss_vec": [
 0.0,
 7.5e-05,
@@ -53,7 +62,7 @@
 "t_vec": [
 -0.08261249999999999,
 -0.0031125,
-0.1
+0.0
 ]
 },
 {
@@ -64,6 +73,9 @@
 ],
 "n_fs": 1024,
 "n_ss": 512,
+"name": "None",
+"parent_data_shape": null,
+"parent_data_slice": null,
 "ss_vec": [
 0.0,
 7.5e-05,
@@ -72,7 +84,7 @@
 "t_vec": [
 -0.08261249999999999,
 0.0379875,
-0.1
+0.0
 ]
 },
 {
@@ -83,6 +95,9 @@
 ],
 "n_fs": 1024,
 "n_ss": 512,
+"name": "None",
+"parent_data_shape": null,
+"parent_data_slice": null,
 "ss_vec": [
 0.0,
 7.5e-05,
@@ -91,7 +106,7 @@
 "t_vec": [
 0.0058874999999999995,
 -0.07631249999999999,
-0.1
+0.0
 ]
 },
 {
@@ -102,6 +117,9 @@
 ],
 "n_fs": 1024,
 "n_ss": 512,
+"name": "None",
+"parent_data_shape": null,
+"parent_data_slice": null,
 "ss_vec": [
 0.0,
 7.5e-05,
@@ -110,7 +128,7 @@
 "t_vec": [
 0.0058874999999999995,
 -0.0352125,
-0.1
+0.0
 ]
 },
 {
@@ -121,6 +139,9 @@
 ],
 "n_fs": 1024,
 "n_ss": 512,
+"name": "None",
+"parent_data_shape": null,
+"parent_data_slice": null,
 "ss_vec": [
 0.0,
 7.5e-05,
@@ -129,7 +150,7 @@
 "t_vec": [
 -0.0031125,
 0.0058874999999999995,
-0.1
+0.0
 ]
 },
 {
@@ -140,6 +161,9 @@
 ],
 "n_fs": 1024,
 "n_ss": 512,
+"name": "None",
+"parent_data_shape": null,
+"parent_data_slice": null,
 "ss_vec": [
 0.0,
 7.5e-05,
@@ -148,7 +172,7 @@
 "t_vec": [
 -0.0031125,
 0.046987499999999995,
-0.1
+0.0
 ]
 }
 ]

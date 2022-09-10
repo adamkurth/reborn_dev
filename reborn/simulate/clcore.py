@@ -196,7 +196,7 @@ class ClCore(object):
             group_size = max_group_size
         self.group_size = group_size
 
-    def _double_precision_is_available(self):
+    def double_precision_is_available(self):
         if 'cl_khr_fp64' not in self.queue.device.extensions.split():
             return False
         # TODO: fix stupid errors to do with Apple's CL double implementation?  Why doesn't double work on apple?
@@ -209,7 +209,7 @@ class ClCore(object):
             self._use_float()
             self.double_precision = False
         if dbl:
-            if self._double_precision_is_available():
+            if self.double_precision_is_available():
                 self._use_double()
                 self.double_precision = True
             else:

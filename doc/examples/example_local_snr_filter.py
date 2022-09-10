@@ -28,7 +28,7 @@ Contributed by Richard A. Kirian.
 import numpy as np
 from reborn import detector, source
 from reborn.simulate import solutions
-from reborn.viewers.mplviews import view_pad_data
+from reborn.viewers.qtviews import view_pad_data
 from reborn.analysis.peaks import snr_filter
 
 np.random.seed(0)

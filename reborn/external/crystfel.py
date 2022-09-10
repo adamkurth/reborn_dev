@@ -19,23 +19,19 @@ Most of the functions below wrap around the functions in the crystfel_utils modu
 which is maintained by CFEL.
 The crystfel_utils module is included in reborn so that you do not need to install it with pip.
 """
-import re
 import os
-import tempfile
 import h5py
 import numpy as np
 import linecache
-from .. import detector, utils
+from .. import detector, utils, const
 from ..fileio.getters import FrameGetter
 from . import _crystfel_utils
-from scipy import constants as const
 import pkg_resources
 
-eV = const.value('electron volt')
 example_stream_file_path = pkg_resources.resource_filename('reborn', 'data/misc/test.stream')
-pnccd_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/pnccd_front.geom')
-epix10k_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/epix10k.geom')
-cspad_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/cspad.geom')
+pnccd_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/pnccd_crystfel.geom')
+epix10k_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/epix10k_crystfel.geom')
+cspad_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/cspad_crystfel.geom')
 
 # ------------------------------------------------
 # Stream file delimiters
@@ -304,10 +300,10 @@ def write_geom_file_single_pad(file_path=None, beam=None, pad_geometry=None):
     pad = pad_geometry
     geom_file = os.path.join(file_path)
     fid = open(geom_file, 'w')
-    fid.write("photon_energy = %g\n" % (beam.photon_energy / eV))
+    fid.write("photon_energy = %g\n" % (beam.photon_energy / const.eV))
     fid.write("clen = %g\n" % pad.t_vec.flat[2])
     fid.write("res = %g\n" % (1 / pad.pixel_size()))
-    fid.write("adu_per_eV = %g\n" % (1.0 / (beam.photon_energy / eV)))
+    fid.write("adu_per_eV = %g\n" % (1.0 / (beam.photon_energy / const.eV)))
     fid.write("0/min_ss = 0\n")
     fid.write("0/max_ss = %d\n" % (pad.n_ss - 1))
     fid.write("0/min_fs = 0\n")

@@ -31,7 +31,14 @@ from reborn.viewers.qtviews import view_pad_data, PADView
 # simulating some data to look at:
 
 beam = source.Beam(wavelength=1.5e-10)
+# from reborn.external import crystfel
+# pads = crystfel.geometry_file_to_pad_geometry_list(crystfel.cspad_geom_file)
+# pads2 = pads.copy()
+# for p in pads2:
+#     p.t_vec[2] = 0
+# pads2.save('../../reborn/data/cspad_geometry.json')
 pads = detector.cspad_pad_geometry_list(detector_distance=0.1)
+# print(pads)
 dat = simulate.solutions.water_scattering_factor_squared(pads.q_mags(beam=beam))
 dat *= pads.polarization_factors(beam=beam)
 dat = np.double(np.random.poisson(dat))

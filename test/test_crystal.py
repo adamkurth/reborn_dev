@@ -15,7 +15,7 @@
 
 import numpy as np
 from reborn.target import crystal
-from reborn.simulate.examples import lysozyme_pdb_file, psi_pdb_file
+from reborn.data import lysozyme_pdb_file, psi_pdb_file
 
 
 def test_01():

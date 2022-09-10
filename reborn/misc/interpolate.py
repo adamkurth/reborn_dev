@@ -114,7 +114,6 @@ def trilinear_interpolation(densities, vectors, corners=None, deltas=None, x_min
                 out = out.astype(np.float64)
     if out is None:
         out = np.zeros(vectors.shape[0], dtype=densities.dtype)
-    print(out.dtype, densities.dtype)
     _trilinear_interpolation_fortran(densities, vectors, corners, deltas, out)
     return out
 
