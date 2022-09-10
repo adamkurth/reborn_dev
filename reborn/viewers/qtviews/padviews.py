@@ -1007,11 +1007,11 @@ class PADView(QtCore.QObject):
         # We allow various input types... so we must now ensure they are either list or None.
         input = []
         for d in [radii, angles, q_mags, d_spacings]:
+            if isinstance(d, np.ndarray):
+                d = [i for i in d]
             if not d:
                 input.append(None)
                 continue
-            if isinstance(d, np.ndarray):
-                d = [i for i in d]
             d = utils.ensure_list(d)
             input.append(d)
         radii, angles, q_mags, d_spacings = input

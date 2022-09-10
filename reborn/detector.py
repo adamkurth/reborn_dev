@@ -2175,7 +2175,7 @@ def epix100_pad_geometry_list(detector_distance=0.1, binning=None):
     Returns: |PADGeometryList|
     """
     pads = load_pad_geometry_list(epix100_geom_file)
-    pads.translate([0, 0, detector_distance])
+    pads.translate([0, 0, detector_distance-2.4])
     if binning is not None:
         pads = pads.binned(binning=binning)
     return pads

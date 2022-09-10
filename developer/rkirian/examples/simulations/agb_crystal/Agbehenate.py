@@ -27,6 +27,7 @@ add_poisson_noise = False     # Turn Poisson noise on or off
 # ------------------------------
 beam = source.Beam(photon_energy=photon_energy, diameter_fwhm=diameter_fwhm, pulse_energy=pulse_energy)
 pads = detector.epix100_pad_geometry_list(detector_distance=detector_distance)
+print(pads)
 # Find the appropriate spacegroup string by doing this: print(crystal.get_hm_symbols())
 uc = (4.176e-10, 4.721e-10, 58.33e-10, 89.44*deg, 89.63*deg, 75.85*deg)
 cryst = crystal.CrystalStructure(pdb_id, spacegroup='P -1', unitcell=uc)
