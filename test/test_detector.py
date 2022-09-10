@@ -17,10 +17,7 @@ import os
 import tempfile
 from reborn import detector
 from reborn import source
-from reborn.external import crystfel
 import numpy as np
-import scipy.constants as const
-eV = const.value('electron volt')
 np.random.seed(0)
 tempdir = tempfile.gettempdir()
 
@@ -286,16 +283,10 @@ def test_padlist():
     assert(isinstance(padlist, detector.PADGeometryList))
 
 def test_loading():
-    crystfel_geom = crystfel.epix10k_geom_file
     json_geom = detector.epix10k_geom_file
     pads = detector.PADGeometryList()
     pads.load(json_geom)
     assert(len(pads) != 1)
-    pads = detector.PADGeometryList()
-    pads.load(crystfel_geom)
-    assert (len(pads) != 1)
-    pads2 = detector.PADGeometryList(filepath=crystfel_geom)
-    assert(pads == pads2)
 
 def test_groups():
     p = detector.PADGeometryList()

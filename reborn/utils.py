@@ -16,7 +16,6 @@ r"""
 Some utility functions that might be useful throughout reborn.  Don't put highly specialized functions here.
 """
 from functools import wraps
-import sys
 import os
 import inspect
 import logging
@@ -25,7 +24,7 @@ import subprocess
 import pkg_resources
 import numpy as np
 from numpy import sin, cos
-from numpy.fft import fftshift, fft, ifft, fftn
+from numpy.fft import fftshift, fftn
 from scipy.sparse import csr_matrix
 from scipy.spatial.transform import Rotation
 from .config import configs
@@ -358,191 +357,13 @@ def memoize(function):
     return wrapper
 
 
-def max_pair_distance(vecs):
+def max_pair_distance(*args, **kwargs):
     r"""
-    Determine the maximum distance between to vectors in a list of vectors.
-
-    Arguments:
-        vecs (Nx3 |ndarray|) : Input vectors.
-
-    Returns:
-        float : The maximum pair distance.
+    Depreciated.  Use reborn.utils.vectors.max_pair_distance
     """
-    from . import fortran
-    vecs = np.double(vecs)
-    if not vecs.flags.c_contiguous:
-        vecs = vecs.copy()
-    d_max = np.array([0], dtype=np.float64)
-    fortran.utils_f.max_pair_distance(vecs.T, d_max)
-    return d_max[0]
-
-
-# def trilinear_insert(*args, **kwargs):
-#     r"""
-#     Don't use this function.  Use functions in reborn.misc.interpolate.
-#     """
-#     depreciate("Don't use reborn.utils.trilinear_insert.  Use the functions in reborn.misc.interpolate.")
-#     from .misc.interpolate import trilinear_insert
-#     return trilinear_insert(*args, **kwargs)
-
-
-# def rotate3D(f, R_in):
-#     r"""
-#     Rotate a 3D array of numbers in 3-dimensions.
-#     The function works by rotating each 2D sections of the 3D array via three shears,
-#     as described by Unser et al. (1995) "Convolution-based interpolation for fast,
-#     high-quality rotation of images." IEEE Transactions on Image Processing, 4:1371.
-#
-#     Note 1: If the input array, f, is non-cubic, it will be zero-padded to a cubic array
-#             with length the size of the largest side of the original array.
-#
-#     Note 2: If you don't want wrap arounds, make sure the input array, f, is zero-padded to
-#             at least sqrt(2) times the largest dimension of the desired object.
-#
-#     Note 3: Proper Euler angle convention is used, i.e, zyz.
-#
-#     Arguments:
-#         f (*3D |ndarray|*) : The 3D input array.
-#         euler_angles (1x3 |ndarray|) : The three Euler angles, in zyz format.
-#
-#     Returns:
-#         - **f_rot** (*3D |ndarray|*) : The rotated 3D array.
-#     """
-#
-#     # ---------------------------
-#     # Define private functions
-#     depreciate("Use the rotations in reborn.misc.rotate.Rotate3D instead of reborn.utils.rotate3D.")
-#
-#     def rotate90(f):
-#         r"""FIXME: Docstring."""
-#         return np.transpose(np.fliplr(f))
-#
-#     def rotate180(f):
-#         r"""FIXME: Docstring."""
-#         return np.fliplr(np.flipud(f))
-#
-#     def rotate270(f):
-#         r"""FIXME: Docstring."""
-#         return np.transpose(np.flipud(f))
-#
-#     def shiftx(f, kxfac, xfac):
-#         r"""FIXME: Docstring."""
-#         return ifft(fftshift(fft(f, axis=0), axes=0) * kxfac, axis=0) * xfac
-#
-#     def shifty(f, kyfac, yfac):
-#         r"""FIXME: Docstring."""
-#         return ifft(fftshift(fft(f, axis=1), axes=1) * kyfac, axis=1) * yfac
-#
-#     def rotate2D(fr, kxfac, xfac, kyfac, yfac, n90_mod_four):
-#         """ Rotate a 2D section.
-#         FIXME: Joe Chen: Needs proper documentation."""
-#
-#         if n90_mod_four == 1:
-#             fr = rotate90(fr)
-#         elif n90_mod_four == 2:
-#             fr = rotate180(fr)
-#         elif n90_mod_four == 3:
-#             fr = rotate270(fr)
-#
-#         fr = shiftx(fr, kxfac, xfac)
-#         fr = shifty(fr, kyfac, yfac)
-#         fr = shiftx(fr, kxfac, xfac)
-#
-#         return fr
-#
-#     def rotate_setup(f, ang):
-#         """ Set up required to rotate.
-#         FIXME: Joe Chen: Needs proper docstring.
-#         FIXME: Joe Chen: Parameter f is unused"""
-#         n90 = np.rint(ang * TwoOverPi)
-#         dang = ang - n90 * PiOvTwo
-#
-#         t = -np.tan(0.5 * dang)
-#         s = np.sin(dang)
-#
-#         kxfac = np.exp(cx1 * t)
-#         xfac = np.exp(cx2_2 - cx2_3 * t)
-#
-#         kyfac = np.exp(cy1 * s)
-#         yfac = np.exp(cy2_2 - cy2_3 * s)
-#
-#         n90_mod_Four = n90 % 4
-#
-#         return kxfac, xfac, kyfac, yfac, n90_mod_Four
-#
-#     def __rotate_euler_z(f, ang):
-#
-#         kxfac, xfac, kyfac, yfac, n90_mod_Four = rotate_setup(f, ang)
-#
-#         f_rot = np.zeros((N, N, N), dtype=np.complex128)
-#         for ii in range(0, N):
-#             f_rot[ii, :, :] = rotate2D(f[ii, :, :], kxfac, xfac, kyfac, yfac, n90_mod_Four)
-#
-#         return f_rot
-#
-#     def __rotate_euler_y(f, ang):
-#
-#         kxfac, xfac, kyfac, yfac, n90_mod_Four = rotate_setup(f, ang)
-#
-#         f_rot = np.zeros((N, N, N), dtype=np.complex128)
-#         for ii in range(0, N):
-#             f_rot[:, ii, :] = rotate2D(f[:, ii, :], kxfac, xfac, kyfac, yfac, n90_mod_Four)
-#
-#         return f_rot
-#
-#     # ---------------------------
-#     # Get the max shape of the array
-#     nx, ny, nz = f.shape
-#     N = np.max([nx, ny, nz])
-#
-#     # Make array cubic if the array is not cubic.
-#     if nx != ny or nx != nz or ny != nz:
-#         f_rot = np.zeros((N, N, N), dtype=np.complex128)
-#         f_rot[0:nx, 0:ny, 0:nz] = f
-#     else:
-#         f_rot = f
-#
-#     # ---------------------------
-#     # Pre-calculations for speed
-#     Y, X = np.meshgrid(np.arange(N), np.arange(N))
-#
-#     y0 = 0.5 * (N - 1)
-#     cx1 = -1j * 2.0 * np.pi / N * X * (Y - y0)
-#     cx2_1 = -1j * np.pi * (1 - (N % 2) / N)
-#     cx2_2 = cx2_1 * X
-#     cx2_3 = cx2_1 * (Y - y0)
-#
-#     x0 = 0.5 * (N - 1)
-#     cy1 = -1j * 2.0 * np.pi / N * Y * (X - x0)
-#     cy2_1 = -1j * np.pi * (1 - (N % 2) / N)
-#     cy2_2 = cy2_1 * Y
-#     cy2_3 = cy2_1 * (X - x0)
-#
-#     TwoOverPi = 2.0 / np.pi
-#     PiOvTwo = 0.5 * np.pi
-#
-#     # ---------------------------
-#     # Do the rotations
-#
-#     # print(euler_angles)
-#
-#     # --------------------
-#     # Joe's implementation
-#     euler_angles = R_in.as_euler('xyx')
-#     # euler_angles = R.from_euler('zyz', euler_angles).as_euler('xyx')
-#     euler_angles[1] = -euler_angles[1]
-#     # --------------------
-#     # Kevin's implementation
-#     # euler_angles = input_rotation.as_euler('xyx') # input_rotation will be a scipy object when we change the
-#     # interface to the rotate3D function
-#     # euler_angles = -euler_angles
-#     # --------------------
-#
-#     f_rot = __rotate_euler_z(f_rot, ang=euler_angles[0])
-#     f_rot = __rotate_euler_y(f_rot, ang=euler_angles[1])
-#     f_rot = __rotate_euler_z(f_rot, ang=euler_angles[2])
-#
-#     return f_rot
+    depreciate('Do not use reborn.utils.max_pair_distance.  Use reborn.misc.vectors.max_pair_distance.')
+    from .misc.vectors import max_pair_distance
+    return max_pair_distance(*args, **kwargs)
 
 
 def make_label_radial_shell(r_bin_vec, n_vec):
@@ -753,7 +574,7 @@ def check_file_md5(file_path, md5_path=None):
         md5_path = file_path+'.md5'
     if not os.path.exists(md5_path):
         return False
-    with open(md5_path, 'r') as f:
+    with open(md5_path, 'r', encoding="utf-8") as f:
         md5 = f.readline()
     with open(file_path, 'rb') as f:
         hasher = hashlib.md5()
@@ -783,7 +604,7 @@ def write_file_md5(file_path, md5_path=None):
         hasher = hashlib.md5()
         hasher.update(f.read())
         md5 = str(hasher.hexdigest())
-    with open(md5_path, 'w') as f:
+    with open(md5_path, 'w', encoding="utf-8") as f:
         f.write(md5)
     return md5_path
 
@@ -794,12 +615,46 @@ def git_sha():
 
     Returns: str
     """
-    out = subprocess.run(['git', 'diff'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    out = subprocess.run(['git', 'diff'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
     if out.stderr == b'':
         if out.stdout == b'':
             sha = subprocess.run(['git', 'rev-parse', '--verify', 'HEAD'], stdout=subprocess.PIPE,
-                                 stderr=subprocess.PIPE).stdout
+                                 stderr=subprocess.PIPE, check=True).stdout
             return sha.decode("utf-8").strip()
-        else:
-            return None
+    return None
+
+
+def google_docstring_test():
+    r"""
+    This is an example docstring for developers.  This function does nothing.
+
+    You might link to other reborn docs, such as :class:`reborn.detector.PADGeometry` .  Linking also works for some
+    external packages, for example :func:`np.median`.
+
+    There are various shortcuts in ``doc/conf.py``, such as |PADGeometry| and |Henke1993|.
+
+    You can put an equation inline like this :math:`f(q)`, or on a separate line like this:
+
+    .. math::
+        a_i = \sum_n f_n \exp(-i \vec{q}_i \cdot (\mathbf{R} \vec{r} + \vec{U}))
+
+    .. note::
+        This is a note to emphasize something important.
+
+    Unfortunately,
+
+    Arguments:
+        data (|ndarray| or list of |ndarray|): Data to get profiles from.
+        beam (|Beam|): Beam info.
+        pad_geometry (|PADGeometryList|): PAD geometry info.
+        mask (|ndarray| or list of |ndarray|): Mask (one is good, zero is bad).
+        n_bins (int): Number of radial bins.
+        q_range (tuple of floats): Centers of the min and max q bins.
+        statistic (function): The function you want to apply to each bin (default: :func:`np.mean`).
+
+    Returns:
+        (tuple):
+            - **statistic** (|ndarray|) -- Radial statistic.
+            - **bins** (|ndarray|) -- The values of q at the bin centers.
+    """
     return None

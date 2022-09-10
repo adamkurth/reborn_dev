@@ -27,20 +27,18 @@ def test_02():
     weights = np.array([1, 1, 2, 0.5, 1, 2], dtype=float)
     q = np.array([-1, 0, 0.5, 1.5, 2.5, 2.6], dtype=float)
     n_bins = 3
-    counts = np.zeros(n_bins, dtype=np.int32)
     sum_ = np.zeros(n_bins)
     sum2 = np.zeros(n_bins)
     w_sum = np.zeros(n_bins)
     q_min = 0.5
     q_max = 2.5
-    fortran.scatter_f.profile_stats(pattern, q, weights, n_bins, q_min, q_max, sum_, sum2, w_sum, counts)
+    fortran.scatter_f.profile_stats(pattern, q, weights, n_bins, q_min, q_max, sum_, sum2, w_sum)
     assert(np.max(np.abs(sum_ - np.array([9, 2, 17]))) == 0)
     indices = np.empty(6, dtype=np.int32)
     fortran.scatter_f.profile_indices(q, n_bins, q_min, q_max, indices)
     sum_1 = sum_.copy()
-    counts = np.zeros(n_bins, dtype=np.int32)
     sum_ = np.zeros(n_bins)
     sum2 = np.zeros(n_bins)
     w_sum = np.zeros(n_bins)
-    fortran.scatter_f.profile_stats_indexed(pattern, indices, weights, sum_, sum2, w_sum, counts)
+    fortran.scatter_f.profile_stats_indexed(pattern, indices, weights, sum_, sum2, w_sum)
     assert(np.max(np.abs(sum_ - sum_1)) == 0)

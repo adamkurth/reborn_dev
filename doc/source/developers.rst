@@ -7,34 +7,25 @@ Before you modify any code:
 ---------------------------
 
 * The "`Zen of Python <https://www.python.org/dev/peps/pep-0020/>`_" captures the essence of Python programming
-  norms.  We follow these norms in reborn for the sake of consistency.
+  norms.  Please follow them for the sake of consistency.
 * Follow the `PEP8 guidelines <https://www.python.org/dev/peps/pep-0008/?>`_.
 * One exception to PEP8: we allow lines to be 120 characters in length.
-* Please use four spaces, not tabs.
-* Write unit tests for any functionality you add.  We use |pytest| for this purpose.
+* Use four spaces, not tabs.  No exceptions.
+* Write unit tests for any non-trivial functionality you add.  We use |pytest| for this purpose.
 * Document your code using the
   `Google format <https://sphinxcontrib-napoleon.readthedocs.io/en/latest/>`_.
-* Learn how to use `git <https://git-scm.com/book/en/v2>`_.
-* Develop code in the git "develop" branch.  We merge the develop branch into (protected) master only after tests are
-  known to pass.
+* Learn how to use `git <https://git-scm.com/book/en/v2>`_ if you haven't already.
+* Develop code in the git "develop" branch.  Rick merges the develop branch into (protected) master branch only after
+  all tests are passing.
 * All units are SI (angles in radians) for the sake of consistency.
-* The scope of this project is diffraction under the Born approximation.  Don't stray far from this.
+* The scope of this project is diffraction under the Born approximation.  Don't stray very far from this.
 
 Checking for PEP8 compliance
 ----------------------------
 
-Use |pycodestyle| to check for basic compliance with PEP8.  The script ``developer/pycodestyle.sh`` might be helpful.
+We use |pycodestyle| and `pylint <https://www.pylint.org/>`_ to check for basic compliance with PEP8.  The script
+``developer/pycodestyle.sh`` should be used to check for compliance.
 
-We also use `pylint <https://www.pylint.org/>`_ for code formatting.  You should occasionally check how well your code
-conforms to pylint standards:
-
-.. code-block:: bash
-
-    pylint --max-line-length=120 filename.py
-
-We do not strive to remove *all* complaints made by pylint.  There are some unreasonable complaints such as "too
-many function arguments".  You may therefore wish to use the helper script ``developer/mylint.sh``, which turns off some
-of the commonly annoying complaints.
 
 Testing
 -------
@@ -44,7 +35,7 @@ We use |pytest| to test the reborn codebase.  It is very simple to make a new te
 1) Create a file that has a name that begins with ``test_`` in the ``reborn/test`` directory
 2) Within this file, write functions with names that begin with ``test_``
 3) Within those functions, include `assert statements <https://wiki.python.org/moin/UsingAssertionsEffectively>`_.
-4) Run |pytest| in the test directory, and all tests will run (or run it on a specific file).
+4) Run |pytest| in the test directory.
 
 
 Generation of documentation
@@ -58,8 +49,9 @@ decently written doc string:
 .. code-block:: python
 
     r"""
-    Compute a radial profile from a PAD (or list of pads).  Calculates the mean by default, but you may pass it any
-    function handle (e.g. :func:`np.median` or :func:`np.std` ).
+    Some basic description at the top.  You might link to other documentation inside of reborn, such as
+    :class:`reborn.detector.PADGeometry` .  Some classes have shortcuts defined in ``doc/conf.py``, such as
+    |PADGeometry|.  You can also link to exernal code docs, for example :func:`np.median`.
 
     Here is a random, unrelated equation for the purpose of demonstration:
 

@@ -21,7 +21,7 @@ import os
 import json
 import numpy as np
 import pkg_resources
-from . import utils, source, detector, const
+from . import utils, source, const
 try:
     from .fortran import polar_f
 except ImportError:
@@ -41,7 +41,8 @@ rayonix_mx340_xfel_geom_file = pkg_resources.resource_filename('reborn', 'data/g
 debug = False
 
 
-def debug_msg(*args, **kwargs):
+def _dbgmsg(*args, **kwargs):
+    r""" Debugging message. """
     if debug:
         print(*args, **kwargs)
 
@@ -49,10 +50,11 @@ def debug_msg(*args, **kwargs):
 def cached(method):
     r""" Experimental decorator for caching results from a method.  Assumes no arguments are needed. """
     def wrapper(self):
+        r""" Method wrapper. """
         if self.do_cache:
             attr = '__cached__'+method.__name__
             if hasattr(self, attr):
-                debug_msg('Returning cached result:', attr)
+                _dbgmsg('Returning cached result:', attr)
             out = method(self)
             setattr(self, attr, out)
             return out
@@ -69,7 +71,7 @@ def clear_cache(self):
     todel = []
     for k in d.keys():
         if '__cached__' in k:
-            debug_msg('Deleting', k)
+            _dbgmsg('Deleting', k)
             todel.append(k)
     for k in todel:
         delattr(self, k)
@@ -159,17 +161,16 @@ class PADGeometry:
             self.simple_setup(distance=distance, pixel_size=pixel_size, shape=shape, **kwargs)
 
     def __str__(self):
-        out = ''
-        out += '{\n'
-        out += 'name: %s\n' % self.name.__str__()
-        out += 'n_fs: %s\n' % self._n_fs.__str__()
-        out += 'n_ss: %s\n' % self._n_ss.__str__()
-        out += 'fs_vec: %s\n' % self._fs_vec.__str__()
-        out += 'ss_vec: %s\n' % self._ss_vec.__str__()
-        out += 't_vec: %s\n' % self._t_vec.__str__()
-        out += 'parent_data_slice: %s\n' % self._parent_data_slice.__str__()
-        out += 'parent_data_shape: %s\n' % self._parent_data_shape.__str__()
-        out += '}\n'
+        out = "{\n"
+        out += f"name: {self.name}\n"
+        out += f"n_fs: {self.n_fs}\n"
+        out += f"n_ss: {self.n_ss}\n"
+        out += f"fs_vec: {self.fs_vec}\n"
+        out += f"ss_vec: {self.ss_vec}\n"
+        out += f"t_vec: {self.t_vec}\n"
+        out += f"parent_data_slice: {self.parent_data_slice}\n"
+        out += f"parent_data_shape: {self.parent_data_shape}\n"
+        out += "}\n"
         return out
 
     def __eq__(self, other):
@@ -197,7 +198,7 @@ class PADGeometry:
     @property
     def hash(self):
         r"""Return a hash of the geometry parameters.  Useful if you want to avoid re-computing things like q_mags."""
-        return hash(self.__str__())
+        return hash(str(self))
 
     def validate(self):
         r""" Determine if this instance has all the needed parameters defined.
@@ -362,12 +363,12 @@ class PADGeometry:
 
     def save_json(self, file_name):
         r""" Save the geometry as a json file. """
-        with open(file_name, 'w') as f:
+        with open(file_name, 'w', encoding="utf-8") as f:
             json.dump(self.to_dict(), f)
 
     def load_json(self, file_name):
         r""" Save the geometry as a json file. """
-        with open(file_name, 'r') as f:
+        with open(file_name, 'r', encoding="utf-8") as f:
             d = json.load(f)
         self.from_dict(d)
 
@@ -441,14 +442,12 @@ class PADGeometry:
             vecs (|ndarray|): An array of vectors, with shape (N, 3) or shape (3)
             insist_in_pad (bool): If you want to allow out-of-range indices, set this to True.  Otherwise, out-of-range
                                   values will be set to nan.
-            round_to_nearest (bool): Round to nearest pixel position.  Default: False.
+            round_to_nearest (bool): Round to the nearest pixel position.  Default: False.
 
         Returns:
             (tuple) : Slow-scan indices, Fast-scan indices.
         """
-        if "round" in kwargs.keys():  # Legacy keyword agument
-            round_to_nearest = kwargs["round"]
-            del kwargs["round"]
+        round_to_nearest = kwargs.pop("round", round_to_nearest)  # Legacy keyword argument
         vecs = np.atleast_2d(vecs)
         fxs = np.dot(vecs, np.cross(self.ss_vec, self.fs_vec))
         i = np.dot(np.cross(self.ss_vec, vecs), self.t_vec)/fxs
@@ -858,7 +857,7 @@ class PADGeometry:
         self.t_vec = np.dot(self.t_vec, matrix.T)
         self.fs_vec = np.dot(self.fs_vec, matrix.T)
         self.ss_vec = np.dot(self.ss_vec, matrix.T)
-        
+
 
 class PADGeometryList(list):
     r""" A subclass of list that does operations on lists of |PADGeometry| instances.  Is helpful, for example.
@@ -887,26 +886,23 @@ class PADGeometryList(list):
         if not isinstance(item, PADGeometry):
             raise ValueError('Not a PADGeometry instance.')
         if not item.name:
-            item.name = len(self).__str__()
+            item.name = str(len(self))
         super().append(item)
 
     def copy(self):
-        r""" Same as the the matching method in |PADGeometry|."""
+        r""" Same as the matching method in |PADGeometry|."""
         return PADGeometryList([p.copy() for p in self])
 
     def __str__(self):
         s = ''
         for item in self:
-            s += '\n'+item.__str__()
+            s += f'{item}\n'
         return s
 
     @property
     def hash(self):
         r"""Return a hash of the geometry parameters.  Useful if you want to avoid re-computing things like q_mags."""
-        s = ''
-        for p in self:
-            s += p.__str__()
-        return hash(s)
+        return hash(''.join(str(p) for p in self))
 
     def validate(self):
         r""" Same as the matching method in |PADGeometry|."""
@@ -933,24 +929,15 @@ class PADGeometryList(list):
 
     def load(self, filename):
         r""" Load the data from saved PADGeometryList. """
-        try:
-            pads = load_pad_geometry_list(filename)
-        except:
-            try:
-                from .external import crystfel
-                pads = crystfel.geometry_file_to_pad_geometry_list(filename)
-            except:
-                raise ValueError("Cannot figure out what kind of geometry file this is.")
+        pads = load_pad_geometry_list(filename)
         if len(self) == 0:
             for p in pads:
                 self.append(p)
-            return
         elif len(self) == len(pads):
             for (n, p) in enumerate(pads):
                 self[n] = p
-            return
-        raise ValueError("It is not clear what you are trying to do.  The PADGeometryList should be empty, or should"
-                         "have the same length as the geometry file.")
+        else:
+            raise ValueError(f"There is a mismatch between this PADGeometryList and the geometry file {filename}.")
 
     def add_group(self, pads, group_name=None):
         r""" Extend the PADGeometryList, and create a group name for the new members.  Helpful if you have multiple
@@ -1016,7 +1003,7 @@ class PADGeometryList(list):
         r""" Make sure that all |PADGeometry| instances have unique names. """
         for (i, p) in enumerate(self):
             if (p.name == 'None') or (p.name is None):
-                p.name = '%d'%i
+                p.name = str(i)
         names = [p.name for p in self]
         repeats = [x for x in names if names.count(x) > 1]
         if repeats:
@@ -1103,10 +1090,6 @@ class PADGeometryList(list):
         y = self.concat_data(y)
         z = self.concat_data(z)
         return np.vstack((x, y, z)).T.copy()
-
-    def split_vecs(self, data):
-        r""" Slice this PAD data from a parent data array. """
-        raise NotImplemented
 
     @property
     def n_pixels(self):
@@ -1230,15 +1213,13 @@ def save_pad_geometry_list(file_name, geom_list):
     r""" Save a list of PADGeometry instances as a json file. """
     if not isinstance(geom_list, list):
         geom_list = [geom_list]
-    with open(file_name, 'w') as f:
+    with open(file_name, 'w', encoding="utf-8") as f:
         json.dump([g.to_dict() for g in geom_list], f, sort_keys=True, indent=0)
 
 
 def load_pad_geometry_list(file_name):
     r""" Load a list of PADGeometry instances stored in json format. """
-    if file_name == '_pnccd':
-        return None
-    with open(file_name, 'r') as f:
+    with open(file_name, 'r', encoding="utf-8") as f:
         dicts = json.load(f)
     out = []
     for d in dicts:
@@ -1446,7 +1427,7 @@ class PADAssembler:
 class IcosphereGeometry:
     r"""
     Experimental class for a spherical detector that follows the "icosphere" geometry. The Icosphere is generated by
-    sub-dividing the vertices of an icosahedron.  The following blog was helpful:
+    subdividing the vertices of an icosahedron.  The following blog was helpful:
     http://sinestesia.co/blog/tutorials/python-icospheres/
 
     The code is quite slow; needs to be vectorized with numpy.  There are definitely better spherical detectors - the
@@ -1470,12 +1451,11 @@ class IcosphereGeometry:
 
     def _middle_point(self, point_1, point_2, verts, middle_point_cache):
         r""" Find a middle point and project to the unit sphere """
-
         # We check if we have already cut this edge first
         # to avoid duplicated verts
         smaller_index = min(point_1, point_2)
         greater_index = max(point_1, point_2)
-        key = '{0}-{1}'.format(smaller_index, greater_index)
+        key = f'{smaller_index}-{greater_index}'
         if key in middle_point_cache:
             return middle_point_cache[key]
         # If it's not in cache, then we can cut it
@@ -1663,7 +1643,7 @@ class PolarPADAssembler:
         if mask is None:
             mask = np.ones_like(data)
         data = self.pad_geometry.concat_data(data) * sa
-        mask = detector.concat_pad_data(mask) * sa
+        mask = concat_pad_data(mask) * sa
 
         # calculate average binned pixel
         if py:
@@ -1720,6 +1700,7 @@ class RadialProfiler:
 
     def copy(self):
         r""" Make a copy of this profiler.  Copy all internal data. """
+        # pylint: disable=protected-access
         rp = RadialProfiler(_plan=False)
         if self.n_bins is not None:
             rp.n_bins = self.n_bins
@@ -1735,6 +1716,7 @@ class RadialProfiler:
             rp._mask = self._mask.copy()
         if self._counts_profile is not None:
             rp._counts_profile = self._counts_profile.copy()
+        # pylint: enable=protected-access
         return rp
 
     @property
@@ -1824,9 +1806,10 @@ class RadialProfiler:
         self.beam = beam
 
     def concat_data(self, data):
+        r""" Concatenate 2D diffraction data. """
         if self.pad_geometry is not None:
             return self.pad_geometry.concat_data(data)
-        return detector.concat_pad_data(data)
+        return concat_pad_data(data)
 
     def get_profile_statistic(self, data, mask=None, statistic=None):
         r"""
@@ -1992,7 +1975,7 @@ class RadialProfiler:
         if as_list:
             data = self.pad_geometry.split_data(data)
         return data
-        
+
     def subtract_median_profile(self, data, mask=None):
         r"""
         Given some PAD data, calculate the radial median and subtract it from the data.
@@ -2260,7 +2243,7 @@ def _slice_to_tuple(slc):
         return tuple(_slice_to_tuple(s) for s in slc)
     if isinstance(slc, int):
         return slc
-    raise ValueError('Cannot convert slice to tuple:', slc.__str__())
+    raise ValueError(f'Cannot convert slice to tuple: {slc}')
 
 
 def _tuple_to_slice(slc):
@@ -2269,12 +2252,12 @@ def _tuple_to_slice(slc):
         return None
     if isinstance(slc, slice):
         return slc
-    if isinstance(slc, tuple) or isinstance(slc, list):
+    if isinstance(slc, (tuple, list)):
         if False not in [isinstance(s, int) for s in slc]:
             return slice(slc[0], slc[1], slc[2])
         out = []
         for s in slc:
-            if isinstance(s, tuple) or isinstance(s, list):
+            if isinstance(s, (tuple, list)):
                 out.append(slice(s[0], s[1], s[2]))
             else:
                 out.append(s)

@@ -26,12 +26,10 @@ def debye(r_vecs, q_mags, f_idx, ff):
     for ri in range(na):
         r1 = r_vecs[ri, :]
         f1 = ff[f_idx[ri], :]
-        # print('f1',f1)
         tot += f1*np.conj(f1)  # Diagonal terms ij = ii
         for rj in range(ri+1, na):
             r2 = r_vecs[rj, :]
             f2 = ff[f_idx[rj], :]
-            # print('f2',f2)
             rij = np.sqrt(np.sum(r1**2 + r2**2))
             qr = qp * rij
             tot += 2*np.real(f1*np.conj(f2))*np.sinc(qr)
