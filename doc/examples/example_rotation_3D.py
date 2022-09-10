@@ -32,7 +32,7 @@ from reborn.misc.rotate import Rotate3D
 eV = const.value('electron volt')
 # %%
 # Make a density map.
-pdb_file = '1LYZ.pdb'
+pdb_file = '2LYZ.pdb'
 resolution = 3e-10
 oversampling = 1
 photon_energy_ev = 12000
