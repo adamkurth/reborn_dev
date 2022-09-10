@@ -162,14 +162,14 @@ class PADGeometry:
 
     def __str__(self):
         out = "{\n"
-        out += f"name: {self.name}\n"
-        out += f"n_fs: {self.n_fs}\n"
-        out += f"n_ss: {self.n_ss}\n"
-        out += f"fs_vec: {self.fs_vec}\n"
-        out += f"ss_vec: {self.ss_vec}\n"
-        out += f"t_vec: {self.t_vec}\n"
-        out += f"parent_data_slice: {self.parent_data_slice}\n"
-        out += f"parent_data_shape: {self.parent_data_shape}\n"
+        out += f"name: {self._name}\n"
+        out += f"n_fs: {self._n_fs}\n"
+        out += f"n_ss: {self._n_ss}\n"
+        out += f"fs_vec: {self._fs_vec}\n"
+        out += f"ss_vec: {self._ss_vec}\n"
+        out += f"t_vec: {self._t_vec}\n"
+        out += f"parent_data_slice: {self._parent_data_slice}\n"
+        out += f"parent_data_shape: {self._parent_data_shape}\n"
         out += "}\n"
         return out
 
