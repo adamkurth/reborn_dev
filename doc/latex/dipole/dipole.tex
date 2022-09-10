@@ -3,7 +3,7 @@
 \usepackage{amssymb}
 \usepackage{graphicx}
 \usepackage{geometry}
-\usepackage{physics}
+%\usepackage{physics}
 %\usepackage{enumitem}
 \geometry{
 a4paper,
@@ -25,7 +25,7 @@ bottom=20mm,
 \renewcommand{\vec}[1]{\boldsymbol{#1}}
 \newcommand{\hvec}[1]{\hat{\vec{#1}}}
 \newcommand{\avg}[1]{\left\langle #1 \right\rangle}
-% \newcommand{\abs}[1]{\left| #1 \right|}
+\newcommand{\abs}[1]{\left| #1 \right|}
 % Griffiths "script r"
 \def\rcurs{{\mbox{$\resizebox{.09in}{.08in}{\includegraphics[trim= 1em 0 14em 0,clip]{fonts/ScriptR}}$}}}
 \def\brcurs{{\mbox{$\resizebox{.09in}{.08in}{\includegraphics[trim= 1em 0 14em 0,clip]{fonts/BoldR}}$}}}
@@ -43,8 +43,8 @@ bottom=20mm,
  
 The main result we derive here is the diffraction intensity equation
 \begin{align}\label{eqn:key}
-    I(\vec{q}) = J_0 r_e^2 \Delta \Omega \mathcal{P}(\vec{q})  \qty|\int  
-\rho(\vec{r}) e^{-i \vec{q}\cdot\vec{r}} d^3 r |^2 \;.
+    I(\vec{q}) = J_0 r_e^2 \Delta \Omega \mathcal{P}(\vec{q})  \abs{\int
+\rho(\vec{r}) e^{-i \vec{q}\cdot\vec{r}} d^3 r }^2 \;.
 \end{align}
 starting with the equations developed in the popular undergraduate 
 electrodynamics textbook by David Griffiths\cite{Griffiths2018}.
@@ -282,7 +282,7 @@ which gives the expression for the measured diffraction signal\footnote{The
 units here are either energy or photons per pixel, depending on the units 
 chosen for $J_0$.  Photons are often the preferred unit since the noise 
 characteristics often depend on photon counts.}
-\begin{align}\label{eqn:keyF}
+\begin{align}
     I(\vec{q}) = J_0 r_e^2  \mathcal{P}(\vec{q}) \Delta \Omega
 \end{align}
 where the polarization factor is defined as

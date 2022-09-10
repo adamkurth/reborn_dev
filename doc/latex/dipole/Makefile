@@ -9,7 +9,6 @@ ${filename}.pdf: ${filename}.tex
 	pdflatex ${filename}
 	pdflatex ${filename}
 	cp -r ${filename}.pdf ../../source/_static/files
-# 	rm *.out *.log *.bbl *.aux *synctex* *.blg
 
 .PHONY: clean html pdf all
 

@@ -35,12 +35,10 @@ subroutine debye(rvecs, qmags, fidx, ff, out)
     do ri=1,nr
         r1 = rvecs(:,ri)
         f1(:) = ff(:, fidx(ri)+1)
-!        print *, 'f f1', f1
         out = out + real(f1*conjg(f1))
         do rj=ri+1,nr
             r2 = rvecs(:,rj)
             f2(:) = ff(:, fidx(rj)+1)
-!            print *, 'f f2', f2
             rij = sqrt(sum((r1-r2)**2))
             !$OMP parallel default(None) &
             !$OMP private(qi,qr,sinc) &
@@ -59,3 +57,95 @@ subroutine debye(rvecs, qmags, fidx, ff, out)
     deallocate(f1)
     deallocate(f2)
 end subroutine debye
+
+
+subroutine profile_stats(pattern, q, weights, n_bins, q_min, q_max, sum, sum2, w_sum)
+    ! Calculate radial profile statistics.
+    !
+    ! pattern: Flattened 1D array of scattering intensities (do not correct for polarization, solid angle)
+    ! q: Flattened 1D array of q vectors that correspond to the above scattering intensities
+    ! weights: For weighted average.  This should be the product of the mask (if 0 means ignore), the polarization
+    !          factor, the solid angle of the pixel, and any other relevant weighting.
+    ! n_bins: How many bins in the 1D profile.
+    ! q_min: The *center* position of the minimum q bin.
+    ! q_max: The *center* position of the maximum q bin.
+    ! sum: Profile with sum of intensities.
+    ! sum2: Profile with sum of intensities squared.
+    ! w_sum: Sum of the weights.
+    implicit none
+    integer(kind=4), intent(in)    :: n_bins
+    real(kind=8),    intent(in)    :: pattern(:), q(:), weights(:), q_min, q_max
+    real(kind=8),    intent(inout) :: sum(:), sum2(:), w_sum(:)
+    real(kind=8)                   :: qm, dq
+    integer(kind=4)                :: i, j, npat
+    npat = size(pattern, 1)
+    dq = (q_max - q_min) / (n_bins - 1)
+    qm = q_min - dq/2
+    do i=1, npat
+        j = floor((q(i)-qm)/dq) + 1
+        j = min(j, n_bins)
+        j = max(j, 1)
+        sum(j) = sum(j) + pattern(i)*weights(i)
+        sum2(j) = sum2(j) + pattern(i)**2*weights(i)
+        w_sum(j) = w_sum(j) + weights(i)
+    end do
+end subroutine profile_stats
+
+
+subroutine profile_indices(q, n_bins, q_min, q_max, indices)
+    ! Fetch the indices that go along with profile_stats
+    implicit none
+    integer(kind=4), intent(in)    :: n_bins
+    real(kind=8),    intent(in)    :: q(:), q_min, q_max
+    integer(kind=4), intent(inout) :: indices(:)
+    real(kind=8)                   :: dq, qm
+    integer(kind=4)                :: i, j, npat
+    npat = size(q, 1)
+    dq = (q_max - q_min) / (n_bins - 1)
+    qm = q_min - dq/2
+    do i=1, npat
+        j = floor((q(i)-qm)/dq) + 1
+        j = min(j, n_bins)
+        j = max(j, 1)
+        indices(i) = j
+    end do
+end subroutine profile_indices
+
+
+subroutine profile_stats_indexed(pattern, indices, weights, sum, sum2, w_sum)
+    ! Same as profile_stats but with indices pre-calculated
+    implicit none
+    integer(kind=4), intent(in)    :: indices(:)
+    real(kind=8),    intent(in)    :: pattern(:), weights(:)
+    real(kind=8),    intent(inout) :: sum(:), sum2(:), w_sum(:)
+    integer(kind=4)                :: i, j, npat
+    npat = size(pattern, 1)
+    do i=1, npat
+        j = indices(i)
+        sum(j) = sum(j) + pattern(i)*weights(i)
+        sum2(j) = sum2(j) + pattern(i)**2*weights(i)
+        w_sum(j) = w_sum(j) + weights(i)
+    end do
+end subroutine profile_stats_indexed
+
+
+subroutine profile_stats_avg(sum, sum2, w_sum, meen, std)
+    ! Given output of profile_stats, calculate the weighted mean and weighted standard deviation
+    implicit none
+    real(kind=8),    intent(in) :: sum(:), sum2(:), w_sum(:)
+    real(kind=8), intent(inout) :: meen(:), std(:)
+    real(kind=8)                :: m, s
+    integer(kind=4)             :: i, n
+    n = size(sum, 1)
+    do i=1, n
+        if (w_sum(i) == 0) then
+            meen(i) = 0
+            std(i) = 0
+        else
+            m = sum(i) / w_sum(i)
+            meen(i) = m
+            s = sum2(i) / w_sum(i)
+            std(i) = sqrt(s - m*m)
+        end if
+    end do
+end subroutine profile_stats_avg
