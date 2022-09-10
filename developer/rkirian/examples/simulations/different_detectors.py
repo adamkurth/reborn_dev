@@ -1,9 +1,8 @@
 import sys
 from time import time
 import numpy as np
-from scipy import constants
 import matplotlib.pyplot as plt
-from reborn import source, detector
+from reborn import source, detector, const
 from reborn.target import molecule, crystal
 from reborn.simulate import gas, solutions
 from reborn.viewers.qtviews import PADView
@@ -11,9 +10,9 @@ from reborn.viewers.qtviews import PADView
 # print(numpy.__file__)
 
 # === CONFIGURATION ==============================================================
-eV = constants.value('electron volt')
-r_e = constants.value('classical electron radius')
-k = constants.value('Boltzmann constant')
+eV = const.eV
+r_e = const.r_e
+k = const.k
 gas_length = 1
 temperature = 300
 pressure = 101325
@@ -23,7 +22,7 @@ pulse_energy = 1e-3
 photon_energy = 9e3*eV
 rayonix_distance = 1.5
 epix_distance = 8*2.54e-2
-epix_angle = 0.5*42.6*180/np.pi         # Tilt angle of the epix
+epix_angle = 0.5*42.6*np.pi/180         # Tilt angle of the epix
 helium_partial_pressure = 0  # Helium partial pressure
 map_resolution = 0.2e-9  # Minimum resolution for 3D density map
 map_oversample = 2  # Oversampling factor for 3D density map
@@ -42,13 +41,9 @@ if random_seed is not None:
     np.random.seed(random_seed)
 beam = source.Beam(photon_energy=photon_energy, pulse_energy=pulse_energy)
 pads_rayonix, mask = detector.rayonix_mx340_xfel_pad_geometry_list(detector_distance=rayonix_distance, return_mask=True)
-pads_epix = detector.epix10k_pad_geometry_list(detector_distance=0)
+pads_epix = detector.epix10k_pad_geometry_list(detector_distance=epix_distance)
 R = np.array([[np.cos(epix_angle), 0, np.sin(epix_angle)], [0, 1, 0], [-np.sin(epix_angle), 0, np.cos(epix_angle)]])
-for p in pads_epix:
-    p.fs_vec = np.dot(p.fs_vec, R.T)
-    p.ss_vec = np.dot(p.ss_vec, R.T)
-    p.t_vec = np.dot(p.t_vec, R.T)
-    p.t_vec += np.dot(np.array([0, 0, epix_distance]), R.T)
+pads_epix.rotate(R)
 pads = detector.PADGeometryList(pads_rayonix + pads_epix)
 mask = pads.concat_data([mask] + pads_epix.split_data(pads_epix.ones()))
 q_mags = pads.q_mags(beam=beam)
@@ -78,5 +73,5 @@ if False:
 total_intensity = water_intensity/sa/pol
 #total_intensity = gas_intensity + water_intensity
 #print(total_intensity[0:10])
-pv = PADView(pad_geometry=pads, raw_data=total_intensity, mask_data=mask)
+pv = PADView(pad_geometry=pads, data=total_intensity, mask=mask)
 pv.start()

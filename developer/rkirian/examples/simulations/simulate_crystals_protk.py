@@ -1,16 +1,15 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 from time import time
-from scipy import constants
-from reborn import detector, source, target
+from reborn import const, source, target, dataframe
 from reborn.target.crystal import get_pdb_file
-from reborn.simulate.examples import CrystalSimulatorV1, cspad_geom_file, lysozyme_pdb_file
-from reborn.external.crystfel import geometry_file_to_pad_geometry_list
+from reborn.simulate.examples import CrystalSimulatorV1
+from reborn.external.crystfel import geometry_file_to_pad_geometry_list, cspad_geom_file
 from reborn.viewers.qtviews.padviews import PADView
 from reborn.fileio.getters import FrameGetter
 
 # Everything in bornagian is SI units.
-eV = constants.value('electron volt')
+eV = const.eV
 
 # Load a CrystFEL geom file
 pads = geometry_file_to_pad_geometry_list(cspad_geom_file)
@@ -49,23 +48,16 @@ simulator = CrystalSimulatorV1(pad_geometry=pads, beam=beam, crystal_structure=c
 # FrameGetter subclass will generate simulations on the fly.  Making a FrameGetter sub-class is easy: we just need to
 # override one method called "get_data(frame_number)".
 class MyFrameGetter(FrameGetter):
+    df = dataframe.DataFrame(pad_geometry=pads, beam=beam)
     def get_data(self, frame_number=1):
-        t = time()
         pad_data = simulator.generate_pattern()
-        print('Simulation in %g seconds' % (time()-t,))
-        print(pad_data)
-        if np.ravel(pad_data):
-            print('There are no photons!!!')
-            # return None
-        dat = {'pad_data': pad_data}
-        return dat
-
-simulator.generate_pattern()
+        self.df.set_raw_data(pad_data)
+        return self.df.copy()
 
 frame_getter = MyFrameGetter()
 
 # PADView is a very basic viewer that is in development.  It can link up with a FrameGetter in order to serve up frames
 # from various file formats, or in this case it can be used to look at simulations one-by-one.
-padview = PADView(pad_geometry=pads, frame_getter=frame_getter, mask_data=masks)
+padview = PADView(frame_getter=frame_getter, mask_data=masks)
 padview.set_levels(-1, 10)
 padview.start()

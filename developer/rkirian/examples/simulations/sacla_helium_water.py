@@ -1,13 +1,12 @@
 """ Example """
 import numpy as np
-from scipy import constants
-from reborn import source, detector
+from reborn import source, detector, const
 from reborn.target import molecule, crystal, atoms
 from reborn.simulate import gas, solutions
 from reborn.viewers.qtviews import PADView
-eV = constants.value('electron volt')
-r_e = constants.value('classical electron radius')
-k = constants.value('Boltzmann constant')
+eV = const.eV
+r_e = const.r_e
+k = const.k
 gas_length = 0.3
 temperature = 300
 pressure = 101325
