@@ -13,6 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with reborn.  If not, see <https://www.gnu.org/licenses/>.
 
+import pyqtgraph as pg
 from pyqtgraph import QtCore, QtGui
 
 
@@ -69,7 +70,7 @@ if __name__ == "__main__":
     import sys
     import random
     qt_app = QtGui.QApplication(sys.argv)
-    w = QtGui.QMainWindow()
+    w = pg.Qt.QtWidgets.QMainWindow()
     w.setCentralWidget(QtGui.QWidget())
     dock = QtGui.QDockWidget("Collapsible Demo")
     w.addDockWidget(QtCore.Qt.LeftDockWidgetArea, dock)

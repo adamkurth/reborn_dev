@@ -54,7 +54,7 @@ def write(msg):
     print(msg)
 
 
-class PADViewMainWindow(QtGui.QMainWindow):
+class PADViewMainWindow(pg.Qt.QtWidgets.QMainWindow):
     r""" A QMainWindow that closes all windows when it is closed.  Be careful... """
     def __init__(self, main=True):
         super().__init__()

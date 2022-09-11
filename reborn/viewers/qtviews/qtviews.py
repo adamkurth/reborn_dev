@@ -347,7 +347,7 @@ def view_finite_crystal(finite_crystal):
 def view_density_map(data, title=None):
 
     app = pg.mkQApp()
-    win = QtGui.QMainWindow()
+    win = pg.Qt.QtWidgets.QMainWindow()
     # win.resize(800, 600)
     if title is not None:
         win.setWindowTitle(title)
