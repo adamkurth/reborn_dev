@@ -53,7 +53,7 @@ from reborn.viewers.qtviews import PADView
 
 eV = reborn.const.eV  # J
 kb = reborn.const.k  # J  K^-1
-r_e = reborn.const.r_E
+r_e = reborn.const.r_e
 
 config = {'photon_energy': 10000 * eV,  # J
           'temperature': 293.15,  # K

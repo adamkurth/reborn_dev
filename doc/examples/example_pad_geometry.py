@@ -362,7 +362,7 @@ c_geom = detector.PADGeometryList(rayonix_geom + epix_geom)
 
 # Create some arbitrary data
 data = [np.random.random(p.n_pixels)*p.polarization_factors(beam=beam) for p in c_geom]
-pv = PADview(pad_geometry=c_geom, data=data)
+pv = PADView(pad_geometry=c_geom, data=data)
 pv.start()
 
 # %%
