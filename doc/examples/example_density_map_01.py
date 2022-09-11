@@ -31,11 +31,11 @@ Edited by Richard Kirian.
 
 import numpy as np
 from reborn.target import crystal
-import scipy.constants as const
+from reborn import const
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
-eV = const.value('electron volt')
+eV = const.eV
 
 pdb_file = '1jb0.pdb'
 resolution = 5e-10

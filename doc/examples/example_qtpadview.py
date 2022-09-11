@@ -24,7 +24,7 @@ Contributed by Richard Kirian.
 """
 import numpy as np
 from reborn import source, detector, dataframe, simulate, fileio
-from reborn.viewers.qtviews import view_pad_data, PADView
+from reborn.viewers.qtviews import PADView
 
 # %%
 # The PADView class provides a GUI to help visualize diffraction data that consists of multiple PADs.  Let's begin by
@@ -44,13 +44,8 @@ dat *= pads.polarization_factors(beam=beam)
 dat = np.double(np.random.poisson(dat))
 
 # %%
-# The simplest way to display the data is as follows:
-
-view_pad_data(data=dat, pad_geometry=pads, beam=beam)
-
-# %%
-# Although the above function exists for convenience, a better way is to create an instance of the PADView class.
-# This way, you can customize a few things before launching the viewer.  We will call a few  methods that help us
+# In order to view PAD data, we create instance of the PADView class, and we may customize a few things before
+# launching the viewer.  Here we will call a few  methods that help us
 # understand the geometry layout.  The beam origin and axes are shown at the center of the pattern (x: red, y: green,
 # z: blue), the PAD names (or numbers) are overlaid on the pads, and the fast-scan directions are indicated by the
 # red arrows.

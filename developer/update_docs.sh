@@ -1,13 +1,13 @@
 #!/bin/bash
 # Note: when documentation is created and pushed to the gitlab repository, this script will run automatically and
 # documentation will be made available here: https://rkirian.gitlab.io/reborn
-[ -d logs ] || mkdir logs
+#[ -d logs ] || mkdir logs
 if [[ ! $(basename "$(pwd)") = 'developer' ]]; then
     echo 'This script should run in the developer directory.'
     exit
 fi
-exec > >(tee -ia logs/update_docs.log)
-exec 2> >(tee -ia logs/update_docs.error.log)
+#exec > >(tee -ia logs/update_docs.log)
+#exec 2> >(tee -ia logs/update_docs.error.log)
 cd ../doc || exit
 home=$(pwd)
 cd latex/dipole || exit

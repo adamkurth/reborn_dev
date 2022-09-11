@@ -28,7 +28,7 @@ import xraylib
 import numpy as np
 from reborn.target import atoms
 import matplotlib.pyplot as plt
-import scipy.constants as const
+from reborn import const
 
 # %%
 # Constants and configurations
@@ -36,7 +36,7 @@ import scipy.constants as const
 a0 = 5.2917721e-11  # Bohr radius
 h = const.h
 c = const.c
-eV = const.value('electron volt')
+eV = const.eV
 save_figures = False
 
 # %%

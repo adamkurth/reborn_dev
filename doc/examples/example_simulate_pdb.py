@@ -26,14 +26,13 @@ Imports:
 
 import time
 import numpy as np
-from scipy import constants as const
 import matplotlib.pyplot as plt
 import reborn
 import reborn.target.crystal as crystal
 import reborn.simulate.clcore as core
 from reborn.utils import rotation_about_axis
 
-eV = const.value('electron volt')
+eV = reborn.const.eV
 
 # %%
 # Our agenda here is to do the following computation of diffraction intensity:

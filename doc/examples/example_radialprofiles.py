@@ -41,7 +41,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from reborn import source, detector, const
 from reborn.simulate import solutions
-from reborn.viewers.qtviews import view_pad_data
+from reborn.viewers.qtviews import PADView
 
 # %%
 # Initializing the RadialProfiler class
@@ -64,7 +64,8 @@ water_pattern = solutions.get_pad_solution_intensity(pad_geometry=geom, beam=bea
 # %%
 # Let's display the pattern:
 
-view_pad_data(pad_geometry=geom, data=water_pattern)
+pv = PADView(pad_geometry=geom, data=water_pattern)
+pv.start()
 
 # %%
 # Now that we have our basic setup, we can calculate our radial profiles.
@@ -136,17 +137,3 @@ ax[1][2].set_title("Median Radial")
 fig.text(0.5, 0.04, r'q=4$\pi\sin\theta / \lambda$ [$\AA$]', ha='center')
 
 plt.show()
-
-
-
-
-
-
-
-
-
-
-
-
-
-

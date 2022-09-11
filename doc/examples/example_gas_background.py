@@ -45,15 +45,15 @@ import pylab as plt
 import reborn
 from reborn.detector import RadialProfiler
 from reborn.simulate import gas
-from reborn.viewers.qtviews import view_pad_data
+from reborn.viewers.qtviews import PADView
 
 # %%
 # Now define a config dictionary that holds all the simulation parameters and constants. This format is not exactly
 # necessary, but it does help keep all the user-defined parameters in one easy-to-find place.
 
-eV = const.value('electron volt')  # J
-kb = const.value('Boltzmann constant')  # J  K^-1
-r_e = const.value('classical electron radius')
+eV = reborn.const.eV  # J
+kb = reborn.const.k  # J  K^-1
+r_e = reborn.const.r_E
 
 config = {'photon_energy': 10000 * eV,  # J
           'temperature': 293.15,  # K
@@ -158,7 +158,8 @@ for step in iter_list:
 # %%
 # Cool, so now let's plot the final results.
 
-view_pad_data(data=I_total, pad_geometry=pad, vmin=0, vmax=2e4)
+pv = PADView(data=I_total, pad_geometry=pad, vmin=0, vmax=2e4)
+pv.start()
 
 # %%
 # Radials
@@ -177,7 +178,8 @@ mask[pad.scattering_angles(beam) < theta] = 0
 # simply ignore those index values.  For now, the `view_pad_data()` function does not have a way to work with the masks,
 # future versions will include this.
 
-view_pad_data(data=I_total * mask, pad_geometry=pad, vmin=0, vmax=2e4)
+pv = PADView(data=I_total * mask, pad_geometry=pad, vmin=0, vmax=2e4)
+pv.start()
 
 # define the q_range
 q_mags = pad.q_mags(beam=beam)

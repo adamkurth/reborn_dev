@@ -61,7 +61,7 @@ import matplotlib.pyplot as plt
 from scipy.ndimage import gaussian_filter
 import reborn
 from reborn import detector, source, temp_dir
-from reborn.viewers.qtviews import view_pad_data
+from reborn.viewers.qtviews import PADView
 
 pad = detector.PADGeometry()
 print(pad)
@@ -199,7 +199,8 @@ print(pads[0])
 # %%
 # The reborn package provides tools to view lists of data arrays, provided matching lists of |PADGeometry| instances:
 
-view_pad_data(data=data, pad_geometry=pads, pad_numbers=True)
+pv = PADView(data=data, pad_geometry=pads, pad_numbers=True)
+pv.start()
 
 # %%
 # We now have a list of data arrays along with corresponding PAD geometry information.  We could write analysis code
@@ -207,7 +208,8 @@ view_pad_data(data=data, pad_geometry=pads, pad_numbers=True)
 
 for (p, d) in zip(pads, data):
     d /= p.polarization_factors(beam=beam)
-view_pad_data(data=data, pad_geometry=pads, pad_numbers=True)
+pv = PADView(data=data, pad_geometry=pads, pad_numbers=True)
+pv.start()
 
 # %%
 # The above is in essence how one must handle multiple PADs.  Looping over multiple PADs is inescapable fact of life
@@ -226,7 +228,8 @@ print(data.shape)
 # list.  This is a concatenated data array, and it is particularly useful for array operations that benefit from
 # vectorization, such as the simple multiplication we did above.  We can display the data as we did before:
 
-view_pad_data(data=data, pad_geometry=pads, pad_numbers=True)
+pv = PADView(data=data, pad_geometry=pads, pad_numbers=True)
+pv.start()
 
 # %%
 # Note that, because the view_pad_data function was given a |PADGeometryList|, it was able to split up the data even
@@ -249,7 +252,8 @@ print(data_concat.shape)
 
 for i in range(len(data_split)):
     data_split[i] = gaussian_filter(data_split[i], sigma=4)
-view_pad_data(data=data_split, pad_geometry=pads, pad_numbers=True)
+pv = PADView(data=data_split, pad_geometry=pads, pad_numbers=True)
+pv.start()
 
 # %%
 # The |PADGeometryList| class attempts to provide generalizations to the corresponding |PADGeometry| methods in an
@@ -280,7 +284,8 @@ mpccd_geom = detector.mpccd_pad_geometry_list(detector_distance=0.1, binning=10)
 print(mpccd_geom[0].t_vec)
 data = [np.random.random(p.n_pixels)*p.polarization_factors(beam=beam) for p in mpccd_geom]
 
-view_pad_data(pad_geometry=mpccd_geom, data=data)
+pv = PADView(pad_geometry=mpccd_geom, data=data)
+pv.start()
 
 # %%
 # Note the use of multiple panels here. Changing panel properties is easy from here. For example,
@@ -300,7 +305,8 @@ geom_1 = mpccd_geom.copy()  # make a copy of the pad geometry so you don't mess 
 geom_1[0].fs_vec = np.dot(geom_1[0].fs_vec, R.T)
 geom_1[0].ss_vec = np.dot(geom_1[0].ss_vec, R.T)
 
-view_pad_data(pad_geometry=geom_1, data=data)
+pv = PADView(pad_geometry=geom_1, data=data)
+pv.start()
 
 # %%
 # The bottom left panel was rotated by 45 degrees.  Note that the `view_pad_data()`
@@ -318,11 +324,13 @@ for pad in geom_2:
     pad.t_vec = np.dot(pad.t_vec, R.T)
 
 # view the rotation
-view_pad_data(pad_geometry=geom_2, data=data)
+pv = PADView(pad_geometry=geom_2, data=data)
+pv.start()
 
 # Now one more time, but we use the convenience function:
 geom_3 = geom_1.rotate(R)
-view_pad_data(pad_geometry=geom_2, data=data)
+pv = PADView(pad_geometry=geom_2, data=data)
+pv.start()
 
 # %%
 # Dealing with Multiple Detectors
@@ -354,7 +362,8 @@ c_geom = detector.PADGeometryList(rayonix_geom + epix_geom)
 
 # Create some arbitrary data
 data = [np.random.random(p.n_pixels)*p.polarization_factors(beam=beam) for p in c_geom]
-view_pad_data(pad_geometry=c_geom, data=data)
+pv = PADview(pad_geometry=c_geom, data=data)
+pv.start()
 
 # %%
 # Data slicing for non-contiguous PADs
@@ -381,7 +390,8 @@ print(pads[0])
 # in the normal way:
 
 sa = pads.solid_angles()
-view_pad_data(pad_geometry=pads, data=sa)
+pv = PADView(pad_geometry=pads, data=sa)
+pv.start()
 
 # %%
 # Now let's see how the data looks in its original format:

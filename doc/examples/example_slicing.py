@@ -27,13 +27,13 @@ Imports, etc.
 
 import numpy as np
 from numpy.fft import fftn, fftshift
-from scipy import constants as const
 import matplotlib.pyplot as plt
 import reborn
+from reborn import const
 from reborn.simulate import clcore
 if plt.rcParams['backend'] == "agg":
     plt.show = lambda: None
-eV = const.value('electron volt')
+eV = const.eV
 # %%
 # Load PDB file with atomic coordinates:
 cryst = reborn.target.crystal.CrystalStructure('2LYZ')

@@ -29,12 +29,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 import reborn
 from reborn.simulate import solutions, form_factors
-from reborn.viewers.qtviews import PADView
 from reborn.detector import RadialProfiler
-from scipy import constants as const
+from reborn import const
 
-r_e = const.value('classical electron radius')
-eV = const.value('electron volt')
+r_e = const.r_e
+eV = const.eV
 
 detector_shape = [2000, 2000]
 pixel_size = 75e-6

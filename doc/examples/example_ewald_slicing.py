@@ -36,8 +36,8 @@ import time
 from reborn.misc.interpolate import trilinear_interpolation
 import reborn.target.crystal as crystal
 import reborn.simulate.clcore
-from scipy import constants as const
-eV = const.value('electron volt')  # 1.602e-19
+from reborn import const
+eV = const.eV  # 1.602e-19
 # %%
 # Detector and x-ray beam
 pad = reborn.detector.PADGeometry(shape=(100, 100), pixel_size=1e-3, distance=0.5)

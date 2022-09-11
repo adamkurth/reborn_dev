@@ -24,12 +24,12 @@ Imports:
 """
 import numpy as np
 from reborn.target import crystal
-import scipy.constants as const
+from reborn import const
 import scipy
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from reborn.misc.rotate import Rotate3D
-eV = const.value('electron volt')
+eV = const.eV
 # %%
 # Make a density map.
 pdb_file = '2LYZ.pdb'
