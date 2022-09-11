@@ -27,6 +27,7 @@ doc:
   script:
   - Xvfb :1 &  # Using X Virtual Framebuffer for capturing Qt windows
   - export DISPLAY=:1
+  - export XDG_RUNTIME_DIR=/tmp/runtime-root
   - cd $reborn/developer
   - bash update_docs.sh
   except:
@@ -36,6 +37,7 @@ pages:
   script:
   - Xvfb :1 &  # Using X Virtual Framebuffer for capturing Qt windows
   - export DISPLAY=:1
+  - export XDG_RUNTIME_DIR=/tmp/runtime-root
   - cd $reborn/developer
   - bash update_docs.sh
   - cd $reborn/doc
