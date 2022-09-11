@@ -109,4 +109,5 @@ print('# photons total: %d' % np.round(np.sum(detector.concat_pad_data(ints))))
 
 # %%
 # Finally, display the pattern (plus 1, log scale):
-view_pad_data(data=np.log10(ints + 1), pad_geometry=pads)
+pv = PADView(data=np.log10(ints + 1), pad_geometry=pads)
+pv.start()

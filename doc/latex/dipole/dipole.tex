@@ -35,7 +35,7 @@
 The main result we derive here is the diffraction intensity equation
 \begin{align}\label{eqn:key}
     I(\vec{q}) = J_0 r_e^2 \Delta \Omega \mathcal{P}(\vec{q})  \abs{\int
-\rho(\vec{r}) e^{-i \vec{q}\cdot\vec{r}} d^3 r }^2 \;.
+\rho(\vec{r}) e^{-i \vec{q}\cdot\vec{r}} d^3 r }^2 \;,
 \end{align}
 starting with the equations developed in the popular undergraduate 
 electrodynamics textbook by David Griffiths\cite{Griffiths2018}.
@@ -78,7 +78,7 @@ the electron density.
 
 \section{Electromagnetic fields from a moving point charge}
 
-Here we briefly outline how the electromagnetic fields from a moving point 
+The electromagnetic fields from a moving point 
 charge were derived by Griffiths, starting with Maxwell's equations in vacuum:
 \begin{align}
 \nabla \cdot \vec{E} &= \rho/\epsilon_0  &\ \nabla\times\vec{E} 
@@ -86,13 +86,13 @@ charge were derived by Griffiths, starting with Maxwell's equations in vacuum:
 \nabla \cdot \vec{B} &= 0  & \nabla\times\vec{B} 
 &= \mu_0 \vec{J}+\mu_0 \epsilon_0 \frac{\partial\vec{E}}{\partial t}\;.
 \end{align}
-As developed in Griffiths chapter 10, Maxwell's equations may be written in 
+As developed in chapter 10, Maxwell's equations may be written in 
 terms of the scalar and vector potentials that are defined as
 \begin{align}\label{eqn:pots}
 \vec{B} &= \nabla \times \vec{A}\;, & \vec{E} &= -\nabla V -
 \frac{\partial \vec{A}}{\partial t} \;.
 \end{align}
-When working in the Lorenz gauge, namely
+When working in the Lorenz gauge, 
 \begin{align}
 \nabla \cdot \vec{A} =  -\mu_0 \epsilon_0 \frac{\partial V}{\partial t} \;,
 \end{align}
@@ -101,7 +101,8 @@ Maxwell's equations are reduced to a set of four inhomogeneous wave equations:
 \nabla^2 V - \mu_0\epsilon_0 \frac{\partial^2 V}{\partial t^2} &= -\rho / \epsilon_0 & \nabla^2 \vec{A} - \mu_0\epsilon_0 \frac{\partial^2 \vec{A}}{\partial t^2} &= -\mu_0 \vec{J} \;.\label{eqn:ihA}
 \end{align}
 The inhomogeneous wave equations may be solved using Green's method (see
-appendix \ref{appendix:inhomogeneous}), which yields the retarded potentials:
+appendix \ref{appendix:inhomogeneous} for details), which yields the retarded 
+potentials:
 \begin{align}
 V(\vec{r}, t) &= \frac{1}{4\pi\epsilon_0}\int \frac{\rho(\vec{r}', t_r)}{\rcurs}
 d^3r' & \vec{A}(\vec{r}, t) &= \frac{\mu_0}{4\pi}\int 
@@ -110,16 +111,21 @@ d^3r' & \vec{A}(\vec{r}, t) &= \frac{\mu_0}{4\pi}\int
 where $\brcurs = \vec{r} - \vec{r}'(t_r)$ and the retarded time is 
 $t_r = t -\rcurs/c$.  For a \emph{point charge} moving on the \emph{trajectory} 
 $\vec{r}'(t)$, the retarded potentials become the Li\'enard-Wiechert
-potentials (see appenxix \ref{appendix:lienard})
+potentials (see appendix \ref{appendix:lienard} for details)
 \begin{align}
-V(\vec{r}, t) &= \frac{1}{4\pi\epsilon_0}    \frac{q}{\left| \rcurs - \brcurs \cdot \vec{\beta} \right|} &
-\vec{A}(\vec{r}, t) &= \frac{\mu_0}{4\pi}    \frac{q\vec{v}}{\left| \rcurs - \brcurs \cdot \vec{\beta} \right|} \;,
+V(\vec{r}, t) &= \frac{1}{4\pi\epsilon_0}    
+\frac{q}{\left| \rcurs - \brcurs \cdot \vec{\beta} \right|} &
+\vec{A}(\vec{r}, t) &= \frac{\mu_0}{4\pi}    
+\frac{q\vec{v}}{\left| \rcurs - \brcurs \cdot \vec{\beta} \right|} \;,
 \end{align}
-where $\vec{\beta} = \vec{v}/c = \dot{\vec{r}}'(t_r)/c$. From the Li\'enard-Wiechert potentials, Griffiths used equation
+where $\vec{\beta} = \vec{v}/c = \dot{\vec{r}}'(t_r)/c$. From the 
+Li\'enard-Wiechert potentials, Griffiths used equation
 \ref{eqn:pots} work out the fields for a point charge:
 \begin{align}\label{eqn:Erad}
-\vec{E}(\vec{r}, t)= \frac{q}{4\pi\epsilon_0} \frac{\rcurs}{(\brcurs \cdot \vec{u})^3}
-[(c^2 - v^2)\vec{u} + \brcurs \times (\vec{u} \times \vec{a})] \; , \quad\quad \vec{B}(\vec{r}, t)
+\vec{E}(\vec{r}, t)= \frac{q}{4\pi\epsilon_0} 
+\frac{\rcurs}{(\brcurs \cdot \vec{u})^3}
+[(c^2 - v^2)\vec{u} + \brcurs \times (\vec{u} \times \vec{a})] \; , 
+\quad\quad \vec{B}(\vec{r}, t)
 = \frac{1}{c}\hrcurs \times \vec{E}(\vec{r}, t)
 \end{align}
 where $\vec{u} = c \hrcurs - \vec{\beta}$ and 
@@ -138,11 +144,10 @@ and the radiation field:
 \vec{E}(\vec r, t) = \vec{E}_{\text{Coulomb}}(\vec r, t) + \vec 
 E_{\text{rad}}(\vec r, t) \;.
 \end{align}
-The
-radiation field in equation \ref{eqn:Erad} dominates because it falls off in 
+The radiation field in equation \ref{eqn:Erad} dominates because it falls off in 
 proportion to $1/\rcurs$ whereas the generalized
-Coulomb field falls off in proportion to $1/\rcurs^2$.  We therefore focus on the
-radiation field
+Coulomb field falls off in proportion to $1/\rcurs^2$.  
+We therefore focus on the radiation field
 \begin{align}
 \vec{E}_{\text{rad}}(\vec r, t) = \frac{q}{4\pi\epsilon_0} 
 \frac{\rcurs}{(\brcurs\cdot \vec{u})^3}
@@ -152,15 +157,22 @@ radiation field
 \end{align}
 for the remainder of this note.
 
-Consider a point charge that oscillates about the origin with position $\vec{r}' 
-= r_0 \exp(-i\omega t) \hvec{r}'$ (we take the real part of this).
-We make the standard dipole radiation assumptions: the dipole is small compared to the distance
-to our observation point, which means that $r \gg r'$ and hence $\brcurs \approx \vec{r}$.
-We further assume that the charged particle is non-relativistic, which means that\footnote{Equivalently, 
+Consider a point charge that oscillates about the origin with position equal to
+the real part of $\vec{r}' 
+= r_0 \exp(-i\omega t) \hvec{r}'$.
+In addition to the far-field approximation, we make the dipole radiation 
+assumptions: 
+\begin{enumerate}
+ \item The dipole is small compared to 
+the distance to our observation point, which means that $r \gg r'$ and hence 
+$\brcurs \approx \vec{r}$.
+\item The charged particle is non-relativistic, which means that $v \ll c$, and 
+hence $\vec{u} \approx c \hrcurs$.  This assumption also implies that 
 $r_0\omega/c = 2\pi r_0/\lambda \ll 1 $; the wavelength is much
-larger than the dipole, and the time it takes light to traverse the extent of the dipole is
-small compared to the period of oscillation.}
-$v \ll c$, and we may use $\vec{u} \approx c \hrcurs$.  Plugging these in, we get
+larger than the dipole, and the time it takes light to traverse the extent of 
+the dipole is small compared to the period of oscillation.
+\end{enumerate}
+Plugging these in, we get the dipole fields
 \begin{align}\label{eqn:dip1}
 \vec{E}_{\text{dip}}(\vec{r},t) &= \frac{q}{4\pi\epsilon_0} \frac{r}{(\vec{r}\cdot c \hvec{r})^3}
 \vec{r} \times (c \hvec{r} \times \vec{a}) \\
@@ -178,32 +190,35 @@ and the Poynting vector (energy flux density) is
 \frac{1}{\mu_0c} E_{\text{dip}}^2\hvec{r} 
 = \frac{\mu_0}{16 \pi^2 cr^2} |\hvec{r} \times    \ddot{\vec{p}}|^2\hvec{r} \;.
 \end{align}
-The differential power radiated through a differential area $d\vec{a} = r^2 
+The power radiated through an area $d\vec{a} = r^2 
 \sin\theta d\theta d\phi \hvec{r} = r^2 d\Omega \hvec{r}$ is
 \begin{align}
 dP = \vec{S}\cdot d\vec{a} = \frac{\mu_0 }{16\pi^2 c} |\hvec{r} \times    \ddot{\vec{p}}|^2 d\Omega \; .
 \end{align}
-The total power radiated away is
+The total power radiated into all angles is is
 \begin{align}
 P = \int \frac{dP}{d\Omega} d\Omega =  \frac{\mu_0 }{16\pi^2 c}  \int |\hvec{r} \times    \ddot{\vec{p}}|^2 d\Omega  \; .
 \end{align}
-The above integral does not depend on the orientation of the coordinate system, and is most easily performed if we choose $|\hvec{r} \times \hvec{p}|^2 = \sin^2\theta$ which yields a factor of $8\pi/3$.  The final result is the Larmor formula:
+Choosing coordinates such that $|\hvec{r} \times \hvec{p}|^2 = \sin^2\theta$ 
+yields a factor of $8\pi/3$.  The final result is the Larmor formula:
 \begin{align}
 P =  \frac{\mu_0 \ddot{p}^2}{6\pi c}  \; .
 \end{align}
-For sinusoidal oscillations, a time average of the above introduces a factor of $1/2$:
+For sinusoidal oscillations, a time average of the above introduces a factor 
+of $1/2$:
 \begin{align}
-\avg{dP} &= \frac{\mu_0 \omega^4 p^2}{32\pi^2 c} |\hvec{r}\times\hvec{p}|^2 d\Omega \\
+\avg{\frac{dP}{\Delta \Omega}} &= \frac{\mu_0 \omega^4 p^2}{32\pi^2 c} |\hvec{r}\times\hvec{p}|^2  \\
 \langle P \rangle &=  \frac{\mu_0 \omega^4 p^2}{12\pi c} \; . \label{eqn:avgpwer}
 \end{align}
 
 
-\section{Thompson scatter from a free electron}
+\section{Thompson scatter from a single free electron}
 
-An example of a very simple classical scattering process is a free electron exposed to an electromagnetic wave, which
-results in acceleration and hence re-radiation or \emph{scattering}.  Unfortunately, this is not covered in Griffiths.
-The force on an electron (mass $m_e$ and charge $e$) due to an incident light beam with oscillating electric field
-$\vec{E}_0(t)$ results in the acceleration
+When a free electron exposed to an electromagnetic wave, the electron 
+accelerates and radiates, which we refer to as \emph{Thompson scattering}.  
+The force on the electron 
+(mass $m_e$ and charge $e$) due to an incident light beam with oscillating 
+electric field $\vec{E}_0(t)$ results in the acceleration
 \begin{align}
 \vec{a}(t) =  -\frac{e}{m_e} \vec{E}_0(t) \;.
 \end{align}
@@ -221,12 +236,12 @@ r_e = \frac{1}{4\pi \epsilon_0} \frac{e^2}{m_e c^2} \approx 2.8\times10^{-15} \;
 \end{align}
 The Poynting vector is
 \begin{align}
-\vec{S} =  \frac{1}{\mu_0} \vec{E}_{\text{dip}}\times\vec{B}_{\text{dip}} =  
+\vec{S} =   
 \frac{1}{\mu_0c} E_{\text{dip}}^2\hvec{r} 
 = \frac{\mu_0}{16 \pi^2 cr^2} |\hvec{r} \times    \ddot{\vec{p}}|^2\hvec{r} 
 \;.
 \end{align}
-We therefore have the power captured by a detector pixel:
+We therefore have the power captured by a small detector pixel:
 \begin{align}\label{eqn:dpthompson}
 \avg{dP}  = \frac{r_e^2 E_0^2}{ 2 \mu_0 c}  |\hvec{r}\times\hvec{E}_0|^2 d\Omega 
  = I_0 r_e^2  |\hvec{r}\times\hvec{E}_0|^2  d\Omega   \; .
@@ -248,7 +263,7 @@ superposition of two orthogonal polarizations:
  \vec{E}_0 = \vec{E}_1 + e^{i\phi}\vec{E}_2 
 \end{align}
 where $\hvec{E}_2 = \hvec{k}_0 \times \hvec{E}_1$.  The time-averaged Poynting 
-vector becomes\footnote{See Appendix \ref{sec:poynt} for details.}
+vector becomes (see appendix \ref{sec:poynt} for details)
 \begin{align}
 \avg{\vec{S}(\vec{r})} &= r_e^2 \frac{1}{r^2} (I_1 | \hvec{r} \times  \hvec{E}_1 
 |^2 + I_2 | \hvec{r} \times  \hvec{E}_2 |^2)  \hvec{r} \;. 
@@ -269,10 +284,11 @@ we may write the generalization of equation \ref{eqn:dpthompson}:
 | \hvec{r} \times  \hvec{E}_2 |^2)  d\Omega\;.
 \end{align}
 We typically work in terms of the fluence (time-integrated intensity) $J_0$, 
-which gives the expression for the measured diffraction signal\footnote{The 
-units here are either energy or photons per pixel, depending on the units 
-chosen for $J_0$.  Photons are often the preferred unit since the noise 
-characteristics often depend on photon counts.}
+which gives the expression for the measured diffraction signal
+% \footnote{The 
+% units here are either energy or photons per pixel, depending on the units 
+% chosen for $J_0$.  Photons are often the preferred unit since the noise 
+% characteristics often depend on photon counts.}
 \begin{align}
     I(\vec{q}) = J_0 r_e^2  \mathcal{P}(\vec{q}) \Delta \Omega
 \end{align}
@@ -285,24 +301,33 @@ with the understanding that
 \begin{align}
  \hvec{r} = \hvec{k} = \frac{\vec{q} - \vec{k}_0}{\abs{\vec{q} - \vec{k}_0}} \;.
 \end{align}
-A convenient form for calculations\footnote{The use of dot products rather 
-than angles is preferred since angles are often defined in different ways by 
-different textbooks and software packages.  Dot products are invariant to the 
-usual coordinate transformations.} is
-\begin{align}
+A convenient form for calculations is
+\begin{align} \label{eqn:Pfactor}
  \mathcal{P}(\vec{q}) &= 1 - \alpha(\hvec{k} \cdot \hvec{E}_1 )^2 - 
 (1-\alpha)(\hvec{k} \cdot \hvec{E}_2 )^2 \;.
 \end{align}
-
-
+The special cases of linear polarized ($\alpha=1$) and unpolarized light light 
+($\alpha=1/2$) often appear in textbooks as
+\begin{align}
+ \mathcal{P}(\phi) &= 1 - \sin^2\phi \;, & \alpha &=1   \\
+ \mathcal{P}(\theta) &= \frac{1}{2}\left[ 1 + \cos^22\theta \right] \;, &\alpha &=\frac{1}{2} 
+\end{align}
+where $2\theta$ is the scattering angle.  The use of dot products rather than 
+angles in equation \ref{eqn:Pfactor} speeds up calculations and avoids the need
+to figure out what $\phi$ is.
 
 \section{Weak Diffraction (Born approximation)}
 
-Consider the the scattered field from a free electron located at position $\vec{r}'$ under the influence of a plane wave
+Starting with the scattering field from a single electron, we build up the 
+diffraction from many electrons by superposition of the individual dipole 
+fields.  The diffraction pattern is caused by the phase shifts that result from
+electrons that are not located at the origin.
+For an electron at position 
+$\vec{r}'$ under the influence of a plane wave
 \begin{align}
- \vec{E}_0(\vec{r},t) = \vec{E}_0 \exp(i\vec{k}_0 \cdot \vec{r} - i \omega t)
+ \vec{E}_0(\vec{r},t) = \vec{E}_0 \exp(i\vec{k}_0 \cdot \vec{r} - i \omega t) \;,
 \end{align}
-The scattered field is
+the scattered field is
 \begin{align}
 \vec{E}_{\text{dip}}(\vec{r},t) =  \frac{r_e}{r} [\hvec{r} \times ( \hvec{r} \times  \vec{E}_0 )] \exp(i\vec{k}_0 \cdot \vec{r}' - i \omega t_r)
 \end{align}
@@ -316,7 +341,8 @@ have
 \begin{align}
 \vec{E}_{\text{dip}}(\vec{r},t) =  \frac{r_e}{r} [\hvec{r} \times ( \hvec{r} \times  \vec{E}_0 )]\exp\left(i\vec{k}_0 \cdot \vec{r}' - i\omega t + i \frac{\omega}{c}( r  - \hvec{r}\cdot \vec{r}')\right) \;.
 \end{align}
-Defining $\vec{k} = \omega/c\; \hvec{r}=2\pi/\lambda \hvec{r}$ (the outgoing wavevector, directed at the detector) and $\vec{q} = \vec{k}-\vec{k}_0$, we get
+Defining the outgoing wavevector $\vec{k} = \omega/c\; \hvec{r}=2\pi/\lambda \hvec{r}$ 
+(directed at the detector) and $\vec{q} = \vec{k}-\vec{k}_0$, we get
 \begin{align}
 \vec{E}_{\text{dip}}(\vec{r},t) =  r_e\frac{e^{ikr}}{r} e^{-i\omega t}[\hvec{r} \times ( \hvec{r} \times  \vec{E}_0 )]e^{-i\vec{q}\cdot\vec{r}'} \;.
 \end{align}
@@ -332,14 +358,13 @@ We typically define the ``form factor'' as
 \begin{align}\label{eqn:formfactor}
  F(\vec{q}) = \int \rho(\vec{r}') e^{-i\vec{q}\cdot\vec{r}'} d^3r' \;.
 \end{align}
-This form factor is just the Fourier transform of the electron density, with the conjugate variable $\vec{q}$ being defined by the incoming and outgoing wavevectors.  The time-averaged Poynting vector is\footnote{See Appendix \ref{sec:poynt} for details.}
+This form factor is just the Fourier transform of the electron density, with the conjugate variable $\vec{q}$ being defined by the incoming and outgoing wavevectors.  The time-averaged Poynting vector is
 \begin{align}
-\avg{\vec{S}(\vec{r})} = \frac{1}{\mu_0}\avg{
-\Re\{\vec{E}_{\text{diff}}\}\times\Re\{\vec{B}_{\text{diff}}\}} = r_e^2 
+\avg{\vec{S}(\vec{r})} =  r_e^2 
 \frac{1}{r^2} J_0 | \hvec{r} \times  \hvec{E}_0 |^2 \left| \int \rho(\vec{r}') 
 e^{-i\vec{q}\cdot\vec{r}'} d^3r' \right|^2 \hvec{r} \;.
 \end{align}
-Where we have used the incident intensity $J_0 = |\vec{E}_0|^2/2\mu_0c$.  
+where we have used the incident intensity $J_0 = |\vec{E}_0|^2/2\mu_0c$.  
 Assuming a detector pixel with area $d\vec{a} = r^2 d\Omega \hvec{r}$, the power 
 into the detector pixel is
 \begin{align}
@@ -352,16 +377,13 @@ Generalizing the polarization factor yields equation \ref{eqn:key}:
     I(\vec{q}) = J_0 r_e^2  \mathcal{P}(\vec{q})  
 \abs{\int \rho(\vec{r}') e^{-i\vec{q}\cdot\vec{r}'} d^3r'}^2 \Delta \Omega \;.
 \end{align}
-The only difference between a single point-like electron (equation  
-\ref{eqn:genthompson}) and a charge distribution (the above equation) is the 
-appearance of the form factor $F(\vec{q})$.   
+
 
 
 \section{Anomalous Dispersion}
 
 A simple classical model for ``anomalous dispersion'' was developed in 
-Griffiths chapter 9, as follows.  Instead of the free electron we considered in 
-the previous sections, we allow for a restoring force and a damping force in 
+Griffiths chapter 9 by adding a restoring force and a damping force in 
 addition to the driving force of the external field.  This model gets us 
 closer to one that includes the affects of the atom to which the electrons 
 are bound.  The position $\vec{x}$ of the electron obeys the following 
@@ -384,7 +406,8 @@ correction we should make to the radiation field is
 \end{align}
 We may call the term involving $\omega$ the ``anomalous dispersion correction''.
 Although it is a very simple model, captures many of the basic 
-frequency-dependent features of diffraction.  The correction to be made to our 
+frequency-dependent features of diffraction.  
+% The correction to be made to our 
 % previous derivations is to make the following replacement:
 % \begin{align}
 %     r_e^2 \rightarrow \frac{\omega^4}{(\omega_0^2-\omega^2)^2+\gamma^2 
@@ -401,7 +424,7 @@ electron density $\rho_n^{(0)}(r)$ and calculate the form factor in equation
 tabulations of scattering factors use a rotational symmetry approximation, and 
 it is very rare to image with resolutions that can resolve internal atomic 
 structure.} situated at the origin, the atomic scattering factor is defined
-as\footnote{Appendix \ref{sec:3d1d} derives \ref{eqn:form}.}
+as (appendix \ref{sec:3d1d} derives \ref{eqn:form})
 \begin{align}
 f_n^{(0)}(q)  = \int_{-\infty}^\infty \rho_n^{(0)}(r) \exp(-i 
 \vec{q}\cdot\vec{r}) \; d^3r = \int_0^\infty \rho_n^{(0)}(r)   
@@ -460,7 +483,8 @@ $N$ of such ``atoms'', the polarization (dipole moment per volume) is
 \vec{P}(t) = N \frac{e^2/m_e}{\omega_0^2 - \omega^2 - i \gamma \omega}\vec{E}_0 
 \exp(-i\omega t) \;.
 \end{align}
-Using the usual definitions for a linear material, $\vec{P} = \epsilon_0 \chi_e 
+Using the usual definitions for a non-magnetic linear material, 
+$\vec{P} = \epsilon_0 \chi_e 
 \vec{E}$, $\epsilon = \epsilon_0 (1+\chi_e)$, and $n = 
 \sqrt{\epsilon/\epsilon_0}$, we arrive at the refractive index 
 \begin{align}

@@ -29,7 +29,7 @@ from reborn.source import Beam
 from reborn.target import atoms
 from reborn.simulate.form_factors import sphere_form_factor
 from reborn.detector import jungfrau4m_pad_geometry_list
-from reborn.viewers.qtviews import view_pad_data
+from reborn.viewers.qtviews import PADView
 import scipy.constants as const
 
 # %%
@@ -106,4 +106,5 @@ for i in range(len(pads)):
 # Here is the final result, viewed on a log scale:
 
 dispim = [np.log10(a + 1) for a in intensities]
-view_pad_data(data=dispim, pad_geometry=pads)
+pv = PADView(data=dispim, pad_geometry=pads)
+pv.start()

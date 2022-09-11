@@ -82,7 +82,14 @@ profiler = detector.RadialProfiler(beam=beam, pad_geometry=geom, n_bins=100, q_r
 # to use your own statistic.
 
 # %%
-# The fastest way to get radial profiles is to use the quickstats method, which is based on fortran code.
+# The fastest way to get radial profiles is to use the quickstats method, which is based on fortran code and produces
+# the sums
+#
+# .. math::
+#
+#     _i = \sum_{i=1}^N w_i I_i
+#
+
 
 t = time.time()
 stats = profiler.quickstats(water_pattern)
@@ -90,9 +97,7 @@ print(f"{(time.time()-t)*1000} milliseconds to calculate the following:")
 print(stats.keys())
 
 # %%
-# The older and slower way to do things is the following.  The only benefit to this approach is that you can calculate
-# arbitrary statistics using function handles, which is useful if you would like to have, for example, the median
-# values of each q ring.
+# Convenience methods exist to avoid
 
 t = time.time()
 # calculating the mean of each q bin
