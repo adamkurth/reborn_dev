@@ -30,10 +30,10 @@ def test_02():
     sum_ = np.zeros(n_bins)
     sum2 = np.zeros(n_bins)
     w_sum = np.zeros(n_bins)
-    q_min = 0.5
+    q_min = 0.5  # Bins are |___0.5___|___1.5___|___2.5___|
     q_max = 2.5
     fortran.scatter_f.profile_stats(pattern, q, weights, n_bins, q_min, q_max, sum_, sum2, w_sum)
-    assert(np.max(np.abs(sum_ - np.array([9, 2, 17]))) == 0)
+    assert(np.max(np.abs(sum_ - np.array([8, 2, 17]))) == 0)
     indices = np.empty(6, dtype=np.int32)
     fortran.scatter_f.profile_indices(q, n_bins, q_min, q_max, indices)
     sum_1 = sum_.copy()

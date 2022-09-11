@@ -21,7 +21,7 @@ import os
 import json
 import numpy as np
 import pkg_resources
-from . import utils, source, const
+from . import utils, source, const, fortran
 try:
     from .fortran import polar_f
 except ImportError:
@@ -49,16 +49,16 @@ def _dbgmsg(*args, **kwargs):
 
 def cached(method):
     r""" Experimental decorator for caching results from a method.  Assumes no arguments are needed. """
-    def wrapper(self):
+    def wrapper(self, *args, **kwargs):
         r""" Method wrapper. """
         if self.do_cache:
             attr = '__cached__'+method.__name__
             if hasattr(self, attr):
                 _dbgmsg('Returning cached result:', attr)
-            out = method(self)
+            out = method(self, *args, **kwargs)
             setattr(self, attr, out)
             return out
-        out = method(self)
+        out = method(self, *args, **kwargs)
         return out
     return wrapper
 
@@ -490,33 +490,41 @@ class PADGeometry:
         """
         return self.t_vec + (self.n_fs - 1) * self.fs_vec / 2.0 + (self.n_ss - 1) * self.ss_vec / 2.0
 
-    def average_detector_distance(self, beam):
+    def average_detector_distance(self, beam=None, beam_vec=None):
         r"""
         Get the average detector distance, which is equal to the dot product between the beam direction vector and the
         vector pointing to the center of the PAD.
 
         Args:
             beam (|Beam|): Beam parameters.
+            beam_vec (|ndarray|): Beam direction (if |Beam| not specified)
 
         Returns:
             float
         """
-        return beam.beam_vec.dot(self.center_pos_vec())
+        if beam is not None:
+            beam_vec = beam.beam_vec
+        beam_vec = np.array(beam_vec)
+        return beam_vec.dot(self.center_pos_vec())
 
-    def set_average_detector_distance(self, distance, beam):
+    def set_average_detector_distance(self, distance, beam=None, beam_vec=None):
         r"""
         Set the average detector distance.  The translation moves along the beam direction by default.
 
         Args:
             distance (float): The desired distance
             beam (|Beam|): Beam properties (the direction is needed).
+            beam_vec (|ndarray|): Beam direction (if |Beam| not specified)
 
         Returns:
             None
         """
-        t = self.average_detector_distance(beam)*beam.beam_vec
+        if beam is not None:
+            beam_vec = beam.beam_vec
+        beam_vec = np.array(beam_vec)
+        t = self.average_detector_distance(beam)*beam_vec
         self.translate(-t)
-        self.translate(distance*beam.beam_vec)
+        self.translate(distance*beam_vec)
 
     def norm_vec(self, beam=None):
         r"""
@@ -561,6 +569,7 @@ class PADGeometry:
             beam = source.Beam(beam_vec=beam_vec)
         return self.s_vecs() - beam.beam_vec
 
+    @cached
     def q_vecs(self, beam=None, **kwargs):
         r"""
         Calculate scattering vectors :math:`\frac{2\pi}{\lambda}(\hat{s} - \hat{s}_0)`
@@ -575,13 +584,14 @@ class PADGeometry:
 
         Returns: |ndarray|
         """
-        # if beam is None:
-        #     utils.warn('You need to define the beam.')
-        #     beam_vec = dict_default(kwargs, 'beam_vec', None)
-        #     wavelength = dict_default(kwargs, 'wavelength', None)
-        #     beam = source.Beam(beam_vec=beam_vec, wavelength=wavelength)
+        if beam is None:
+            utils.warn('You need to define the beam.')
+            beam_vec = dict_default(kwargs, 'beam_vec', None)
+            wavelength = dict_default(kwargs, 'wavelength', None)
+            beam = source.Beam(beam_vec=beam_vec, wavelength=wavelength)
         return (2 * np.pi / beam.wavelength) * self.ds_vecs(beam=beam)
 
+    @cached
     def ds_mags(self, beam=None, **kwargs):
         r"""
         These are the magnitudes that correspond to
@@ -597,6 +607,7 @@ class PADGeometry:
             beam = source.Beam(beam_vec=beam_vec)
         return utils.vec_mag(self.ds_vecs(beam=beam))
 
+    @cached
     def q_mags(self, beam=None, **kwargs):
         r"""
         Calculate scattering vector magnitudes:
@@ -657,6 +668,7 @@ class PADGeometry:
         solid_angle_2 = utils.triangle_solid_angle(corner4, corner2, corner3)
         return solid_angle_1 + solid_angle_2
 
+    @cached
     def polarization_factors(self, beam=None, e1=None, b=None, a=None):
         r"""
         The scattering polarization factors.
@@ -690,6 +702,7 @@ class PADGeometry:
             polarization_factor += weight2 * (1 - np.abs(np.dot(pix_vec, polarization_vec_2)) ** 2)
         return polarization_factor.ravel()
 
+    @cached
     def scattering_angles(self, beam=None, **kwargs):
         r"""
         Scattering angles (i.e. twice the Bragg angles).
@@ -706,6 +719,7 @@ class PADGeometry:
             beam = source.Beam(beam_vec=beam_vec)
         return np.arccos(utils.vec_norm(self.position_vecs()).dot(beam.beam_vec.ravel()))
 
+    @cached
     def azimuthal_angles(self, beam):
         r"""
         The azimuthal angles of pixels in |spherical_coordinates|.  In the physics convention, the incident beam points
@@ -772,6 +786,7 @@ class PADGeometry:
             mask[r > max_radius] = 0
         return self.reshape(mask)
 
+    @cached
     def f2phot(self, beam=None):
         r""" Returns the conversion factor needed to convert structure factors :math:`|F(\vec q)|^2` to photon counts.
         Specifically, this function returns :math:`\alpha_i` in the expression
@@ -824,6 +839,7 @@ class PADGeometry:
         """
         return np.random.random((self.n_ss, self.n_fs), *args, **kwargs)  # pylint: disable=no-member
 
+    @cached
     def max_resolution(self, beam=None):
         r"""
         Maximum resolution over all pixels: 2*pi/q
@@ -893,8 +909,9 @@ class PADGeometryList(list):
     """
 
     _name = ''
-    _q_mags = None
+    q_mags = None
     _groups = []
+    do_cache = False
 
     def __init__(self, pad_geometry=None, filepath=None):
         r"""
@@ -1128,36 +1145,45 @@ class PADGeometryList(list):
         r""" Same as the matching method in |PADGeometry|."""
         save_pad_geometry_list(file_name, self)
 
+    @cached
     def position_vecs(self):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
         return self.concat_vecs([p.position_vecs() for p in self])
 
-    def average_detector_distance(self, beam):
+    def average_detector_distance(self, beam=None, beam_vec=None):
         r""" Same as the matching method in |PADGeometry|, but averaged over all PADs. """
-        return np.mean(np.array([d.average_detector_distance(beam) for d in self]))
+        return np.mean(np.array([d.average_detector_distance(beam=beam, beam_vec=beam_vec) for d in self]))
 
-    def set_average_detector_distance(self, distance, beam):
+    def set_average_detector_distance(self, distance, beam=None, beam_vec=None):
         r""" Same as the matching method in |PADGeometry|. """
-        t = self.average_detector_distance(beam) * beam.beam_vec
+        if beam is not None:
+            beam_vec = beam.beam_vec
+        beam_vec = np.array(beam_vec)
+        t = self.average_detector_distance(beam_vec=beam_vec) * beam_vec
         self.translate(-t)
-        self.translate(distance * beam.beam_vec)
+        self.translate(distance * beam_vec)
 
+    @cached
     def s_vecs(self):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
         return self.concat_vecs([p.s_vecs() for p in self])
 
+    @cached
     def ds_vecs(self, beam):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
         return self.concat_vecs([p.ds_vecs(beam=beam) for p in self])
 
+    @cached
     def q_vecs(self, beam):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
         return self.concat_vecs([p.q_vecs(beam=beam) for p in self])
 
+    @cached
     def q_mags(self, beam):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
         return self.concat_data([p.q_mags(beam=beam).ravel() for p in self])
 
+    @cached
     def solid_angles(self):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
         return self.concat_data([p.solid_angles().ravel() for p in self])
@@ -1170,18 +1196,22 @@ class PADGeometryList(list):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
         return self.concat_data([p.solid_angles2().ravel() for p in self])
 
+    @cached
     def polarization_factors(self, beam):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
         return self.concat_data([p.polarization_factors(beam=beam).ravel() for p in self])
 
+    @cached
     def scattering_angles(self, beam):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
         return self.concat_data([p.scattering_angles(beam=beam).ravel() for p in self])
 
+    @cached
     def f2phot(self, beam):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
         return self.concat_data([p.f2phot(beam=beam).ravel() for p in self])
 
+    @cached
     def azimuthal_angles(self, beam):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
         return self.concat_data([p.azimuthal_angles(beam).ravel() for p in self])
@@ -1202,6 +1232,7 @@ class PADGeometryList(list):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
         return self.concat_data([p.random(*args, **kwargs).ravel() for p in self])
 
+    @cached
     def max_resolution(self, beam):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
         return np.max(np.array([p.max_resolution(beam=beam) for p in self]))
@@ -1701,9 +1732,9 @@ class PolarPADAssembler:
 
 class RadialProfiler:
     r"""
-    A class for creating radial profiles from image data.  You must provide the number of bins and the q range that
-    you desire for your radial profiles.  The q magnitudes that correspond to your diffraction patterns may be
-    derived from a list of |PADGeometry|'s along with a |Beam|, or you may supply the q magnitudes directly.
+    A class for creating radial profiles from image data.  Standard profiles are computed using fortran code.  Bin
+    indices are cached for speed, provided that the |PADGeometry| and |Beam| do not change.
+    Arbitrary profiles can also be computed (slowly!) provided a function handle that operates on an |ndarray|.
     """
     # pylint: disable=too-many-instance-attributes
     n_bins = None  # Number of bins in radial profile
@@ -1714,14 +1745,13 @@ class RadialProfiler:
     bin_size = None  # The size of the 1D profile bin in q space
     _q_mags = None  # q magnitudes corresponding to diffraction pattern intensities
     _mask = None  # The default mask, in case no mask is provided upon requesting profiles
-    _counts_profile = None  # For speed, we cache the counts corresponding to the default _mask
-    pad_geometry = None  # List of PADGeometry instances
-    beam = None  # Beam instance for creating q magnitudes
+    _fortran_indices = None  # For speed, pre-index arrays
+    _pad_geometry = None  # List of PADGeometry instances
+    _beam = None  # Beam instance for creating q magnitudes
 
-    def __init__(self, q_mags=None, mask=None, n_bins=None, q_range=None, pad_geometry=None, beam=None, _plan=True):
+    def __init__(self, mask=None, n_bins=None, q_range=None, pad_geometry=None, beam=None, q_mags=None):
         r"""
         Arguments:
-            q_mags (|ndarray|): Optional.  Array of q magnitudes.
             mask (|ndarray|): Optional.  The arrays will be multiplied by this mask, and the counts per radial bin
                                 will come from this (e.g. use values of 0 and 1 if you want a normal average, otherwise
                                 you get a weighted average).
@@ -1732,76 +1762,71 @@ class RadialProfiler:
             beam (|Beam| instance): Optional, unless pad_geometry is provided.  Wavelength and beam direction are
                                      needed in order to calculate q magnitudes.
         """
-        if _plan:
-            self.make_plan(q_mags=q_mags, mask=mask, n_bins=n_bins, q_range=q_range,
-                           pad_geometry=pad_geometry, beam=beam)
+        self.make_plan(q_mags=q_mags, mask=mask, n_bins=n_bins, q_range=q_range, pad_geometry=pad_geometry, beam=beam)
 
-    def copy(self):
-        r""" Make a copy of this profiler.  Copy all internal data. """
-        # pylint: disable=protected-access
-        rp = RadialProfiler(_plan=False)
-        if self.n_bins is not None:
-            rp.n_bins = self.n_bins
-            rp.q_range = self.q_range
-            rp.q_edge_range = self.q_edge_range.copy()
-            rp.bin_centers = self.bin_centers.copy()
-            rp.bin_edges = self.bin_edges.copy()
-            rp.bin_size = self.bin_size
-            rp._q_mags = self._q_mags.copy()
-            rp.pad_geometry = self.pad_geometry.copy()
-            rp.beam = self.beam.copy()
-        if self._mask is not None:
-            rp._mask = self._mask.copy()
-        if self._counts_profile is not None:
-            rp._counts_profile = self._counts_profile.copy()
-        # pylint: enable=protected-access
-        return rp
-
-    @property
-    def mask(self):
-        r""" PAD masks. """
-        if self._mask is not None:
-            return self._mask.copy()
-        return None
-
-    @mask.setter
-    def mask(self, mask):
-        if mask is not None:
-            mask = self.concat_data(mask)
-
-            # if self._mask is not None:  # Check if we already have an identical mask
-            #     if np.sum(np.abs(mask - self.mask)) == 0:
-            #         return
-            self._mask = mask.copy()  # Ensure a properly flattened array
-            self._counts_profile = None  # Wipe out this profile
+    # def copy(self):
+    #     r""" Make a copy of this profiler.  Copy all internal data. """
+    #     # pylint: disable=protected-access
+    #     rp = RadialProfiler()
+    #     if self.n_bins is not None:
+    #         rp.n_bins = self.n_bins
+    #         rp.q_range = self.q_range
+    #         rp.q_edge_range = self.q_edge_range.copy()
+    #         rp.bin_centers = self.bin_centers.copy()
+    #         rp.bin_edges = self.bin_edges.copy()
+    #         rp.bin_size = self.bin_size
+    #         rp._q_mags = self._q_mags.copy()
+    #         rp._pad_geometry = self._pad_geometry.copy()
+    #         rp._beam = self._beam.copy()
+    #         rp._mask = self._mask.copy()
+    #     # pylint: enable=protected-access
+    #     return rp
 
     def set_mask(self, mask):
-        r""" Update the mask.
+        r""" Update the mask.  Concatenate (if needed), copy, and make it un-writeable.
 
         Arguments:
-            mask (|ndarray| or list of |ndarray|): Mask
+            mask (|ndarray|): Mask.
         """
-        self.mask = mask
+        if mask is not None:
+            self._mask = self.concat_data(mask).copy()
+        else:
+            self._mask = np.ones(len(self._q_mags))
+        self._mask = self._mask.astype(np.float64)  # Because fortran code is involved
+        self._mask.flags['WRITEABLE'] = False
+
+    def set_beam(self, beam):
+        r""" Update the |Beam| with a copy and clear out derived caches.
+
+        Arguments:
+            beam (|Beam|): Beam properties.
+        """
+        self._beam = beam.copy()
+        self._q_mags = None
+        self._fortran_indices = None
+
+    def set_pad_geometry(self, geom):
+        r""" Update the |PADGeometryList| with a copy and clear out derived caches.
+
+        Arguments:
+            geom (|PADGeometryList|): PAD geometry.
+        """
+        self._pad_geometry = PADGeometryList(geom).copy()
+        self._q_mags = None
+        self._fortran_indices = None
+
+    def _calc_q_mags(self):
+        self._q_mags = self._pad_geometry.q_mags(beam=self._beam).astype(np.float64)
 
     @property
     def q_bin_centers(self):
         r""" The centers of the q bins. """
-        return self.bin_centers.copy()
-
-    @property
-    def counts_profile(self):
-        r""" The number of pixels in each radial bin. """
-        if self._counts_profile is None:
-            if self.mask is None:
-                self._counts_profile, _ = np.histogram(self._q_mags, bins=self.n_bins, range=self.q_edge_range)
-            else:
-                self._counts_profile, _ = np.histogram(self._q_mags, weights=self.mask, bins=self.n_bins,
-                                                       range=self.q_edge_range)
-        return self._counts_profile
+        return self.bin_centers
 
     def make_plan(self, q_mags=None, mask=None, n_bins=None, q_range=None, pad_geometry=None, beam=None):
         r"""
-        Setup the binning indices for the creation of radial profiles.
+        Set up the binning indices for the creation of radial profiles.  Cache some useful data to speed things up
+        later.
 
         Arguments:
             q_mags (|ndarray|): Optional.  Array of q magnitudes.
@@ -1815,14 +1840,19 @@ class RadialProfiler:
             beam (|Beam| instance): Optional, unless pad_geometry is provided.  Wavelength and beam direction are
                                      needed in order to calculate q magnitudes.
         """
-
-        if q_mags is None:
+        if q_mags is not None:
+            utils.depreciate("Initialize RadialProfiler with |PADGeometryList| and |Beam|, not q_mags.")
+            self._q_mags = q_mags.copy()
+            self._q_mags.flags['WRITEABLE'] = False
+        else:
             if pad_geometry is None:
-                raise ValueError("You must provide a |PADGeometry| if q_mags are not provided in RadialProfiler")
+                raise ValueError("You must provide a |PADGeometry| to initialize RadialProfiler")
             if beam is None:
-                raise ValueError("You must provide a |Beam| if q_mags are not provided in RadialProfiler")
-            pad_geometry = PADGeometryList(pad_geometry)
-            q_mags = pad_geometry.q_mags(beam=beam)
+                raise ValueError("You must provide a |Beam| to initialize RadialProfiler")
+            self.set_pad_geometry(pad_geometry)
+            self.set_beam(beam)
+            self._calc_q_mags()
+            q_mags = self._q_mags
         if q_range is None:
             q_range = (0, np.max(q_mags))
         if n_bins is None:
@@ -1832,26 +1862,28 @@ class RadialProfiler:
         bin_centers = np.linspace(q_range[0], q_range[1], n_bins)
         bin_edges = np.linspace(q_range[0] - bin_size / 2, q_range[1] + bin_size / 2, n_bins + 1)
         q_edge_range = np.array([q_range[0] - bin_size / 2, q_range[1] + bin_size / 2])
-        self._q_mags = q_mags
         self.n_bins = n_bins
         self.bin_centers = bin_centers
         self.bin_edges = bin_edges
         self.bin_size = bin_size
         self.q_range = q_range
         self.q_edge_range = q_edge_range
-        self.pad_geometry = pad_geometry
-        self.mask = mask
-        self.beam = beam
+        self.set_mask(mask)
+        self.bin_centers.flags['WRITEABLE'] = False
+        self.bin_edges.flags['WRITEABLE'] = False
+        self.q_range.flags['WRITEABLE'] = False
+        self.q_edge_range.flags['WRITEABLE'] = False
 
     def concat_data(self, data):
         r""" Concatenate 2D diffraction data. """
-        if self.pad_geometry is not None:
-            return self.pad_geometry.concat_data(data)
+        if self._pad_geometry is not None:
+            return self._pad_geometry.concat_data(data)
+        utils.depreciate("Do not use RadialProfiler without a |PADGeometryList|.  Data structure may depend on it.")
         return concat_pad_data(data)
 
     def get_profile_statistic(self, data, mask=None, statistic=None):
         r"""
-        Calculate the radial profile of averaged intensities.
+        Calculate the radial profile using an arbitrary function.
 
         Arguments:
             data (|ndarray|): The intensity data from which the radial profile is formed.
@@ -1859,41 +1891,43 @@ class RadialProfiler:
                                  provided here, the mask configured with :meth:`set_mask` will be used.
             statistic (function or list of functions): Provide a function of your choice that runs on each radial bin.
 
-
         Returns: |ndarray|
         """
         data = self.concat_data(data)
-        q_mags = self._q_mags
-        if mask is not None:
-            self.mask = mask
-        if self.mask is not None:
-            w = np.where(self.mask)
-            data = data[w]
-            q_mags = q_mags[w]
+        q = self._q_mags
+        if mask is None:
+            mask = self._mask
+        w = np.where(self._mask)
+        data = data[w]
+        q = q[w]
         list_type = False
         if isinstance(statistic, list):
+            utils.depreciate('Do not provide a list of statistics in RadialProfiler.get_profile_statistic.  Use a '
+                             'list comprehension instead.')
             list_type = True
         statistic = utils.ensure_list(statistic)
         stat = []
         for s in statistic:
-            stat.append(utils.binned_statistic(q_mags, data, s, self.n_bins, (self.bin_edges[0], self.bin_edges[-1])))
+            stat.append(utils.binned_statistic(q, data, s, self.n_bins, (self.bin_edges[0], self.bin_edges[-1])))
         if not list_type:
             stat = stat[0]
         return stat
 
-    def get_counts_profile(self, mask=None):
-        r""" Calculate the radial profile of counts that fall in each bin.
+    def get_counts_profile(self, mask=None, quick=True):
+        r""" Calculate the radial profile of counts that fall in each bin.  If the mask is not binary, then the "counts"
+        are actually the sum of weights in each bin.
 
         Arguments:
-            mask (|ndarray|): Optional mask (one means "good")
+            mask (|ndarray|): Optional mask.  Uses cache if not provided.
 
         Returns:
-            |ndarray| : The counts profile
+            |ndarray|
         """
-        data = np.ones(self.pad_geometry.n_pixels)
-        return self.get_profile_statistic(data, mask=mask, statistic=np.sum)
+        data = np.ones(len(self._q_mags), dtype=np.float64)
+        stats = self.quickstats(data, weights=mask)
+        return stats['sum']
 
-    def get_sum_profile(self, data, mask=None):
+    def get_sum_profile(self, data, mask=None, quick=True):
         r"""
         Calculate the radial profile of summed intensities.  This is divided by counts to get an average.
 
@@ -1903,10 +1937,10 @@ class RadialProfiler:
 
         Returns:  |ndarray|
         """
-        # data = self.concat_data(data)
-        return self.get_profile_statistic(data, mask=mask, statistic=np.sum)
+        stats = self.quickstats(data, weights=mask)
+        return stats['sum']
 
-    def get_mean_profile(self, data, mask=None):
+    def get_mean_profile(self, data, mask=None, quick=True):
         r"""
         Calculate the radial profile of averaged intensities.
 
@@ -1917,8 +1951,8 @@ class RadialProfiler:
 
         Returns: |ndarray|
         """
-        # data = self.concat_data(data)
-        return self.get_profile_statistic(data, mask=mask, statistic=np.mean)
+        stats = self.quickstats(data, weights=mask)
+        return stats['mean']
 
     def get_median_profile(self, data, mask=None):
         r"""
@@ -1931,10 +1965,9 @@ class RadialProfiler:
 
         Returns:  |ndarray|
         """
-        # data = self.concat_data(data)
         return self.get_profile_statistic(data, mask=mask, statistic=np.median)
 
-    def get_sdev_profile(self, data, mask=None):
+    def get_sdev_profile(self, data, mask=None, quick=True):
         r"""
         Calculate the standard deviations of radial bin.
 
@@ -1945,8 +1978,8 @@ class RadialProfiler:
 
         Returns:  |ndarray|
         """
-        # data = self.concat_data(data)
-        return self.get_profile_statistic(data, mask=mask, statistic=np.std)
+        stats = self.quickstats(data, weights=mask)
+        return stats['sdev']
 
     def subtract_profile(self, data, mask=None, statistic=np.median):
         r"""
@@ -1970,7 +2003,6 @@ class RadialProfiler:
             mprof = self.get_median_profile(data, mask=mask)
         else:
             mprof = self.get_profile_statistic(data, mask=mask, statistic=statistic)
-            # raise ValueError('Statistic %s not recognized' % (statistic,))
         mprofq = self.bin_centers
         mpat = np.interp(self._q_mags, mprofq, mprof)
         mpat = self.concat_data(mpat)
@@ -1978,7 +2010,7 @@ class RadialProfiler:
         data = data.copy()
         data -= mpat
         if as_list:
-            data = self.pad_geometry.split_data(data)
+            data = self._pad_geometry.split_data(data)
         return data
 
     def divide_profile(self, data, mask=None, statistic=np.median):
@@ -1992,7 +2024,7 @@ class RadialProfiler:
             statistic (function): Provide a function of your choice that runs on each radial bin.
 
         Returns:
-
+            |ndarray|
         """
         as_list = False
         if isinstance(data, list):
@@ -2011,7 +2043,7 @@ class RadialProfiler:
         data = data.copy()
         data /= mpat
         if as_list:
-            data = self.pad_geometry.split_data(data)
+            data = self._pad_geometry.split_data(data)
         return data
 
     def subtract_median_profile(self, data, mask=None):
@@ -2019,22 +2051,57 @@ class RadialProfiler:
         Given some PAD data, calculate the radial median and subtract it from the data.
 
         Arguments:
-            data:
-            mask:
+            data (|ndarray|): Intensities.
+            mask (|ndarray|): Mask.
 
         Returns:
-
+            |ndarray|
         """
         return self.subtract_profile(data, mask=mask, statistic=np.median)
 
-    def get_profile(self, data, mask=None, average=True):
-        r"""
-        This method is depreciated.  Use get_mean_profile or get_sum_profile instead.
+    # def get_profile(self, data, mask=None, average=True):
+    #     r"""
+    #     This method is depreciated.  Use get_mean_profile or get_sum_profile instead.
+    #     """
+    #     utils.depreciate("RadialProfiler.get_profile() is depreciated.  Use RadialProfiler.quickstats().")
+    #     if average is True:
+    #         return self.get_mean_profile(data, mask=mask)
+    #     return self.get_sum_profile(data, mask=mask)
+
+    def quickstats(self, data, weights=None):
+        r""" Use the faster fortran functions to get the mean and standard deviations.  These are weighted by the
+        mask, and you are allowed to use non-binary values in the mask.  The proper weighting is most likely equal
+        to the product of the pixel solid angle, the polarization factor, and the binary mask.
+
+        Arguments:
+            data (|ndarray|): Diffraction intensities.
+            weights (|ndarray|): Weights (or binary mask if you prefer unweighted average)
+
+        Returns:
+            dict
         """
-        utils.depreciate("RadialProfiler.get_profile() is depreciated.  Use RadialProfiler.get_mean_profile().")
-        if average is True:
-            return self.get_mean_profile(data, mask=mask)
-        return self.get_sum_profile(data, mask=mask)
+        q = self._q_mags
+        data = self.concat_data(data).astype(np.float64)
+        if weights is None:
+            weights = self._mask.astype(np.float64)
+        q_min = self.q_range[0]
+        q_max = self.q_range[1]
+        n_bins = self.n_bins
+        sum_ = np.zeros(n_bins, dtype=np.float64)
+        sum2 = np.zeros(n_bins, dtype=np.float64)
+        w_sum = np.zeros(n_bins, dtype=np.float64)
+        indices = self._fortran_indices
+        if indices is None:  # Cache for faster computing next time.
+            indices = np.zeros(len(q), dtype=np.int32)
+            fortran.scatter_f.profile_indices(q, n_bins, q_min, q_max, indices)
+            self._fortran_indices = indices
+        fortran.scatter_f.profile_stats_indexed(data, indices, weights, sum_, sum2, w_sum)
+        # fortran.scatter_f.profile_stats(data, q, weights, n_bins, q_min, q_max, sum_, sum2, w_sum)
+        meen = np.empty(n_bins, dtype=np.float64)
+        std = np.empty(n_bins, dtype=np.float64)
+        fortran.scatter_f.profile_stats_avg(sum_, sum2, w_sum, meen, std)
+        out = dict(mean=meen, sdev=std, sum=sum_, sum2=sum2, weight_sum=w_sum)
+        return out
 
 
 def get_radial_profile(data, beam, pad_geometry, mask=None, n_bins=None, q_range=None, statistic=np.mean):
@@ -2127,7 +2194,7 @@ def pnccd_pad_geometry_list(detector_distance=0.1, binning=None):
     Returns: |PADGeometryList|
     """
     pads = load_pad_geometry_list(pnccd_geom_file)
-    pads.translate([0, 0, detector_distance])
+    pads.set_average_detector_distance(detector_distance, beam_vec=[0, 0, 1])
     if binning is not None:
         pads = pads.binned(binning=binning)
     return pads
@@ -2144,7 +2211,7 @@ def cspad_pad_geometry_list(detector_distance=0.1, binning=None):
     Returns: |PADGeometryList|
     """
     pads = load_pad_geometry_list(cspad_geom_file)
-    pads.translate([0, 0, detector_distance])
+    pads.set_average_detector_distance(detector_distance, beam_vec=[0, 0, 1])
     if binning is not None:
         pads = pads.binned(binning=binning)
     return pads
@@ -2161,7 +2228,7 @@ def cspad_2x2_pad_geometry_list(detector_distance=2.4, binning=None):
     Returns: |PADGeometryList|
     """
     pads = load_pad_geometry_list(cspad_2x2_geom_file)
-    pads.translate([0, 0, detector_distance])
+    pads.set_average_detector_distance(detector_distance, beam_vec=[0, 0, 1])
     if binning is not None:
         pads = pads.binned(binning=binning)
     return pads
@@ -2178,7 +2245,7 @@ def jungfrau4m_pad_geometry_list(detector_distance=0.1, binning=None):
     Returns: |PADGeometryList|
     """
     pads = load_pad_geometry_list(jungfrau4m_geom_file)
-    pads.translate([0, 0, detector_distance])
+    pads.set_average_detector_distance(detector_distance, beam_vec=[0, 0, 1])
     if binning is not None:
         pads = pads.binned(binning=binning)
     return pads
@@ -2195,8 +2262,7 @@ def epix10k_pad_geometry_list(detector_distance=0.1, binning=None):
     Returns: |PADGeometryList|
     """
     pads = load_pad_geometry_list(epix10k_geom_file)
-    pads.translate([0, 0, -0.1])
-    pads.translate([0, 0, detector_distance])
+    pads.set_average_detector_distance(detector_distance, beam_vec=[0, 0, 1])
     if binning is not None:
         pads = pads.binned(binning=binning)
     return pads
@@ -2213,7 +2279,7 @@ def epix100_pad_geometry_list(detector_distance=0.1, binning=None):
     Returns: |PADGeometryList|
     """
     pads = load_pad_geometry_list(epix100_geom_file)
-    pads.translate([0, 0, detector_distance-2.4])
+    pads.set_average_detector_distance(detector_distance, beam_vec=[0, 0, 1])
     if binning is not None:
         pads = pads.binned(binning=binning)
     return pads
@@ -2230,8 +2296,7 @@ def mpccd_pad_geometry_list(detector_distance=0.1, binning=None):
     Returns: |PADGeometryList|
     """
     pads = load_pad_geometry_list(mpccd_geom_file)
-    pads.translate([0, 0, -0.056])
-    pads.translate([0, 0, detector_distance])
+    pads.set_average_detector_distance(detector_distance, beam_vec=[0, 0, 1])
     if binning is not None:
         pads = pads.binned(binning=binning)
     return pads
@@ -2249,10 +2314,10 @@ def rayonix_mx340_xfel_pad_geometry_list(detector_distance=0.1, binning=None, re
     Returns: |PADGeometryList|
     """
     pads = load_pad_geometry_list(rayonix_mx340_xfel_geom_file)
-    pads.translate([0, 0, detector_distance])
+    pads.set_average_detector_distance(detector_distance, beam_vec=[0, 0, 1])
     if binning is not None:
         pads = pads.binned(binning=binning)
-    if return_mask:
+    if return_mask:  # TODO: Need to bin the mask if binning is not None
         mask = pads.ones()
         xyz = pads[0].position_vecs()
         xyz[:, 2] = 0

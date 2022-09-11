@@ -139,7 +139,7 @@ def depreciate(*args, caller=0, **kwargs):
 
     Returns: None
     """
-    msg = "WARNING:DEPRECIATION"
+    msg = "*** WARNING *** DEPRECIATION:"
     if caller >= 0:
         msg += get_caller(1)
     msg += ':'

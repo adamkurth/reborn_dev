@@ -137,13 +137,7 @@ print(vecs.shape)
 # %%
 # One of the most frequently used quantities that |PADGeometry| provides are the q vectors.  However, a |PADGeometry|
 # class alone cannot provide q vectors, because q vectors, by definition, require knowledge of the x-ray wavelength and
-# the direction of the beam.  Here is one way to get the q vectors:
-
-q_vecs = pad.q_vecs(beam_vec=[0, 0, 1], wavelength=1.5e-10)
-
-# %%
-# As in the above, we provided the beam direction and wavelength, which helps clarify what is meant when we say "reborn
-# makes no prior assumptions about geometry".  Since beam direction and wavelength are frequently needed, reborn
+# the direction of the beam.  Since beam direction and wavelength are frequently needed, reborn
 # provides the |Beam| class as a compact container for various beam properties.  For example:
 
 beam = source.Beam(wavelength=1.5e-10, pulse_energy=1e-3)

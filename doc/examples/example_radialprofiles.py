@@ -17,11 +17,13 @@ r"""
 .. _example_radialprofiles:
 
 Making Radial Profiles
-=========================================
+======================
 
 Demonstration of how to use `reborn`'s RadialProfiler class.
 
 Contributed by Konstantinos Karpos
+
+Updated by Richard A. Kirian
 
 """
 
@@ -29,58 +31,46 @@ Contributed by Konstantinos Karpos
 # Overview
 # --------
 #
-# Radial profiles are an essential step in X-Ray diffraction data analysis. This example 
-# goes over a few basic examples on how to use the built in `RadialProfiler` class within `reborn`. 
+# Radial profiles are an essential step in solution and powder diffraction analysis. This example
+# goes over a few basic examples on how to use the built-in `RadialProfiler` class within `reborn`.
+#
+# We start with the usual import block:
 
+import time
+import numpy as np
+import matplotlib.pyplot as plt
+from reborn import source, detector, const
+from reborn.simulate import solutions
+from reborn.viewers.qtviews import view_pad_data
 
 # %%
 # Initializing the RadialProfiler class
 # -------------------------------------
 #
 # As is the case in every diffraction analysis or simulation, the geometry of your detector is required before
-# any further steps are taken. For the sake of simplicity, we can use a built in PADGeometry. We should also initialize
+# any further steps are taken. For the sake of simplicity, we can use a built-in PADGeometry. We should also initialize
 # beam class while we're setting things up.
 
-import reborn
-from scipy import constants
-
-eV = constants.value('electron volt')  # J
-
 # Note that detector_geometry is in terms of meters
-rayonix_geom = reborn.detector.rayonix_mx340_xfel_pad_geometry_list(detector_distance=0.1)
-beam = reborn.source.Beam(photon_energy=10000*eV)
+geom = detector.rayonix_mx340_xfel_pad_geometry_list(detector_distance=0.2, binning=10)
+beam = source.Beam(photon_energy=8000*const.eV)
 
 # %%
-# Next, we should simulate a water pattern for use throughout the example. 
+# Next, we simulate a water pattern for use throughout the example:
 
-from reborn.simulate import solutions
-
-water_pattern = solutions.get_pad_solution_intensity(pad_geometry=rayonix_geom,
-                                                            beam=beam,
-                                                            thickness=5e-6,
-                                                            liquid='water',
-                                                            temperature=293.15,
-                                                            poisson=False)
+water_pattern = solutions.get_pad_solution_intensity(pad_geometry=geom, beam=beam, thickness=5e-6, liquid='water',
+                                                     temperature=293.15, poisson=False)
 
 # %%
-# Let's display the pattern so we can get an idea of what the pattern looks like.
-from reborn.viewers.mplviews import view_pad_data
+# Let's display the pattern:
 
-view_pad_data(pad_geometry=rayonix_geom, data=water_pattern)
+view_pad_data(pad_geometry=geom, data=water_pattern)
 
 # %%
 # Now that we have our basic setup, we can calculate our radial profiles.
 # Before doing so, we'll need to initialize the RadialProfiler class.
 
-from reborn.detector import RadialProfiler
-import numpy as np
-
-profiler = RadialProfiler(beam=beam,
-                            pad_geometry=rayonix_geom,
-                            n_bins=1000, # number of histogram bins, 1000 is usually our default
-                            q_range=np.array([0, 3.2]) * 1e10, # reborn is SI, so the qrange is in units of meters
-                            mask=None)
-
+profiler = detector.RadialProfiler(beam=beam, pad_geometry=geom, n_bins=100, q_range=np.array([0, 3.2]) * 1e10)
 
 # %%
 # Basic Usage
@@ -91,25 +81,40 @@ profiler = RadialProfiler(beam=beam,
 # deviation, etc. Examples of the built-in functions are shown below, with the final example covering how 
 # to use your own statistic.
 
-import pylab as plt
+# %%
+# The fastest way to get radial profiles is to use the quickstats method, which is based on fortran code.
 
+t = time.time()
+stats = profiler.quickstats(water_pattern)
+print(f"{(time.time()-t)*1000} milliseconds to calculate the following:")
+print(stats.keys())
+
+# %%
+# The older and slower way to do things is the following.  The only benefit to this approach is that you can calculate
+# arbitrary statistics using function handles, which is useful if you would like to have, for example, the median
+# values of each q ring.
+
+t = time.time()
 # calculating the mean of each q bin
 mean_radial = profiler.get_mean_profile(water_pattern)
 # get the standard deviation in each bin
 standard_deviation_radial = profiler.get_sdev_profile(water_pattern)
 # and now the sum
 sum_radial = profiler.get_sum_profile(water_pattern)
-# continuing on with the photon counts per q bin
+# continuing on with the number of pixels per q bin
 counts_radial = profiler.get_counts_profile(water_pattern)
+print(f"{(time.time()-t)*1000} milliseconds.")
 
+# %%
 # Finally, to calculate any statistic, the following function is available. 
 # Note that for the sake of the example, np.var() and np.median are used. Any function can be used here.
 statistic_radial_1 = profiler.get_profile_statistic(water_pattern, statistic=np.var)
 statistic_radial_2 = profiler.get_profile_statistic(water_pattern, statistic=np.median)
 
+# %%
 # let's plot each statistic for the fun of it.
-qrange = np.linspace(0, 3.2, 1000) # converting from bins to q
-fig, ax = plt.subplots(2, 3, figsize=(12,6), sharex=True)
+qrange = profiler.q_bin_centers*1e-10
+fig, ax = plt.subplots(2, 3, figsize=(12, 6), sharex=True)
 
 ax[0][0].plot(qrange, mean_radial)
 ax[0][0].set_title("Mean Radial")

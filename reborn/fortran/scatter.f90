@@ -83,8 +83,14 @@ subroutine profile_stats(pattern, q, weights, n_bins, q_min, q_max, sum, sum2, w
     qm = q_min - dq/2
     do i=1, npat
         j = floor((q(i)-qm)/dq) + 1
-        j = min(j, n_bins)
-        j = max(j, 1)
+        if (j > n_bins) then
+            cycle
+        end if
+        if (j < 1) then
+            cycle
+        end if
+!        j = min(j, n_bins)
+!        j = max(j, 1)
         sum(j) = sum(j) + pattern(i)*weights(i)
         sum2(j) = sum2(j) + pattern(i)**2*weights(i)
         w_sum(j) = w_sum(j) + weights(i)
@@ -105,8 +111,16 @@ subroutine profile_indices(q, n_bins, q_min, q_max, indices)
     qm = q_min - dq/2
     do i=1, npat
         j = floor((q(i)-qm)/dq) + 1
-        j = min(j, n_bins)
-        j = max(j, 1)
+        if (j > n_bins) then
+            j = 0
+            cycle
+        end if
+        if (j < 1) then
+            j = 0
+            cycle
+        end if
+!        j = min(j, n_bins)
+!        j = max(j, 1)
         indices(i) = j
     end do
 end subroutine profile_indices
@@ -122,6 +136,9 @@ subroutine profile_stats_indexed(pattern, indices, weights, sum, sum2, w_sum)
     npat = size(pattern, 1)
     do i=1, npat
         j = indices(i)
+        if (j < 1) then
+            cycle
+        end if
         sum(j) = sum(j) + pattern(i)*weights(i)
         sum2(j) = sum2(j) + pattern(i)**2*weights(i)
         w_sum(j) = w_sum(j) + weights(i)

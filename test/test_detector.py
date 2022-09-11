@@ -137,12 +137,14 @@ def test_PADAssembler():
 
 
 def test_radial_profiler_01():
-    pad_geom = detector.PADGeometry(shape=[3, 3], distance=1.0, pixel_size=100e-6)
+    pad_geom = detector.PADGeometry(shape=(3, 3), distance=1.0, pixel_size=100e-6)
     q_mags = pad_geom.q_mags(beam_vec=[0, 0, 1], wavelength=1.0e-10)
+    print(q_mags)
     # q_mags = [8885765.80967349 6283185.28361764 8885765.80967349 6283185.28361764 0. 6283185.28361764
     #           8885765.80967349 6283185.28361764 8885765.80967349]
     dat = np.ones([3, 3])
     rad = detector.RadialProfiler(q_mags=q_mags, mask=None, n_bins=3, q_range=[0, 9283185])
+    print(rad.bin_edges)
     # rad.bin_edges = [-2320796.25  2320796.25  6962388.75 11603981.25]
     profile = rad.get_sum_profile(dat)  # Sums over
     assert profile[0] == 1
@@ -194,17 +196,17 @@ def test_radial_profiler_03():
     prof1 = rad.get_mean_profile(data)
     prof2 = rad.get_profile_statistic(data, statistic=np.mean)
     prof3, _ = detector.get_radial_profile(data, beam, pads, n_bins=100, statistic=np.mean)
-    assert(np.max(np.abs(prof1-prof2)) == 0)
-    assert(np.max(np.abs(prof3-prof2)) == 0)
+    assert(np.max(np.abs(prof1-prof2)) < 1e-10)
+    assert(np.max(np.abs(prof3-prof2)) < 1e-10)
 
 
-def test_radial_profiler_04():
-    pads = detector.cspad_2x2_pad_geometry_list()
-    beam = source.Beam(wavelength=1.0e-10)
-    rad = detector.RadialProfiler(beam=beam, pad_geometry=pads, mask=None, n_bins=100)
-    rad_mod = rad.copy()
-    m1 = rad._mask
-    m2 = rad_mod._mask
+# def test_radial_profiler_04():
+#     pads = detector.cspad_2x2_pad_geometry_list()
+#     beam = source.Beam(wavelength=1.0e-10)
+#     rad = detector.RadialProfiler(beam=beam, pad_geometry=pads, mask=None, n_bins=100)
+#     rad_mod = rad.copy()
+#     m1 = rad._mask
+#     m2 = rad_mod._mask
 
 
 def test_vector_math():
