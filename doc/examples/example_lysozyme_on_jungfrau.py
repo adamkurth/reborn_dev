@@ -29,7 +29,7 @@ from scipy.spatial.transform import Rotation
 from reborn import source, detector, const
 from reborn.target import crystal, atoms
 from reborn.simulate import clcore
-from reborn.viewers.qtviews import view_pad_data
+from reborn.viewers.qtviews import PADView
 
 # %%
 # Define some constants and other parameters that we'll need:
