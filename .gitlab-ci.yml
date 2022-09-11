@@ -27,7 +27,7 @@ doc:
   script:
   - Xvfb :1 &  # Using X Virtual Framebuffer for capturing Qt windows
   - export DISPLAY=:1
-  - cd $reborn/doc
+  - cd $reborn/developer
   - bash update_docs.sh
   except:
   - master
@@ -36,8 +36,9 @@ pages:
   script:
   - Xvfb :1 &  # Using X Virtual Framebuffer for capturing Qt windows
   - export DISPLAY=:1
-  - cd $reborn/doc
+  - cd $reborn/developer
   - bash update_docs.sh
+  - cd $reborn/doc
   - cp -r build/html ../public
   artifacts:
     paths:
