@@ -2,37 +2,28 @@
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{graphicx}
-\usepackage{geometry}
-%\usepackage{physics}
-%\usepackage{enumitem}
-\geometry{
-a4paper,
-left=20mm,
-right=20mm,
-top=20mm,
-bottom=20mm,
-}
-%\usepackage[makeroom]{cancel}
-%\usepackage{color}
 \usepackage{hyperref}
-%\usepackage[utf8]{inputenc}
-%\usepackage[T1]{fontenc}
-
-
+\usepackage{geometry}
+\geometry{a4paper,left=20mm,right=20mm,top=20mm,bottom=20mm}
 \setlength{\parindent}{0ex}
 \setlength{\parskip}{10pt}
+%\usepackage{physics}
+%\usepackage{enumitem}
+%\usepackage[makeroom]{cancel}
+%\usepackage{color}
+%\usepackage[utf8]{inputenc}
+%\usepackage[T1]{fontenc}
 
 \renewcommand{\vec}[1]{\boldsymbol{#1}}
 \newcommand{\hvec}[1]{\hat{\vec{#1}}}
 \newcommand{\avg}[1]{\left\langle #1 \right\rangle}
 \newcommand{\abs}[1]{\left| #1 \right|}
 % Griffiths "script r"
-\def\rcurs{{\mbox{$\resizebox{.09in}{.08in}{\includegraphics[trim= 1em 0 14em 0,clip]{fonts/ScriptR}}$}}}
-\def\brcurs{{\mbox{$\resizebox{.09in}{.08in}{\includegraphics[trim= 1em 0 14em 0,clip]{fonts/BoldR}}$}}}
-\def\hrcurs{{\mbox{$\hat \brcurs$}}}
+\newcommand{\rcurs}{{\mbox{$\resizebox{.09in}{.08in}{\includegraphics[trim= 1em 0 14em 0,clip]{fonts/ScriptR}}$}}}
+\newcommand{\brcurs}{{\mbox{$\resizebox{.09in}{.08in}{\includegraphics[trim= 1em 0 14em 0,clip]{fonts/BoldR}}$}}}
+\newcommand{\hrcurs}{{\mbox{$\hat \brcurs$}}}
 
-
-\title{Classical derivation of far-field elastic x-ray scattering under the first Born approximation}
+\title{Classical far-field elastic x-ray scattering under the first Born approximation}
 \author{Richard A. Kirian}
 \date{\today}
 

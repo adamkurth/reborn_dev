@@ -1,10 +1,10 @@
 #!/bin/bash
-
 if [[ ! $(basename "$(pwd)") = 'developer' ]]; then
     echo 'This script should run in the developer directory.'
     exit
 fi
-
-export PYTHONPATH=$(cd ..; pwd):$PYTHONPATH
-cd ../test
-pytest $@
+[ -d logs ] || mkdir logs
+PYTHONPATH=$(cd ..; pwd):$PYTHONPATH
+export PYTHONPATH
+cd ../test || exit
+pytest "$@" | tee ../developer/logs/run_tests.log
