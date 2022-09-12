@@ -2085,7 +2085,7 @@ class RadialProfiler:
         if weights is None:
             weights = self._mask.astype(np.float64)
         else:
-            weights = self.concate_data(weights).astype(np.float64)
+            weights = self.concat_data(weights).astype(np.float64)
         q_min = self.q_range[0]
         q_max = self.q_range[1]
         n_bins = self.n_bins
