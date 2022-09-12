@@ -1923,9 +1923,9 @@ class RadialProfiler:
         Returns:
             |ndarray|
         """
-        data = np.ones(len(self._q_mags), dtype=np.float64)
+        data = np.empty(len(self._q_mags), dtype=np.float64)
         stats = self.quickstats(data, weights=mask)
-        return stats['sum']
+        return stats['weight_sum']
 
     def get_sum_profile(self, data, mask=None, quick=True):
         r"""
@@ -2084,6 +2084,8 @@ class RadialProfiler:
         data = self.concat_data(data).astype(np.float64)
         if weights is None:
             weights = self._mask.astype(np.float64)
+        else:
+            weights = self.concate_data(weights).astype(np.float64)
         q_min = self.q_range[0]
         q_max = self.q_range[1]
         n_bins = self.n_bins
