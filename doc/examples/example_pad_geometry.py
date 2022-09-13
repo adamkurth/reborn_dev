@@ -31,22 +31,20 @@ Edited by Konstantinos Karpos.
 # Overview
 # --------
 #
-# Nearly everyone who works with XFEL diffraction gets confused when they encounter data that consists of multiple
-# Pixel Array Detectors (PADs).  This happens when people get used to synchrotron detectors that consist of single
-# PADs (usually fake single PADs created by software), or when students begin with simulation projects and later try to
-# adapt their code to real data.  In this example, we hope to provide guidance on how to write code that handles
-# multiple PADs.
+# Most scattering experiments at XFELs involve segmented Pixel Array Detectors (PADs).  It is therefore ideal to build
+# analysis code around the assumption that multiple PADs may be present.  The |reborn| package began with this singular
+# task -- to make it easier to write custom code that handles segmented PADs, and to easily view multiple PADs.  Here
+# we provide some examples of how to make use of these tools.
 #
 # .. note::
 #
 #     This documentation does not describe what a PAD is.  If you are unfamiliar with the basic concept of a PAD and the
-#     vectors used to describe PAD geometry in reborn, first read the :ref:`documentation <doc_pads>` before moving
-#     forward from this point.
+#     3-vector convention used to describe PAD geometry in |reborn|, first read the |detector_documentation|
+#     before moving forward from this point.
 #
 # The starting point for working with PAD data is to specify the geometry of the PADs.  The reborn package provides the
-# |PADGeometry| class to do so in a *standardized way*.  Note that a single |PADGeometry|
-# instance only contains the information of a *single* PAD; you need multiple |PADGeometry| instances to handle multiple
-# PADs.  We will get to that later in this example.
+# |PADGeometry| class to do so in a standardized way.  Note that a |PADGeometry| instance only contains the
+# information of a single PAD, but the |PADGeometryList| class makes it easy to work with multiple PADs.
 
 
 # %%
@@ -64,10 +62,15 @@ from reborn import detector, source, temp_dir
 from reborn.viewers.qtviews import PADView
 
 pad = detector.PADGeometry()
+
+# %%
+# The print function will produce some useful information:
+
 print(pad)
 
 # %%
-# As you see, none of the five necessary parameters are specified.  We can specify them manually:
+# As you see, none of the five necessary parameters are specified.  Using defaults tends to cause confusion.  We can
+# specify them manually:
 
 pad.n_fs = 100
 pad.n_ss = 200
@@ -76,7 +79,7 @@ pad.ss_vec = [0, 100e-6, 0]
 
 # %%
 # In the above, we specified only four of the five necessary parameters.  As a result, your code will likely raise
-# ValueErrors.  For convenience, you may validate your |PADGeometry|:
+# ValueErrors.  For convenience, there is a ``validate`` method to check that your |PADGeometry| is reasonable:
 
 try:
     pad.validate()
@@ -84,13 +87,11 @@ except ValueError:
     print('ValueError excepted')
 
 # %%
-# Now we add in the final parameter, which is the overall translation of the PAD.  Be mindful of the fact that we will
-# define "detector distance", and then set it to the third coordinate (i.e. "z") of the translation vector.  This of
-# course depends on how you define "detector distance".  In our case, we understand that "detector distance" refers to
-# the "z" component, which is the third component of our vectors, and which is orthogonal to the gravitational force
-# (to be absolutely clear...).  It is not uncommon for others to assume the x-ray beam points in a totally different
-# direction.  In fact, the x-ray beam rarely points exactly along the so-called "z" direction, because KB focusing
-# optics deflect the beam (for example).  When defining PAD geometry parameters, one must think.
+# Now we add in the final parameter, which is the overall translation of the PAD.  We will set the "detector
+# distance" to the third vector component (perhaps called the "z" component), keeping in mind that it is not uncommon
+# for others to assume the x-ray beam and detector translation point along a different axis.  In reality, the x-ray beam
+# rarely points exactly along *any* of the coordinate axes, because focusing optics tend to deflect the beam.
+# Ultimately, one just needs to be consistent with the ordering of vector components.
 
 detector_distance = 1
 pad.t_vec = [-50*100e-6, -100*100e-6, detector_distance]
@@ -103,7 +104,7 @@ print(pad.t_vec.shape)
 
 # %%
 # Now that we know how to configure a |PADGeometry| "manually", we point out that there is an initialization function
-# that you might find useful:
+# that you might find useful when making an idealized detector geometry:
 
 pad = detector.PADGeometry(distance=detector_distance, shape=(100, 200), pixel_size=100e-6)
 
@@ -135,18 +136,16 @@ print(vecs.shape)
 # specifying multiple vectors in reborn.
 
 # %%
-# One of the most frequently used quantities that |PADGeometry| provides are the q vectors.  However, a |PADGeometry|
-# class alone cannot provide q vectors, because q vectors, by definition, require knowledge of the x-ray wavelength and
-# the direction of the beam.  Since beam direction and wavelength are frequently needed, reborn
-# provides the |Beam| class as a compact container for various beam properties.  For example:
+# One of the most frequently used quantities that |PADGeometry| provides are the :math:`q` vectors.  However, a
+# |PADGeometry| class alone cannot provide q vectors, because q vectors, by definition, require knowledge of the
+# x-ray wavelength and the direction of the indident x-ray beam.  Since beam direction and wavelength are frequently
+# needed, reborn provides the |Beam| class as a compact container for various beam properties.  For example:
 
 beam = source.Beam(wavelength=1.5e-10, pulse_energy=1e-3)
-q_vecs = pad.q_vecs(beam=beam)  # noqa
+q_vecs = pad.q_vecs(beam=beam)
 
 # %%
 # In the above, the default beam direction for the |Beam| class is [0, 0, 1], but you may configure this as you see fit.
-#
-# %%
 # There are other quantities that require beam information, such as the polarization factors:
 
 polfacs = pad.polarization_factors(beam=beam)
@@ -193,51 +192,59 @@ pad2.t_vec[0] += 51*psize
 # At this stage, it would be useful to be able to visualize our PAD list, so let's create some data to look at.  For
 # convenience, we set our data equal to a totally uniform scatterer, and we include the polarization factor:
 
-data = [np.random.random(p.n_pixels)*p.polarization_factors(beam=beam) for p in pads]
+data_list = [np.random.random(p.n_pixels)*p.polarization_factors(beam=beam) for p in pads]
 print(pads[0])
 
 # %%
 # The reborn package provides tools to view lists of data arrays, provided matching lists of |PADGeometry| instances:
 
-pv = PADView(data=data, pad_geometry=pads, pad_numbers=True)
+pv = PADView(data=data_list, pad_geometry=pads, pad_numbers=True)
 pv.start()
 
 # %%
-# We now have a list of data arrays along with corresponding PAD geometry information.  We could write analysis code
-# around these lists.  For example, suppose we wish to correct for the polarization factor.
+# We now have a list of data arrays along with corresponding list of |PADGeometry| instances.  We could write analysis
+# code that loops over the detectors as follows.  For example, suppose we wish to correct for the polarization factor:
 
-for (p, d) in zip(pads, data):
+for (p, d) in zip(pads, data_list):
     d /= p.polarization_factors(beam=beam)
-pv = PADView(data=data, pad_geometry=pads, pad_numbers=True)
+pv = PADView(data=data_list, pad_geometry=pads, pad_numbers=True)
 pv.start()
 
 # %%
-# The above is in essence how one must handle multiple PADs.  Looping over multiple PADs is inescapable fact of life
-# for folks who analyze XFEL data.  It is a nuisance, but reborn attempts to make the process less annoying.
-#
-# The |PADGeometryList| class in reborn is a subclass of the built-in python list class, so it has all the
-# features of a python list instance, but it adds a few methods that are specific to lists of |PADGeometry|.  This is
-# perhaps easiest to explain by doing the same operations as the above:
+# You can avoid looping over lists as in the above example if you make use of the |PADGeometryList| class in reborn. It
+# is a subclass of the built-in python list class, so it has all the features of a python list instance, but it adds
+# a few methods that are specific to lists of |PADGeometry|.  This is perhaps easiest to explain by doing the same
+# operations as the above:
 
 pads = detector.PADGeometryList(pads)  # Transform normal list to PADGeometryList
-data = np.random.random(pads.n_pixels)*pads.polarization_factors(beam=beam)
-print(data.shape)
+polfacs_concat = pads.polarization_factors(beam=beam)
+print(polfacs_concat.shape)
+
+# %%
+# The ``polarization_factors`` method now returns a 1D array, but it is the concatenation of all the PADs in the list.
+# We can also concatenate the data array to match the shape of the polarization factors:
+
+data_list = [np.random.random(p.n_pixels)*p.polarization_factors(beam=beam) for p in pads]
+data_concat = pads.concat_data(data_list)
+print(data_concat.shape)
+
+data_concat /= polfacs_concat
 
 # %%
 # As you can see, data is now a single |ndarray|, and it's length is equal to the combined length of all PADs in the
 # list.  This is a concatenated data array, and it is particularly useful for array operations that benefit from
 # vectorization, such as the simple multiplication we did above.  We can display the data as we did before:
 
-pv = PADView(data=data, pad_geometry=pads, pad_numbers=True)
+pv = PADView(data=data_concat, pad_geometry=pads, pad_numbers=True)
 pv.start()
 
 # %%
-# Note that, because the view_pad_data function was given a |PADGeometryList|, it was able to split up the data even
+# Note that, because the PADView was given a |PADGeometryList|, it was able to split up the data even
 # though a concatenated array was passed in.  We try to enable such capabilities in reborn wherever it is appropriate,
 # but it is usually best if you split up your data into individual panels once you are done with your array-based
 # operations.  This is easy to do:
 
-data_split = pads.split_data(data)
+data_split = pads.split_data(data_concat)
 print(type(data_split))
 # %%
 print(data_split[0].shape)
@@ -246,11 +253,11 @@ data_concat = pads.concat_data(data_split)
 print(data_concat.shape)
 
 # %%
-# As shown above, we can easily move between concatenated data arrays and lists of individual 2D |ndarray| s.  If you
-# are doing image-processing steps using functions in scipy (for example), you will almost certainly need to write loops
-# over the individual 2D |ndarray| s.  For example:
+# As shown above, we can easily move between concatenated data arrays and lists of individual 2D |ndarray| s.  The
+# concatenated data is usually the fastest way to do things, but some functions need to operate on individual PADs
+# in the form of 2D |ndarray| s.  For example:
 
-for i in range(len(data_split)):
+for i in range(len(pads)):
     data_split[i] = gaussian_filter(data_split[i], sigma=4)
 pv = PADView(data=data_split, pad_geometry=pads, pad_numbers=True)
 pv.start()
@@ -276,7 +283,7 @@ print(p_vecs.shape)
 # -----------------------------
 
 # %%
-# `reborn` provides multiple detector geometries that are ready for use. Say your experiment used the SACLA MPCCD
+# |reborn| provides multiple detector geometries that are ready for use. Say your experiment used the SACLA MPCCD
 # detector and you would like to display a 2D pattern. The `reborn.detector.mpccd_pad_geometry_list()` function 
 # will provide that detector as a |PADGeometryList| object, which can be manipulated using the methods described above.
 
@@ -289,7 +296,7 @@ pv.start()
 
 # %%
 # Note the use of multiple panels here. Changing panel properties is easy from here. For example,
-# say you would like to rotate your detector by 45 degrees. 
+# say you would like to rotate your detector.
 
 theta = 45 * np.pi / 180  # reborn uses radians by default
 
@@ -299,7 +306,7 @@ R2 = np.array([[np.cos(theta), 0, np.sin(theta)], [0, 1, 0], [-np.sin(theta), 0,
 R = R1.dot(R2)
 
 # %%
-# Let's see what this looks like with one panel, first.
+# Let's see what this looks like with one panel rotated:
 
 geom_1 = mpccd_geom.copy()  # make a copy of the pad geometry so you don't mess with the original
 geom_1[0].fs_vec = np.dot(geom_1[0].fs_vec, R.T)
@@ -309,12 +316,12 @@ pv = PADView(pad_geometry=geom_1, data=data)
 pv.start()
 
 # %%
-# The bottom left panel was rotated by 45 degrees.  Note that the `view_pad_data()`
-# function is a projection operation, so although it looks like it simply shrunk, the panel 
-# shows a 2D projected rotation.
+# The PADView class applies affine transformations that emulate a projection operation to the individual PADs (the Qt
+# objects); we do not interpolate into an |ndarray| and display the interpolation.
 
 # %%
-# Now let's apply to this to the whole detector.
+# Now let's apply to the rotation operation to the entire detector:
+
 geom_2 = mpccd_geom.copy()  # make a copy of the pad geometry so you don't mess with the original
 
 # Loop across each panel and perform the rotation operation

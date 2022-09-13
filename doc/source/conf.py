@@ -41,6 +41,7 @@ intersphinx_mapping = {'python': ('http://docs.python.org/2', None),
 rst_epilog = """
 .. |examples|  replace:: :ref:`examples`
 .. |binning|  replace:: :ref:`binning`
+.. |detector_documentation|  replace:: :ref:`detector documentation <doc_detector>`
 
 .. |Beam|  replace:: :class:`Beam <reborn.source.Beam>`
 .. |ClCore|  replace:: :mod:`ClCore <reborn.simulate.clcore.ClCore>`
@@ -58,6 +59,7 @@ rst_epilog = """
 .. |slice|  replace:: `slice <https://docs.python.org/dev/library/functions.html#slice>`__
 .. |sliced|  replace:: `sliced <https://docs.python.org/dev/library/functions.html#slice>`__
 
+.. |reborn|  replace:: `reborn <https://kirianlab.gitlab.io/reborn/>`__
 .. |Jungfrau|  replace:: `Jungfrau <https://lcls.slac.stanford.edu/detectors/jungfrau>`__
 .. |xraylib|  replace:: `xraylib <https://github.com/tschoonj/xraylib/wiki>`__
 .. |pyopencl|  replace:: `pyopencl <https://documen.tician.de/pyopencl/index.html>`__
