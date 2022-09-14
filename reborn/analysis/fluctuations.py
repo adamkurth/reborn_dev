@@ -35,14 +35,15 @@ def correlate(s1, s2=None, cached=False):
     Returns:
         correlation (|ndarray|): correlation of s1 and s2
     """
-    if cached:
-        a = s1
-        b = a.copy() if s2 is None else s2
-    else:
-        a = np.fft.fft(s1, axis=1)
-        b = a.copy() if s2 is None else np.fft.fft(s2, axis=1)
-    correlation = np.fft.ifft(a * np.conj(b))
-    return correlation.real
+    if not cached:
+        s1 = np.fft.fft(s1, axis=1)
+        if s2 is not None:
+            s2 = np.fft.fft(s2, axis=1)
+    if s2 is None:
+        s2 = s1.copy()
+    cor_fft = s1 * s2.conj()
+    correlation = np.fft.ifft(cor_fft, axis=1)
+    return np.real(correlation)
 
 
 def subtract_masked_data_mean(data, mask):
@@ -54,14 +55,15 @@ def subtract_masked_data_mean(data, mask):
         data (|ndarray|): data
         mask (|ndarray|): mask (i.e. data to ignore)
     Returns:
-        data (|ndarray|): (data - <data>_q) / max(data)
+        data (|ndarray|): data - <data>_q
     """
-    d_sum = np.sum(data * mask, axis=1)
+    data[mask == 0] = 0
+    d_sum = np.sum(data, axis=1)
     count = np.sum(mask, axis=1)
-    d_zro = np.zeros_like(d_sum)
-    d_avg = np.divide(d_sum, count, out=d_zro, where=count != 0)
+    zs = np.zeros_like(d_sum)
+    d_avg = np.divide(d_sum, count, out=zs, where=count != 0)
     d = (data.T - d_avg).T
-    d *= mask  # re-zero masked pixels
+    d[mask == 0] = 0  # re-zero masked pixels
     return d
 
 
@@ -77,21 +79,20 @@ def data_correlation(n, data, mask, cached=False):
         mask (|ndarray|): mask (i.e. data to ignore)
         cached (bool): provide ffts instead of computing
     Returns:
-        ccf (|ndarray|): cross correlation function of data
+        ccf (|ndarray|): cross correlation of data
     """
-    zros = np.zeros_like(data)
-    d = data * mask
+    zs = np.zeros_like(data)
+    data[mask == 0] = 0
+    d_roll = None
+    m_roll = None
     if not cached:
-        d = subtract_masked_data_mean(d, mask)
-    if n == 0:
-        d_cf = correlate(s1=d, cached=cached)
-        m_cf = correlate(s1=mask, cached=cached)
-    else:
-        d_roll = np.roll(d, n, axis=0)
-        m_roll = np.roll(mask, n, axis=0)
-        d_cf = correlate(s1=d, s2=d_roll, cached=cached)
-        m_cf = correlate(s1=mask, s2=m_roll, cached=cached)
-    return np.divide(d_cf, m_cf, out=zros, where=m_cf != 0)
+        data = subtract_masked_data_mean(data=data, mask=mask)
+    if n > 0:
+        d_roll = np.roll(data, shift=n, axis=0)
+        m_roll = np.roll(mask, shift=n, axis=0)
+    d_cf = correlate(s1=data, s2=d_roll, cached=cached)
+    m_cf = correlate(s1=mask, s2=m_roll, cached=cached)
+    return np.divide(d_cf, m_cf, out=zs, where=m_cf != 0)
 
 
 def compute_data_correlations(data, mask):
@@ -106,15 +107,12 @@ def compute_data_correlations(data, mask):
     Returns:
         correlations (dict): correlations of data
     """
-    d = data * mask
-    d = subtract_masked_data_mean(d, mask)
-    d = np.fft.fft(d, axis=1)
-    mask = np.fft.fft(mask, axis=1)
+    data[mask == 0] = 0
     q_range = data.shape[0]
-    correlations = {n: data_correlation(n=n, data=d,
-                                        mask=mask, cached=True)
-                    for n in range(q_range)}
-    return correlations
+    data = subtract_masked_data_mean(data=data, mask=mask)
+    d = np.fft.fft(data, axis=1)
+    m = np.fft.fft(mask, axis=1)
+    return [data_correlation(n=n, data=d, mask=m, cached=True) for n in range(q_range)]
 
 
 class FXS:
@@ -177,7 +175,7 @@ class FXS:
 
     @property
     def run_var(self):
-        return self._run_sum2 - self._run_sum ** 2
+        return [rs2 - rs ** 2 for rs, rs2 in zip(self._run_sum, self._run_sum2)]
 
     def __str__(self):
         out = "Fluctuation X-ray Scattering\n"
@@ -211,8 +209,8 @@ class FXS:
                 if self._run_sum_correlations is None:
                     self._run_sum_correlations = self._frame_correlations
                 else:
-                    for k, v in self._frame_correlations.items():
-                        self._run_sum_correlations[k] += v
+                    for i, fc in enumerate(self._frame_correlations):
+                        self._run_sum_correlations[i] += fc
 
                 if self._run_max is None:
                     self._run_max = self._frame_data
@@ -247,8 +245,8 @@ class FXS:
             if self._run_sum_correlations is None:
                 self._run_sum_correlations = fxso.run_sum_correlations
             else:
-                for k, v in fxso.run_sum_correlations.items():
-                    self._run_sum_correlations[k] += v
+                for i, c in enumerate(fxso.run_sum_correlations):
+                    self._run_sum_correlations[i] += c
 
             if self._run_max is None:
                 self._run_max = fxso.run_max
@@ -275,22 +273,23 @@ class FXS:
             print("Only merging FXS objects is supported at this time.", end="\r")
 
     def get_run_correlations(self):
-        n = self._n_patterns
-        return {k: v / n for k, v in self._run_sum_correlations.items()}
+        return [c / self._n_patterns for c in self._run_sum_correlations]
 
     def get_auto_correlations(self):
         return self._run_sum_correlations[0] / self._n_patterns
 
-    def get_saxs(self, pattern, statistic=np.mean):
+    def get_saxs(self, pattern, mask=None, statistic=None):
         if self._radial_profiler is None:
             p = None
         else:
-            p = self._radial_profiler.get_profile_statistic(pattern, statistic=statistic)
+            p = self._radial_profiler.quickstats(data=pattern, weights=mask)
+            if statistic is not None:
+                p = p[statistic]
         return p
 
     def to_dict(self):
         kam_cor = self.get_run_correlations()
-        base_keys = [f'analysis/kam_correlations/{k}' for k in kam_cor.keys()] + \
+        base_keys = [f'analysis/kam_correlations/{k}' for k in range(len(kam_cor))] + \
                     ['analysis/saxs', 'analysis/n_patterns',
                      'analysis/run_max', 'analysis/run_min',
                      'analysis/run_sum', 'analysis/run_sum2',
@@ -303,14 +302,13 @@ class FXS:
         qs = self._polar_assembler.q_mags
         phis = self._polar_assembler.phis
         rsum = np.array(self._run_sum)
-        sxs = self.get_saxs(pattern=rsum / self.n_patterns, statistic=np.mean)
+        sxs = self.get_saxs(pattern=rsum / self.n_patterns)
         if sxs is None:
             saxs = 'None'
         else:
             saxs = sxs
-        base_vals = [v for v in kam_cor.values()] + \
-                    [saxs, self.n_patterns,
-                     self.run_max, self.run_min, self.run_sum, self._run_sum2,
-                     nq, nphi, qs[-1], qs[0], phis[-1], phis[0],
-                     self.experiment_id, self.run_id]
+        base_vals = kam_cor + [saxs, self.n_patterns,
+                               self.run_max, self.run_min, self.run_sum, self._run_sum2,
+                               nq, nphi, qs[-1], qs[0], phis[-1], phis[0],
+                               self.experiment_id, self.run_id]
         return dict(zip(base_keys, base_vals))

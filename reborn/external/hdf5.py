@@ -19,19 +19,79 @@ from ..detector import concat_pad_data, PADGeometry, PADGeometryList
 from ..source import Beam
 
 
-def save_pad_geometry_as_h5(pad_geometry, h5_file_path):
+def _allkeys(obj):
+    # https://stackoverflow.com/questions/59897093/get-all-keys-and-its-hierarchy-in-h5-file-using-python-library-h5py
+    keys = (obj.name,)
+    if isinstance(obj, h5py.Group):
+        for key, value in obj.items():
+            if isinstance(value, h5py.Group):
+                keys = keys + _allkeys(value)
+            else:
+                keys = keys + (value.name,)
+    return keys
+
+
+def all_keys_in_file(h5_file_path):
     r"""
-    Save |PADGeometryList| in an HDF5 file format in a standardized way.
+    Gather all keys an HDF5 file.
+
+    Arguments:
+        h5_file_path (str): filename
+    """
+    with h5py.File(h5_file_path, 'a') as hf:
+        keys = _allkeys(hf)
+    return keys
+
+
+def save_metadata_as_h5(h5_file_path, experiment_id, run_id):
+    r"""
+    Save metadata in an HDF5 file in a standardized way.
+
+    Arguments:
+        h5_file_path (str): filename
+        experiment_id (str): experiment id
+        run_id (int): experiment run id
+    """
+    metadata = {'meta/experiment_id': f'{experiment_id}',
+                'meta/run_id': run_id}
+    file_keys = all_keys_in_file(h5_file_path)
+    with h5py.File(h5_file_path, 'a') as hf:
+        for k, v in metadata.items():
+            if k not in file_keys:
+                hf.create_dataset(k, data=v)
+    print(f'Saved metadata: {h5_file_path}')
+
+
+def load_metadata_from_h5(h5_file_path):
+    r"""
+    Load metadata from an HDF5 file in a standardized way.
+
+    Arguments:
+        h5_file_path (str): filename
+    """
+    metadata = dict()
+    with h5py.File(h5_file_path, 'a') as hf:
+        metadata['experiment_id'] = hf['meta/experiment_id'][()].decode('utf-8')
+        metadata['run_id'] = hf['meta/run_id']
+    return metadata
+
+
+def save_pad_geometry_as_h5(h5_file_path, pad_geometry):
+    r"""
+    Save |PADGeometryList| in an HDF5 file in a standardized way.
 
     FIXME: Missing the parent_data_slice and parent_data_shape info.
 
     Arguments:
-        pad_geometry (|PADGeometryList|): pad geometry to save
         h5_file_path (str): filename
+        pad_geometry (|PADGeometryList|): pad geometry to save
     """
+    file_keys = all_keys_in_file(h5_file_path)
     with h5py.File(h5_file_path, 'a') as hf:
         for i, pad in enumerate(pad_geometry):
             p = f'geometry/pad_{i:03n}'
+            if p in file_keys:
+                continue
             hf.create_dataset(f'{p}/t_vec', data=pad.t_vec)
             hf.create_dataset(f'{p}/fs_vec', data=pad.fs_vec)
             hf.create_dataset(f'{p}/ss_vec', data=pad.ss_vec)
@@ -67,18 +127,21 @@ def load_pad_geometry_from_h5(h5_file_path):
     return geometry
 
 
-def save_mask_as_h5(mask, h5_file_path):
+def save_mask_as_h5(h5_file_path, mask):
     r"""
-    Save mask in an HDF5 file format in a standardized way.
+    Save mask in an HDF5 file in a standardized way.
 
     Arguments:
-        mask (list or |ndarray|): mask to save
         h5_file_path (str): filename
+        mask (list or |ndarray|): mask to save
     """
+    file_keys = all_keys_in_file(h5_file_path)
     if isinstance(mask, list):
         mask = concat_pad_data(mask)
     with h5py.File(h5_file_path, 'a') as hf:
-        hf.create_dataset('geometry/mask', data=mask)
+        m = 'geometry/mask'
+        if m not in file_keys:
+            hf.create_dataset(m, data=mask)
     print(f'Saved mask: {h5_file_path}')
 
 
@@ -101,20 +164,25 @@ def load_mask_from_h5(h5_file_path):
     return mask
 
 
-def save_beam_as_h5(beam, h5_file_path):
+def save_beam_as_h5(h5_file_path, beam):
     r"""
-    Save |Beam| in an HDF5 file format in a standardized way.
+    Save |Beam| in an HDF5 file in a standardized way.
 
     Arguments:
-        beam (|Beam|): beam to save
         h5_file_path (str): filename
+        beam (|Beam|): beam to save
     """
+    file_keys = all_keys_in_file(h5_file_path)
     beam_dict = beam.to_dict()
     with h5py.File(h5_file_path, 'a') as hf:
-        hf.create_dataset('data/beam/beam_profile', data=beam_dict['beam_profile'])
+        bpk = 'data/beam/beam_profile'
+        if bpk not in file_keys:
+            hf.create_dataset(bpk, data=beam_dict['beam_profile'])
         del beam_dict['beam_profile']
         for k, v in beam_dict.items():
-            hf.create_dataset(f'data/beam/{k}', data=np.array(v))
+            bk = f'data/beam/{k}'
+            if bk not in file_keys:
+                hf.create_dataset(bk, data=np.array(v))
     print(f'Saved beam: {h5_file_path}')
 
 
@@ -145,50 +213,67 @@ def load_beam_from_h5(h5_file_path):
     return beam
 
 
-def save_padstats_as_h5(experiment_id, run, stats, h5_file_path):
+def save_padstats_as_h5(h5_file_path, experiment_id, run_id, stats):
     r"""
-    Save padstats in an HDF5 file format in a dictionary with the keys following keys:
-
-    FIXME: There is a sphinx warning caused by this doc string.
+    Save padstats in an HDF5 file in a dictionary with the keys following keys:
 
     Arguments:
-        stats (dict): dict to save with keys: 'dataset_id', 'pad_geometry', 'mask', 'n_frames', 'sum', 'min', 'max',
-                      'sum2', 'beam', 'start', 'stop'
         h5_file_path (str): filename
+        experiment_id (str): experiment id
+        run_id (int): experiment run id
+        stats (dict): dict to save
+                      with keys: dataset_id
+                                 pad_geometry
+                                 mask
+                                 n_frames
+                                 sum
+                                 min
+                                 max
+                                 sum2
+                                 beam
+                                 start
+                                 stop
     """
-    save_stats = ['n_frames', 'max', 'min', 'sum', 'sum2', 'start', 'stop']
-    save_pad_geometry_as_h5(stats['pad_geometry'], h5_file_path)
-    save_mask_as_h5(stats['mask'], h5_file_path)
-    save_beam_as_h5(stats['beam'], h5_file_path)
+    file_keys = all_keys_in_file(h5_file_path)
+    save_metadata_as_h5(h5_file_path=h5_file_path, experiment_id=experiment_id, run_id=run_id)
+    save_pad_geometry_as_h5( h5_file_path=h5_file_path, pad_geometry=stats['pad_geometry'])
+    save_mask_as_h5(h5_file_path=h5_file_path, mask=stats['mask'])
+    save_beam_as_h5(h5_file_path=h5_file_path, beam=stats['beam'])
+    del stats['pad_geometry']
+    del stats['mask']
+    del stats['beam']
     with h5py.File(h5_file_path, 'a') as hf:
-        hf.create_dataset('meta/experiment_id', data=f'{experiment_id}')
-        hf.create_dataset('meta/run_number', data=run)
-        hf.create_dataset('meta/dataset_id', data=stats['dataset_id'])
-        for ss in save_stats:
-            hf.create_dataset(f'padstats/{ss}', data=stats[ss])
+        md = 'meta/dataset_id'
+        if md not in file_keys:
+            hf.create_dataset(md, data=stats['dataset_id'])
+        del stats['dataset_id']
+        for k, v in stats.items():
+            psk = f'padstats/{k}'
+            if psk not in file_keys:
+                hf.create_dataset(psk, data=v)
     print(f'Saved padstats: {h5_file_path}')
 
 
 def load_padstats_from_h5(h5_file_path):
     r"""
-    Load padstats from HDF5 file format in a standardized way.
+    Load padstats from HDF5 file in a standardized way.
 
     Arguments:
         h5_file_path (str): filename
 
     Returns:
-        stats (dict): dict to save
-                      with keys: 'dataset_id'
-                                 'pad_geometry'
-                                 'mask'
-                                 'n_frames'
-                                 'sum'
-                                 'min'
-                                 'max'
-                                 'sum2'
-                                 'beam'
-                                 'start'
-                                 'stop'
+        stats (dict): dict to load
+                      with keys: dataset_id
+                                 pad_geometry
+                                 mask
+                                 n_frames
+                                 sum
+                                 min
+                                 max
+                                 sum2
+                                 beam
+                                 start
+                                 stop
     """
     save_stats_scalar = ['n_frames', 'start', 'stop']
     save_stats_arrays = ['max', 'min', 'sum', 'sum2']
@@ -206,18 +291,40 @@ def load_padstats_from_h5(h5_file_path):
     return stats
 
 
-def save_analysis_as_h5(dataset_name, data, h5_file_path):
+def save_analysis_as_h5(h5_file_path, **kwargs):
     r"""
     Save analysis result in an HDF5 file format in a standardized way.
 
     Arguments:
-        dataset_name (str): dataset name for hdf5
-        data (|ndarray|): data to store
         h5_file_path (str): filename
+        kwargs: the data you would like to save (format: key=data)
     """
+    file_keys = all_keys_in_file(h5_file_path)
     with h5py.File(h5_file_path, 'a') as hf:
-        hf.create_dataset(f'analysis/{dataset_name}', data=data)
+        for k, v in kwargs.items():
+            key_name = f'analysis/{k}'
+            if key_name not in file_keys:
+                hf.create_dataset(f'analysis/{k}', data=v)
     print(f'Saved analysis: {h5_file_path}!')
+
+
+def load_analysis_from_h5(h5_file_path):
+    r"""
+    Load analysis results from an HDF5 file in a standardized way.
+
+    Arguments:
+        h5_file_path (str): filename
+
+    Returns:
+        data (dict): data stored in HDF5 file
+    """
+    data = dict()
+    file_keys = all_keys_in_file(h5_file_path)
+    analysis_keys = [k for k in file_keys if 'analysis' in k]
+    with h5py.File(h5_file_path, 'a') as hf:
+        for k in analysis_keys:
+            data[k] = hf[f'{k}'][:]
+    return data
 
 
 def get_analysis_h5_keys(h5_file_path):
@@ -232,47 +339,51 @@ def get_analysis_h5_keys(h5_file_path):
     return ks
 
 
-def load_analysis_from_h5(analysis_key, h5_file_path):
+def load_analysis_key_from_h5(h5_file_path, *analysis_key):
     r"""
-    Load analysis results from an HDF5 file format in a standardized way.
+    Load analysis results from an HDF5 file in a standardized way.
 
     Arguments:
-        analysis_key (list): analysis keys for data to retrieve
         h5_file_path (str): filename
+        analysis_key (str): analysis keys for data to retrieve
 
     Returns:
         data (dict): data stored in HDF5 file
     """
-    data = {}
+    data = dict()
     with h5py.File(h5_file_path, 'a') as hf:
         for k in analysis_key:
             data[k] = hf[f'analysis/{k}'][:]
     return data
 
 
-def save_fxs_as_h5(fxs, filename, **kwargs):
+def save_fxs_as_h5(h5_file_path, fxs, experiment_id, run_id, **kwargs):
+    file_keys = all_keys_in_file(h5_file_path)
     analysis_dict = fxs.to_dict()
     analysis_dict.update(kwargs)
-    if filename[-4:] == 'hdf5':
-        with h5py.File(filename, 'a') as hf:
+    if h5_file_path[-4:] == 'hdf5':
+        save_metadata_as_h5(h5_file_path=h5_file_path, experiment_id=experiment_id, run_id=run_id)
+        with h5py.File(h5_file_path, 'a') as hf:
             for k, v in analysis_dict.items():
+                if k in file_keys:
+                    continue
                 if v is None:
                     continue
                 else:
                     hf.create_dataset(k, data=v)
     else:
         print('Only hdf5 files can be saved at this time.')
-    print(f'Saved : {filename}', end='\r')
+    print(f'Saved : {h5_file_path}', end='\r')
 
 
-def load_fxs_from_h5(filename):
+def load_fxs_from_h5(h5_file_path):
     fxs_dict = dict()
     bkeys = ['meta', 'analysis/kam_correlations/', 'analysis/geometry/']
     okeys = ['analysis/saxs', 'analysis/n_patterns',
              'analysis/run_max', 'analysis/run_min',
              'analysis/run_sum', 'analysis/run_sum2']
-    if filename[-4:] == 'hdf5':
-        with h5py.File(filename, 'r') as hf:
+    if h5_file_path[-4:] == 'hdf5':
+        with h5py.File(h5_file_path, 'r') as hf:
             fxs_dict.update({k: hf[f'{k}'][()] for k in okeys})
             for sec in bkeys:
                 sec_keys = list(hf[f'{sec}'])
@@ -282,24 +393,46 @@ def load_fxs_from_h5(filename):
     return fxs_dict
 
 
-def save_run_profile_stats_as_h5(pstats, h5_file_path):
+def save_run_profile_stats_as_h5(h5_file_path, pstats):
     r"""
-    Save profile runstats in an HDF5 file format in a standardized way.
+    Save profile runstats in an HDF5 file in a standardized way.
 
     Arguments:
-        beam (|Beam|): beam to save
         h5_file_path (str): filename
+        pstats (dict): profile stats
+                       with keys: mean
+                                  sdev
+                                  sum
+                                  sum2
+                                  weight_sum
     """
+    file_keys = all_keys_in_file(h5_file_path)
     with h5py.File(h5_file_path, 'a') as hf:
         for k, v in pstats.items():
-            hf.create_dataset(f'pstats/{k}', data=np.array(v))
+            if k in file_keys:
+                continue
+            hf.create_dataset(f'profile_stats/{k}', data=np.array(v))
     print(f'Saved run profile stats: {h5_file_path}')
 
 
 def load_run_profile_stats_from_h5(h5_file_path):
-    stat_keys = ['median', 'mean', 'sum', 'sum2', 'counts', 'q_bins']
+    r"""
+    Load profile runstats from an HDF5 file in a standardized way.
+
+    Arguments:
+        h5_file_path (str): filename
+
+    Returns:
+        pstats (dict): profile stats
+                       with keys: mean
+                                  sdev
+                                  sum
+                                  sum2
+                                  weight_sum
+    """
+    keys = ['median', 'mean', 'sum', 'sum2', 'counts', 'q_bins']
     pstats = dict()
     with h5py.File(h5_file_path, 'a') as hf:
-        for k in stat_keys:
-            pstats[k] = hf[f'pstats/{k}'][:]
+        for k in keys:
+            pstats[k] = hf[f'profile_stats/{k}'][:]
     return pstats
