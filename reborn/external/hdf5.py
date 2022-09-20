@@ -357,12 +357,16 @@ def load_analysis_key_from_h5(h5_file_path, *analysis_key):
     return data
 
 
-def save_fxs_as_h5(h5_file_path, fxs, experiment_id, run_id, **kwargs):
+def save_fxs_as_h5(h5_file_path, fxs, **kwargs):
     file_keys = all_keys_in_file(h5_file_path)
     analysis_dict = fxs.to_dict()
     analysis_dict.update(kwargs)
     if h5_file_path[-4:] == 'hdf5':
-        save_metadata_as_h5(h5_file_path=h5_file_path, experiment_id=experiment_id, run_id=run_id)
+        save_metadata_as_h5(h5_file_path=h5_file_path,
+                            experiment_id=analysis_dict['experiment_id'],
+                            run_id=analysis_dict['run_id'])
+        del analysis_dict['experiment_id']
+        del analysis_dict['run_id']
         with h5py.File(h5_file_path, 'a') as hf:
             for k, v in analysis_dict.items():
                 if k in file_keys:
@@ -373,7 +377,7 @@ def save_fxs_as_h5(h5_file_path, fxs, experiment_id, run_id, **kwargs):
                     hf.create_dataset(k, data=v)
     else:
         print('Only hdf5 files can be saved at this time.')
-    print(f'Saved : {h5_file_path}', end='\r')
+    print(f'Saved : {h5_file_path}')
 
 
 def load_fxs_from_h5(h5_file_path):
