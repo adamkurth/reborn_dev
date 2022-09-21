@@ -15,8 +15,12 @@
 
 import numpy as np
 import reborn.dataframe
-from joblib import delayed
-from joblib import Parallel
+try:
+    from joblib import delayed
+    from joblib import Parallel
+except ImportError:
+    Parallel = None
+    delayed = None
 
 
 def correlate(s1, s2=None, cached=False):
