@@ -24,15 +24,16 @@ module polar_binning
     implicit none
     contains
 
-    subroutine polar_mean(nq, qbin_size, qmin, np, pbin_size, pmin, qs, phis, weight, data, mask, pmask, pmean)
+    subroutine polar_mean(nq, qbin_size, qmin, np, pbin_size, pmin, qs, phis, weight, data, mask, pmean, pmask)
         implicit none
+        real(kind=8), parameter :: pi = 4.d0 * datan(1.d0)
         integer(kind=8), intent(in) :: nq, np
         real(kind=8), intent(in) :: qbin_size, qmin, pbin_size, pmin, qs(:), phis(:), weight(:), data(:), mask(:)
         real(kind=8), intent(out), dimension(nq * np) :: pmask, pmean
         integer(kind=8) :: count(nq * np), i, ii, p_index, q_index
         real(kind=8) :: dsum(nq * np), p, q, weights(nq * np)
         dsum = 0.d0
-        count = 0.d0
+        count = 0
         weights = 0.d0
         do i = 1, size(data)
             if (mask(i) == 0) cycle
@@ -40,8 +41,10 @@ module polar_binning
             q_index = int(floor((q - qmin) / qbin_size))
             if (q_index < 0) cycle
             if (q_index >= nq) cycle
-            p = phis(i)
-            p_index = modulo(int(floor((p - pmin) / pbin_size)), np)
+!            p = phis(i)
+!            p_index = modulo(int(floor((p - pmin) / pbin_size)), np)
+            p = modulo(phis(i), 2 * pi)
+            p_index = int(floor((p - pmin) / pbin_size))
             if (p_index < 0) cycle
             if (p_index >= np) cycle
             ! bin data
@@ -53,12 +56,12 @@ module polar_binning
         where (count /= 0)
             pmask = weights / count
         elsewhere
-            pmask = 0.d0
+            pmask = 0
         end where
         where (pmask /= 0)
             pmean = dsum / pmask
         elsewhere
-            pmean = 0.d0
+            pmean = 0
         end where
     end subroutine polar_mean
 

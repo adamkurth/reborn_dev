@@ -26,6 +26,7 @@ try:
     from .fortran import polar_f
 except ImportError:
     polar_f = None
+from .misc import polar
 
 
 pnccd_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/pnccd_geometry.json')
@@ -1659,42 +1660,19 @@ class PolarPADAssembler:
             data (|ndarray|): The PAD data to be binned.
             mask (|ndarray|): A mask to indicate ignored pixels.
         """
-        _p = self.phis % (2 * np.pi)
-        _pi = np.floor((_p - self.phi_min) / self.phi_bin_size)
-        _qi = np.floor((self.q_mags - self.q_min) / self.q_bin_size)
-        q_index = _qi.astype(int)
-        p_index = _pi.astype(int)
-        # conditions
-        _cqn = q_index >= self.n_q_bins
-        _cpn = p_index >= self.n_phi_bins
-        _cq0 = q_index < 0
-        _cp0 = p_index < 0
-        _cq = _cqn | _cq0
-        _cp = _cpn | _cp0
-        cqp = _cq | _cp
-        conditions = (mask == 0) | cqp
-        keepers = ~conditions
-        # data to keep
-        qk = q_index[keepers]
-        pk = p_index[keepers]
-        dk = data[keepers]
-        sa = self.solid_angles[keepers]
-        # calculate average binned pixel
-        shp = self.n_q_bins * self.n_phi_bins
-        counts = np.zeros(shp)  # number of raw pixels binned to polar pixel
-        dsum = np.zeros(shp)  # binned data sum
-        pbsa = np.zeros(shp)  # pixel binned solid angle
-        idx = (self.n_phi_bins * qk + pk).astype(int)
-        slices = [i for i in range(0, len(dk), shp)]
-        for i, j in zip(slices[:-1], slices[1:]):
-            np.add.at(counts, idx[i:j], 1)
-            np.add.at(dsum, idx[i:j], dk[i:j])
-            np.add.at(pbsa, idx[i:j], sa[i:j])
-        zs = np.zeros(shp, dtype=float)
-        polar_mask = np.divide(pbsa, counts, out=zs, where=counts != 0)
-        polar_mean = np.divide(dsum, polar_mask, out=zs, where=polar_mask != 0)
-        polar_mask = polar_mask.reshape(self.polar_shape).astype(float)
-        polar_mean = polar_mean.reshape(self.polar_shape).astype(float)
+        pmean, pmask = polar.polar_mean(n_q_bins=self.polar_shape[0],
+                                        q_bin_size=self.q_bin_size,
+                                        q_min=self.q_min,
+                                        n_phi_bins=self.polar_shape[1],
+                                        phi_bin_size=self.phi_bin_size,
+                                        phi_min=self.phi_min,
+                                        qs=self.q_mags,
+                                        phis=self.phis,
+                                        weights=self.solid_angles,
+                                        data=data,
+                                        mask=mask)
+        polar_mask = pmask.reshape(self.polar_shape)
+        polar_mean = pmean.reshape(self.polar_shape)
         return polar_mean, polar_mask
 
     def _f_mean(self, data, mask):
