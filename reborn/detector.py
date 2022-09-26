@@ -2337,14 +2337,14 @@ def dict_default(dictionary, key, default):
 
 
 def _slice_to_tuple(slc):
-    r""" Special conversion of slice type to tuple. """
+    r""" Special conversion of slice type to tuple.  This is for storing slices in json file format. """
     if slc is None:
         return None
-    if isinstance(slc, list):
+    if isinstance(slc, list):  # Convert to tuple and try again
         return _slice_to_tuple(tuple(slc))
     if isinstance(slc, slice):
         return slc.start, slc.stop, slc.step
-    if isinstance(slc, tuple):
+    if isinstance(slc, tuple):  # Presumably we have multiple dimensions, hence multiple slices
         return tuple(_slice_to_tuple(s) for s in slc)
     if isinstance(slc, int):
         return slc
@@ -2352,7 +2352,7 @@ def _slice_to_tuple(slc):
 
 
 def _tuple_to_slice(slc):
-    r""" Special conversion of tuple to slice. """
+    r""" Special conversion of tuple to slice.  This is for storing slices in json format. """
     if slc is None:
         return None
     if isinstance(slc, slice):
