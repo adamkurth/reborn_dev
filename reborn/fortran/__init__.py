@@ -15,6 +15,7 @@
 
 import os
 import sys
+import glob
 import importlib
 import numpy.f2py
 from ..utils import debug, check_file_md5, write_file_md5
@@ -103,6 +104,11 @@ def import_f90(source_file, extra_args='', hash=True, verbose=False, with_omp=Fa
     compile_args = {'modulename': modulename, 'extension': '.f90', 'extra_args': extra_args,
                     'verbose': verbose}#, 'full_output': False}
     if do_compile:
+        bins = glob.glob(modulename+'.cpython*')
+        if len(bins) > 0:
+            for b in bins:
+                print('Removing', b)
+                os.remove(b)
         print('Compiling...', source_file, 'to', modulename)
         fp = numpy.f2py.compile(source, **compile_args)
         # print(('='*40+'\n')*5)
