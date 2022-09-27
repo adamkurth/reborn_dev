@@ -55,7 +55,7 @@ function vecmag(v)
 end function vecmag
 end module utils
 
-subroutine gaussian_crystal(qin, kin, A, F, R, var_siz, var_mos, var_wav, var_div, Iout)
+subroutine gaussian_crystal(qin, kin, A, F, R, var_siz, var_mos, var_wav, var_div, bfac, neighbors, Iout)
     ! qin: Inpug q vectors.  Vector components contiguous.
     ! A: Reciprocal lattice vectors.  Vector components contiguous.
     ! F: Structure factors.  3D array.  Last component "l" of "hkl" is contiguous.
@@ -65,11 +65,12 @@ subroutine gaussian_crystal(qin, kin, A, F, R, var_siz, var_mos, var_wav, var_di
     ! Iout: Output intensities.
     use utils
     implicit none
-    real(kind=8), intent(in) :: qin(:,:),kin(:),A(3,3),F(:,:,:),R(3,3),var_siz,var_mos,var_wav,var_div
+    real(kind=8), intent(in) :: qin(:,:),kin(:),A(3,3),F(:,:,:),R(3,3),var_siz,var_mos,var_wav,var_div,bfac
+    integer(kind=4), intent(in) :: neighbors
     real(kind=8), intent(inout) :: Iout(:)
-    real(kind=8) :: q(3),h(3),hh(3),Ainv(3, 3),RA(3,3),RAinv(3,3),g(3),dq(3),kout(3) !, dqn(3)
+    real(kind=8) :: q(3),h(3),Ainv(3, 3),RA(3,3),RAinv(3,3),g(3),dq(3),kout(3),hh(3) !, dqn(3)
     real(kind=8) :: cov_siz(3,3),cov_mos(3,3),cov_wav(3,3),cov_div(3,3),cov(3,3),id(3,3)
-    integer(kind=4) :: nq, i, nh, nk, nl, hp, kp, lp
+    integer(kind=4) :: nq, i, nh, nk, nl, hs, ks, ls
     nq = size(qin, 2)
     nh = size(F, 3)
     nk = size(F, 2)
@@ -86,25 +87,23 @@ subroutine gaussian_crystal(qin, kin, A, F, R, var_siz, var_mos, var_wav, var_di
     if (var_div > 0._8) then
         cov_div = (id - outer(normvec(kin))) * vecmag(kin)**2 * var_div
     end if
-    !$OMP parallel default(None) private(i,q,kout,h,g,dq,cov_wav,cov_mos,v,c,cov,cov_inv,hp,kp,lp,hh) &
-    !$OMP shared(var_mos,var_siz,var_wav,qin,id,nq,Iout,A,Ainv,kin,R,RA,RAinv,cov_siz,cov_div)
-    !$OMP do schedule(static)
     RA = matmul(R, A)
-    RAinv = matmul(R, Ainv)
+    RAinv = matinv3(RA)
+    !$OMP parallel default(None) private(i,q,kout,h,g,dq,cov_wav,cov_mos,cov,hs,ks,ls,hh) &
+    !$OMP shared(var_mos,var_siz,var_wav,qin,id,nq,Iout,A,Ainv,kin,R,RA,RAinv,cov_siz,cov_div,bfac,neighbors)
+    !$OMP do schedule(static)
     do i=1,nq
-!        Iout(i) = 0
         q = qin(:,i)
-        kout = q + kin
         h = nint(matmul(RAinv, q))
-!        do hp=-1,1
-!        do kp=-1,1
-!        do lp=-1,1
-!        hh = h
-!        hh(1) = hh(1)+hp
-!        hh(2) = hh(2)+kp
-!        hh(3) = hh(3)+lp
-!        g = matmul(RA,hh)
-        g = matmul(RA,h)
+        Iout(i) = 0
+        do hs=-neighbors,+neighbors
+        do ks=-neighbors,+neighbors
+        do ls=-neighbors,+neighbors
+        hh = h
+        hh(1) = hh(1)+hs
+        hh(2) = hh(2)+ks
+        hh(3) = hh(3)+ls
+        g = matmul(RA,hh)
         dq = q - g
         if (var_wav > 0._8) then
             cov_wav = outer(q)*var_wav
@@ -113,11 +112,11 @@ subroutine gaussian_crystal(qin, kin, A, F, R, var_siz, var_mos, var_wav, var_di
             cov_mos = (id - outer(normvec(g))) * vecmag(g)**2 * var_mos
         end if
         cov = cov_siz + cov_wav + cov_mos + cov_div
-        Iout(i) = exp(-dot_product(dq,matmul(matinv3(cov),  dq)))
-!        Iout(i) = Iout(i) + exp(-dot_product(dq,matmul(matinv3(cov),  dq)))
-!        end do
-!        end do
-!        end do
+        Iout(i) = Iout(i) + exp(-dot_product(dq,matmul(matinv3(cov),  dq)))*exp(-bfac*vecmag(q)**2)
+        end do
+        end do
+        end do
+!        Iout(i) = Iout(i) + exp(-dot_product(dq,matmul(matinv3(cov),  dq)))!*exp(-bfac*vecmag(q))
     end do
     !$OMP enddo
     !$OMP end parallel

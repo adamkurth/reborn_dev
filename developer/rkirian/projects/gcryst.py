@@ -18,11 +18,13 @@ A[1, 1] = 1/a0
 A[2, 2] = 1/a0
 F = np.random.rand(10, 10, 10)
 var_siz = (20e-3/a0)**2
-var_mos = (5e-3)**2 * 0
+var_mos = (20e-3)**2 #* 0
 var_wav = (5e-3)**2 * 0
-var_div = (5e-3)**2 #* 0
+var_div = (5e-3)**2 * 0
+B = (100e-3*a0)**2 * 0
 Iout = np.empty(q_vecs.shape[0])
 kin = beam.k_in
+neighbors=1
 class Getter(FrameGetter):
     df = dataframe.DataFrame(pad_geometry=geom, beam=beam)
     def __init__(self):
@@ -31,8 +33,10 @@ class Getter(FrameGetter):
     def get_data(self, frame_number=0):
         R = np.identity(3)
         R = utils.random_rotation()
+        print(np.dot(R, R.T))
         t = time.time()
-        crystal_f.gaussian_crystal(q_vecs.T, kin.T, A.T, F.T, R.T, var_siz, var_mos, var_wav, var_div, Iout.T)
+        crystal_f.gaussian_crystal(q_vecs.T, kin.T, A.T, F.T, R.T, var_siz, var_mos, var_wav, var_div, B,
+                                   neighbors, Iout.T)
         print(f"{time.time()-t} seconds")
         self.df.set_raw_data(Iout)
         return self.df
