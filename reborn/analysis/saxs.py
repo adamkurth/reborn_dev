@@ -69,10 +69,11 @@ def get_profile_stats(dataframe, n_bins, q_range):
     debug_message('computing profiles')
     profiler = RadialProfiler(pad_geometry=geom, mask=mask, beam=beam,
                               n_bins=n_bins, q_range=q_range)
-    out_keys = ['median', 'mean', 'sum', 'sum2', 'counts', 'q_bins']
-    out_vals = [profiler.get_median_profile(data), profiler.get_mean_profile(data),
-                profiler.get_sum_profile(data), profiler.get_sum_profile(data**2),
-                profiler.get_counts_profile(), profiler.q_bin_centers]
+    stats = profiler.quickstats(data)
+    out_keys = ['median', 'mean', 'sdev', 'sum', 'sum2', 'counts', 'q_bins']
+    out_vals = [profiler.get_median_profile(data), stats['mean'],
+                stats['sdev'], stats['sum'], stats['sum2'],
+                stats['weight_sum'], profiler.q_bin_centers]
     return dict(zip(out_keys, out_vals))
 
 
@@ -122,6 +123,7 @@ def get_profile_runstats(framegetter=None, n_bins=1000, q_range=None,
                                                                          for i in range(n_processes))
         pmedian = np.concatenate([o['median'] for o in out])
         pmean = np.concatenate([o['mean'] for o in out])
+        psdev = np.concatenate([o['sdev'] for o in out])
         psum = np.concatenate([o['sum'] for o in out])
         psum2 = np.concatenate([o['sum2'] for o in out])
         pcounts = np.concatenate([o['counts'] for o in out])
@@ -137,6 +139,7 @@ def get_profile_runstats(framegetter=None, n_bins=1000, q_range=None,
         frame_ids = np.array_split(frame_ids, n_processes)[process_id]
     pmedian = np.zeros((frame_ids.size, n_bins))
     pmean = np.zeros((frame_ids.size, n_bins))
+    psdev = np.zeros((frame_ids.size, n_bins))
     psum = np.zeros((frame_ids.size, n_bins))
     psum2 = np.zeros((frame_ids.size, n_bins))
     pcounts = np.zeros((frame_ids.size, n_bins))
@@ -152,18 +155,18 @@ def get_profile_runstats(framegetter=None, n_bins=1000, q_range=None,
                                    q_range=q_range)
         pmedian[n, :] = pstats['median'].copy()
         pmean[n, :] = pstats['mean'].copy()
+        psdev[n, :] = pstats['sdev'].copy()
         psum[n, :] = pstats['sum'].copy()
         psum2[n, :] = pstats['sum2'].copy()
         pcounts[n, :] = pstats['counts'].copy()
         pq_bin[n, :] = pstats['q_bins'].copy()
-    out_vals = [pmedian, pmean, psum, psum2, pcounts, pq_bin]
+    out_vals = [pmedian, pmean, psdev, psum, psum2, pcounts, pq_bin]
     return dict(zip(out_keys, out_vals))
 
 
 def normalize_profile_stats(stats, q_range=None):
     r"""
-    Given a stats dictionary, normalize by setting a particular q range to an average
-    of 1.  
+    Given a stats dictionary, normalize by setting a particular q range to an average of 1.
 
     Arguments:
         stats (dict): A stats dictionary created by get_profile_stats_from_pandas()
@@ -179,6 +182,7 @@ def normalize_profile_stats(stats, q_range=None):
         q_range = (np.min(q), np.max(q))
     run_pmedian = stats['median'].copy()
     run_pmean = stats['mean'].copy()
+    run_psdev = stats['sdev'].copy()
     run_psum = stats['sum'].copy()
     run_psum2 = stats['sum2'].copy()
     qmin = q_range[0]
@@ -186,6 +190,7 @@ def normalize_profile_stats(stats, q_range=None):
     w = np.where((q > qmin) * (q < qmax))
     s = np.mean(run_pmean[:, w[0]], axis=1)
     out_vals = [(run_pmedian.T / s).T, (run_pmean.T / s).T,
-                (run_psum.T / s).T, (run_psum2.T / s ** 2).T,
-                stats["counts"].copy(), stats["q_bins"].copy()]
+                (run_psdev.T / s).T, (run_psum.T / s).T,
+                (run_psum2.T / s ** 2).T, stats["counts"].copy(),
+                stats["q_bins"].copy()]
     return dict(zip(out_keys, out_vals))
