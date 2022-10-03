@@ -31,9 +31,17 @@ try:
     import extra_data
 except:
     extra_data = None
-    print('You do not have the extra_data python package installed.')
 
 debug = True
+
+
+def check_extra_data():
+    r""" Check if the extra_data package is installed.  """
+    if extra_data is None:
+        print('You do not have the extra_data python package installed.')
+        print('Look here: https://rtd.xfel.eu/docs/data-analysis-user-documentation/en/latest/index.html')
+        print('Look here: https://extra-data.readthedocs.io/en/latest/index.html')
+        raise ImportError('The extra_data package is required.')
 
 
 def debug_message(*args, caller=True, **kwargs):
@@ -56,6 +64,7 @@ def inspect_available_data(experiment_id, run_id, source=None):
         source (str): data source (example='SPB_XTD9_XGM/XGM/DOOCS').
     """
     debug_message('opening run')
+    check_extra_data()
     run = extra_data.open_run(proposal=experiment_id, run=run_id, data='raw')
     debug_message('gathering sources')
     print(f'Data Sources:\n\n{run.all_sources}\n\n')
@@ -92,6 +101,7 @@ class EuXFELFrameGetter(reborn.fileio.getters.FrameGetter):
                  xray_wavelength_detector='SA1_XTD2_XGM/XGM/DOOCS',
                  max_events=None):
         debug_message('Initializing superclass')
+        check_extra_data()
         super().__init__()
         self.init_params = {'experiment_id': experiment_id,
                             'run_id': run_id,

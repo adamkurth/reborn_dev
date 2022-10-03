@@ -41,7 +41,7 @@ intersphinx_mapping = {'python': ('http://docs.python.org/2', None),
 rst_epilog = """
 .. |examples|  replace:: :ref:`examples`
 .. |binning|  replace:: :ref:`binning`
-.. |detector_documentation|  replace:: :ref:`detector documentation <doc_detector>`
+.. |detector_documentation|  replace:: :ref:`detector documentation <doc_detectors>`
 
 .. |Beam|  replace:: :class:`Beam <reborn.source.Beam>`
 .. |ClCore|  replace:: :mod:`ClCore <reborn.simulate.clcore.ClCore>`

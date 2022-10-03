@@ -218,21 +218,22 @@ def save_padstats_as_h5(h5_file_path, experiment_id, run_id, stats):
     Save padstats in an HDF5 file in a dictionary with the keys following keys:
 
     Arguments:
-        h5_file_path (str): filename
-        experiment_id (str): experiment id
-        run_id (int): experiment run id
-        stats (dict): dict to save
-                      with keys: dataset_id
-                                 pad_geometry
-                                 mask
-                                 n_frames
-                                 sum
-                                 min
-                                 max
-                                 sum2
-                                 beam
-                                 start
-                                 stop
+        h5_file_path (str): Filename
+        experiment_id (str): Experiment ID
+        run_id (int): Experiment run ID
+        stats (dict): Dictionary to save with keys
+
+                        - dataset_id
+                        - pad_geometry
+                        - mask
+                        - n_frames
+                        - sum
+                        - min
+                        - max
+                        - sum2
+                        - beam
+                        - start
+                        - stop
     """
     file_keys = all_keys_in_file(h5_file_path)
     save_metadata_as_h5(h5_file_path=h5_file_path, experiment_id=experiment_id, run_id=run_id)
@@ -398,17 +399,18 @@ def load_fxs_from_h5(h5_file_path):
 
 
 def save_run_profile_stats_as_h5(h5_file_path, pstats):
-    r"""
+    r"""  FIXME: Add link to the function that generates profile runstats.
     Save profile runstats in an HDF5 file in a standardized way.
 
     Arguments:
-        h5_file_path (str): filename
-        pstats (dict): profile stats
-                       with keys: mean
-                                  sdev
-                                  sum
-                                  sum2
-                                  weight_sum
+        h5_file_path (str): Filename
+        pstats (dict): Profile stats with keys:
+
+                        - mean: Radially binned mean of pixel values.
+                        - sdev: Radially binned standard deviation of pixel values.
+                        - sum: Radially binned sum of pixel values
+                        - sum2: Radially binned sum of squared pixel values.
+                        - weight_sum: Radially binned sum of pixel weights.
     """
     file_keys = all_keys_in_file(h5_file_path)
     with h5py.File(h5_file_path, 'a') as hf:
