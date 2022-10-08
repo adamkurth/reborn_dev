@@ -18,3 +18,4 @@ from . import peaks
 from . import runstats
 from . import svd
 from . import fluctuations
+from . import saxs
