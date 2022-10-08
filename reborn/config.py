@@ -17,13 +17,15 @@
 import os
 configs = dict()
 # Default settings:
-recognized_keys = ['debug', 'padview_debug', 'autocompile_fortran']
+recognized_keys = ['debug', 'padview_debug', 'autocompile_fortran', 'fortran_developer']
 # Global debug setting
 configs['debug'] = configs.get('debug', 0)
 # PADView debug setting
 configs['padview_debug'] = configs.get('padview_debug', 0)
-# Automatically recompile fortran if source is changed
+# Automatically recompile fortran if source is changed.
 configs['autocompile_fortran'] = configs.get('autocompile_fortran', True)
+# Wipe out compiled code when the source changes.  Helps identify when there are compilation errors.
+configs['fortran_developer'] = configs.get('fortran_developer', False)
 # Now we override with custom configs if available
 if os.path.exists(__file__.replace('config.py', 'custom_config.py')):
     try:
