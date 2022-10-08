@@ -34,5 +34,12 @@ if os.path.exists(__file__.replace('config.py', 'custom_config.py')):
             configs[k] = custom[k]
     except ImportError:
         pass
+if os.path.exists('reborn_config.py'):
+    try:
+        from reborn_config import configs as custom
+        for k in custom:
+            configs[k] = custom[k]
+    except ImportError:
+        pass
 if len(configs.keys()) > len(recognized_keys):
     raise ValueError('There are unrecognized keys in custom_config.py', configs.keys(), recognized_keys)
