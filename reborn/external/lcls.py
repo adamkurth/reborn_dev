@@ -30,9 +30,8 @@ try:
     import psana
 except ImportError:
     psana = None
-
-
-debug = True
+from ..config import configs
+debug = configs['debug']
 
 
 def debug_message(*args, caller=True, **kwargs):

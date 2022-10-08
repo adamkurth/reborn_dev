@@ -91,6 +91,7 @@ def import_f90(source_file, extra_args='', hash=True, verbose=False, with_omp=Fa
     debug('module_name =', modulename)
     # If not auto-compiling, just try to import and fail if import doesn't work
     if not autocompile:
+        debug('autocompile off')
         return importlib.import_module(modulename)
     # By default we will not recompile the source unless needed.
     do_compile = False
