@@ -111,7 +111,7 @@ def get_profile_runstats(framegetter=None, n_bins=1000, q_range=None,
             if framegetter.init_params is None:
                 raise ValueError('This FrameGetter does not have init_params attribute needed to make a replica')
             framegetter = {'framegetter': type(framegetter), 'kwargs': framegetter.init_params}
-        out = Parallel(n_jobs=n_processes)(delayed(get_profile_runstats)(framegetter=framegetter,
+        pout = Parallel(n_jobs=n_processes)(delayed(get_profile_runstats)(framegetter=framegetter,
                                                                          start=start,
                                                                          stop=stop,
                                                                          parallel=False,
@@ -120,14 +120,14 @@ def get_profile_runstats(framegetter=None, n_bins=1000, q_range=None,
                                                                          include_median=include_median)
                                                                          for i in range(n_processes))
         out = dict()
-        out['mean'] = np.concatenate([o['mean'] for o in out])
-        out['sdev'] = np.concatenate([o['sdev'] for o in out])
-        out['sum'] = np.concatenate([o['sum'] for o in out])
-        out['sum2'] = np.concatenate([o['sum2'] for o in out])
-        out['counts'] = np.concatenate([o['counts'] for o in out])
-        out['q_bins'] = np.concatenate([o['q_bins'] for o in out])
+        out['mean'] = np.concatenate([o['mean'] for o in pout])
+        out['sdev'] = np.concatenate([o['sdev'] for o in pout])
+        out['sum'] = np.concatenate([o['sum'] for o in pout])
+        out['sum2'] = np.concatenate([o['sum2'] for o in pout])
+        out['counts'] = np.concatenate([o['counts'] for o in pout])
+        out['q_bins'] = np.concatenate([o['q_bins'] for o in pout])
         if include_median:
-            out['median'] = np.concatenate([o['median'] for o in out])
+            out['median'] = np.concatenate([o['median'] for o in pout])
         return out
     if isinstance(framegetter, dict):
         framegetter = framegetter['framegetter'](**framegetter['kwargs'])
