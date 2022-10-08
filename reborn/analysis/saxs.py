@@ -133,6 +133,8 @@ def get_profile_runstats(framegetter=None, n_bins=1000, q_range=None,
         framegetter = framegetter['framegetter'](**framegetter['kwargs'])
     if stop is None:
         stop = framegetter.n_frames
+    stop = min(stop, framegetter.n_frames)
+    start = max(0, start)
     frame_ids = np.arange(start, stop, dtype=int)
     if process_id is not None:
         frame_ids = np.array_split(frame_ids, n_processes)[process_id]
