@@ -35,6 +35,7 @@ def get_profile_stats(dataframe, n_bins, q_range, include_median=False):
     Operates on one raw diffraction pattern and returns a dictionary with the following:
     
         mean :   Mean of unmasked intensities
+        sdev :   Standard deviation of unmasked intensities
         median : Median of unmasked intensities (only if requested; this is slow)
         sum :    Sum of unmasked intensities
         sum2 :   Sum of squared unmasked intensities
@@ -71,12 +72,16 @@ def get_profile_stats(dataframe, n_bins, q_range, include_median=False):
     profiler = RadialProfiler(pad_geometry=geom, mask=mask, beam=beam,
                               n_bins=n_bins, q_range=q_range)
     stats = profiler.quickstats(data)
-    out_keys = ['mean', 'sdev', 'sum', 'sum2', 'counts', 'q_bins']
-    out_vals = [stats['mean'], stats['sdev'], stats['sum'], stats['sum2'], stats['weight_sum'], profiler.q_bin_centers]
+    out = dict()
+    out['mean'] = stats['mean']
+    out['sdev'] = stats['sdev']
+    out['sum'] = stats['sum']
+    out['sum2'] = stats['sum2']
+    out['counts'] = stats['weight_sum']
+    out['q_bins'] = profiler.q_bin_centers
     if include_median:
-        out_keys.append('median')
-        out_vals.append(profiler.get_median_profile(data))
-    return dict(zip(out_keys, out_vals))
+        out['median'] = profiler.get_median_profile(data)
+    return out
 
 
 def get_profile_runstats(framegetter=None, n_bins=1000, q_range=None,
@@ -98,10 +103,8 @@ def get_profile_runstats(framegetter=None, n_bins=1000, q_range=None,
     """
     if framegetter is None:
         raise ValueError('framegetter cannot be None')
-    out_keys = ['mean', 'sum', 'sum2', 'counts', 'q_bins']
-    if include_median:
-        out_keys.append('median')
     if parallel:
+        debug_message('Begin parallelized processing.')
         if Parallel is None:
             raise ImportError('You need the joblib package to run in parallel mode.')
         if not isinstance(framegetter, dict):
@@ -116,16 +119,16 @@ def get_profile_runstats(framegetter=None, n_bins=1000, q_range=None,
                                                                          process_id=i,
                                                                          include_median=include_median)
                                                                          for i in range(n_processes))
+        out = dict()
+        out['mean'] = np.concatenate([o['mean'] for o in out])
+        out['sdev'] = np.concatenate([o['sdev'] for o in out])
+        out['sum'] = np.concatenate([o['sum'] for o in out])
+        out['sum2'] = np.concatenate([o['sum2'] for o in out])
+        out['counts'] = np.concatenate([o['counts'] for o in out])
+        out['q_bins'] = np.concatenate([o['q_bins'] for o in out])
         if include_median:
-            pmedian = np.concatenate([o['median'] for o in out])
-        pmean = np.concatenate([o['mean'] for o in out])
-        psdev = np.concatenate([o['sdev'] for o in out])
-        psum = np.concatenate([o['sum'] for o in out])
-        psum2 = np.concatenate([o['sum2'] for o in out])
-        pcounts = np.concatenate([o['counts'] for o in out])
-        pq_bin = np.concatenate([o['q_bins'] for o in out])
-        out_vals = [pmedian, pmean, psum, psum2, pcounts, pq_bin]
-        return dict(zip(out_keys, out_vals))
+            out['median'] = np.concatenate([o['median'] for o in out])
+        return out
     if isinstance(framegetter, dict):
         framegetter = framegetter['framegetter'](**framegetter['kwargs'])
     if stop is None:
@@ -133,35 +136,39 @@ def get_profile_runstats(framegetter=None, n_bins=1000, q_range=None,
     frame_ids = np.arange(start, stop, dtype=int)
     if process_id is not None:
         frame_ids = np.array_split(frame_ids, n_processes)[process_id]
-    if include_median:
-        pmedian = np.zeros((frame_ids.size, n_bins))
     pmean = np.zeros((frame_ids.size, n_bins))
     psdev = np.zeros((frame_ids.size, n_bins))
     psum = np.zeros((frame_ids.size, n_bins))
     psum2 = np.zeros((frame_ids.size, n_bins))
     pcounts = np.zeros((frame_ids.size, n_bins))
     pq_bin = np.zeros((frame_ids.size, n_bins))
+    if include_median:
+        pmedian = np.zeros((frame_ids.size, n_bins))
     for (n, i) in enumerate(frame_ids):
-        debug_message(f'Frame {i:6d} ({n / len(frame_ids) * 100:0.2g})', end='\r')
+        debug_message(f'Frame {i:6d} ({n / len(frame_ids) * 100:0.2g}%)', end='\r')
         dat = framegetter.get_frame(frame_number=i)
         if dat is None:
             debug_message(f'Frame {i:6d} is None!!!')
             continue
-        pstats = get_profile_stats(dataframe=dat,
-                                   n_bins=n_bins,
-                                   q_range=q_range)
+        pstats = get_profile_stats(dataframe=dat, n_bins=n_bins, q_range=q_range, include_median=include_median)
+        pmean[n, :] = pstats['mean']
+        psdev[n, :] = pstats['sdev']
+        psum[n, :] = pstats['sum']
+        psum2[n, :] = pstats['sum2']
+        pcounts[n, :] = pstats['counts']
+        pq_bin[n, :] = pstats['q_bins']
         if include_median:
-            pmedian[n, :] = pstats['median'].copy()
-        pmean[n, :] = pstats['mean'].copy()
-        psdev[n, :] = pstats['sdev'].copy()
-        psum[n, :] = pstats['sum'].copy()
-        psum2[n, :] = pstats['sum2'].copy()
-        pcounts[n, :] = pstats['counts'].copy()
-        pq_bin[n, :] = pstats['q_bins'].copy()
-    out_vals = [pmean, psdev, psum, psum2, pcounts, pq_bin]
+            pmedian[n, :] = pstats['median']
+    out = dict()
+    out['mean'] = pmean
+    out['sdev'] = psdev
+    out['sum'] = psum
+    out['sum2'] = psum2
+    out['counts'] = pcounts
+    out['q_bins'] = pq_bin
     if include_median:
-        out_vals.append(pmedian)
-    return dict(zip(out_keys, out_vals))
+        out['median'] = pmedian
+    return out
 
 
 def normalize_profile_stats(stats, q_range=None):
