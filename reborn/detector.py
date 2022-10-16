@@ -2157,6 +2157,15 @@ def load_pad_masks(file_name):
 
     Returns: List of |ndarray| objects with int type.
     """
+    if isinstance(file_name, list):
+        masks = [load_pad_masks(f) for f in file_name]
+        mask = masks[0]
+        nmask = len(masks)
+        npad = len(mask)
+        for m in range(1, nmask):
+            for p in range(npad):
+                mask[p] *= masks[m][p]
+        return mask
     out = np.load(file_name)
     keys = list(out.keys())
     n = int(len(out) - 1)
