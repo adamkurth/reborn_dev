@@ -263,7 +263,7 @@ class AreaDetector(object):
         debug_message('Initial (home) geometry', self._home_geometry)
         # print(self._home_geometry)
         self.mask = mask
-        if isinstance(mask, str):
+        if isinstance(mask, str) or (isinstance(mask, list) and isinstance(mask[0], str)):
             self.mask = detector.load_pad_masks(mask)
         if self.mask is None:
             self.mask = [p.ones() for p in self._home_geometry]
