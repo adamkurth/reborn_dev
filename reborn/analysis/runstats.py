@@ -142,6 +142,10 @@ def save_padstats(stats, filepath):
 
 def load_padstats(filepath):
     stats = np.load(filepath, allow_pickle=True)
+    s = {}
+    for k in stats.keys():
+        s[k] = stats[k]
+    stats = s
     if isinstance(stats['pad_geometry'][0], dict):
         geom = detector.PADGeometryList()
         stats['pad_geometry'] = geom.from_dict_list(stats['pad_geometry'])
