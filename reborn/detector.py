@@ -2012,6 +2012,8 @@ class RadialProfiler:
         mpat = self.concat_data(mpat)
         data = self.concat_data(data)
         data = data.copy()
+        if np.issubdtype(data.dtype, np.integer):
+            data = data.astype(float)
         data -= mpat
         if as_list:
             data = self._pad_geometry.split_data(data)

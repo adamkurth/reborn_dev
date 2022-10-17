@@ -106,12 +106,19 @@ def snr_mask(dat, mask, nin, ncent, nout, threshold=6, mask_negative=True, max_i
         profiler = RadialProfiler(pad_geometry=pad_geometry, beam=beam, mask=mask)
         dat = profiler.subtract_median_profile(dat)
     if isinstance(dat, list):
-        return [snr_mask(d, m, nin, ncent, nout, threshold=threshold, mask_negative=mask_negative,
+        zipped = [snr_mask(d, m, nin, ncent, nout, threshold=threshold, mask_negative=mask_negative,
                          max_iterations=max_iterations, subtract_median=False) for (d, m) in zip(dat, mask)]
+        m = []
+        d = []
+        for i in range(len(zipped)):
+            m.append(zipped[i][0])
+            d.append(zipped[i][1])
+        return m, d
     mask_a = mask.copy()
     prev = 0
+    a = dat.copy()
     for i in range(max_iterations):
-        a, _ = boxsnr(dat, mask, mask_a, nin, ncent, nout)
+        a, _ = boxsnr(a, mask, mask_a, nin, ncent, nout)
         if mask_negative:
             a = np.abs(a)
         ab = a > threshold
@@ -120,4 +127,4 @@ def snr_mask(dat, mask, nin, ncent, nout, threshold=6, mask_negative=True, max_i
         if above == prev:
             break
         prev = above
-    return mask_a
+    return mask_a, a
