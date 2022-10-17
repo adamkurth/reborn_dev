@@ -141,6 +141,13 @@ def save_padstats(stats, filepath):
 
 def load_padstats(filepath):
     stats = fileio.misc.load_pickle(filepath)
+    meen = stats['sum']/stats['n_frames']
+    meen2 = stats['sum2']/stats['n_frames']
+    sdev = np.nan_to_num(meen2-meen**2)
+    sdev[sdev < 0] = 0
+    sdev = np.sqrt(sdev)
+    stats['mean'] = meen
+    stats['sdev'] = sdev
     return stats
 
 
