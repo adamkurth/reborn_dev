@@ -19,7 +19,7 @@ try:
 except ImportError:
     Parallel = None
     delayed = None
-from .. import source, detector
+from .. import source, detector, fileio
 from ..dataframe import DataFrame
 from ..fileio.getters import ListFrameGetter
 from ..source import Beam
@@ -136,21 +136,11 @@ def padstats(framegetter=None, start=0, stop=None, parallel=False, n_processes=N
 
 
 def save_padstats(stats, filepath):
-    stats['pad_geometry'] = stats['pad_geometry'].to_dict_list()
-    stats['beam'] = stats['beam'].to_dict()
-    np.savez(filepath, allow_pickle=True, **stats)
+    fileio.misc.save_pickle(stats, filepath)
 
 
 def load_padstats(filepath):
-    stats = np.load(filepath, allow_pickle=True)
-    s = {}
-    for k in stats.keys():
-        s[k] = stats[k]
-    stats = s
-    if isinstance(stats['pad_geometry'][0], dict):
-        geom = detector.PADGeometryList()
-        stats['pad_geometry'] = geom.from_dict_list(stats['pad_geometry'])
-    stats['beam'] = source.Beam().from_dict(stats['beam'])
+    stats = fileio.misc.load_pickle(filepath)
     return stats
 
 
