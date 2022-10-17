@@ -123,32 +123,32 @@ def padstats(framegetter=None, start=0, stop=None, parallel=False, n_processes=N
         avg_wavelength = beam_wavelength / beam_frames
         beam = Beam(wavelength=avg_wavelength)
     return {'dataset_id': dataset_id,
-            'pad_geometry': pad_geometry,
-            'mask': mask,
+            # 'pad_geometry': pad_geometry,
+            # 'mask': mask,
             'n_frames': n_frames,
             'sum': sum_pad,
             'min': min_pad,
             'max': max_pad,
             'sum2': sum_pad2,
-            'beam': beam,
+            # 'beam': beam,
             'start': start,
             'stop': stop}
 
 
 def save_padstats(stats, filepath):
-    stats['pad_geometry'] = stats['pad_geometry'].to_dict_list()
-    np.savez(filepath, allow_pickle=True, **stats)
+    # stats['pad_geometry'] = stats['pad_geometry'].to_dict_list()
+    np.savez(filepath, **stats)  #allow_pickle=True, **stats)
 
 
 def load_padstats(filepath):
-    stats = np.load(filepath, allow_pickle=True)
-    s = {}
-    for k in stats.keys():
-        s[k] = stats[k]
-    stats = s
-    if isinstance(stats['pad_geometry'][0], dict):
-        geom = detector.PADGeometryList()
-        stats['pad_geometry'] = geom.from_dict_list(stats['pad_geometry'])
+    stats = np.load(filepath) #, allow_pickle=True)
+    # s = {}
+    # for k in stats.keys():
+    #     s[k] = stats[k]
+    # stats = s
+    # if isinstance(stats['pad_geometry'][0], dict):
+    #     geom = detector.PADGeometryList()
+    #     stats['pad_geometry'] = geom.from_dict_list(stats['pad_geometry'])
     return stats
 
 
