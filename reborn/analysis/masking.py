@@ -77,7 +77,7 @@ def boxsnr(dat, mask_in, mask_out, n_in, n_cent, n_out):
 
 
 def snr_mask(dat, mask, nin, ncent, nout, threshold=6, mask_negative=True, max_iterations=3,
-             pad_geometry=None, subtract_median=False):
+             pad_geometry=None, beam=None, subtract_median=False):
     r"""
     Mask out pixels above some chosen SNR threshold.  The image is converted to a map of SNR using boxsnr.  Additional
     iterations follow, in which pixels above threshold in the previous run are also masked in the annulus.
@@ -101,7 +101,9 @@ def snr_mask(dat, mask, nin, ncent, nout, threshold=6, mask_negative=True, max_i
     if subtract_median:
         if pad_geometry is None:
             raise ValueError('pad_geometry is None.  Cannot subtract median.')
-        profiler = RadialProfiler(pad_geometry=pad_geometry, mask=mask)
+        if beam is None:
+            raise ValueError('beam is None.  Cannot subtract median.')
+        profiler = RadialProfiler(pad_geometry=pad_geometry, beam=beam, mask=mask)
         dat = profiler.subtract_median_profile(dat)
     if isinstance(dat, list):
         return [snr_mask(d, m, nin, ncent, nout, threshold=threshold, mask_negative=mask_negative,
