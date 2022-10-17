@@ -150,7 +150,7 @@ def load_padstats(filepath):
     if isinstance(stats['pad_geometry'][0], dict):
         geom = detector.PADGeometryList()
         stats['pad_geometry'] = geom.from_dict_list(stats['pad_geometry'])
-    stats['beam'] = source.Beam().from_dict()
+    stats['beam'] = source.Beam().from_dict(stats['beam'])
     return stats
 
 
