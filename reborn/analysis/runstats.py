@@ -136,11 +136,16 @@ def padstats(framegetter=None, start=0, stop=None, parallel=False, n_processes=N
 
 
 def save_padstats(stats, filepath):
+    stats['pad_geometry'] = stats['pad_geometry'].to_dict_list()
     np.savez(filepath, allow_pickle=True, **stats)
 
 
 def load_padstats(filepath):
-    return np.load(filepath)
+    stats = np.load(filepath, allow_pickle=True)
+    if isinstance(stats['pad_geometry'][0], dict):
+        geom = detector.PADGeometryList()
+        stats['pad_geometry'] = geom.from_dict_list(stats['pad_geometry'])
+    return stats
 
 
 def padstats_framegetter(stats, geom=None, mask=None):
