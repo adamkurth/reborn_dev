@@ -19,6 +19,7 @@ try:
 except ImportError:
     Parallel = None
     delayed = None
+from .. import detector
 from ..dataframe import DataFrame
 from ..fileio.getters import ListFrameGetter
 from ..source import Beam
@@ -135,7 +136,7 @@ def padstats(framegetter=None, start=0, stop=None, parallel=False, n_processes=N
 
 
 def save_padstats(stats, filepath):
-    np.savez(filepath, **stats)
+    np.savez(filepath, allow_pickle=True, **stats)
 
 
 def load_padstats(filepath):
@@ -147,6 +148,7 @@ def padstats_framegetter(stats, geom=None, mask=None):
     beam = stats['beam']
     if geom is None:
         geom = stats['pad_geometry']
+    geom = detector.PADGeometryList(geom)
     if mask is None:
         mask = stats['mask']
     meen = stats['sum']/stats['n_frames']
