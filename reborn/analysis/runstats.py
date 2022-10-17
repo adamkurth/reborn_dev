@@ -142,11 +142,13 @@ def load_padstats(filepath):
     return np.load(filepath)
 
 
-def padstats_framegetter(stats):
+def padstats_framegetter(stats, geom=None, mask=None):
     r""" Make a FrameGetter that can flip through the padstats result. """
     beam = stats['beam']
-    geom = stats['pad_geometry']
-    mask = stats['mask']
+    if geom is None:
+        geom = stats['pad_geometry']
+    if mask is None:
+        mask = stats['mask']
     meen = stats['sum']/stats['n_frames']
     meen2 = stats['sum2']/stats['n_frames']
     sdev = np.nan_to_num(meen2-meen**2)
@@ -167,8 +169,8 @@ def padstats_framegetter(stats):
     return ListFrameGetter(dfs)
 
 
-def view_padstats(stats):
-    fg = padstats_framegetter(stats)
+def view_padstats(stats, geom=None, mask=None):
+    fg = padstats_framegetter(stats, geom=geom, mask=mask)
     pv = PADView(frame_getter=fg, percentiles=[1, 99])
     pv.start()
     # fg.view()
