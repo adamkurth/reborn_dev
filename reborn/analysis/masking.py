@@ -13,12 +13,30 @@
 # You should have received a copy of the GNU General Public License
 # along with reborn.  If not, see <https://www.gnu.org/licenses/>.
 
+import time
 import numpy as np
+from scipy.signal import convolve
 from ..fortran import peaks_f
 from ..detector import RadialProfiler
 
 
-def boxsnr(dat, mask_in, mask_out, n_in, n_cent, n_out):
+def snr_filter_test(data, mask, mask2, nin, ncent, nout):
+    r""" This is a slow version of snr_filter, which is about 10-fold faster on multi-core CPUs.  """
+    kin = np.ones((2*nin+1, 2*nin+1))
+    kout = np.ones((2*nout+1, 2*nout+1))
+    d = (nout-ncent)
+    kout[d:-d, d:-d] = 0
+    cin = convolve(mask, kin, mode='same')
+    cout = convolve(mask2, kout, mode='same')
+    bak = convolve(data*mask2, kout, mode='same') / cout
+    sig = convolve(data*mask, kin, mode='same') / cin - bak
+    bak2 = convolve(data**2*mask2, kout, mode='same') / cout
+    stderr = np.sqrt((bak2 - bak**2) / cin)
+    snr = sig / stderr
+    return snr, sig
+
+
+def snr_filter(dat, mask_in, mask_out, n_in, n_cent, n_out):
 
     r"""
     Transform an 2D image into a map of local signal-to-noise ratio by the following equivalent steps:
@@ -67,12 +85,14 @@ def boxsnr(dat, mask_in, mask_out, n_in, n_cent, n_out):
         **signal** (|ndarray|): The signal array.
     """
     float_t = np.float64
-    snr = np.asfortranarray(np.ones(dat.shape, dtype=float_t))
-    signal = np.asfortranarray(np.ones(dat.shape, dtype=float_t))
-    d = np.asfortranarray(dat.astype(float_t))
-    m = np.asfortranarray(mask_in.astype(float_t))
-    m2 = np.asfortranarray(mask_out.astype(float_t))
-    peaks_f.boxsnr(d, m, m2, snr, signal, n_in, n_cent, n_out)
+    # snr = np.asfortranarray(np.empty(dat.shape, dtype=float_t))
+    # signal = np.asfortranarray(np.empty(dat.shape, dtype=float_t))
+    snr = np.empty(dat.shape, dtype=float_t)
+    signal = np.empty(dat.shape, dtype=float_t)
+    dat = np.asfortranarray(dat.astype(float_t))
+    mask_in = np.asfortranarray(mask_in.astype(float_t))
+    mask_out = np.asfortranarray(mask_out.astype(float_t))
+    peaks_f.boxsnr(dat.T, mask_in.T, mask_out.T, snr.T, signal.T, n_in, n_cent, n_out)
     return snr, signal
 
 
@@ -105,7 +125,7 @@ def snr_mask(dat, mask, nin, ncent, nout, threshold=6, mask_negative=True, max_i
             raise ValueError('beam is None.  Cannot subtract median.')
         profiler = RadialProfiler(pad_geometry=pad_geometry, beam=beam, mask=mask)
         dat = profiler.subtract_median_profile(dat)
-    if isinstance(dat, list):
+    if isinstance(dat, list):  # Recursive function calls in the case of a list
         zipped = [snr_mask(d, m, nin, ncent, nout, threshold=threshold, mask_negative=mask_negative,
                          max_iterations=max_iterations, subtract_median=False) for (d, m) in zip(dat, mask)]
         m = []
@@ -114,17 +134,23 @@ def snr_mask(dat, mask, nin, ncent, nout, threshold=6, mask_negative=True, max_i
             m.append(zipped[i][0])
             d.append(zipped[i][1])
         return m, d
-    mask_a = mask.copy()
+    amask = mask.copy()
     prev = 0
-    a = dat.copy()
+    d = dat.copy()
     for i in range(max_iterations):
-        a, _ = boxsnr(a, mask, mask_a, nin, ncent, nout)
+        # print('iteration', i)
+        # t = time.time()
+        # snr, sig = boxsnr(d, mask, amask, nin, ncent, nout)
+        # print(time.time()-t)
+        # t = time.time()
+        snr, sig = snr_filter(d, mask, amask, nin, ncent, nout)
+        # print(time.time()-t)
         if mask_negative:
-            a = np.abs(a)
-        ab = a > threshold
-        above = np.sum(ab)
-        mask_a[ab] = 0
-        if above == prev:
-            break
-        prev = above
-    return mask_a, a
+            snr = np.abs(snr)
+        ab = snr > threshold
+        # above = np.sum(ab)
+        amask[ab] = 0
+        # if above == prev:
+        #     break
+        # prev = above
+    return amask, snr

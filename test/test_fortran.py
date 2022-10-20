@@ -42,3 +42,17 @@ def test_02():
     w_sum = np.zeros(n_bins)
     fortran.scatter_f.profile_stats_indexed(pattern, indices, weights, sum_, sum2, w_sum)
     assert(np.max(np.abs(sum_ - sum_1)) == 0)
+
+
+def test_03():
+    shape = (5, 5)
+    dat = np.ones(shape, dtype=float)
+    conv = np.empty_like(dat)
+    n = 1
+    fortran.peaks_f.boxconv(dat.T, conv.T, n, shape[0], shape[1])
+    ans = np.array([[4., 6., 6., 6., 4.],
+                    [6., 9., 9., 9., 6.],
+                    [6., 9., 9., 9., 6.],
+                    [6., 9., 9., 9., 6.],
+                    [4., 6., 6., 6., 4.]])
+    assert(np.sum(np.abs(ans-conv)) == 0)

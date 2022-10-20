@@ -35,12 +35,12 @@ class Widget(QtGui.QWidget):
         row += 1
         self.layout.addWidget(QtGui.QLabel('Show Data Transform'), row, 1)
         self.update_colorbar_button = QtGui.QCheckBox()
-        self.update_colorbar_button.setChecked(True)
+        self.update_colorbar_button.setChecked(False)
         self.layout.addWidget(self.update_colorbar_button, row, 2, alignment=QtCore.Qt.AlignCenter)
         row += 1
         self.layout.addWidget(QtGui.QLabel('Subtract Radial Median'), row, 1)
         self.subtract_median_button = QtGui.QCheckBox()
-        self.subtract_median_button.setChecked(True)
+        self.subtract_median_button.setChecked(False)
         self.layout.addWidget(self.subtract_median_button, row, 2, alignment=QtCore.Qt.AlignCenter)
         row += 1
         self.layout.addWidget(QtGui.QLabel('Inner Size'), row, 1)
@@ -52,19 +52,19 @@ class Widget(QtGui.QWidget):
         self.layout.addWidget(QtGui.QLabel('Center Size'), row, 1)
         self.center_spinbox = QtGui.QSpinBox()
         self.center_spinbox.setMinimum(1)
-        self.center_spinbox.setValue(5)
+        self.center_spinbox.setValue(10)
         self.layout.addWidget(self.center_spinbox, row, 2)
         row += 1
         self.layout.addWidget(QtGui.QLabel('Outer Size'), row, 1)
         self.outer_spinbox = QtGui.QSpinBox()
         self.outer_spinbox.setMinimum(1)
-        self.outer_spinbox.setValue(10)
+        self.outer_spinbox.setValue(20)
         self.layout.addWidget(self.outer_spinbox, row, 2)
         row += 1
         self.layout.addWidget(QtGui.QLabel('Threshold'), row, 1)
         self.thresh_spinbox = QtGui.QDoubleSpinBox()
         self.thresh_spinbox.setMinimum(0)
-        self.thresh_spinbox.setValue(8)
+        self.thresh_spinbox.setValue(6)
         self.layout.addWidget(self.thresh_spinbox, row, 2)
         row += 1
         self.layout.addWidget(QtGui.QLabel('Max Iterations'), row, 1)
@@ -90,16 +90,18 @@ class Widget(QtGui.QWidget):
         max_iterations = self.iter_spinbox.value()
         subtract_median = self.subtract_median_button.isChecked()
         update_colorbar = self.update_colorbar_button.isChecked()
-        t = time()
+
         data = dataframe.get_processed_data_list()
         mask = dataframe.get_mask_list()
+        t = time()
         newmask, newdat = snr_mask(data, mask, inner, center, outer, threshold=threshold, mask_negative=True,
                              max_iterations=max_iterations, pad_geometry=geom, beam=beam,
                              subtract_median=subtract_median)
+        self.padview.debug('%g seconds' % (time() - t,))
         dataframe.set_mask(newmask)
         if update_colorbar:
             dataframe.set_processed_data(newdat)
             self.padview.set_levels(0, 10)
         self.padview.dataframe = dataframe
         self.padview.update_display()
-        self.padview.debug('%g seconds' % (time()-t,))
+
