@@ -47,34 +47,244 @@ def image(*args, **kargs):
     return w
 
 
-def imview(image, hold=False):
+def imview(image, *args, hold=False, **kwargs):
     r""" Makes an ImageView widget but adds some functionality that I commonly need.  A PlotItem is used as the
     view so that there are axes, and by default the aspect ratio is unlocked so that the image is stretched to fill
     the view.  The default colormap is set to 'flame'. The hold option keeps the window open, so that your script
     will not exit and close your window a few milliseconds after opening it.  A Qt application is created if need be,
     which avoids a common runtime error. """
     app = pg.mkQApp()
-    plot = pg.PlotItem()
-    imv = pg.ImageView(view=plot)
-    plot.setAspectLocked(False)
-    imv.setImage(image)
-    imv.setPredefinedGradient('flame')
+    imv = ImView(*args, image, gradient='flame', aspect_locked=False, **kwargs)
+    # plot.setAspectLocked(False)
+    # imv.setImage(image)
+    # imv.setPredefinedGradient('flame')
     imv.show()
     if hold:
         app.exec_()
     return imv
 
 
-
 class ImView(pg.ImageView):
+
+    plots = []
+    lines = []
+    rois = []
+
     def __init__(self, *args, **kwargs):
+        r"""
+        A subclass of pyqtgraph.ImageView that adds helpful features when you need the image to be embedded in a
+        plot axis.  Lists of roi, plot, and line items are maintained.
+        In addition to the usual positional and keyword arguments for the pyqtgraph.ImageView class, the following
+        arguments are accepted:
+
+        Arguments:
+            gradient (str): Set the colormap (‘thermal’, ‘flame’, ‘yellowy’, ‘bipolar’, ‘spectrum’, ‘cyclic’,
+                            ‘greyclip’, ‘grey’, ‘viridis’, ‘inferno’, ‘plasma’, ‘magma’)
+            show_histogram (bool): Set to False if you don't want the usual histogram to appear on the right.
+            aspect_locked (bool): Set to False if you don't want the aspect ratio of the plot/image to be fixed to 1.
+            title (str): Plot title.
+            xlabel (str): X (horizontal) axis label.
+            ylabel (str): Y (vertical) axis label.
+            fs_lims (tuple of float): The min and max values of pixel coordinates along fast-scan axis.
+            ss_lims (tuple of float): The min and max values of pixel coordinates along slow-scan axis.
+        """
+        gradient = kwargs.pop('gradient', 'grey') #'flame')
+        show_histogram = kwargs.pop('show_histogram', True)
+        aspect_locked = kwargs.pop('aspect_locked', True)
+        title = kwargs.pop('title', None)
+        xlabel = kwargs.pop('ss_label', None)
+        ylabel = kwargs.pop('fs_label', None)
+        self.fs_lims = kwargs.pop('fs_lims', None)
+        self.ss_lims = kwargs.pop('ss_lims', None)
+        self.frame_names = kwargs.pop('frame_names', None)
         self.app = pg.mkQApp()
-        view = kwargs.pop('view', None)
-        title = kwargs.pop('title', 'ImView')
-        fs_lims = kwargs.pop('fs_lims', None)
-        ss_lims = kwargs.pop('ss_lims', None)
-        if view is None:
-            view = pg.PlotItem()
+        p = pg.PlotItem()
+        super().__init__(view=p)
+        self.view.setAspectLocked(aspect_locked)
+        self.view.invertY(False)
+        if title is not None:
+            self.view.setTitle(title)
+        if ylabel is not None:
+            self.view.setLabel('left', ylabel)
+        if xlabel is not None:
+            self.view.setLabel('bottom', xlabel)
+        self.ui.roiBtn.hide()
+        self.ui.menuBtn.hide()
+        if len(args) > 0:
+            self.setImage(*args, **kwargs)
+        self.setPredefinedGradient(gradient)
+        if show_histogram:
+            self.ui.histogram.show()
+        else:
+            # self.ui.histogram = pg.GradientEditorItem()
+            self.ui.histogram.hide()
+        self._frame_changed(0, None)
+        self.sigTimeChanged.connect(self._frame_changed)
+
+    def setImage(self, *args, **kwargs):
+        r""" Override setImage so that the image is positioned properly on the plot.  The default puts the *corner*
+        of the first pixel at the position (0, 0) by default, which makes no sense; the *center* of the pixel should
+        be located at (0, 0) for all the obvious reasons.
+
+        In addition to the usual positional and keyword arguments, the following keyword arguments are accepted:
+
+        Arguments:
+            fs_lims (list): The minimum and maximum values of the pixel coordinates along the fast-scan direction.
+            ss_lims (list): The minimum and maximum values of the pixel coordinates along the slow-scan direction.
+
+        """
+        image = args[0]
+        ns, nf = image.shape[-2:]
+        self.fs_lims = kwargs.pop('fs_lims', self.fs_lims)
+        self.ss_lims = kwargs.pop('ss_lims', self.ss_lims)
+        if self.fs_lims is None:
+            self.fs_lims = np.array([0, nf-1])
+        if self.ss_lims is None:
+            self.ss_lims = np.array([0, ns-1])
+        fs_width = self.fs_lims[1] - self.fs_lims[0]
+        ss_width = self.ss_lims[1] - self.ss_lims[0]
+        kwargs.setdefault('pos', (self.ss_lims[0]-0.5, self.fs_lims[0]-0.5))
+        kwargs.setdefault('scale', (ss_width/(ns-1), fs_width/(nf-1)))
+        super().setImage(*args, **kwargs)
+
+    def add_plot(self, *args, **kwargs):
+        r""" TODO: Document. """
+        name = kwargs.pop('name', None)
+        plot = self.getView().plot(*args, **kwargs)
+        plot.name = name
+        self.plots.append(plot)
+        return plot
+
+    def add_line(self, *args, **kwargs):
+        r""" TODO: Document. """
+        name = kwargs.pop('name', None)
+        p = kwargs.pop('position')
+        line = pg.InfiniteLine(*args, **kwargs)
+        line.setPos([p, p])
+        line.name = name
+        self.lines.append(line)
+        self.getView().addItem(line)
+        return line
+
+    def add_roi(self, *args, **kwargs):
+        r""" TODO: Document. """
+        nx, ny = self.image.shape[-2:]
+        name = kwargs.pop('name', None)
+        pos = kwargs.pop('pos', (nx/4, ny/4))
+        size = kwargs.pop('size', (nx/2, ny/2))
+        pen = kwargs.pop('pen', pg.mkPen('r', width=5))
+        roi = pg.ROI(*args, pos=pos, size=size, pen=pen, **kwargs)
+        roi.addScaleHandle([1, 1], [0, 0])
+        roi.addScaleHandle([1, 0], [1, 0])
+        roi.addScaleHandle([1, 0], [0, 1])
+        roi.addScaleHandle([0, 1], [1, 0])
+        roi.name = name
+        self.rois.append(roi)
+        self.getView().addItem(roi)
+        return roi
+
+    def get_roi(self, name=None):
+        roi = None
+        for r in self.rois:
+            if r.name == name:
+                roi = r
+                break
+        if roi is None:
+            roi = self.add_roi(name=name)
+        return roi
+
+    def get_roi_slice(self, name=None):
+        roi = self.get_roi(name)
+        (nx, ny) = self.image.shape[-2:]
+        (px, py) = roi.pos()
+        (sx, sy) = roi.size()
+        slc = np.s_[max(int(px), 0):min(int(px+sx), nx - 1), max(int(py), 0):min(int(py+sy), ny - 1)]
+        return slc
+
+    def get_plot(self, name=None):
+        plot = None
+        for p in self.plots:
+            if p.name == name:
+                plot = p
+                break
+        if plot is None:
+            plot = self.add_plot(name=name)
+        return plot
+
+    def get_line(self, name=None):
+        line = None
+        for l in self.lines:
+            if l.name == name:
+                line = l
+                break
+        if line is None:
+            line = self.add_line(name=name)
+        return line
+
+    def set_mask(self, mask, color=None):
+        d = mask
+        if color is None:
+            color = (255, 255, 255, 20)
+        mask_rgba = np.zeros((d.shape[0], d.shape[1], 4))
+        r = np.zeros_like(d)
+        r[d == 0] = color[0]
+        g = np.zeros_like(d)
+        g[d == 0] = color[1]
+        b = np.zeros_like(d)
+        b[d == 0] = color[2]
+        t = np.zeros_like(d)
+        t[d == 0] = color[3]
+        mask_rgba[:, :, 0] = r
+        mask_rgba[:, :, 1] = g
+        mask_rgba[:, :, 2] = b
+        mask_rgba[:, :, 3] = t
+        im = pg.ImageItem(mask_rgba)
+        self.getView().addItem(im)
+
+    # def keyPressEvent(self, ev):
+    #     if ev.key() == 82:  # r button
+    #         print("'r' pushed")
+    #         self.retry = True
+    #         global retry
+    #         retry = True
+    #         self.app.quit()
+    #     if ev.key() == 32:  # spacebar
+    #         print("spacebar pushed")
+    #         self.app.quit()
+    #     if ev.key() == 81:  # q button
+    #         print("'q' pushed")
+    #         global quit
+    #         quit = True
+    #         self.quit = True
+    #         self.app.quit()
+    #     if ev.key() == 75:
+    #         print("'k' pushed")
+    #         global kill
+    #         kill = True
+    #         self.app.closeAllWindows()
+    #         self.app.quit()
+    #         self.kill = True
+    #         del (self.app)
+
+    def _frame_changed(self, ind, time):
+        if self.frame_names is not None:
+            self.view.setTitle(self.frame_names[ind])
+    #     # TODO make two versions of this, onewith jet and one with ntip
+    #     # check setVisible(True or False)
+    #     if (self.ntip_idx is None) or (self.jet_breakup_idx is None):
+    #         return
+    #     p = self.ntip_idx[ind]
+    #     d = self.jet_breakup_idx[ind]
+    #     dc = self.drop_centroids[ind]
+    #     if self.ntip_position is None:
+    #         self.ntip_position = self.add_line(angle=90, position=p, movable=True, pen='r')
+    #         self.jtip_position = self.add_line(angle=90, position=d, movable=True, pen='b')
+    #         self.drop_plot = self.add_plot(pen=None, symbolPen='g', symbol='o', symbolBrush=None, symbolSize=10)
+    #         self.drop_plot.setData(dc[:,0],dc[:,1])
+    #     else:
+    #         self.ntip_position.setPos([p, p])
+    #         self.jtip_position.setPos([d,d])
+    #         self.drop_plot.setData(dc[:,0],dc[:,1])
 
 
 
@@ -939,3 +1149,5 @@ class ImageItem(GraphicsObject):
     def emitRemoveRequested(self):
         self.removeTimer.timeout.disconnect(self.emitRemoveRequested)
         self.sigRemoveRequested.emit(self)
+
+

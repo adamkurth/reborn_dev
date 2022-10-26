@@ -15,8 +15,9 @@
 import numpy as np
 from joblib import delayed
 from joblib import Parallel
-from reborn.detector import RadialProfiler
-from reborn import utils, fileio
+from ..detector import RadialProfiler
+from ..external import pyqtgraph as pg
+from .. import utils, fileio
 
 debug = True
 
@@ -180,14 +181,23 @@ def save_profiles(stats, filepath):
 
 def load_profiles(filepath):
     stats = fileio.misc.load_pickle(filepath)
-    meen = stats['sum']/stats['counts']
-    meen2 = stats['sum2']/stats['counts']
-    sdev = np.nan_to_num(meen2-meen**2, copy=True, nan=0.0, posinf=0.0, neginf=0.0)
-    sdev[sdev < 0] = 0
-    sdev = np.sqrt(sdev)
+    with np.errstate(divide='ignore', invalid='ignore'):
+        meen = stats['sum']/stats['counts']
+        meen2 = stats['sum2']/stats['counts']
+        sdev = np.nan_to_num(meen2-meen**2, copy=True, nan=0.0, posinf=0.0, neginf=0.0)
+        sdev[sdev < 0] = 0
+        sdev = np.sqrt(sdev)
     stats['mean'] = meen
     stats['sdev'] = sdev
     return stats
+
+
+def view_profile_runstats(stats):
+    q = stats['q_bins'][0]
+    labels = ['Mean', 'Standard Deviation']
+    images = np.array([stats['mean'], stats['sdev']])
+    pg.imview(images, fs_label='q [A]', ss_label='frame #', fs_lims=[q[0]/1e10, q[-1]/1e10], hold=True,
+              frame_names=labels)
 
 
 def normalize_profile_stats(stats, q_range=None):
