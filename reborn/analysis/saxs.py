@@ -16,7 +16,7 @@ import numpy as np
 from joblib import delayed
 from joblib import Parallel
 from reborn.detector import RadialProfiler
-from reborn import utils
+from reborn import utils, fileio
 
 debug = True
 
@@ -172,6 +172,22 @@ def get_profile_runstats(framegetter=None, n_bins=1000, q_range=None,
     if include_median:
         out['median'] = pmedian
     return out
+
+
+def save_profiles(stats, filepath):
+    fileio.misc.save_pickle(stats, filepath)
+
+
+def load_profiles(filepath):
+    stats = fileio.misc.load_pickle(filepath)
+    meen = stats['sum']/stats['counts']
+    meen2 = stats['sum2']/stats['counts']
+    sdev = np.nan_to_num(meen2-meen**2, copy=True, nan=0.0, posinf=0.0, neginf=0.0)
+    sdev[sdev < 0] = 0
+    sdev = np.sqrt(sdev)
+    stats['mean'] = meen
+    stats['sdev'] = sdev
+    return stats
 
 
 def normalize_profile_stats(stats, q_range=None):
