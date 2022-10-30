@@ -25,7 +25,10 @@ from ..fileio.getters import ListFrameGetter
 from ..source import Beam
 from ..viewers.qtviews.padviews import PADView
 
-def padstats(framegetter=None, start=0, stop=None, parallel=False, n_processes=None, process_id=None, verbose=False):
+def padstats(framegetter=None, start=0, stop=None,
+             parallel=False, n_processes=None, process_id=None,
+             bin_pixels=False, n_pixel_bins=None, bin_min=None,
+             bin_max=None, verbose=False):
     r""" EXPERIMENTAL!!!  Since we often need to loop over a series of dataframes and fetch the mean, variance, min
     max values, this function will do that for you.  You should be able to pass in any FrameGetter subclass.  You can
     try the parallel flag if you have joblib package installed... but if you parallelize, please understand that you
@@ -58,12 +61,17 @@ def padstats(framegetter=None, start=0, stop=None, parallel=False, n_processes=N
                                                              for i in range(n_processes))
         tot = out[0]
         for o in out[1:]:
-            if o['sum'] is None:
-                continue
-            tot['sum'] += o['sum']
-            tot['sum2'] += o['sum2']
-            tot['min'] = np.minimum(tot['min'], o['min'])
-            tot['max'] = np.minimum(tot['max'], o['max'])
+            if isinstance(o['sum'], np.ndarray):
+                tot['sum'] += o['sum']
+            if isinstance(o['sum2'], np.ndarray):
+                tot['sum2'] += o['sum2']
+            if isinstance(o['min'], np.ndarray):
+                tot['min'] = np.minimum(tot['min'], o['min'])
+            if isinstance(o['max'], np.ndarray):
+                tot['max'] = np.minimum(tot['max'], o['max'])
+            if bin_pixels:
+                if isinstance(o['max'], np.ndarray):
+                    tot['pixel_bins'] += o['pixel_bins']
             tot['n_frames'] += o['n_frames']
         return tot
     if isinstance(framegetter, dict):
@@ -99,12 +107,21 @@ def padstats(framegetter=None, start=0, stop=None, parallel=False, n_processes=N
             beam_wavelength += beam_data.wavelength
             beam_frames += 1
         if first:
-            s = rdat.shape
+            s = rdat.size
             sum_pad = np.zeros(s)
             sum_pad2 = np.zeros(s)
             max_pad = rdat
             min_pad = rdat
             n_frames = np.zeros(s)
+            if bin_pixels:
+                if n_pixel_bins is None:
+                    n_pixel_bins = int(s * 0.01)
+                pixel_bins = np.zeros((n_pixel_bins, rdat.size), dtype=int)
+                if bin_min is None:
+                    bin_min = np.min(rdat)
+                if bin_max is None:
+                    bin_max = np.max(rdat)
+                bins = np.linspace(bin_min, bin_max, n_pixel_bins, dtype=int)
             first = False
         sum_pad += rdat
         sum_pad2 += rdat ** 2
@@ -116,23 +133,30 @@ def padstats(framegetter=None, start=0, stop=None, parallel=False, n_processes=N
             pad_geometry = dat.get_pad_geometry()
         if mask is None:
             mask = dat.get_mask_flat()
+        if bin_pixels:
+            frame_bins = np.zeros((n_pixel_bins, rdat.size), dtype=int)
+            for i, pixel in enumerate(rdat):
+                idx = (np.abs(bins - pixel)).argmin()
+                framebin[idx, i] = 1
+            pixel_bins += framebin
         n_frames += 1
     if beam_frames == 0:
         beam = None
     else:
         avg_wavelength = beam_wavelength / beam_frames
         beam = Beam(wavelength=avg_wavelength)
-    return {'dataset_id': dataset_id,
-            'pad_geometry': pad_geometry,
-            'mask': mask,
-            'n_frames': n_frames,
-            'sum': sum_pad,
-            'min': min_pad,
-            'max': max_pad,
-            'sum2': sum_pad2,
-            'beam': beam,
-            'start': start,
-            'stop': stop}
+    run_stats_keys = ['dataset_id', 'pad_geometry', 'mask',
+                      'n_frames', 'sum', 'min',
+                      'max', 'sum2', 'beam',
+                      'start', 'stop']
+    run_stats_vals = [dataset_id, pad_geometry, mask,
+                      n_frames, sum_pad, min_pad,
+                      max_pad, sum_pad2, beam,
+                      start, stop]
+    runstats = dict(zip(run_stats_keys, run_stats_vals))
+    if bin_pixels:
+        runstats['pixel_bins'] = pixel_bins
+    return runstats
 
 
 def save_padstats(stats, filepath):
