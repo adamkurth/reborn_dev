@@ -35,13 +35,14 @@ def padstats(framegetter=None, start=0, stop=None,
     cannot pass a framegetter from the main process to the children processes (because, for example, the framegetter
     might have a reference to a file handle object).  Therefore, in order to parallelize, we use the convention in
     which the framegetter is passed in as a dictionary with the 'framegetter' key set to the desired FrameGetter
-    subclass, and the 'kwargs' key set to the keyword arguments needed to create a new class instance.
+    subclass, and the 'kwargs' key set to the keyword arguments needed to create a new class instance. If bin_pixels
+    is set to True this function will generate a histogram of the signal over the run for every pixel in the detector.
 
     The return of this function is a dictionary as follows:
 
     {'sum': sum_pad, 'sum2': sum_pad2, 'min': min_pad, 'max': max_pad, 'n_frames': n_frames,
-            'dataset_id': dat.get_dataset_id(), 'pad_geometry': dat.get_pad_geometry(),
-            'mask': dat.get_mask_flat(), 'beam': dat.get_beam()}
+     'dataset_id': dat.get_dataset_id(), 'pad_geometry': dat.get_pad_geometry(),
+     'mask': dat.get_mask_flat(), 'beam': dat.get_beam(), 'pixel_bins': pixel_bins}
 
     There is a corresponding view_padstats function to view the results in this dictionary.
 

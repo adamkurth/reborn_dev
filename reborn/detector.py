@@ -840,6 +840,12 @@ class PADGeometry:
         """
         return np.random.random((self.n_ss, self.n_fs), *args, **kwargs)  # pylint: disable=no-member
 
+    def poisson(self, lam=1.0):
+        r"""
+        For convenience: np.random.poisson(lam=lam, size=(self.n_ss, self.n_fs))
+        """
+        return np.random.poisson(lam=lam, size=(self.n_ss, self.n_fs))
+
     @cached
     def max_resolution(self, beam=None):
         r"""
@@ -1246,6 +1252,10 @@ class PADGeometryList(list):
     def random(self, *args, **kwargs):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
         return self.concat_data([p.random(*args, **kwargs).ravel() for p in self])
+
+    def poisson(self, lam=1.0):
+        r""" Concatenates the output of the matching method in |PADGeometry|"""
+        return self.concat_data([p.poisson(lam=lam).ravel() for p in self])
 
     @cached
     def max_resolution(self, beam):
