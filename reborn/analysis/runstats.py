@@ -116,13 +116,13 @@ def padstats(framegetter=None, start=0, stop=None,
             n_frames = np.zeros(s)
             if bin_pixels:
                 if n_pixel_bins is None:
-                    n_pixel_bins = int(s * 0.01)
-                pixel_bins = np.zeros((n_pixel_bins, rdat.size), dtype=int)
+                    n_pixel_bins = int(s * 0.001)
                 if bin_min is None:
                     bin_min = np.min(rdat)
                 if bin_max is None:
                     bin_max = np.max(rdat)
-                bins = np.linspace(bin_min, bin_max, n_pixel_bins, dtype=int)
+                histogram = PixelHistogram(bin_min=bin_min, bin_max=bin_max,
+                                           n_pixel_bins=n_pixel_bins, n_detector_pixels=rdat.size)
             first = False
         sum_pad += rdat
         sum_pad2 += rdat ** 2
@@ -135,11 +135,7 @@ def padstats(framegetter=None, start=0, stop=None,
         if mask is None:
             mask = dat.get_mask_flat()
         if bin_pixels:
-            frame_bins = np.zeros((n_pixel_bins, rdat.size), dtype=int)
-            for i, pixel in enumerate(rdat):
-                idx = (np.abs(bins - pixel)).argmin()
-                framebin[idx, i] = 1
-            pixel_bins += framebin
+            histogram.add_frame(dat)
         n_frames += 1
     if beam_frames == 0:
         beam = None
@@ -156,7 +152,7 @@ def padstats(framegetter=None, start=0, stop=None,
                       start, stop]
     runstats = dict(zip(run_stats_keys, run_stats_vals))
     if bin_pixels:
-        runstats['pixel_bins'] = pixel_bins
+        runstats['pixel_bins'] = histogram.pixel_histogram
     return runstats
 
 
