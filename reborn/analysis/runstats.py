@@ -71,8 +71,10 @@ def padstats(framegetter=None, start=0, stop=None,
             if isinstance(o['max'], np.ndarray):
                 tot['max'] = np.minimum(tot['max'], o['max'])
             if bin_pixels:
-                if isinstance(o['max'], np.ndarray):
+                if isinstance(o['pixel_bins'], np.ndarray):
                     tot['pixel_bins'] += o['pixel_bins']
+            tot['start'] = np.min(tot['start'], o['start'])
+            tot['stop'] = np.max(tot['stop'], o['stop'])
             tot['n_frames'] += o['n_frames']
         return tot
     if isinstance(framegetter, dict):
