@@ -13,8 +13,12 @@
 # You should have received a copy of the GNU General Public License
 # along with reborn.  If not, see <https://www.gnu.org/licenses/>.
 import numpy as np
-from joblib import delayed
-from joblib import Parallel
+try:
+    from joblib import delayed
+    from joblib import Parallel
+except ImportError:
+    delayed = None
+    Parallel = None
 from ..detector import RadialProfiler
 from ..external import pyqtgraph as pg
 from .. import utils, fileio
