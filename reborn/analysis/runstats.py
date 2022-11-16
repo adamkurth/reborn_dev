@@ -71,8 +71,8 @@ class PixelHistogram:
 
     def add_frame(self, dataframe):
         data = dataframe.get_raw_data_flat()
-        mask = dataframe.get_mask_flat()
-        data[mask == 0] = 0
+        # mask = dataframe.get_mask_flat()
+        # data[mask == 0] = 0
         # bin data
         bin_index = np.floor((data - self._bin_min) / self._bin_delta).astype(int)
         idx = np.ravel_multi_index((bin_index, self._detector_pixels_index),
