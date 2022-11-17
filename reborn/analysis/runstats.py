@@ -29,63 +29,50 @@ from ..viewers.qtviews.padviews import PADView
 
 
 class PixelHistogram:
-    _bin_min = None
-    _bin_max = None
-    _bin_delta = None
-    _n_pixel_bins = None
-    _n_detector_pixels = None
-    _detector_pixels_index = None
-    _pixel_histogram = None
 
-    def __init__(self, bin_min, bin_max, n_pixel_bins, n_detector_pixels):
-        self._bin_min = bin_min
-        self._bin_max = bin_max
-        self._n_pixel_bins = n_pixel_bins
-        self._bin_delta = (self._bin_max - self._bin_min) / (self._n_pixel_bins - 1)
-        self._n_detector_pixels = n_detector_pixels
-        self._detector_pixels_index = np.arange(self._n_detector_pixels, dtype=int)
-        self._pixel_histogram = np.zeros((self._n_pixel_bins, self._n_detector_pixels), dtype=int)
+    def __init__(self, bin_min=None, bin_max=None, n_bins=None, n_pixels=None):
+        r""" Creates an intensity histogram for each pixel in a PAD.  For a PAD with N pixels in total, this class
+        will produce an array of shape (M, N) assuming that you requested M bins in the histogram.
 
-    @property
-    def bin_min(self):
-        return self._bin_min
+        Arguments:
+            bin_min (float): The minimum value corresponding to histogram bin *centers*.
+            bin_max (float): The maximum value corresponding to histogram bin *centers*.
+            n_bins (int): The number of histogram bins.
+            n_pixels (int): How many pixels there are in the detector.
+            """
+        self.count = 0
+        self.bin_min = float(bin_min)
+        self.bin_max = float(bin_max)
+        self.n_bins = int(n_bins)
+        self.n_pixels = int(n_pixels)
+        self.bin_delta = (self.bin_max - self.bin_min) / (self.n_bins - 1)
+        self._idx = np.arange(self.n_pixels, dtype=int)
+        self.histogram = np.zeros((self.n_pixels, self.n_bins), dtype=int)
 
-    @property
-    def bin_max(self):
-        return self._bin_max
+    def get_bin_centers(self):
+        r""" Returns an 1D array of histogram bin centers. """
+        return np.linspace(self.bin_min, self.bin_max, self.n_bins)
 
-    @property
-    def bin_delta(self):
-        return self._bin_delta
+    def get_histogram_normalized(self):
+        r""" Returns a normalized histogram - an |ndarray| of shape (M, N) where M is the number of pixels and
+        N is the number of requested bins per pixel. """
+        return self.histogram / self.count
 
-    @property
-    def n_pixel_bins(self):
-        return self._n_pixel_bins
+    def get_histogram(self):
+        r""" Returns a copy of the histogram - an |ndarray| of shape (M, N) where M is the number of pixels and
+        N is the number of requested bins per pixel."""
+        return self.histogram.copy()
 
-    @property
-    def n_detector_pixels(self):
-        return self._n_detector_pixels
-
-    @property
-    def pixel_histogram(self):
-        return self._pixel_histogram
-
-    def add_frame(self, dataframe):
-        data = dataframe.get_raw_data_flat()
-        # mask = dataframe.get_mask_flat()
-        # data[mask == 0] = 0
-        # bin data
-        bin_index = np.floor((data - self._bin_min) / self._bin_delta).astype(int)
-        idx = np.ravel_multi_index((bin_index, self._detector_pixels_index),
-                                   (self._n_pixel_bins, self._n_detector_pixels),
-                                   mode='clip')
-        self._pixel_histogram.flat[idx] += 1
+    def add_frame(self, data):
+        r""" Add PAD measurement to the histogram."""
+        self.count += 1
+        bin_index = np.floor((data - self.bin_min) / self.bin_delta).astype(int)
+        idx = np.ravel_multi_index((self._idx, bin_index), (self.n_pixels, self.n_bins), mode='clip')
+        self.histogram.flat[idx] += 1
 
 
-def padstats(framegetter=None, start=0, stop=None,
-             parallel=False, n_processes=None, process_id=None,
-             bin_pixels=False, n_pixel_bins=None, bin_min=None,
-             bin_max=None, verbose=False):
+def padstats(framegetter=None, start=0, stop=None, parallel=False, n_processes=None, process_id=None,
+             histogram_params=None, verbose=False):
     r""" EXPERIMENTAL!!!  Since we often need to loop over a series of dataframes and fetch the mean, variance, min
     max values, this function will do that for you.  You should be able to pass in any FrameGetter subclass.  You can
     try the parallel flag if you have joblib package installed... but if you parallelize, please understand that you
@@ -103,6 +90,18 @@ def padstats(framegetter=None, start=0, stop=None,
 
     There is a corresponding view_padstats function to view the results in this dictionary.
 
+    Arguments:
+        framegetter (|FrameGetter|): A FrameGetter subclass.  If running in parallel, you should instead pass a
+                                     dictionary with keys 'framegetter' (with reference to FrameGetter subclass,
+                                     not an actual class instance) and 'kwargs' containing a dictionary of keyword
+                                     arguments needed to create a class instance.
+        start (int): Which frame to start with.
+        stop (int): Which frame to stop at.
+        parallel (bool): Set to true to use joblib for multi-processing.
+        n_processes (int): How many processes to run in parallel (if parallel=True).
+        histogram_params (dict): Optional: A dictionary with the keyword arguments needed for the PixelHistogram class
+                                    instance.
+
     Returns: dict """
     if framegetter is None:
         raise ValueError('framegetter cannot be None')
@@ -114,11 +113,8 @@ def padstats(framegetter=None, start=0, stop=None,
                 raise ValueError('This FrameGetter does not have init_params attribute needed to make a replica')
             framegetter = {'framegetter': type(framegetter), 'kwargs': framegetter.init_params}
         out = Parallel(n_jobs=n_processes)(delayed(padstats)(framegetter=framegetter, start=start, stop=stop,
-                                                             parallel=False, n_processes=n_processes,
-                                                             bin_pixels=bin_pixels,
-                                                             n_pixel_bins=n_pixel_bins, bin_min=bin_min,
-                                                             bin_max=bin_max,
-                                                             process_id=i, verbose=verbose)
+                                                             parallel=False, n_processes=n_processes, process_id=i,
+                                                             histogram_params=histogram_params, verbose=verbose)
                                                              for i in range(n_processes))
         tot = out[0]
         for o in out[1:]:
@@ -130,7 +126,7 @@ def padstats(framegetter=None, start=0, stop=None,
                 tot['min'] = np.minimum(tot['min'], o['min'])
             if isinstance(o['max'], np.ndarray):
                 tot['max'] = np.minimum(tot['max'], o['max'])
-            if bin_pixels:
+            if histogram_params is not None:
                 if isinstance(o['pixel_bins'], np.ndarray):
                     tot['pixel_bins'] += o['pixel_bins']
             tot['start'] = min(tot['start'], o['start'])
@@ -177,15 +173,10 @@ def padstats(framegetter=None, start=0, stop=None,
             max_pad = rdat
             min_pad = rdat
             n_frames = np.zeros(s)
-            if bin_pixels:
-                if n_pixel_bins is None:
-                    n_pixel_bins = int(s * 0.001)
-                if bin_min is None:
-                    bin_min = np.min(rdat)
-                if bin_max is None:
-                    bin_max = np.max(rdat)
-                histogram = PixelHistogram(bin_min=bin_min, bin_max=bin_max,
-                                           n_pixel_bins=n_pixel_bins, n_detector_pixels=rdat.size)
+            if histogram_params is not None:
+                if histogram_params['n_pixels'] is None:
+                    histogram_params['n_pixels'] = rdat.size
+                histogram = PixelHistogram(**histogram_params)
             first = False
         sum_pad += rdat
         sum_pad2 += rdat ** 2
@@ -197,8 +188,8 @@ def padstats(framegetter=None, start=0, stop=None,
             pad_geometry = dat.get_pad_geometry()
         if mask is None:
             mask = dat.get_mask_flat()
-        if bin_pixels:
-            histogram.add_frame(dat)
+        if histogram is not None:
+            histogram.add_frame(rdat)
         n_frames += 1
     if beam_frames == 0:
         beam = None
@@ -214,8 +205,8 @@ def padstats(framegetter=None, start=0, stop=None,
                       max_pad, sum_pad2, beam,
                       start, stop]
     runstats = dict(zip(run_stats_keys, run_stats_vals))
-    if bin_pixels:
-        runstats['pixel_bins'] = histogram.pixel_histogram
+    if histogram is not None:
+        runstats['pixel_bins'] = histogram.histogram
     return runstats
 
 
