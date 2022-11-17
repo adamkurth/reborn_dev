@@ -30,6 +30,11 @@ from ..viewers.qtviews.padviews import PADView
 
 class PixelHistogram:
 
+    count = 0  #: Number of frames contributing to the histogram.
+    bin_min = None  #: The minimum value corresponding to histogram bin *centers*.
+    bin_max = None  #: The maximum value corresponding to histogram bin *centers*.
+    n_bins = None  #: The number of histogram bins.
+
     def __init__(self, bin_min=None, bin_max=None, n_bins=None, n_pixels=None):
         r""" Creates an intensity histogram for each pixel in a PAD.  For a PAD with N pixels in total, this class
         will produce an array of shape (M, N) assuming that you requested M bins in the histogram.
@@ -40,7 +45,6 @@ class PixelHistogram:
             n_bins (int): The number of histogram bins.
             n_pixels (int): How many pixels there are in the detector.
             """
-        self.count = 0
         self.bin_min = float(bin_min)
         self.bin_max = float(bin_max)
         self.n_bins = int(n_bins)
