@@ -83,8 +83,8 @@ class ImView(pg.ImageView):
             show_histogram (bool): Set to False if you don't want the usual histogram to appear on the right.
             aspect_locked (bool): Set to False if you don't want the aspect ratio of the plot/image to be fixed to 1.
             title (str): Plot title.
-            xlabel (str): X (horizontal) axis label.
-            ylabel (str): Y (vertical) axis label.
+            ss_label (str): X (horizontal) axis label.
+            fs_label (str): Y (vertical) axis label.
             fs_lims (tuple of float): The min and max values of pixel coordinates along fast-scan axis.
             ss_lims (tuple of float): The min and max values of pixel coordinates along slow-scan axis.
         """
@@ -92,8 +92,8 @@ class ImView(pg.ImageView):
         show_histogram = kwargs.pop('show_histogram', True)
         aspect_locked = kwargs.pop('aspect_locked', True)
         title = kwargs.pop('title', None)
-        xlabel = kwargs.pop('ss_label', None)
-        ylabel = kwargs.pop('fs_label', None)
+        ss_label = kwargs.pop('ss_label', 'Axis 1')
+        fs_label = kwargs.pop('fs_label', 'Axis 0')
         self.fs_lims = kwargs.pop('fs_lims', None)
         self.ss_lims = kwargs.pop('ss_lims', None)
         self.frame_names = kwargs.pop('frame_names', None)
@@ -104,10 +104,10 @@ class ImView(pg.ImageView):
         self.view.invertY(False)
         if title is not None:
             self.view.setTitle(title)
-        if ylabel is not None:
-            self.view.setLabel('left', ylabel)
-        if xlabel is not None:
-            self.view.setLabel('bottom', xlabel)
+        if fs_label is not None:
+            self.view.setLabel('left', fs_label)
+        if ss_label is not None:
+            self.view.setLabel('bottom', ss_label)
         self.ui.roiBtn.hide()
         self.ui.menuBtn.hide()
         if len(args) > 0:
