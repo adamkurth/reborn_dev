@@ -174,7 +174,7 @@ def padstats(framegetter=None, start=0, stop=None, parallel=False, n_processes=N
             min_pad = rdat
             n_frames = np.zeros(s)
             if histogram_params is not None:
-                if histogram_params['n_pixels'] is None:
+                if histogram_params.get('n_pixels', None) is None:
                     histogram_params['n_pixels'] = rdat.size
                 histogram = PixelHistogram(**histogram_params)
             first = False
