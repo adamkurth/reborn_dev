@@ -13,6 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with reborn.  If not, see <https://www.gnu.org/licenses/>.
 
+import time
 import numpy as np
 try:
     from joblib import Parallel, delayed
@@ -154,9 +155,10 @@ def padstats(framegetter=None, start=0, stop=None,
     dataset_id = None
     pad_geometry = None
     mask = None
+    t0 = time.time()
     for (n, i) in enumerate(frame_ids):
         if verbose:
-            print(f'Frame {i:6d} ({n / len(frame_ids) * 100:0.2g})')
+            print(f'Frame {i:6d} ({n / len(frame_ids) * 100:0.2g}\%, {(time.time()-t0)/60} minutes)')
         dat = framegetter.get_frame(frame_number=i)
         if dat is None:
             print(f'Frame {i:6d} is None!!!')
