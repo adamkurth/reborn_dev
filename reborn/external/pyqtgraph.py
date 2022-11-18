@@ -155,13 +155,24 @@ class ImView(pg.ImageView):
         self.plots.append(plot)
         return plot
 
-    def add_line(self, *args, **kwargs):
-        r""" TODO: Document. """
-        name = kwargs.pop('name', None)
-        p = kwargs.pop('position')
+    def add_line(self, *args, position=None, vertical=False, horizontal=False, **kwargs):
+        r""" Adds pyqtgraph.InfiniteLine.  Accepts the InfiniteLine arguments:
+        pos=None, angle=90, pen=None, movable=False, bounds=None, hoverPen=None, label=None, labelOpts=None,
+        span=(0, 1), markers=None, name=None
+
+        Adds the following arguments:
+            horizontal (bool): Make the line horizontal (angle=)
+            vertical (bool): Make the line vertical (angle=)
+            position (str): Same as pos argument for InfiniteLine
+
+        """
+        if vertical:
+            kwargs['angle'] = 90
+        if horizontal:
+            kwargs['angle'] = 0
         line = pg.InfiniteLine(*args, **kwargs)
-        line.setPos([p, p])
-        line.name = name
+        if position is not None:
+            line.setPos([position, position])
         self.lines.append(line)
         self.getView().addItem(line)
         return line
