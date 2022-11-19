@@ -13,6 +13,8 @@
 # You should have received a copy of the GNU General Public License
 # along with reborn.  If not, see <https://www.gnu.org/licenses/>.
 
+r""" Utilities for gathering statistics from data runs. """
+
 import time
 import numpy as np
 try:
@@ -77,20 +79,22 @@ class PixelHistogram:
 
 def padstats(framegetter=None, start=0, stop=None, parallel=False, n_processes=None, process_id=None,
              histogram_params=None, verbose=False):
-    r""" EXPERIMENTAL!!!  Since we often need to loop over a series of dataframes and fetch the mean, variance, min
-    max values, this function will do that for you.  You should be able to pass in any FrameGetter subclass.  You can
-    try the parallel flag if you have joblib package installed... but if you parallelize, please understand that you
-    cannot pass a framegetter from the main process to the children processes (because, for example, the framegetter
-    might have a reference to a file handle object).  Therefore, in order to parallelize, we use the convention in
-    which the framegetter is passed in as a dictionary with the 'framegetter' key set to the desired FrameGetter
-    subclass, and the 'kwargs' key set to the keyword arguments needed to create a new class instance. If bin_pixels
-    is set to True this function will generate a histogram of the signal over the run for every pixel in the detector.
+    r""" Given a |FrameGetter| subclass instance, fetch the mean intensity, mean squared intensity, minimum,
+    and maximum intensities, and optionally a pixel-by-pixel intensity histogram.  The function can run in a
+    multiprocessing mode through recursion via the joblib library.
+
+    Note:
+        If you run the function in parallel mode, you cannot pass a |FrameGetter| instance from the main process to the
+        children processes.  Each process must initialize its own instance of the |FrameGetter|.  Instead of
+        passing a class instance, you must instead pass in a dictionary with the 'framegetter' key set to the desired
+        |FrameGetter| subclass (not an instance of the subclass), and the 'kwargs' key set to the keyword arguments
+        needed to instantiate the subclass.
 
     The return of this function is a dictionary as follows:
 
     {'sum': sum_pad, 'sum2': sum_pad2, 'min': min_pad, 'max': max_pad, 'n_frames': n_frames,
      'dataset_id': dat.get_dataset_id(), 'pad_geometry': dat.get_pad_geometry(),
-     'mask': dat.get_mask_flat(), 'beam': dat.get_beam(), 'pixel_bins': pixel_bins}
+     'mask': dat.get_mask_flat(), 'beam': dat.get_beam(), 'histogram': histogram}
 
     There is a corresponding view_padstats function to view the results in this dictionary.
 
@@ -101,12 +105,14 @@ def padstats(framegetter=None, start=0, stop=None, parallel=False, n_processes=N
                                      arguments needed to create a class instance.
         start (int): Which frame to start with.
         stop (int): Which frame to stop at.
-        parallel (bool): Set to true to use joblib for multi-processing.
+        parallel (bool): Set to true to use joblib for multiprocessing.
         n_processes (int): How many processes to run in parallel (if parallel=True).
         histogram_params (dict): Optional: A dictionary with the keyword arguments needed for the PixelHistogram class
-                                    instance.
+                                    instance.  The keys should be dict(bin_min=None, bin_max=None, n_bins=None,
+                                    n_pixels=None)
 
     Returns: dict """
+    histogram = None
     if framegetter is None:
         raise ValueError('framegetter cannot be None')
     if parallel:
@@ -131,8 +137,8 @@ def padstats(framegetter=None, start=0, stop=None, parallel=False, n_processes=N
             if isinstance(o['max'], np.ndarray):
                 tot['max'] = np.minimum(tot['max'], o['max'])
             if histogram_params is not None:
-                if isinstance(o['pixel_bins'], np.ndarray):
-                    tot['pixel_bins'] += o['pixel_bins']
+                if isinstance(o['histogram'], np.ndarray):
+                    tot['histogram'] += o['histogram']
             tot['start'] = min(tot['start'], o['start'])
             tot['stop'] = max(tot['stop'], o['stop'])
             tot['n_frames'] += o['n_frames']
@@ -210,7 +216,8 @@ def padstats(framegetter=None, start=0, stop=None, parallel=False, n_processes=N
                       start, stop]
     runstats = dict(zip(run_stats_keys, run_stats_vals))
     if histogram is not None:
-        runstats['pixel_bins'] = histogram.histogram
+        runstats['histogram'] = histogram.histogram
+    runstats['histogram_params'] = histogram_params
     return runstats
 
 

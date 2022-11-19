@@ -15,6 +15,7 @@ dependencies:
   - xraylib             # Only if you need scattering factors
   - joblib              # For simple multiprocessing and pipelines
   - pandas              # For tabular data displays
+  - joblib              # For parallel processing
 #  - pocl               # Possibly helpful if pyopencl doesn't work
 #  - ocl-icd-system     # Possibly helpful if pyopencl doesn't work
 #  - fortran-compiler   # Possibly helpful for strange computers (windows, mac)
