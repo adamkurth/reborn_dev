@@ -150,7 +150,7 @@ class ImView(pg.ImageView):
             kwargs.setdefault('scale', (ss_scale, fs_scale))
             kwargs.setdefault('pos', (self.ss_lims[0]-0.5*ss_scale, self.fs_lims[0]-0.5*fs_scale))
             self.first = False
-        super().setImage(*args, **kwargs)
+        super().setImage(*args, autoRange=False, **kwargs)
 
     def add_plot(self, *args, **kwargs):
         r""" TODO: Document. """
