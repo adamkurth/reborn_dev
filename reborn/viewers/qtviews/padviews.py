@@ -194,7 +194,7 @@ class PADView(QtCore.QObject):
 
     @dataframe.setter
     def dataframe(self, val):
-        self.debug()
+        self.debug("dataframe setter")
         if self._dataframe is None:
             self._dataframe = val
         val = ensure_dataframe(val, self._dataframe)
@@ -212,6 +212,7 @@ class PADView(QtCore.QObject):
 
     def setup_ui(self):
         r""" Creates the main interface: QMainWindow, menubar, statusbar, viewbox, etc."""
+        self.debug("setup_ui")
         self.main_window = PADViewMainWindow(main=self.main) #QtGui.QMainWindow()
         self.menubar = self.main_window.menuBar()
         self.statusbar = self.main_window.statusBar()
@@ -256,7 +257,7 @@ class PADView(QtCore.QObject):
 
     def set_title(self, title=None):
         r""" Set the title of the main window. """
-        self.debug()
+        self.debug("set_title")
         if title is not None:
             self.main_window.setWindowTitle(title)
             self._fixed_title = True
@@ -276,12 +277,12 @@ class PADView(QtCore.QObject):
     def setup_mouse_interactions(self):
         r""" I don't know what this does... obviously something about mouse interactions... """
         # FIXME: What does this do?
-        self.debug()
+        self.debug("setup_mouse_interactions")
         self.proxy = pg.SignalProxy(self.viewbox.scene().sigMouseMoved, rateLimit=30, slot=self.mouse_moved)
 
     def setup_menubar(self):
         r""" Connect menu items (e.g. "File") so that they actually do something when clicked. """
-        self.debug()
+        self.debug("setup_menubar")
         def add_menu(append_to, name, short=None, tip=None, connect=None):
             action = QtGui.QAction(name, self.main_window)
             if short: action.setShortcut(short)
@@ -342,7 +343,7 @@ class PADView(QtCore.QObject):
     def setup_shortcuts(self):
         r""" Connect all standard keyboard shortcuts to functions. """
         # FIXME: Many of these shortcuts were randomly assigned in a hurry.  Need to re-think the keystrokes.
-        self.debug()
+        self.debug("setup_shortcuts")
         self.set_shortcut(QtCore.Qt.Key_Right, self.show_next_frame)
         self.set_shortcut(QtCore.Qt.Key_Left, self.show_previous_frame)
         self.set_shortcut("a", self.call_method_by_name)
@@ -359,7 +360,7 @@ class PADView(QtCore.QObject):
 
     def update_status_string(self, frame_number=None, n_frames=None):
         r""" Update status string at the bottom of the main window. """
-        self.debug(level=3)
+        self.debug("update_status_string", level=3)
         strn = ''
         if frame_number is None:
             frame_number = self.frame_getter.current_frame
@@ -380,7 +381,7 @@ class PADView(QtCore.QObject):
     # FIXME: Also, we need to allow for the histogram to be disabled since it takes time to compute.
     def setup_histogram_tool(self):
         r""" Set up the histogram/colorbar/colormap tool that is located to the right of the PAD display. """
-        self.debug()
+        self.debug("setup_histogram_tool")
         self.set_colormap('flame')
         self.histogram.setImageItems(self.pad_image_items)
 
@@ -388,7 +389,7 @@ class PADView(QtCore.QObject):
         r""" Change the colormap to one of the presets configured in pyqtgraph.  Right-click on the colorbar to find
         out what values are allowed.
         """
-        self.debug()
+        self.debug("set_colormap")
         self.histogram.gradient.loadPreset(preset)
         self.histogram.setImageItems(self.pad_image_items)
         pg.QtGui.QApplication.processEvents()
@@ -399,7 +400,7 @@ class PADView(QtCore.QObject):
 
     def set_levels(self, min_value=None, max_value=None, levels=None, percentiles=None, colormap=None):
         r""" Set the minimum and maximum levels, same as sliding the yellow sliders on the histogram tool. """
-        self.debug()
+        self.debug("set_levels")
         if levels is not None:
             min_value = levels[0]
             max_value = levels[1]
@@ -412,7 +413,7 @@ class PADView(QtCore.QObject):
 
     def set_levels_by_percentiles(self, percents=(1, 99), colormap=None):
         r""" Set upper and lower levels according to percentiles.  This is based on :func:`numpy.percentile`. """
-        self.debug()
+        self.debug("set_levels_by_percentiles")
         d = detector.concat_pad_data(self.get_pad_display_data())
         lower = np.percentile(d, percents[0])
         upper = np.percentile(d, percents[1])
@@ -420,7 +421,7 @@ class PADView(QtCore.QObject):
 
     def add_rectangle_roi(self, pos=(0, 0), size=None):
         r""" Adds a |pyqtgraph| RectROI """
-        self.debug()
+        self.debug("add_rectangle_roi")
         if type(pos) != tuple:
             pos = (0, 0)
         if size is None:
@@ -441,7 +442,7 @@ class PADView(QtCore.QObject):
 
     # FIXME: Circle ROI should have an option to fix the center on the beam center.
     def add_circle_roi(self, pos=(0, 0), radius=None):
-        self.debug()
+        self.debug("add_circle_roi")
         if radius is None:
             br = self.get_view_bounding_rect()
             radius = min(br[2], br[3]) / 2
@@ -454,19 +455,19 @@ class PADView(QtCore.QObject):
         self.viewbox.addItem(roi)
 
     def show_rois(self):
-        self.debug()
+        self.debug("show_rois")
         if self._mask_rois is not None:
             for roi in self._mask_rois:
                 roi.setVisible(True)
 
     def hide_rois(self):
-        self.debug()
+        self.debug("hide_rois")
         if self._mask_rois is not None:
             for roi in self._mask_rois:
                 roi.setVisible(False)
 
     def toggle_rois(self):
-        self.debug()
+        self.debug("toggle_rois")
         if self._mask_rois is None:
             return
         for roi in self._mask_rois:
@@ -476,7 +477,7 @@ class PADView(QtCore.QObject):
         self.show_rois()
 
     def show_coordinate_axes(self):
-        self.debug()
+        self.debug("show_coordinate_axes")
         if self.coord_axes is None:
             geom = self.dataframe.get_pad_geometry()
             corners = self.vector_to_view_coords(np.vstack([p.corner_position_vectors() for p in geom]))
@@ -505,21 +506,21 @@ class PADView(QtCore.QObject):
             self.coord_axes = [xl, yl, x, y, z1, z2, xt, yt, zt]
 
     def hide_coordinate_axes(self):
-        self.debug()
+        self.debug("hide_coordinate_axes")
         if self.coord_axes is not None:
             for c in self.coord_axes:
                 self.viewbox.removeItem(c)
             self.coord_axes = None
 
     def toggle_coordinate_axes(self):
-        self.debug()
+        self.debug("toggle_coordinate_axes")
         if self.coord_axes is None:
             self.show_coordinate_axes()
         else:
             self.hide_coordinate_axes()
 
     def show_fast_scan_directions(self):
-        self.debug()
+        self.debug("show_fast_scan_directions")
         if self.scan_arrows is None:
             self.scan_arrows = []
             for p in self.dataframe.get_pad_geometry():
@@ -536,14 +537,14 @@ class PADView(QtCore.QObject):
                 self.viewbox.addItem(a)
 
     def hide_fast_scan_directions(self):
-        self.debug()
+        self.debug("hide_fast_scan_directions")
         if self.scan_arrows is not None:
             for a in self.scan_arrows:
                 self.viewbox.removeItem(a)
             self.scan_arrows = None
 
     def toggle_fast_scan_directions(self):
-        self.debug()
+        self.debug("toggle_fast_scan_directions")
         if self.scan_arrows is None:
             self.show_fast_scan_directions()
         else:
@@ -604,7 +605,7 @@ class PADView(QtCore.QObject):
             self.hide_pad_labels()
 
     def _apply_pad_transform(self, im, p):
-        self.debug(level=2)
+        self.debug("_apply_pad_transform", level=2)
         f = p.fs_vec.copy()
         s = p.ss_vec.copy()
         t = p.t_vec.copy() - (f + s)/2.0
@@ -659,26 +660,26 @@ class PADView(QtCore.QObject):
         self.toc()
 
     def hide_masks(self):
-        self.debug()
+        self.debug("hide_masks")
         if self.mask_image_items is not None:
             for im in self.mask_image_items:
                 im.setVisible(False)
 
     def show_masks(self):
-        self.debug()
+        self.debug("show_masks")
         if self.mask_image_items is not None:
             for im in self.mask_image_items:
                 im.setVisible(True)
 
     def toggle_masks(self):
-        self.debug()
+        self.debug("toggle_masks")
         if self.mask_image_items is not None:
             for im in self.mask_image_items:
                 im.setVisible(not im.isVisible())
 
     def save_masks(self):
         r""" Save list of masks in pickle or reborn mask format. """
-        self.debug()
+        self.debug("save_masks")
         options = QtGui.QFileDialog.Options()
         file_name, file_type = QtGui.QFileDialog.getSaveFileName(self.main_window, "Save Masks", "mask",
                                                           "reborn Mask File (*.mask);;Python Pickle (*.pkl)",
@@ -697,7 +698,7 @@ class PADView(QtCore.QObject):
 
     def load_masks(self):
         r""" Load list of masks that have been saved in pickle or reborn mask format. """
-        self.debug()
+        self.debug("load_masks")
         options = QtGui.QFileDialog.Options()
         file_name, file_type = QtGui.QFileDialog.getOpenFileName(self.main_window, "Load Masks", "mask",
                                                           "reborn Mask File (*.mask);;Python Pickle (*.pkl)",
@@ -748,16 +749,18 @@ class PADView(QtCore.QObject):
         return inds, roi.name
 
     def clear_masks(self):
+        self.debug("clear_masks")
         self.dataframe.set_mask(None)
         self.update_masks()
 
     def get_pad_display_data(self):
-        self.debug(level=3)
+        self.debug("get_pad_display_data", level=3)
         if self.dataframe is not None:
             return self.dataframe.get_processed_data_list()
 
     def set_pad_display_data(self, data, auto_levels=False, update_display=True, levels=None, percentiles=None,
                              colormap=None):
+        self.debug("set_pad_display_data")
         self.dataframe.set_processed_data(data)
         if percentiles is not None:
             self.auto_percentiles = percentiles
@@ -780,7 +783,7 @@ class PADView(QtCore.QObject):
 
     def setup_image_items(self):
         r""" Creates the PAD and mask ImageItems. Applies geometry transforms.  Sets data and colormap levels. """
-        self.debug()
+        self.debug("setup_image_items")
         if self.pad_image_items:
             for item in self.pad_image_items:
                 self.viewbox.removeItem(item)
@@ -805,7 +808,7 @@ class PADView(QtCore.QObject):
     def update_pads(self):
         r""" Update only the PAD data that is displayed, including colormap.  Usually you should run update_display
         instead of this. """
-        self.debug()
+        self.debug("update_pads")
         self.tic('Updating PAD displays.')
         if self.hold_levels:
             levels = self.get_levels()
@@ -833,7 +836,7 @@ class PADView(QtCore.QObject):
 
     def update_pad_geometry(self, pad_geometry=None):
         r""" Update the PAD geometry.  Apply Qt transforms.  Also emits the sig_geometry_changed signal."""
-        self.debug()
+        self.debug("update_pad_geometry")
         if pad_geometry is None:
             pad_geometry = self.dataframe.get_pad_geometry()
         else:
@@ -850,7 +853,7 @@ class PADView(QtCore.QObject):
 
     def update_beam(self, beam=None):
         r""" Update the |Beam|.  Emits the sig_beam_changed signal. """
-        self.debug()
+        self.debug("update_beam")
         if beam is None:
             return
         self.dataframe.set_beam(beam)
@@ -858,13 +861,13 @@ class PADView(QtCore.QObject):
 
     def set_auto_level_percentiles(self, percents=(1, 99)):
         r""" Set to None if auto-scaling is not desired """
-        self.debug()
+        self.debug("set_auto_level_percentiles")
         self.auto_percentiles = percents
         self.update_display()
 
     def save_pad_geometry(self):
         r""" Save list of pad geometry specifications in json format. """
-        self.debug()
+        self.debug("save_pad_geometry")
         options = QtGui.QFileDialog.Options()
         file_name, file_type = QtGui.QFileDialog.getSaveFileName(self.main_window, "Save PAD Geometry", "geometry",
                                                           "reborn PAD Geometry File (*.json);;",
@@ -876,7 +879,7 @@ class PADView(QtCore.QObject):
 
     def load_pad_geometry(self):
         r""" Load list of pad geometry specifications in json format. """
-        self.debug()
+        self.debug("load_pad_geometry")
         options = QtGui.QFileDialog.Options()
         file_name, file_type = QtGui.QFileDialog.getOpenFileName(self.main_window, "Load PAD Geometry", "geometry",
                                                           "reborn PAD Geometry File (*.json);;",
@@ -889,7 +892,7 @@ class PADView(QtCore.QObject):
 
     def save_beam(self):
         r""" Save beam specifications in json format. """
-        self.debug()
+        self.debug("save_beam")
         options = QtGui.QFileDialog.Options()
         file_name, file_type = QtGui.QFileDialog.getSaveFileName(self.main_window, "Save Beam", "beam",
                                                           "reborn Beam File (*.json);;",
@@ -901,7 +904,7 @@ class PADView(QtCore.QObject):
 
     def load_beam(self):
         r""" Load beam specifications in json format. """
-        self.debug()
+        self.debug("load_beam")
         options = QtGui.QFileDialog.Options()
         file_name, file_type = QtGui.QFileDialog.getOpenFileName(self.main_window, "Load Beam", "beam",
                                                           "reborn Beam File (*.json);;",
@@ -924,7 +927,7 @@ class PADView(QtCore.QObject):
     def get_pad_coords_from_view_coords(self, view_coords):
         r""" Get PAD coordinates (slow-scan index, fast-scan index, PAD index) from view coordinates.  The view
         coordinates correspond to the plane that is 1 meter away from the origin."""
-        self.debug(level=3)
+        self.debug("get_pad_coords_from_view_coords", level=3)
         x = view_coords[0]
         y = view_coords[1]
         pad_idx = None
@@ -939,7 +942,7 @@ class PADView(QtCore.QObject):
 
     def get_pad_coords_from_mouse_pos(self):
         r""" Maps mouse cursor position to view coordinates, then maps the view coords to PAD coordinates."""
-        self.debug(level=3)
+        self.debug("get_pad_coords_from_mouse_pos", level=3)
         view_coords = self.get_view_coords_from_mouse_pos()
         ss_idx, fs_idx, pad_idx = self.get_pad_coords_from_view_coords(view_coords)
         self.debug('PAD coords: '+(ss_idx, fs_idx, pad_idx).__str__(), level=3)
@@ -947,7 +950,7 @@ class PADView(QtCore.QObject):
 
     def get_view_coords_from_mouse_pos(self):
         r""" Map the current mouse cursor position to the display plane situated 1 meter from the interaction point. """
-        self.debug(level=3)
+        self.debug("get_view_coords_from_mouse_pos", level=3)
         if self.evt is None:  # Note: self.evt is updated by _mouse_moved
             return 0, 0
         sc = self.viewbox.mapSceneToView(self.evt[0])
@@ -961,7 +964,7 @@ class PADView(QtCore.QObject):
 
     def mouse_moved(self, evt):
         r""" Updates the status string with info about mouse position (e.g. data value under cursor)."""
-        self.debug(level=3)
+        self.debug("mouse_moved", level=3)
         self.debug('mouse position: ' + evt.__str__(), level=3)
         if evt is None:
             return
@@ -980,7 +983,7 @@ class PADView(QtCore.QObject):
         self.update_status_string()
 
     def edit_ring_radii(self):
-        self.debug()
+        self.debug("edit_ring_radii")
         text, ok = QtGui.QInputDialog.getText(self.main_window, "Enter ring radii (dict format)", "Ring radii",
                                               QtGui.QLineEdit.Normal,
                                               '{"q_mags":[], "d_spacings":[1e-10, 5e-10], "radii":[], "angles":[], '
@@ -1118,7 +1121,7 @@ class PADView(QtCore.QObject):
             self.hide_grid()
 
     def show_pad_border(self, n, pen=None):
-        self.debug()
+        self.debug("show_pad_border")
         if self.pad_image_items is None:
             return
         if pen is None:
@@ -1126,13 +1129,13 @@ class PADView(QtCore.QObject):
         self.pad_image_items[n].setBorder(pen)
 
     def hide_pad_border(self, n):
-        self.debug()
+        self.debug("hide_pad_border")
         if self.pad_image_items is None:
             return
         self.pad_image_items[n].setBorder(None)
 
     def show_pad_borders(self, pen=None):
-        self.debug()
+        self.debug("show_pad_borders")
         if self.pad_image_items is None:
             return
         if pen is None:
@@ -1141,45 +1144,45 @@ class PADView(QtCore.QObject):
             image.setBorder(pen)
 
     def hide_pad_borders(self):
-        self.debug()
+        self.debug("hide_pad_borders")
         if self.pad_image_items is None:
             return
         for image in self.pad_image_items:
             image.setBorder(None)
 
     def show_history_next(self):
-        self.debug()
+        self.debug("show_history_next")
         self.dataframe = self.frame_getter.get_history_next()
         self.update_display()
 
     def show_history_previous(self):
-        self.debug()
+        self.debug("show_history_previous")
         self.dataframe = self.frame_getter.get_history_previous()
         self.update_display()
 
     def show_next_frame(self, skip=1):
-        self.debug()
+        self.debug("show_next_frame")
         self.dataframe = self.frame_getter.get_next_frame(skip=skip)
         self.update_display()
 
     def show_previous_frame(self, skip=1):
-        self.debug()
+        self.debug("show_previous_frame")
         self.dataframe = self.frame_getter.get_previous_frame(skip=skip)
         self.update_display()
 
     def show_random_frame(self):
-        self.debug()
+        self.debug("show_random_frame")
         self.dataframe = self.frame_getter.get_random_frame()
         self.update_display()
 
     def show_frame(self, frame_number=0):
-        self.debug()
+        self.debug("show_frame")
         self.dataframe = self.frame_getter.get_frame(frame_number=frame_number)
         self.debug(self.dataframe, level=2)
         self.update_display()
 
     def show_first_frame(self):
-        self.debug()
+        self.debug("show_first_frame")
         self.dataframe = self.frame_getter.get_first_frame()
         self.debug(self.dataframe, level=2)
         self.update_display()
@@ -1191,7 +1194,7 @@ class PADView(QtCore.QObject):
         Arguments:
             dataframe (|DataFrame|): Optional input dataframe.  Will use self.dataframe otherwise.
         """
-        self.debug()
+        self.debug("update_display")
         if dataframe is not None:
             self.dataframe = dataframe
         self.update_pads()
@@ -1204,7 +1207,7 @@ class PADView(QtCore.QObject):
         r"""
         Example: self.add_plot_item(x, y, pen=pg.mkPen(width=3, color='g'))
         """
-        self.debug()
+        self.debug("add_plot_item")
         if self.plot_items is None:
             self.plot_items = []
         plot_item = pg.PlotDataItem(*args, **kargs)
@@ -1213,7 +1216,7 @@ class PADView(QtCore.QObject):
         return plot_item
 
     def add_scatter_plot(self, *args, **kargs):
-        self.debug()
+        self.debug("add_scatter_plot")
         if self.scatter_plots is None:
             self.scatter_plots = []
         scat = pg.ScatterPlotItem(*args, **kargs)
@@ -1221,14 +1224,14 @@ class PADView(QtCore.QObject):
         self.viewbox.addItem(scat)
 
     def remove_scatter_plots(self):
-        self.debug()
+        self.debug("remove_scatter_plots")
         if self.scatter_plots is not None:
             for scat in self.scatter_plots:
                 self.viewbox.removeItem(scat)
         self.scatter_plots = None
 
     def load_geometry_file(self):
-        self.debug()
+        self.debug("load_geometry_file")
         options = QtGui.QFileDialog.Options()
         file_name, file_type = QtGui.QFileDialog.getOpenFileName(self.main_window, "Load geometry file", "",
                                                           "CrystFEL geom (*.geom)", options=options)
@@ -1244,6 +1247,7 @@ class PADView(QtCore.QObject):
 
         mask_data, pad_display_data, beam, pad_geometry
         """
+        self.debug("load_pickled_dataframe")
         dataframe = reborn.fileio.misc.load_pickle(file_name)
         write('Loaded pickled dictionary:' + list(dataframe.keys()).__str__())
         self.update_masks(dataframe['mask'])
@@ -1268,7 +1272,7 @@ class PADView(QtCore.QObject):
             pickle.dump(dataframe, f)
 
     def open_data_file_dialog(self):
-        self.debug()
+        self.debug("open_data_file_dialog")
         options = QtGui.QFileDialog.Options()
         file_name, file_type = QtGui.QFileDialog.getOpenFileName(self.main_window, "Load data file", "",
                                                           "Python Pickle (*.pkl)", options=options)
@@ -1279,7 +1283,7 @@ class PADView(QtCore.QObject):
 
     def save_data_file_dialog(self):
         r""" Save list of masks in pickle or reborn mask format. """
-        self.debug()
+        self.debug("save_data_file_dialog")
         options = QtGui.QFileDialog.Options()
         file_name, file_type = QtGui.QFileDialog.getSaveFileName(self.main_window, "Save Data Frame", "data",
                                                                  "Python Pickle (*.pkl)", options=options)
@@ -1303,7 +1307,7 @@ class PADView(QtCore.QObject):
         self.add_scatter_plot(vecs[:, 0], vecs[:, 1], **style)
 
     def import_plugin_module(self, module_name):
-        self.debug()
+        self.debug("import_plugin_module")
         if module_name in self.plugins:
             return self.plugins[module_name]  # Check if module already imported and cached
         module_path = __package__+'.plugins.'+module_name
@@ -1316,7 +1320,7 @@ class PADView(QtCore.QObject):
         return module
 
     def run_plugin(self, module_name):
-        self.debug(get_caller()+' '+module_name, 1)
+        self.debug('run_plugin '+module_name, 1)
         if self.plugins is None:
             self.plugins = {}
         if not module_name in self.plugins.keys():
@@ -1350,7 +1354,7 @@ class PADView(QtCore.QObject):
         return
 
     def run_plugins(self, module_names=[]):
-        self.debug()
+        self.debug("run_plugins")
         self.debug('\tplugin module names: '+module_names.__str__(), 1)
         if len(module_names) <= 0:
             return
@@ -1371,16 +1375,16 @@ class PADView(QtCore.QObject):
 
     # FIXME: Figure out how to make start work without blocking the ipython terminal.
     def start(self):
-        self.debug()
+        self.debug("start")
         self.app.aboutToQuit.connect(self.stop)
         if self.main:
             self.app.exec_()
 
     def stop(self):
-        self.debug()
+        self.debug("stop")
 
     def show(self):
-        self.debug()
+        self.debug("show")
         self.main_window.show()
         # self.main_window.callback_pb_load()
 
