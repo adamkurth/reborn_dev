@@ -143,8 +143,10 @@ class ImView(pg.ImageView):
             self.ss_lims = np.array([0, ns-1])
         fs_width = self.fs_lims[1] - self.fs_lims[0]
         ss_width = self.ss_lims[1] - self.ss_lims[0]
-        kwargs.setdefault('pos', (self.ss_lims[0]-0.5, self.fs_lims[0]-0.5))
-        kwargs.setdefault('scale', (ss_width/(ns-1), fs_width/(nf-1)))
+        fs_scale = fs_width/(nf-1)
+        ss_scale = ss_width/(ns-1)
+        kwargs.setdefault('scale', (ss_scale, fs_scale))
+        kwargs.setdefault('pos', (self.ss_lims[0]-0.5*ss_scale, self.fs_lims[0]-0.5*fs_scale))
         super().setImage(*args, **kwargs)
 
     def add_plot(self, *args, **kwargs):
