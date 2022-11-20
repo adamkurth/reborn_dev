@@ -20,11 +20,10 @@ the `LCLS Data Analysis Confluence pages <https://confluence.slac.stanford.edu/d
 Note that there is documentation on
 `LCLS PAD geometry <https://confluence.slac.stanford.edu/display/PSDM/Detector+Geometry>`_.
 """
-
+import os
 import re
 import numpy as np
-import reborn
-from .. import utils, detector
+from .. import utils, detector, source, fileio, const, dataframe
 from . import crystfel, cheetah
 try:
     import psana
@@ -140,9 +139,9 @@ def get_pad_geometry_from_psana(pad_det, run_number, splitter):
     debug_message()
     xx, yy, zz = get_pad_pixel_coordinates(pad_det, run_number, splitter)
 
-    geom = reborn.detector.PADGeometryList()
+    geom = detector.PADGeometryList()
     for (x, y, z) in zip(xx, yy, zz):
-        g = reborn.detector.PADGeometry()
+        g = detector.PADGeometry()
         g.t_vec = np.array([x[0, 0], y[0, 0], z[0, 0]]) * 1e-6
         g.ss_vec = np.array([x[2, 1] - x[1, 1],
                              y[2, 1] - y[1, 1],
@@ -255,7 +254,7 @@ class AreaDetector(object):
                     print('Your CrystFEL geometry assumes the psana data has been re-shuffled by Cheetah!!')
         if geometry is None:
             if self.detector_type == 'rayonix':
-                geom = reborn.detector.rayonix_mx340_xfel_pad_geometry_list(detector_distance=1)
+                geom = detector.rayonix_mx340_xfel_pad_geometry_list(detector_distance=1)
                 geometry = geom.binned(2)
             else:
                 geometry = get_pad_geometry_from_psana(self.detector, run_number, self.splitter)
@@ -285,7 +284,6 @@ class AreaDetector(object):
         if isinstance(motions, dict):
             debug_message('dict')
             self.motions.append(EpicsTranslationStageMotion(**motions))
-
 
     def get_detector_type(self):
         """ The psana detector fails to provide reliable information on detector type. """
@@ -355,13 +353,16 @@ class AreaDetector(object):
         return self._home_geometry.n_pixels
 
 
-class LCLSFrameGetter(reborn.fileio.getters.FrameGetter):
+class LCLSFrameGetter(fileio.getters.FrameGetter):
 
     mask = None
     event = None
     event_codes = None
+    event_ids = None
+    cachefile = None
 
-    def __init__(self, experiment_id, run_number, pad_detectors, max_events=1e6, psana_dir=None, beam=None, idx=True, evr='evr0'):
+    def __init__(self, experiment_id, run_number, pad_detectors, max_events=1e6, psana_dir=None, beam=None, idx=True,
+                 evr='evr0', cachedir=None):
         debug_message('Initializing superclass')
         super().__init__()  # initialize the superclass
         self.init_params = {"experiment_id": experiment_id,
@@ -370,19 +371,28 @@ class LCLSFrameGetter(reborn.fileio.getters.FrameGetter):
                             "max_events": max_events,
                             "psana_dir": psana_dir,
                             "beam": beam,
-                            "idx": idx}
+                            "idx": idx,
+                            "cachedir": cachedir}
         self.run_number = run_number
         self.data_string = f'exp={experiment_id}:run={run_number}:smd'
         debug_message('datastring', self.data_string)
         if psana_dir is not None:
             self.data_string += f'dir={psana_dir}'
         self.data_source = psana.DataSource(self.data_string)
-        self.event_ids = []
-        for nevent, evt in enumerate(self.data_source.events()):
-            if nevent >= max_events:
-                break
-            evtId = evt.get(psana.EventId)
-            self.event_ids.append((evtId.time()[0], evtId.time()[1], evtId.fiducials()))
+        if cachedir is not None:
+            cachefile = cachedir+f'/event_ids_{run_number:04d}.pkl'
+            os.makedirs(cachedir, exist_ok=True)
+            if os.path.exists(cachefile):
+                self.event_ids = fileio.misc.load_pickle(cachefile)
+        if self.event_ids is None:
+            self.event_ids = []
+            for nevent, evt in enumerate(self.data_source.events()):
+                # if (nevent >= max_events) and (cachedir is None):
+                #     break
+                evtId = evt.get(psana.EventId)
+                self.event_ids.append((evtId.time()[0], evtId.time()[1], evtId.fiducials()))
+            if cachedir is not None:
+                fileio.misc.save_pickle(self.event_ids, cachefile)
         self.n_frames = len(self.event_ids)
         self.has_indexing = idx
         if self.has_indexing:
@@ -401,7 +411,7 @@ class LCLSFrameGetter(reborn.fileio.getters.FrameGetter):
         self.detectors = [AreaDetector(**p, run_number=self.run_number, accept_missing=True) for p in pad_detectors]
         self.beam = beam
         if beam is None:
-            self.beam = reborn.source.Beam()
+            self.beam = source.Beam()
 
     def get_data(self, frame_number=0):
         debug_message()
@@ -438,11 +448,11 @@ class LCLSFrameGetter(reborn.fileio.getters.FrameGetter):
             laser_on = False
         photon_energy = None
         try:
-            photon_energy = self.ebeam_detector.get(event).ebeamPhotonEnergy()*reborn.const.eV
+            photon_energy = self.ebeam_detector.get(event).ebeamPhotonEnergy()*const.eV
         except AttributeError:
             debug_message(f'Run {self.run_number} frame {frame_number} causes ebeamPhotonEnergy failure, skipping this '
                      f'shot.')
-        geometry = reborn.detector.PADGeometryList()
+        geometry = detector.PADGeometryList()
         pad_data = []
         pad_mask = []
         for det in self.detectors:
@@ -452,7 +462,7 @@ class LCLSFrameGetter(reborn.fileio.getters.FrameGetter):
             geometry.extend(geom)
             pad_data.extend(data)
             pad_mask.extend([m for m in mask if m is not None])
-        df = reborn.dataframe.DataFrame()
+        df = dataframe.DataFrame()
         df.set_dataset_id(self.data_string)
         df.set_frame_id(ts)
         df.set_frame_index(frame_number)
