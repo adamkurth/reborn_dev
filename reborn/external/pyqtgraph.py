@@ -69,7 +69,6 @@ class ImView(pg.ImageView):
     plots = []
     lines = []
     rois = []
-    first = True
 
     def __init__(self, *args, **kwargs):
         r"""
@@ -135,22 +134,20 @@ class ImView(pg.ImageView):
 
         """
         image = args[0]
-        if self.first:
-            ns, nf = image.shape[-2:]
-            self.fs_lims = kwargs.pop('fs_lims', self.fs_lims)
-            self.ss_lims = kwargs.pop('ss_lims', self.ss_lims)
-            if self.fs_lims is None:
-                self.fs_lims = np.array([0, nf-1])
-            if self.ss_lims is None:
-                self.ss_lims = np.array([0, ns-1])
-            fs_width = self.fs_lims[1] - self.fs_lims[0]
-            ss_width = self.ss_lims[1] - self.ss_lims[0]
-            fs_scale = fs_width/(nf-1)
-            ss_scale = ss_width/(ns-1)
-            kwargs.setdefault('scale', (ss_scale, fs_scale))
-            kwargs.setdefault('pos', (self.ss_lims[0]-0.5*ss_scale, self.fs_lims[0]-0.5*fs_scale))
-            self.first = False
-        super().setImage(*args, autoRange=False, **kwargs)
+        ns, nf = image.shape[-2:]
+        self.fs_lims = kwargs.pop('fs_lims', self.fs_lims)
+        self.ss_lims = kwargs.pop('ss_lims', self.ss_lims)
+        if self.fs_lims is None:
+            self.fs_lims = np.array([0, nf-1])
+        if self.ss_lims is None:
+            self.ss_lims = np.array([0, ns-1])
+        fs_width = self.fs_lims[1] - self.fs_lims[0]
+        ss_width = self.ss_lims[1] - self.ss_lims[0]
+        fs_scale = fs_width/(nf-1)
+        ss_scale = ss_width/(ns-1)
+        kwargs.setdefault('scale', (ss_scale, fs_scale))
+        kwargs.setdefault('pos', (self.ss_lims[0]-0.5*ss_scale, self.fs_lims[0]-0.5*fs_scale))
+        super().setImage(*args, **kwargs)
 
     def add_plot(self, *args, **kwargs):
         r""" TODO: Document. """
