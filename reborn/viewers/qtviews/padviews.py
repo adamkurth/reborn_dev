@@ -634,6 +634,9 @@ class PADView(QtCore.QObject):
         self.tic('Getting mask list from dataframe...')
         if masks is None:
             masks = self.dataframe.get_mask_list()
+        else:
+            geom = self.dataframe.get_pad_geometry()
+            masks = geom.split_data(masks)
         self.toc()
         if self._mask_rgba_arrays is None:
             self.tic('Initializing RGBA mask arrays...')
