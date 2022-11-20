@@ -632,7 +632,8 @@ class PADView(QtCore.QObject):
         self.debug('update_masks')
         self.tic('update_masks')
         self.tic('Getting mask list from dataframe...')
-        masks = self.dataframe.get_mask_list()
+        if masks is None:
+            masks = self.dataframe.get_mask_list()
         self.toc()
         if self._mask_rgba_arrays is None:
             self.tic('Initializing RGBA mask arrays...')

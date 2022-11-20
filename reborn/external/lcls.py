@@ -359,7 +359,6 @@ class LCLSFrameGetter(fileio.getters.FrameGetter):
     event = None
     event_codes = None
     event_ids = None
-    cachefile = None
 
     def __init__(self, experiment_id, run_number, pad_detectors, max_events=1e6, psana_dir=None, beam=None, idx=True,
                  evr='evr0', cachedir=None):
@@ -383,6 +382,7 @@ class LCLSFrameGetter(fileio.getters.FrameGetter):
             cachefile = cachedir+f'/event_ids_{run_number:04d}.pkl'
             os.makedirs(cachedir, exist_ok=True)
             if os.path.exists(cachefile):
+                debug_message('Loading cached event Ids:', cachefile)
                 self.event_ids = fileio.misc.load_pickle(cachefile)
         if self.event_ids is None:
             self.event_ids = []
@@ -392,6 +392,7 @@ class LCLSFrameGetter(fileio.getters.FrameGetter):
                 evtId = evt.get(psana.EventId)
                 self.event_ids.append((evtId.time()[0], evtId.time()[1], evtId.fiducials()))
             if cachedir is not None:
+                debug_message('Caching event Ids:', cachefile)
                 fileio.misc.save_pickle(self.event_ids, cachefile)
         self.n_frames = len(self.event_ids)
         self.has_indexing = idx
