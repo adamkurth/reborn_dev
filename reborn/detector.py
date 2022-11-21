@@ -747,6 +747,16 @@ class PADGeometry:
         q2 = np.dot(q_vecs, beam.e2_vec)
         return np.arctan2(q2, q1)
 
+    def edge_mask(self, n=1):
+        r""" Mask pixels along the perimeter of the PAD.
+
+        Arguments:
+            n (int): How many pixels to mask.
+
+        Returns: |ndarray|
+        """
+        return edge_mask(self.ones(dtype=int), n)
+
     def beamstop_mask(self, beam=None, q_min=None, q_max=None, min_angle=None, max_angle=None, min_radius=None,
                       max_radius=None):
         r"""
@@ -1240,6 +1250,10 @@ class PADGeometryList(list):
     def beamstop_mask(self, *args, **kwargs):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
         return self.concat_data([p.beamstop_mask(*args, **kwargs).ravel() for p in self])
+
+    def edge_mask(self, *args, **kwargs):
+        r""" Concatenates the output of the matching method in |PADGeometry|"""
+        return self.concat_data([p.edge_mask(*args, **kwargs).ravel() for p in self])
 
     def zeros(self, *args, **kwargs):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
