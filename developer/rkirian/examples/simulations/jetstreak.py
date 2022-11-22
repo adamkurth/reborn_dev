@@ -24,11 +24,16 @@ beam_vec = beam.beam_vec  # Incident beam unit vector
 # Make the unit vector that defines the streak.  The x-ray E-field vectors are a convenient basis.
 streak_vec = beam.e1_vec * np.cos(angle) + beam.e2_vec * np.sin(angle)
 # Angular deviation from plane of the streak
-phi = 90*np.pi/180 - np.abs(np.arccos(np.abs(np.dot(pixel_vecs, streak_vec))))
+phi = 90*np.pi/180 - np.arccos(np.abs(np.dot(pixel_vecs, streak_vec)))
 # Angular deviation from x-ray beam
-theta = np.abs(np.arccos(np.abs(np.dot(pixel_vecs, beam.beam_vec))))
+theta = np.arccos(np.abs(np.dot(pixel_vecs, beam.beam_vec)))
 # Fiddle with the numbers to make it look like a jet streak.
 streak = np.random.poisson(100*np.exp(-1000000*phi**2 - 100*theta**2))
+pattern += streak
 # Have a look
-padview = PADView(data=pattern+streak, pad_geometry=geom, beam=beam)
+padview = PADView(data=pattern, pad_geometry=geom, beam=beam)
+padview.start()
+# Now mask the streak
+smask = geom.streak_mask(vec=streak_vec, angle=0.01)
+padview = PADView(data=pattern*smask, pad_geometry=geom, beam=beam)
 padview.start()

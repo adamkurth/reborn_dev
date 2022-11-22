@@ -747,6 +747,27 @@ class PADGeometry:
         q2 = np.dot(q_vecs, beam.e2_vec)
         return np.arctan2(q2, q1)
 
+    def streak_mask(self, vec=None, angle=None):
+        r""" Create a streak mask.  Given the "streak vector" :math:`\vec{s}` that defines the plane of the streak,
+        calculate the angles between outgoing pixel vector :math:`\vec{p}` and that plane:
+        :math:`\phi = \pi/2 - |\arccos(\vec{s}\cdot \vec{p})|`.  Then mask all pixels for which :math:`\phi` is less
+        than the specified angle.
+
+        Note:
+            If you want to mask a liquid jet, then the streak vector should be :math:`\vec{s} \times \vec{b}` where the
+            vector :math:`\vec{b}` points along the beam direction and :math:`\vec{s}` points along the liquid jet.
+
+        Arguments:
+            vec (|ndarray|): Vector describing plane of streak
+            angle (float): Mask everything within this angle
+
+        Returns: |ndarray|
+        """
+        phi = np.arccos(np.abs(np.dot(self.s_vecs(), np.array(vec))))
+        mask = self.ones(dtype=int).ravel()
+        mask[phi > (90*np.pi/180 - angle)] = 0
+        return mask
+
     def edge_mask(self, n=1):
         r""" Mask pixels along the perimeter of the PAD.
 
@@ -1254,6 +1275,10 @@ class PADGeometryList(list):
     def edge_mask(self, *args, **kwargs):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
         return self.concat_data([p.edge_mask(*args, **kwargs).ravel() for p in self])
+
+    def streak_mask(self, *args, **kwargs):
+        r""" Concatenates the output of the matching method in |PADGeometry|"""
+        return self.concat_data([p.streak_mask(*args, **kwargs).ravel() for p in self])
 
     def zeros(self, *args, **kwargs):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
