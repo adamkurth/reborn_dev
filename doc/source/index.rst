@@ -7,8 +7,8 @@ Overview of reborn package
 --------------------------
 
 The reborn Python package contains utilities for the simulation and analysis of x-ray diffraction under the Born 
-approximation.  The content of reborn is dictated by the needs of the Kirian group, but it is available for anyone to
-use under the GNU V3 License..  Similar utilities with related aspirations are:
+approximation.  The content of reborn is mostly dictated by the needs of the Kirian group, but it is available for
+anyone to use under the GNU V3 License.  Similar utilities with related aspirations are:
 `thor <https://github.com/tjlane/thor>`_,
 `OnDa <https://github.com/ondateam>`_,
 `DIALS <https://dials.github.io/>`_,
@@ -27,8 +27,6 @@ presently passing in the master branch:
 
 You can find the reborn source code on gitlab here: https://gitlab.com/kirianlab/reborn
 
-This documentation is available on the web here: https://kirianlab.gitlab.io/reborn
-
 What's in reborn?
 -----------------
 
@@ -42,24 +40,26 @@ In a nutshell, the basic elements reborn are:
 - Tools for displaying diffraction data.
 - A few analysis algorithms.
 
-For Newbies who want to use reborn..
-------------------------------------
+For Newbies who want to use reborn:
+-----------------------------------
 
-- If you are totally new to writing data analysis or simulation code, do learn the basics of
+- If you are totally new to writing data analysis or simulation code, first learn the basics of
   `shell scripting <https://linuxconfig.org/bash-scripting-tutorial-for-beginners>`_,
   `git <https://www.vogella.com/tutorials/Git/article.html>`_,
   `python <https://becksteinlab.physics.asu.edu/learning/48/learning-python>`_.
 - Learn how to use the |numpy| python package.
-- When you learn python, make sure you learn object-oriented programming concepts.
+- Learn object-oriented programming concepts.
 - Skim through all of the reborn docs so you know what is here.  Complaints are not allowed until you've done that!
 - If documentation is missing or confusing, please fix the problem or notify someone who can.
-- The units in reborn are SI.  Angles are radians.  You rarely need to convert units within reborn.
-- No special coordinate system is assumed in reborn.  You specify the direction of the x-ray beam.
-- We make consistent assumptions about the shapes and memory layout of |numpy| arrays.
+- The units in reborn are SI.  Angles are radians.  This choice was made to avoid unit changes internally within reborn,
+  with the understanding that you can choose units when it is time to plot or crunch numbers.
+- No special coordinate system is assumed in reborn.  For example, the x-ray beam can point in any direction you wish.
+- We try to be consistent with the memory layout of |numpy| arrays.  For example, vector components are
+  always contiguous in memory.
 - The :ref:`examples` page is a good place to learn about how we use reborn.
 
-If you plan to develop reborn...
---------------------------------
+If you plan to develop reborn:
+------------------------------
 
 See :ref:`developers_anchor`.
 

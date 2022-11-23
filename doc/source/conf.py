@@ -374,3 +374,20 @@ texinfo_documents = [
 # texinfo_no_detailmenu = False
 
 math_number_all = True
+
+# Monkey-patch functools.wraps
+# See: https://github.com/sphinx-doc/sphinx/issues/1711
+# import functools
+# def no_op_wraps(func):
+#     """
+#     Replaces functools.wraps in order to undo wrapping when generating Sphinx documentation
+#     """
+#     if func.__module__ is None or 'MY_PACKAGE_NAME' not in func.__module__:
+#         return functools.orig_wraps(func)
+#     def wrapper(decorator):
+#         return func
+#     return wrapper
+# functools.orig_wraps = functools.wraps
+# functools.wraps = no_op_wraps
+# import contextlib
+# contextlib.wraps = no_op_wraps

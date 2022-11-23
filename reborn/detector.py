@@ -21,6 +21,7 @@ import os
 import json
 import numpy as np
 import pkg_resources
+from functools import wraps
 from . import utils, source, const, fortran
 try:
     from .fortran import polar_f
@@ -50,6 +51,7 @@ def _dbgmsg(*args, **kwargs):
 
 def cached(method):
     r""" Experimental decorator for caching results from a method.  Assumes no arguments are needed. """
+    @wraps(method)
     def wrapper(self, *args, **kwargs):
         r""" Method wrapper. """
         if self.do_cache:
@@ -61,6 +63,7 @@ def cached(method):
             return out
         out = method(self, *args, **kwargs)
         return out
+    # wrapper.__doc__ = method.__doc__
     return wrapper
 
 
