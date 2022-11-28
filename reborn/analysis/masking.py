@@ -15,7 +15,8 @@
 
 import time
 import numpy as np
-from scipy.signal import convolve
+from scipy.signal import convolve, find_peaks
+from .. import misc
 from ..fortran import peaks_f
 from ..detector import RadialProfiler
 
@@ -154,3 +155,80 @@ def snr_mask(dat, mask, nin, ncent, nout, threshold=6, mask_negative=True, max_i
         #     break
         # prev = above
     return amask, snr
+
+
+class StreakMasker:
+
+    def __init__(self, geom, beam, n_q=100, q_range=(0, 2e10), prominence=0.8, max_streaks=2):
+        r"""
+        A tool for masking jet streaks or other streak-like features in diffraction patterns.  It is assumed that
+        the streak crosses through the beam center.
+
+        Arguments:
+            geom (|PADGeometryList|): PAD geometry.
+            beam (|Beam|): Beam info.
+            n_q (int): Number of q bins.  Default: 100.
+            q_range (float tuple): Range of q values to consider. Default: (0, 2e10).
+            prominence (float): Look at the corresponding parameter in scipy.signal.find_peaks.  Default: 0.8.
+            max_streaks (int): Maximum number of streaks.  Default: 2.
+        """
+        self.prominence = prominence
+        self.max_streaks = max_streaks
+        self.n_p = 360
+        d_p = 2*np.pi/self.n_p
+        self.p_r = (d_p/2, 2*np.pi-d_p/2)
+        self.phi = np.linspace(self.p_r[0], self.p_r[1], self.n_p)
+        self.q_r = q_range
+        self.q = geom.q_mags(beam=beam)
+        self.p = geom.azimuthal_angles(beam=beam)
+        self.beam = beam
+        self.n_q = n_q
+        self.geom = geom
+
+    def get_mask(self, pattern, mask=None):
+        r""" Find streaks and return a mask.
+
+        Arguments:
+            pattern (|ndarray|): Diffraction intensities.
+            mask (|ndarray|): Diffraction intensity mask.  Zero means ignore.
+
+        Returns: |ndarray|"""
+        if mask is None:
+            mask = self.geom.ones()
+        stats = misc.polar.get_polar_stats(pattern.astype(np.float64), self.q, self.p,
+            weights=mask.astype(np.float64), n_q_bins=self.n_q, q_min=self.q_r[0], q_max=self.q_r[1], n_p_bins=360,
+            p_min=0, p_max=6.283185307179586)
+        smask = self.geom.ones()
+        polar = stats['mean']
+        pmask = stats['weight_sum']
+        pmask[pmask != 0] = 1
+        polar = polar[:, 0:180] + polar[:, 180:360]
+        pmask = pmask[:, 0:180] + pmask[:, 180:360]
+        polar = np.divide(polar, pmask, out=np.zeros_like(polar), where=pmask != 0)
+        pmask[pmask != 0] = 1
+        polar *= pmask
+        m = np.sum(pmask, 1)
+        p = np.sum(polar, 1)
+        pt = polar.T
+        pt -= np.divide(p, m, out=np.zeros_like(p), where=m > 0)
+        polar *= pmask
+        proj = np.sum(polar, axis=0)
+        m = np.sum(pmask, axis=0)
+        proj = np.divide(proj, m, out=np.zeros_like(proj), where=m > 0)
+        peaks = find_peaks(np.concatenate([proj, proj]), prominence=self.prominence)
+        if len(peaks[0]) == 0:
+            return smask
+        peak_angles, indices = np.unique(peaks[0] % 180, return_index=True)
+        peak_prominences = peaks[1]['prominences'][indices]
+        s = np.argsort(peak_prominences)[::-1]
+        peak_prominences = peak_prominences[s]
+        peak_angles = peak_angles[s]
+        c = 0
+        for (angle, prominence) in zip(peak_angles, peak_prominences):
+            c += 1
+            if c > self.max_streaks:
+                break
+            angle = angle*np.pi/180 + np.pi/2
+            streak_vec = self.beam.e1_vec * np.cos(angle) + self.beam.e2_vec * np.sin(angle)
+            smask = smask * self.geom.streak_mask(vec=streak_vec, angle=0.01)
+        return smask

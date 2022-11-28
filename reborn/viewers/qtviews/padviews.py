@@ -628,6 +628,11 @@ class PADView(QtCore.QObject):
         self._mask_rgba_arrays = None
         self.update_masks()
 
+    def set_mask_color(self, color):
+        self.mask_color = color
+        self._mask_rgba_arrays = None
+        self.update_masks()
+
     def update_masks(self, masks=None):
         r""" Update the data shown in mask image items. """
         self.debug('update_masks')
@@ -639,6 +644,8 @@ class PADView(QtCore.QObject):
             geom = self.dataframe.get_pad_geometry()
             masks = geom.split_data(masks)
         self.toc()
+        if len(self.mask_color) < 4:
+            self.mask_color.append(0)
         if self._mask_rgba_arrays is None:
             self.tic('Initializing RGBA mask arrays...')
             self._mask_rgba_arrays = []
@@ -647,12 +654,14 @@ class PADView(QtCore.QObject):
                 m[:, :, 0] = int(self.mask_color[0])
                 m[:, :, 1] = int(self.mask_color[1])
                 m[:, :, 2] = int(self.mask_color[2])
+                m[:, :, 3] = int(self.mask_color[3])
                 self._mask_rgba_arrays.append(m)
             self.toc()
         for (item, mask, rgba) in zip(self.mask_image_items, masks, self._mask_rgba_arrays):
             self.tic('Updating RGBA mask array...')
-            rgba[:, :, 3] = 255
-            rgba[:, :, 3] -= mask.astype(np.uint8)*255
+            m = rgba[:, :, 3]
+            m[:, :] = 0
+            m[np.where(mask == 0)] = self.mask_color[3]
             self.toc()
             self.tic('Setting mask image...')
             item.setImage(rgba)

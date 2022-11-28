@@ -19,6 +19,7 @@ Classes for analyzing/simulating diffraction data contained in pixel array detec
 
 import os
 import json
+import time
 import numpy as np
 import pkg_resources
 from functools import wraps
@@ -40,7 +41,7 @@ jungfrau4m_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/jung
 rayonix_mx340_xfel_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/rayonix_mx340_xfel_geometry.json')
 
 
-debug = False
+debug = 0
 
 
 def _dbgmsg(*args, **kwargs):
@@ -58,12 +59,12 @@ def cached(method):
             attr = '__cached__'+method.__name__
             if hasattr(self, attr):
                 _dbgmsg('Returning cached result:', attr)
+                return getattr(self, attr)
             out = method(self, *args, **kwargs)
             setattr(self, attr, out)
             return out
         out = method(self, *args, **kwargs)
         return out
-    # wrapper.__doc__ = method.__doc__
     return wrapper
 
 
@@ -766,9 +767,9 @@ class PADGeometry:
 
         Returns: |ndarray|
         """
-        phi = np.arccos(np.abs(np.dot(self.s_vecs(), np.array(vec))))
+        phi = np.abs(np.dot(self.s_vecs(), np.array(vec)))
         mask = self.ones(dtype=int).ravel()
-        mask[phi > (90*np.pi/180 - angle)] = 0
+        mask[phi < np.cos(90*np.pi/180 - angle)] = 0
         return mask
 
     def edge_mask(self, n=1):
@@ -1703,6 +1704,8 @@ class PolarPADAssembler:
         phi_centers = np.linspace(phi_range[0], phi_range[1], n_phi_bins)
         phi_edges = np.linspace(phi_range[0] - phi_bin_size / 2, phi_range[1] + phi_bin_size / 2, n_phi_bins + 1)
         phi_min = phi_edges[0]
+        self.q_range = q_range
+        self.phi_range = phi_range
         self.q_bin_size = q_bin_size
         self.q_bin_centers = q_centers
         self.q_bin_edges = q_edges
@@ -1755,9 +1758,11 @@ class PolarPADAssembler:
                                                         self.phi_min,
                                                         self.q_mags,
                                                         self.phis,
-                                                        self.solid_angles,
+                                                        mask,
+                                                        # self.solid_angles,
                                                         data,
-                                                        mask)
+                                                        self.solid_angles)
+
         polar_mask = count.reshape(self.polar_shape).astype(float)
         polar_mean = mean_.reshape(self.polar_shape).astype(float)
         return polar_mean, polar_mask
@@ -1771,8 +1776,8 @@ class PolarPADAssembler:
         """
         if mask is None:
             mask = np.ones_like(data)
-        data = self.pad_geometry.concat_data(data) * self.solid_angles
-        mask = concat_pad_data(mask)
+        data = self.pad_geometry.concat_data(data) # * self.solid_angles
+        mask = self.pad_geometry.concat_data(mask)
 
         # calculate average binned pixel
         if py or polar_f is None:
@@ -1780,6 +1785,11 @@ class PolarPADAssembler:
         else:
             polar_mean, polar_mask = self._f_mean(data, mask)
         return polar_mean, polar_mask
+
+    def quickstats(self, data, mask=None):
+        return polar.get_polar_stats(data, self.q_bin_centers, self.phi_bin_centers, weights=mask,
+                                     n_q_bins=self.n_q_bins, q_min=self.q_range[0], q_max=self.q_range[1],
+                                     n_p_bins=self.n_phi_bins, p_min=self.phi_range[0], p_max=self.phi_range[1])
 
     def get_sdev(self, data, mask=None):
         r""" Create polar-binned standard deviation.  Not implemented yet."""

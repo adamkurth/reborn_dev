@@ -83,3 +83,24 @@ def test_polar_fortran_python_match():
         assert x == y
     for x, y in zip(pmask, pmask_f):
         assert x == y
+
+
+def test_polar_stats():
+    print()
+    nq = 3
+    nphi = 4
+    data = np.arange(nq*nphi, dtype=np.float64).reshape(nq, nphi)
+    data[0, 1]
+    weights = np.ones_like(data)
+    weights[0, 1] = 0
+    q = np.arange(nq, dtype=np.float64) + 1
+    p = np.arange(nphi, dtype=np.float64) + 1
+    q, p = np.meshgrid(q, p, indexing='ij')
+    q = q.ravel()
+    p = p.ravel()
+    stats = polar.get_polar_stats(data, q, p, weights=weights, n_q_bins=nq, q_min=1, q_max=nq, n_p_bins=nphi,
+                                  p_min=1, p_max=nphi, sum_=None, sum2=None, w_sum=None)
+    # print(stats['mean'])
+    assert stats['mean'][0, 0] == 0
+    assert stats['mean'][0, 1] == 0
+    assert stats['mean'][0, 2] == 2
