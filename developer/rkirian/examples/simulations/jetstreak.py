@@ -30,10 +30,8 @@ theta = np.arccos(np.abs(np.dot(pixel_vecs, beam.beam_vec)))
 # Fiddle with the numbers to make it look like a jet streak.
 streak = np.random.poisson(100*np.exp(-1000000*phi**2 - 100*theta**2))
 pattern += streak
-# Have a look
-padview = PADView(data=pattern, pad_geometry=geom, beam=beam)
-padview.start()
-# Now mask the streak
-smask = geom.streak_mask(vec=streak_vec, angle=0.01)
-padview = PADView(data=pattern*smask, pad_geometry=geom, beam=beam)
+# Have a look (and mask the streak)
+padview = PADView(data=pattern, pad_geometry=geom, beam=beam, mask=mask)
+padview.set_mask_color([127, 0, 0, 50])
+padview.run_plugin('mask_jetstreak')
 padview.start()

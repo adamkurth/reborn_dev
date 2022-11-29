@@ -93,7 +93,7 @@ class PADView(QtCore.QObject):
     debug_level = 0  # Levels are 0: no messages, 1: basic messages, 2: more verbose, 3: extremely verbose
     pad_labels = None
     mask_image_items = None
-    mask_color = [128, 0, 0]
+    mask_color = [128, 0, 0, 255]
     _mask_rgba_arrays = None
     _mask_rois = None
     skip_empty_frames = True

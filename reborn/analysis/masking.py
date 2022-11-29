@@ -18,7 +18,8 @@ import numpy as np
 from scipy.signal import convolve, find_peaks
 from .. import misc
 from ..fortran import peaks_f
-from ..detector import RadialProfiler
+from ..detector import RadialProfiler, PADGeometryList
+from ..source import Beam
 
 
 def snr_filter_test(data, mask, mask2, nin, ncent, nout):
@@ -159,7 +160,8 @@ def snr_mask(dat, mask, nin, ncent, nout, threshold=6, mask_negative=True, max_i
 
 class StreakMasker:
 
-    def __init__(self, geom, beam, n_q=100, q_range=(0, 2e10), prominence=0.8, max_streaks=2):
+    def __init__(self, geom: PADGeometryList, beam: Beam, n_q=100, q_range=(0, 2e10), prominence=0.8, max_streaks=2,
+                 debug=1):
         r"""
         A tool for masking jet streaks or other streak-like features in diffraction patterns.  It is assumed that
         the streak crosses through the beam center.
@@ -172,6 +174,8 @@ class StreakMasker:
             prominence (float): Look at the corresponding parameter in scipy.signal.find_peaks.  Default: 0.8.
             max_streaks (int): Maximum number of streaks.  Default: 2.
         """
+        self.debug = debug
+        self.dbgmsg('Initializing')
         self.prominence = prominence
         self.max_streaks = max_streaks
         self.n_p = 360
@@ -185,6 +189,10 @@ class StreakMasker:
         self.n_q = n_q
         self.geom = geom
 
+    def dbgmsg(self, *args, **kwargs):
+        if self.debug:
+            print('DEBUG:StreakMasker:', *args, **kwargs)
+
     def get_mask(self, pattern, mask=None):
         r""" Find streaks and return a mask.
 
@@ -195,6 +203,8 @@ class StreakMasker:
         Returns: |ndarray|"""
         if mask is None:
             mask = self.geom.ones()
+        pattern = self.geom.concat_data(pattern)
+        mask = self.geom.concat_data(mask)
         stats = misc.polar.get_polar_stats(pattern.astype(np.float64), self.q, self.p,
             weights=mask.astype(np.float64), n_q_bins=self.n_q, q_min=self.q_r[0], q_max=self.q_r[1], n_p_bins=360,
             p_min=0, p_max=6.283185307179586)
@@ -216,6 +226,7 @@ class StreakMasker:
         m = np.sum(pmask, axis=0)
         proj = np.divide(proj, m, out=np.zeros_like(proj), where=m > 0)
         peaks = find_peaks(np.concatenate([proj, proj]), prominence=self.prominence)
+        self.dbgmsg(f"Result from scipy.signal.find_peaks:", peaks)
         if len(peaks[0]) == 0:
             return smask
         peak_angles, indices = np.unique(peaks[0] % 180, return_index=True)
@@ -226,6 +237,7 @@ class StreakMasker:
         c = 0
         for (angle, prominence) in zip(peak_angles, peak_prominences):
             c += 1
+            self.dbgmsg(f'Masking streak at {angle} degrees (prominence = {prominence})')
             if c > self.max_streaks:
                 break
             angle = angle*np.pi/180 + np.pi/2
