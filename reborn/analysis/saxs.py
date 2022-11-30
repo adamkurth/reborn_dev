@@ -108,7 +108,7 @@ def get_profile_runstats(framegetter=None, n_bins=1000, q_range=None,
     """
     if framegetter is None:
         raise ValueError('framegetter cannot be None')
-    if parallel:
+    if parallel and n_processes > 1:
         debug_message('Begin parallelized processing.')
         if Parallel is None:
             raise ImportError('You need the joblib package to run in parallel mode.')
