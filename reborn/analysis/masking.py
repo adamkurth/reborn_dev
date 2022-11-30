@@ -228,7 +228,9 @@ class StreakMasker:
         proj = np.sum(polar, axis=0)
         m = np.sum(pmask, axis=0)
         proj = np.divide(proj, m, out=np.zeros_like(proj), where=m > 0)
-        std = np.std(proj[proj < np.percentile(proj, 80)])
+        w = proj < np.percentile(proj, 80)
+        std = np.std(proj[w])
+        baseline = np.mean(proj[w])
         peaks = find_peaks(np.concatenate([proj, proj]), prominence=self.prominence)
         self.dbgmsg(f"Result from scipy.signal.find_peaks:", peaks)
         if len(peaks[0]) == 0:
@@ -238,7 +240,7 @@ class StreakMasker:
         s = np.argsort(peak_prominences)[::-1]
         peak_prominences = peak_prominences[s]
         peak_angles = peak_angles[s]
-        peak_snr = proj[s]/std
+        peak_snr = (proj[s]-baseline)/std
         self.dbgmsg('peak_snr', peak_snr)
         c = 0
         for (angle, prominence) in zip(peak_angles, peak_prominences):
