@@ -14,6 +14,8 @@
 # along with reborn.  If not, see <https://www.gnu.org/licenses/>.
 
 import time
+from builtins import str
+
 import numpy as np
 from scipy.signal import convolve, find_peaks
 from .. import misc
@@ -161,7 +163,7 @@ def snr_mask(dat, mask, nin, ncent, nout, threshold=6, mask_negative=True, max_i
 class StreakMasker:
 
     def __init__(self, geom: PADGeometryList, beam: Beam, n_q=100, q_range=(0, 2e10), prominence=0.8, max_streaks=2,
-                 debug=1):
+                 debug=1, streak_width=0.01):
         r"""
         A tool for masking jet streaks or other streak-like features in diffraction patterns.  It is assumed that
         the streak crosses through the beam center.
@@ -176,6 +178,7 @@ class StreakMasker:
         """
         self.debug = debug
         self.dbgmsg('Initializing')
+        self.streak_width = streak_width
         self.prominence = prominence
         self.max_streaks = max_streaks
         self.n_p = 360
@@ -242,5 +245,5 @@ class StreakMasker:
                 break
             angle = angle*np.pi/180 + np.pi/2
             streak_vec = self.beam.e1_vec * np.cos(angle) + self.beam.e2_vec * np.sin(angle)
-            smask = smask * self.geom.streak_mask(vec=streak_vec, angle=0.01)
+            smask = smask * self.geom.streak_mask(vec=streak_vec, angle=self.streak_width)
         return smask
