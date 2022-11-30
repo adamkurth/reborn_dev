@@ -163,7 +163,7 @@ def snr_mask(dat, mask, nin, ncent, nout, threshold=6, mask_negative=True, max_i
 class StreakMasker:
 
     def __init__(self, geom: PADGeometryList, beam: Beam, n_q=100, q_range=(0, 2e10), prominence=0.8, max_streaks=2,
-                 debug=1, streak_width=0.01):
+                 debug=1, streak_width=0.01, snr=1):
         r"""
         A tool for masking jet streaks or other streak-like features in diffraction patterns.  It is assumed that
         the streak crosses through the beam center.
@@ -228,6 +228,7 @@ class StreakMasker:
         proj = np.sum(polar, axis=0)
         m = np.sum(pmask, axis=0)
         proj = np.divide(proj, m, out=np.zeros_like(proj), where=m > 0)
+        std = np.std(proj[proj < np.percentile(proj, 80)])
         peaks = find_peaks(np.concatenate([proj, proj]), prominence=self.prominence)
         self.dbgmsg(f"Result from scipy.signal.find_peaks:", peaks)
         if len(peaks[0]) == 0:
@@ -237,6 +238,8 @@ class StreakMasker:
         s = np.argsort(peak_prominences)[::-1]
         peak_prominences = peak_prominences[s]
         peak_angles = peak_angles[s]
+        peak_snr = proj[s]/std
+        self.dbgmsg('peak_snr', peak_snr)
         c = 0
         for (angle, prominence) in zip(peak_angles, peak_prominences):
             c += 1
