@@ -230,12 +230,12 @@ class StreakMasker:
         proj = np.sum(polar, axis=0)
         m = np.sum(pmask, axis=0)
         proj = np.divide(proj, m, out=np.zeros_like(proj), where=m > 0)
-        if self.debug:
-            if self.plot is None:
-                import pyqtgraph as pg
-                self.plot = pg.plot(proj)
-            else:
-                self.plot.plot(proj, clear=True)
+        # if self.debug:
+        #     if self.plot is None:
+        #         import pyqtgraph as pg
+        #         self.plot = pg.plot(proj)
+        #     else:
+        #         self.plot.plot(proj, clear=True)
         w = proj < np.percentile(proj, 80)
         std = np.std(proj[w])
         baseline = np.mean(proj[w])
