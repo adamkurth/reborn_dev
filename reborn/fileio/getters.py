@@ -90,8 +90,9 @@ class FrameGetter(ABC):
     _debug = 0
     postprocessors = []
 
-    def __init__(self):
-        pass
+    def __init__(self, postprocessors=None):
+        if postprocessors is not None:
+            self.postprocessors = postprocessors
 
     def __copy__(self):
         if self.init_params is not None:
