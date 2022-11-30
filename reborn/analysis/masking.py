@@ -162,7 +162,7 @@ def snr_mask(dat, mask, nin, ncent, nout, threshold=6, mask_negative=True, max_i
 
 class StreakMasker:
 
-    def __init__(self, geom: PADGeometryList, beam: Beam, n_q=100, q_range=(0, 2e10), prominence=0.8, max_streaks=2,
+    def __init__(self, geom: PADGeometryList, beam: Beam, n_q=100, q_range=(0, 0.3e10), prominence=0.8, max_streaks=2,
                  debug=1, streak_width=0.01, snr=1):
         r"""
         A tool for masking jet streaks or other streak-like features in diffraction patterns.  It is assumed that
@@ -178,6 +178,7 @@ class StreakMasker:
         """
         self.debug = debug
         self.dbgmsg('Initializing')
+        self.snr = snr
         self.streak_width = streak_width
         self.prominence = prominence
         self.max_streaks = max_streaks
@@ -191,6 +192,7 @@ class StreakMasker:
         self.beam = beam
         self.n_q = n_q
         self.geom = geom
+        self.plot = None
 
     def dbgmsg(self, *args, **kwargs):
         if self.debug:
@@ -228,22 +230,32 @@ class StreakMasker:
         proj = np.sum(polar, axis=0)
         m = np.sum(pmask, axis=0)
         proj = np.divide(proj, m, out=np.zeros_like(proj), where=m > 0)
+        if self.debug:
+            if self.plot is None:
+                import pyqtgraph as pg
+                self.plot = pg.plot(proj)
+            else:
+                self.plot.plot(proj, clear=True)
         w = proj < np.percentile(proj, 80)
         std = np.std(proj[w])
         baseline = np.mean(proj[w])
+        print('std, baseline', std, baseline)
         peaks = find_peaks(np.concatenate([proj, proj]), prominence=self.prominence)
         self.dbgmsg(f"Result from scipy.signal.find_peaks:", peaks)
         if len(peaks[0]) == 0:
             return smask
         peak_angles, indices = np.unique(peaks[0] % 180, return_index=True)
         peak_prominences = peaks[1]['prominences'][indices]
-        s = np.argsort(peak_prominences)[::-1]
+        peak_snr = (proj[peak_angles] - baseline) / std
+        s = np.argsort(peak_snr)
+        peak_snr = peak_snr[s]
         peak_prominences = peak_prominences[s]
         peak_angles = peak_angles[s]
-        peak_snr = (proj[s]-baseline)/std
         self.dbgmsg('peak_snr', peak_snr)
         c = 0
-        for (angle, prominence) in zip(peak_angles, peak_prominences):
+        for (angle, prominence, snr) in zip(peak_angles, peak_prominences, peak_snr):
+            if snr < self.snr:
+                continue
             c += 1
             self.dbgmsg(f'Masking streak at {angle} degrees (prominence = {prominence})')
             if c > self.max_streaks:
