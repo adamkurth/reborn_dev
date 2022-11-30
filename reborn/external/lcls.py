@@ -361,9 +361,9 @@ class LCLSFrameGetter(fileio.getters.FrameGetter):
     event_ids = None
 
     def __init__(self, experiment_id, run_number, pad_detectors, max_events=1e6, psana_dir=None, beam=None, idx=True,
-                 evr='evr0', cachedir=None):
+                 evr='evr0', cachedir=None, **kwargs):
         debug_message('Initializing superclass')
-        super().__init__()  # initialize the superclass
+        super().__init__(**kwargs)  # initialize the superclass
         self.init_params = {"experiment_id": experiment_id,
                             "run_number": run_number,
                             "pad_detectors": pad_detectors,
