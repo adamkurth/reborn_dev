@@ -88,6 +88,7 @@ class FrameGetter(ABC):
     _cached_data = None
     _cache_forward = False
     _debug = 0
+    postprocessors = []
 
     def __init__(self):
         pass
@@ -192,6 +193,8 @@ class FrameGetter(ABC):
                 dat = self._get_data_cache_forward(frame_number=frame_number)
             else:
                 dat = self.get_data(frame_number=frame_number)
+        for processor in self.postprocessors:
+            dat = processor(self, dat)
         self.current_dataframe = dat
         self.debug(time.time() - tic, 'seconds to load frame', frame_number)
         return dat
