@@ -23,7 +23,7 @@ from ..detector import RadialProfiler
 from ..external import pyqtgraph as pg
 from .. import utils, fileio
 
-debug = True
+debug = False
 
 
 def debug_message(*args, caller=True, **kwargs):
