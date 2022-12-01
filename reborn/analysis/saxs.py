@@ -92,7 +92,7 @@ def get_profile_stats(dataframe, n_bins, q_range, include_median=False):
 def get_profile_runstats(framegetter=None, n_bins=1000, q_range=None,
                          start=0, stop=None, parallel=False,
                          n_processes=None, process_id=None,
-                         include_median=False):
+                         include_median=False, verbose=1):
     r""" 
     Parallelized version of get_profile_stats.
 
@@ -106,6 +106,9 @@ def get_profile_runstats(framegetter=None, n_bins=1000, q_range=None,
     Returns:
         dict
     """
+    def message(*args, **kwargs):
+        if verbose >= 1:
+            print(*args, **kwargs)
     if framegetter is None:
         raise ValueError('framegetter cannot be None')
     if parallel and n_processes > 1:
@@ -155,10 +158,10 @@ def get_profile_runstats(framegetter=None, n_bins=1000, q_range=None,
         pmedian = np.zeros((frame_numbers.size, n_bins))
     nf = len(frame_numbers)
     for (n, i) in enumerate(frame_numbers):
-        debug_message(f'Process {process_id}; Frame {i:6d}; {n:6d} of {nf:6d}; {n / nf * 100:0.2g}% complete.')
+        message(f'Process {process_id}; Frame {i:6d}; {n:6d} of {nf:6d}; {n / nf * 100:0.2g}% complete.')
         dat = framegetter.get_frame(frame_number=i)
         if dat is None:
-            debug_message(f'Frame {i:6d} is None!!!')
+            message(f'Frame {i:6d} is None!!!')
             continue
         pstats = get_profile_stats(dataframe=dat, n_bins=n_bins, q_range=q_range, include_median=include_median)
         pmean[n, :] = pstats['mean']
