@@ -239,7 +239,7 @@ class StreakMasker:
         w = proj < np.percentile(proj, 80)
         std = np.std(proj[w])
         baseline = np.mean(proj[w])
-        print('std, baseline', std, baseline)
+        self.dbgmsg('std, baseline', std, baseline)
         peaks = find_peaks(np.concatenate([proj, proj]), prominence=self.prominence)
         self.dbgmsg(f"Result from scipy.signal.find_peaks:", peaks)
         if len(peaks[0]) == 0:
