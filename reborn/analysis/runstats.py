@@ -62,16 +62,23 @@ class PixelHistogram:
     def get_histogram_normalized(self):
         r""" Returns a normalized histogram - an |ndarray| of shape (M, N) where M is the number of pixels and
         N is the number of requested bins per pixel. """
-        return self.histogram / self.count
+        if isinstance(self.count, int):
+            h = self.histogram / self.count
+        else:
+            h = np.divide(self.histogram, self.count, np.zeros_like(), where=self.count > 0)
+        return h
 
     def get_histogram(self):
         r""" Returns a copy of the histogram - an |ndarray| of shape (M, N) where M is the number of pixels and
         N is the number of requested bins per pixel."""
         return self.histogram.copy()
 
-    def add_frame(self, data):
+    def add_frame(self, data, mask=None):
         r""" Add PAD measurement to the histogram."""
-        self.count += 1
+        if mask is not None:
+            self.count += mask
+        else:
+            self.count += 1
         bin_index = np.floor((data - self.bin_min) / self.bin_delta).astype(int)
         idx = np.ravel_multi_index((self._idx, bin_index), (self.n_pixels, self.n_bins), mode='clip')
         self.histogram.flat[idx] += 1
