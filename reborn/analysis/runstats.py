@@ -208,7 +208,7 @@ def padstats(framegetter=None, start=0, stop=None, parallel=False, n_processes=N
         if mask is None:
             mask = dat.get_mask_flat()
         if histogram is not None:
-            histogram.add_frame(rdat)
+            histogram.add_frame(rdat, mask=dat.get_mask_flat())
         n_frames += 1
     if beam_frames == 0:
         beam = None
