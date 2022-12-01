@@ -20,22 +20,23 @@ import numpy as np
 class FrameGetter(ABC):
 
     r"""
-    |FrameGetter| is a generic interface for serving up |DataFrame| instances.  It exists so that we have a standard
-    interface that hides the details of where data come from (disk, shared memory, on-the-fly simulations, etc.).  With
-    a |FrameGetter| we can build software that can work in a way that is agnostic to the data source.  This of course
-    comes at a cost -- the reborn |FrameGetter| only deals with basic coherent diffraction data.
+    A |FrameGetter| is meant to serve up |DataFrame| instances.  It exists so that we have a standard interface that
+    hides the details of where data come from (disk, shared memory, on-the-fly simulations, etc.).  With such
+    standardizations, we can sometimes build software that can work in a way that is agnostic to the data source.
+    A good example of this is |PADView|, which allows one to flip through dataframes for any experiment, provided that
+    a |FrameGetter| can be provided.
 
-    The FrameGetter serves up |DataFrame| instances that contain diffraction raw data, x-ray |Beam| info, |PADGeometry|
-    info, etc.  It is assumed that a set of frames can be indexed with integers, starting with zero.
+    The |DataFrame| instances contain diffraction raw data, x-ray |Beam| info, |PADGeometry| info, etc.  It is
+    assumed that a set of frames can be indexed with integers, starting with zero.
 
-    This FrameGetter class is only an Abstract Base Class (ABC).  You cannot use it directly.  Instead, you must define
+    This |FrameGetter| class is an Abstract Base Class (ABC).  You cannot use it directly.  Instead, you must create
     a subclass.  Here is what a very simple subclass should look like:
 
     .. code-block:: Python
 
         class MyFrameGetter(FrameGetter):
-            def __init__(self, arguments):
-                super().__init__()
+            def __init__(self, arguments, **kwargs):
+                super().__init__(**kwargs)
                 # Do whatever is needed to set up the data source.
                 # Be sure to set the n_frames attribute:
                 self.n_frames = something_based_on_arguments
@@ -46,21 +47,18 @@ class FrameGetter(ABC):
     Minimally, your |FrameGetter| subclass should set the n_frames attribute that specifies how many frames there
     are, and the get_data method should be defined such that it returns a properly constructed |DataFrame| instance.
     The |FrameGetter| base class will then implement other conveniences such as get_next_frame(), get_previous_frame(),
-    etc.  Eventually we hope to implement pre-fetching of dataframes to speed things up (optionally).
+    etc.
 
     Some advanced notes:
 
-    COPY: It is sometimes useful to copy a |FrameGetter|.  Please understand that this is not always an easy thing to
-    implement because a |FrameGetter| might have pointers to file objects that should not be copied, as there may be
-    serious issues if multiple threads or processes are using that same pointer.  If you want your subclass to allow
-    copies, then you need to store all of the initialization parameters in the init_params dictionary.
+    COPYING: Please understand that it is not always straightforward to copy a |FrameGetter| because, for example,
+    it might have pointers to file objects that should not be accessed by multiple threads.  If you want your
+    subclass to allow copies, then you need to store all of the initialization keyword parameters in the init_params
+    dictionary.
 
     PARALLEL PROCESSING: Parallel processing is not problematic so long as you create a new |FrameGetter| instance
-    within each process.  However, if you wish to allow one process to spawn multiple processes that each operates on an
-    existing |FrameGetter| instance, then you need to be mindful of the fact that it is rarely possible to pass a
-    |FrameGetter| from one process to another without creating a disaster.  To get around this, we currently use
-    the following strategy: we pass the init_params dictionary mentioned above (needed for creating a copy) along
-    with your |FrameGetter| sub-class type.  We create a dictionary like so:
+    within each process.  Our current strategy for this is to pass the init_params dictionary mentioned above
+    (needed for creating a copy) along with your |FrameGetter| subclass type.  We create a dictionary like so:
 
     .. code-block:: Python
 
@@ -71,6 +69,23 @@ class FrameGetter(ABC):
     .. code-block:: Python
 
         fg = fgd["framegetter"](**fgd["kwargs"])
+
+    POSTPROCESSING: Sometimes you have a |FrameGetter| subclass that serves up data, but for each frame you need to
+    perform a couple of extra manipulations to the |DataFrame| that are not already implemented in your subclass.  For
+    example, you need to create a mask for a liquid jet streak in a diffraction pattern.  To do this, you can define
+    a list of postprocessing functions as follows:
+
+    .. code-block:: Python
+
+        def myprocessor(self, dataframe):
+            # Do something to your dataframe.  The self argument allows access to the internals of the FrameGetter
+            return dataframe
+
+        mygetter = MyFrameGetter(param1=something, postprocessors=[myprocessor])
+        df = mygetter.get_next_frame()
+
+    In the above, the mygetter instance will peform the usual steps when you call the get_frame method, but the list
+    of postprocessor functions will first intercept the |DataFrame| s before they are returned.
 
     """
 
