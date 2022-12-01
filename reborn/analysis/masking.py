@@ -163,7 +163,7 @@ def snr_mask(dat, mask, nin, ncent, nout, threshold=6, mask_negative=True, max_i
 class StreakMasker:
 
     def __init__(self, geom: PADGeometryList, beam: Beam, n_q=100, q_range=(0, 0.3e10), prominence=0.8, max_streaks=2,
-                 debug=1, streak_width=0.01, snr=1):
+                 debug=0, streak_width=0.01, snr=1):
         r"""
         A tool for masking jet streaks or other streak-like features in diffraction patterns.  It is assumed that
         the streak crosses through the beam center.
