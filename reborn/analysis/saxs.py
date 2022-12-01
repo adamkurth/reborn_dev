@@ -83,6 +83,7 @@ def get_profile_stats(dataframe, n_bins, q_range, include_median=False):
     out['sum2'] = stats['sum2']
     out['counts'] = stats['weight_sum']
     out['q_bins'] = profiler.q_bin_centers
+    out['frame_id'] = dataframe.get_frame_id()
     if include_median:
         out['median'] = profiler.get_median_profile(data)
     return out
@@ -130,6 +131,7 @@ def get_profile_runstats(framegetter=None, n_bins=1000, q_range=None,
         out['sum2'] = np.concatenate([o['sum2'] for o in pout])
         out['counts'] = np.concatenate([o['counts'] for o in pout])
         out['q_bins'] = np.concatenate([o['q_bins'] for o in pout])
+        out['frame_ids'] = np.concatenate([o['frame_ids'] for o in pout])
         if include_median:
             out['median'] = np.concatenate([o['median'] for o in pout])
         return out
@@ -139,19 +141,20 @@ def get_profile_runstats(framegetter=None, n_bins=1000, q_range=None,
         stop = framegetter.n_frames
     stop = min(stop, framegetter.n_frames)
     start = max(0, start)
-    frame_ids = np.arange(start, stop, dtype=int)
+    frame_numbers = np.arange(start, stop, dtype=int)
     if process_id is not None:
-        frame_ids = np.array_split(frame_ids, n_processes)[process_id]
-    pmean = np.zeros((frame_ids.size, n_bins))
-    psdev = np.zeros((frame_ids.size, n_bins))
-    psum = np.zeros((frame_ids.size, n_bins))
-    psum2 = np.zeros((frame_ids.size, n_bins))
-    pcounts = np.zeros((frame_ids.size, n_bins))
-    pq_bin = np.zeros((frame_ids.size, n_bins))
+        frame_numbers = np.array_split(frame_numbers, n_processes)[process_id]
+    pmean = np.zeros((frame_numbers.size, n_bins))
+    psdev = np.zeros((frame_numbers.size, n_bins))
+    psum = np.zeros((frame_numbers.size, n_bins))
+    psum2 = np.zeros((frame_numbers.size, n_bins))
+    pcounts = np.zeros((frame_numbers.size, n_bins))
+    pq_bin = np.zeros((frame_numbers.size, n_bins))
+    frame_ids = []
     if include_median:
-        pmedian = np.zeros((frame_ids.size, n_bins))
-    nf = len(frame_ids)
-    for (n, i) in enumerate(frame_ids):
+        pmedian = np.zeros((frame_numbers.size, n_bins))
+    nf = len(frame_numbers)
+    for (n, i) in enumerate(frame_numbers):
         debug_message(f'Process {process_id}; Frame {i:6d}; {n:6d} of {nf:6d}; {n / nf * 100:0.2g}% complete.')
         dat = framegetter.get_frame(frame_number=i)
         if dat is None:
@@ -164,6 +167,7 @@ def get_profile_runstats(framegetter=None, n_bins=1000, q_range=None,
         psum2[n, :] = pstats['sum2']
         pcounts[n, :] = pstats['counts']
         pq_bin[n, :] = pstats['q_bins']
+        frame_ids.append(dat.get_frame_id())
         if include_median:
             pmedian[n, :] = pstats['median']
     out = dict()
@@ -173,6 +177,7 @@ def get_profile_runstats(framegetter=None, n_bins=1000, q_range=None,
     out['sum2'] = psum2
     out['counts'] = pcounts
     out['q_bins'] = pq_bin
+    out['frame_ids'] = np.array(frame_ids)
     if include_median:
         out['median'] = pmedian
     return out
