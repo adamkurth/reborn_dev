@@ -71,8 +71,7 @@ def get_profile_stats(dataframe, n_bins, q_range, include_median=False):
     mask = dataframe.get_mask_flat()
     pfac = dataframe.get_polarization_factors_flat()
     sa = dataframe.get_solid_angles_flat()
-    sa *= 1e6  # Set the units to micro steradian solid angles
-    data /= pfac * sa   # normalize our the polarization factors
+    data /= pfac * sa * 1e6  # normalize our the polarization factors, microsteradian units for solid angles
     debug_message('computing profiles')
     profiler = RadialProfiler(pad_geometry=geom, mask=mask, beam=beam,
                               n_bins=n_bins, q_range=q_range)

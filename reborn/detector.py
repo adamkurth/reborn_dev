@@ -61,6 +61,8 @@ def cached(method):
                 _dbgmsg('Returning cached result:', attr)
                 return getattr(self, attr)
             out = method(self, *args, **kwargs)
+            if isinstance(out, np.ndarray):
+                out.flags.writeable = False
             setattr(self, attr, out)
             return out
         out = method(self, *args, **kwargs)
