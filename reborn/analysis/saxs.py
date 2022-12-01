@@ -158,7 +158,7 @@ def get_profile_runstats(framegetter=None, n_bins=1000, q_range=None,
         pmedian = np.zeros((frame_numbers.size, n_bins))
     nf = len(frame_numbers)
     for (n, i) in enumerate(frame_numbers):
-        message(f'Process {process_id}; Frame {i:6d}; {n:6d} of {nf:6d}; {n / nf * 100:0.2g}% complete.')
+        message(f'Process {process_id:2d}; Frame {i:6d}; {n:6d} of {nf:6d}; {n / nf * 100:0.2g}% complete.')
         dat = framegetter.get_frame(frame_number=i)
         if dat is None:
             message(f'Frame {i:6d} is None!!!')
