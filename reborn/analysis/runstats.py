@@ -81,7 +81,9 @@ class PixelHistogram:
             self.count += 1
         bin_index = np.floor((data - self.bin_min) / self.bin_delta).astype(int)
         idx = np.ravel_multi_index((self._idx, bin_index), (self.n_pixels, self.n_bins), mode='clip')
-        self.histogram.flat[idx[mask > 0]] += 1
+        if mask is not None:
+            idx = idx[mask > 0]
+        self.histogram.flat[idx] += 1
 
 
 def padstats(framegetter=None, start=0, stop=None, parallel=False, n_processes=None, process_id=None,
