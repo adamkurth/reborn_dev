@@ -375,6 +375,9 @@ def view_histogram(stats):
 def analyze_histogram(stats, n_processes=1, debug=0):
     r""" Analyze histogram and attempt to extract offsets and gains from the zero- and one-photon peak.  Experimental.
     Use at your own risk!"""
+    def dbgmsg(*args, **kwargs):
+        if debug:
+            print(*args, **kwargs)
     if n_processes > 1:
         if Parallel is None:
             raise ImportError('You need the joblib package to run in parallel mode.')
@@ -387,8 +390,8 @@ def analyze_histogram(stats, n_processes=1, debug=0):
     mn = stats['histogram_params']['bin_min']
     mx = stats['histogram_params']['bin_max']
     nb = stats['histogram_params']['n_bins']
-    c0 = stats['histogram_params'].get('zero_photon_peak', 0)
-    c1 = stats['histogram_params'].get('one_photon_peak', 30)
+    c00 = stats['histogram_params'].get('zero_photon_peak', 0)
+    c10 = stats['histogram_params'].get('one_photon_peak', 30)
     x = np.linspace(mn, mx, nb)
     histdat = stats['histogram']
     poly = np.polynomial.Polynomial
@@ -396,8 +399,11 @@ def analyze_histogram(stats, n_processes=1, debug=0):
     gain = np.zeros(n_pixels)
     offset = np.zeros(n_pixels)
     for i in range(n_pixels):
+        c0 = c00
+        c1 = c10
         a = (c1 - c0) / 3
         o = 5
+        goodfit = 1
         for j in range(2):
             w0 = np.where((x >= c0-a) * (x <= c0+a))
             w1 = np.where((x >= c1-a) * (x <= c1+a))
@@ -405,18 +411,32 @@ def analyze_histogram(stats, n_processes=1, debug=0):
             x1 = x[w1]
             y0 = histdat[i, :][w0]
             y1 = histdat[i, :][w1]
-            if np.sum(np.abs(y0)):
+            if np.sum(y0) < o:
+                dbgmsg('skip')
+                goodfit = 0
                 break
-            f0 = poly.fit(x0, y0, o)
+            if np.sum(y1) < o:
+                dbgmsg('skip')
+                goodfit = 0
+                break
+            if len(y0) < o:
+                dbgmsg('skip')
+                goodfit = 0
+                break
+            if len(y1) < o:
+                dbgmsg('skip')
+                goodfit = 0
+                break
+            f0, extra = poly.fit(x0, y0, o, full=True)
             xf0, yf0 = f0.linspace()
             c0 = xf0[np.where(yf0 == np.max(yf0))[0][0]]
-            f1 = poly.fit(x1, y1, o)
+            f1, extra = poly.fit(x1, y1, o, full=True)
             xf1, yf1 = f1.linspace()
             c1 = xf1[np.where(yf1 == np.max(yf1))[0][0]]
             a = 5
             o = 3
-        gain[i] = c1-c0
-        offset[i] = c0
-        if debug:
-            print(i, n_pixels, f"{i*100/float(n_pixels):0.2f}%", gain[i])
+        if goodfit:
+            gain[i] = c1-c0
+            offset[i] = c0
+        dbgmsg(f"Pixel {i} of {n_pixels} ({i*100/float(n_pixels):0.2f}%), gain={gain[i]}, offset={offset[i]}")
     return dict(gain=gain, offset=offset)
