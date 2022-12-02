@@ -405,6 +405,8 @@ def analyze_histogram(stats, n_processes=1, debug=0):
             x1 = x[w1]
             y0 = histdat[i, :][w0]
             y1 = histdat[i, :][w1]
+            if np.sum(np.abs(y0)):
+                break
             f0 = poly.fit(x0, y0, o)
             xf0, yf0 = f0.linspace()
             c0 = xf0[np.where(yf0 == np.max(yf0))[0][0]]
