@@ -366,3 +366,51 @@ def view_histogram(stats):
     line.sigPositionChanged.connect(partial(update_histplot, c0=c0, c1=c1, a=(c1-c0)/3))
     pv.proxy2 = pg.SignalProxy(pv.viewbox.scene().sigMouseMoved, rateLimit=30, slot=set_line_index)
     pv.start()
+
+
+def analyze_histogram(stats, n_processes=1, debug=0):
+    r""" Analyze histogram and attempt to extract offsets and gains from the zero- and one-photon peak.  Experimental.
+    Use at your own risk!"""
+    if n_processes > 1:
+        if Parallel is None:
+            raise ImportError('You need the joblib package to run in parallel mode.')
+        stats_split = [dict(histogram=h) for h in np.array_split(stats['histogram'], n_processes, axis=0)]
+        for s in stats_split:
+            s['histogram_params'] = stats['histogram_params']
+        out = Parallel(n_jobs=n_processes)(delayed(analyze_histogram)(s, debug=debug) for s in stats_split)
+        return dict(gain=np.concatenate([out[i]['gain'] for i in range(n_processes)]),
+                    offset=np.concatenate([out[i]['offset'] for i in range(n_processes)]))
+    mn = stats['histogram_params']['bin_min']
+    mx = stats['histogram_params']['bin_max']
+    nb = stats['histogram_params']['n_bins']
+    c0 = stats['histogram_params'].get('zero_photon_peak', 0)
+    c1 = stats['histogram_params'].get('one_photon_peak', 30)
+    x = np.linspace(mn, mx, nb)
+    histdat = stats['histogram']
+    poly = np.polynomial.Polynomial
+    n_pixels = histdat.shape[0]
+    gain = np.zeros(n_pixels)
+    offset = np.zeros(n_pixels)
+    for i in range(n_pixels):
+        a = (c1 - c0) / 3
+        o = 5
+        for j in range(2):
+            w0 = np.where((x >= c0-a) * (x <= c0+a))
+            w1 = np.where((x >= c1-a) * (x <= c1+a))
+            x0 = x[w0]
+            x1 = x[w1]
+            y0 = histdat[i, :][w0]
+            y1 = histdat[i, :][w1]
+            f0 = poly.fit(x0, y0, o)
+            xf0, yf0 = f0.linspace()
+            c0 = xf0[np.where(yf0 == np.max(yf0))[0][0]]
+            f1 = poly.fit(x1, y1, o)
+            xf1, yf1 = f1.linspace()
+            c1 = xf1[np.where(yf1 == np.max(yf1))[0][0]]
+            a = 5
+            o = 3
+        gain[i] = c1-c0
+        offset[i] = c0
+        if debug:
+            print(i, n_pixels, f"{i*100/float(n_pixels):0.2f}%", gain[i])
+    return dict(gain=gain, offset=offset)
