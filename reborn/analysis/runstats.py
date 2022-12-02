@@ -16,7 +16,9 @@
 r""" Utilities for gathering statistics from data runs. """
 
 import time
+from functools import partial
 import numpy as np
+import pyqtgraph as pg
 try:
     from joblib import Parallel, delayed
 except ImportError:
@@ -27,7 +29,7 @@ from ..dataframe import DataFrame
 from ..fileio.getters import ListFrameGetter
 from ..source import Beam
 from ..viewers.qtviews.padviews import PADView
-
+from ..external.pyqtgraph import imview
 
 
 class PixelHistogram:
@@ -230,11 +232,24 @@ def padstats(framegetter=None, start=0, stop=None, parallel=False, n_processes=N
     return runstats
 
 
-def save_padstats(stats, filepath):
+def save_padstats(stats: dict, filepath: str):
+    r""" Saves the results of the padstats function.
+
+    Arguments:
+        stats (dict): Dictionary output of padstats.
+        filepath (str): Path to the file you want to save.
+    """
     fileio.misc.save_pickle(stats, filepath)
 
 
-def load_padstats(filepath):
+def load_padstats(filepath: str):
+    r""" Load the results of padstats from disk.
+
+    Arguments:
+        filepath (str): Path to the file you want to load.
+
+    Returns: dict
+    """
     stats = fileio.misc.load_pickle(filepath)
     meen = stats['sum']/stats['n_frames']
     meen2 = stats['sum2']/stats['n_frames']
@@ -246,14 +261,18 @@ def load_padstats(filepath):
     return stats
 
 
-def padstats_framegetter(stats, geom=None, mask=None):
-    r""" Make a FrameGetter that can flip through the padstats result. """
+def padstats_framegetter(stats):
+    r""" Make a FrameGetter that can flip through the output of padstats.
+
+    Arguments:
+        stats (dict): Output of padstats.
+
+    Returns: ListFrameGetter
+    """
     beam = stats['beam']
-    if geom is None:
-        geom = stats['pad_geometry']
+    geom = stats['pad_geometry']
     geom = detector.PADGeometryList(geom)
-    if mask is None:
-        mask = stats['mask']
+    mask = stats['mask']
     meen = stats['sum']/stats['n_frames']
     meen2 = stats['sum2']/stats['n_frames']
     sdev = np.nan_to_num(meen2-meen**2)
@@ -274,8 +293,76 @@ def padstats_framegetter(stats, geom=None, mask=None):
     return ListFrameGetter(dfs)
 
 
-def view_padstats(stats, geom=None, mask=None):
-    fg = padstats_framegetter(stats, geom=geom, mask=mask)
-    pv = PADView(frame_getter=fg, percentiles=[1, 99])
+def view_padstats(stats, histogram=False):
+    r""" View the output of padstats.
+
+    Arguments:
+        stats (dict): Output dictionary from padstats.
+    """
+    if histogram:
+        view_histogram(stats)
+    else:
+        fg = padstats_framegetter(stats)
+        pv = PADView(frame_getter=fg, percentiles=(1, 99))
+        pv.start()
+
+
+def view_histogram(stats):
+    r""" View the output of padstats with histogram enabled. """
+    geom = stats['pad_geometry']
+    mn = stats['histogram_params']['bin_min']
+    mx = stats['histogram_params']['bin_max']
+    nb = stats['histogram_params']['n_bins']
+    c0 = stats['histogram_params'].get('zero_photon_peak', 0)
+    c1 = stats['histogram_params'].get('one_photon_peak', 30)
+    x = np.linspace(mn, mx, nb)
+    histdat = stats['histogram']
+    h = np.mean(stats['histogram'], axis=0)
+    histplot = pg.plot(x, np.log10(h))
+    imv = imview(np.log10(histdat+1), fs_lims=[mn, mx], fs_label='Intensity', ss_label='Flat Pixel Index',
+           title='Intensity Histogram')
+    line = imv.add_line(vertical=True, movable=True)
+    def update_histplot(line, c0, c1, a=10):
+        i = int(np.round(line.value()))
+        i = max(i, 0)
+        i = min(i, histdat.shape[0]-1)
+        histplot.plot(x, np.log10(histdat[i, :]+1), clear=True)
+        if 1:  # TODO: Some hard-coded numbers below should instead be grabbed from histogram_params
+            poly = np.polynomial.Polynomial
+            o = 5
+            for j in range(2):
+                w0 = np.where((x >= c0-a) * (x <= c0+a))
+                w1 = np.where((x >= c1-a) * (x <= c1+a))
+                x0 = x[w0]
+                x1 = x[w1]
+                y0 = histdat[i, :][w0]
+                y1 = histdat[i, :][w1]
+                f0 = poly.fit(x0, y0, o)
+                xf0, yf0 = f0.linspace()
+                c0 = xf0[np.where(yf0 == np.max(yf0))]
+                f1 = poly.fit(x1, y1, o)
+                xf1, yf1 = f1.linspace()
+                c1 = xf1[np.where(yf1 == np.max(yf1))]
+                a = 5
+                o = 3
+            histplot.plot(xf0, np.log10(yf0 + 1), pen='g')
+            histplot.plot(xf1, np.log10(yf1 + 1), pen='g')
+    flat_indices = np.arange(0, geom.n_pixels)
+    flat_indices = stats['pad_geometry'].split_data(flat_indices)
+    fg = padstats_framegetter(stats)
+    pv = PADView(frame_getter=fg, percentiles=(1, 99))
+    def set_line_index(evt):
+        if evt is None:
+            print('Event is None')
+            return
+        ss, fs, pid = pv.get_pad_coords_from_mouse_pos()
+        if pid is None:
+            pass
+        else:
+            fs = int(np.round(fs))
+            ss = int(np.round(ss))
+            line.setValue(flat_indices[pid][ss, fs])
+        pass
+    line.sigPositionChanged.connect(partial(update_histplot, c0=c0, c1=c1, a=(c1-c0)/3))
+    pv.proxy2 = pg.SignalProxy(pv.viewbox.scene().sigMouseMoved, rateLimit=30, slot=set_line_index)
     pv.start()
-    # fg.view()
