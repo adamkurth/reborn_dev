@@ -381,7 +381,7 @@ def analyze_histogram(stats, n_processes=1, debug=0):
         stats_split = [dict(histogram=h) for h in np.array_split(stats['histogram'], n_processes, axis=0)]
         for s in stats_split:
             s['histogram_params'] = stats['histogram_params']
-        out = Parallel(n_jobs=n_processes)(delayed(analyze_histogram)(s, debug=debug) for s in stats_split)
+        out = Parallel(n_jobs=n_processes)([delayed(analyze_histogram)(s, debug=debug) for s in stats_split])
         return dict(gain=np.concatenate([out[i]['gain'] for i in range(n_processes)]),
                     offset=np.concatenate([out[i]['offset'] for i in range(n_processes)]))
     mn = stats['histogram_params']['bin_min']
