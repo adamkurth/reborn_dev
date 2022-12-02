@@ -19,7 +19,7 @@ import numpy as np
 from reborn.fortran import peaks_f
 from reborn import analysis
 from scipy.signal import convolve
-
+from reborn.simulate.form_factors import sphere_form_factor
 
 def test_fortran():
 
@@ -168,3 +168,19 @@ def notest_snr_02():
     # std = da / sig / np.sqrt(sc)
     # print('std')
     # print(std)
+
+
+def test_fit_sphere_profile():
+    
+    q_mags = np.linspace(0,1e10,617)
+    r = np.array([1, 10, 20, 50])*1e-9
+    sd = analysis.optimize.SphericalDroplets(q=q_mags, r=r)
+    test_sphere_diffraction = (sphere_form_factor(radius=10e-9, q_mags=q_mags, check_divide_by_zero=True))**2
+    
+    print('hello - we are now fitting the sphere profile')
+    r_min, r_dic = sd.fit_profile(I_D=test_sphere_diffraction)
+    A_min = r_dic['A_min']
+
+    assert r_min == 10e-9
+    assert A_min == 1
+

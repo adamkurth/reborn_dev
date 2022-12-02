@@ -20,6 +20,7 @@ Miscellaneous optimization and fitting routines.
 import numpy as np
 from numpy.linalg import eig, inv
 from .. import utils, detector
+from ..simulate.form_factors import sphere_form_factor
 
 
 def fit_ellipse(x, y):
@@ -202,3 +203,57 @@ def fit_ellipse_pad(pad_geometry, data, threshold, mask=None):
     fit_mask = detector.concat_pad_data(fit_mask)
     fit_params = fit_ellipse(px[fit_mask == 1], py[fit_mask == 1])
     return fit_params
+    
+
+
+
+class SphericalDroplets:
+
+    def __init__(self, q=None, r=None):
+        r"""
+        Initialise stuff
+        """
+        if q is None:
+            q = np.linspace(0,1e10,517)
+        if r is None:
+            r = np.arange(5,20)*1e-9
+        self.q = q.copy()
+        self.r = r.copy() # radius range of sphere to scan through
+
+        self.N = len(self.r)
+        self.I_R_precompute = np.zeros((self.N,len(self.q)))
+        for i in range(self.N):
+            print(i)
+            self.I_R_precompute[i,:] = (sphere_form_factor(radius=self.r[i], q_mags=self.q, check_divide_by_zero=True))**2
+
+
+    def fit_profile(self, I_D, mask=None):
+        if mask is None:
+            mask = np.ones_like(I_D)
+
+        w = mask > 0
+
+        A_save = np.zeros(self.N)
+        error_vec = np.zeros(self.N)
+        for i in range(self.N):
+            print(i)
+            I_R = self.I_R_precompute[i,:]
+            A = np.sum(I_D[w] * I_R[w]) / np.sum(I_R[w]**2)
+            diff_sq = (A*I_R[w] - I_D[w])**2
+            error_vec[i] = np.sum(diff_sq)
+            A_save[i] = A
+
+
+
+        ind_min = np.argmin(error_vec)
+
+
+        A_min = A_save[ind_min]
+        r_min = self.r[ind_min]
+        e_min = error_vec[ind_min]
+        I_R_min = self.I_R_precompute[ind_min,:]
+
+        r_dic = dict(A_min=A_min, e_min=e_min, error_vec=error_vec, I_R_min=I_R_min.copy())
+
+        return r_min, r_dic
+
