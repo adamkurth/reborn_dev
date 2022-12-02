@@ -278,7 +278,11 @@ def padstats_framegetter(stats):
     sdev = np.nan_to_num(meen2-meen**2)
     sdev[sdev < 0] = 0
     sdev = np.sqrt(sdev)
-    dats = (('mean', meen), ('sdev', sdev), ('min', stats['min']), ('max', stats['max']))
+    dats = [('mean', meen), ('sdev', sdev), ('min', stats['min']), ('max', stats['max'])]
+    if 'gain' in stats:
+        dats.append(('gain', stats['gain']))
+    if 'offset' in stats:
+        dats.append(('offset', stats['offset']))
     dfs = []
     for (a, b) in dats:
         d = DataFrame()
