@@ -175,6 +175,10 @@ class StreakMasker:
             q_range (float tuple): Range of q values to consider. Default: (0, 2e10).
             prominence (float): Look at the corresponding parameter in scipy.signal.find_peaks.  Default: 0.8.
             max_streaks (int): Maximum number of streaks.  Default: 2.
+            debug (int): Set to 1 or greater to see some standard output.
+            streak_width (float): Angular width of the jet streak mask.
+            snr (float): Threshold the signal-to-noise ration for jet streaks (peak height - average
+                         background)/standard deviation
         """
         self.debug = debug
         self.dbgmsg('Initializing')

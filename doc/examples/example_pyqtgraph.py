@@ -32,28 +32,64 @@ import pyqtgraph as pg
 np.random.seed(1)
 
 # %%
-# If you run a script and find that the plot window appears for an instant and vanishes,
-# you need to execute a Qt app to block further executions
+# A totally incomplete summary of plot settings:
 
-dat2d = np.random.rand(25, 15)
-im = pg.image(dat2d)
-# pg.mkQApp().exec_()
+plot = pg.plot()
+legend = plot.addLegend()
+x = np.linspace(0, 2*np.pi, 40)
+
+y1 = np.cos(x)
+pen1 = pg.mkPen(width=4.5, color='r', style=pg.QtCore.Qt.DashLine)
+symbol1 = dict(symbol='o', symbolBrush=pg.mkBrush(0, 127, 0, 200), symbolSize=np.arange(40), symbolPen='b')
+plot.plot(x, y1, pen=pen1, **symbol1, name='Cos(x)')
+
+y2 = np.sin(x)
+plot.plot(x, y2, name='Sin(x)')
+
+plot.setXRange(0, 2 * np.pi, padding=0.1)
+plot.setLabel('bottom', "x")
+plot.setLabel('left', "y")
+plot.setTitle('A Plot!')
+
+legend.setBrush([0, 0, 0, 200])
+legend.setPen(plot.getAxis("left").pen())
+legend.setPos(100, 0)
 
 # %%
-# If you want a plot to update within a for loop so you can watch something change:
+# Formatting fonts:
 
-p = pg.plot()
+font = plot.getAxis("left").label.font()
+font.setFamily("Serif")
+font.setPixelSize(20)
+plot.getAxis("left").label.setFont(font)
+plot.getAxis("left").setTickFont(font)
+plot.getAxis("bottom").label.setFont(font)
+plot.getAxis("bottom").setTickFont(font)
+plot.getPlotItem().titleLabel.item.setFont(font)
+plot.show()
+
+# %%
+# If you run a script and find that the plot window appears for an instant and vanishes,
+# you need to execute a Qt app:
+
+pg.mkQApp().exec_()
+
+# %%
+# If you want a plot to update within a for loop:
+
+plot = pg.plot()
 app = pg.mkQApp()
 for i in range(2):
-    p.plot(np.random.rand(10), clear=True)
+    plot.plot(np.random.rand(10), clear=True)
     app.processEvents()
-    time.sleep(0.5)
+    time.sleep(0.1)
 
 # %%
-# If you want your image to have a plot axis:
+# If you want to put an image within a plot axis:
 
-p = pg.PlotItem()
-imv = pg.ImageView(view=p)
+dat2d = np.random.rand(100, 150)
+plot = pg.PlotItem()
+imv = pg.ImageView(view=plot)
 imv.setImage(dat2d)
 imv.show()
 
