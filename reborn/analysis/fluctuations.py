@@ -14,8 +14,13 @@
 # along with reborn.  If not, see <https://www.gnu.org/licenses/>.
 
 import numpy as np
-
 import reborn.dataframe
+try:
+    from joblib import delayed
+    from joblib import Parallel
+except ImportError:
+    Parallel = None
+    delayed = None
 
 
 def correlate(s1, s2=None, cached=False):
@@ -35,14 +40,15 @@ def correlate(s1, s2=None, cached=False):
     Returns:
         correlation (|ndarray|): correlation of s1 and s2
     """
-    if cached:
-        a = s1
-        b = a.copy() if s2 is None else s2
-    else:
-        a = np.fft.fft(s1, axis=1)
-        b = a.copy() if s2 is None else np.fft.fft(s2, axis=1)
-    correlation = np.fft.ifft(a * np.conj(b))
-    return correlation.real
+    if not cached:
+        s1 = np.fft.fft(s1, axis=1)
+        if s2 is not None:
+            s2 = np.fft.fft(s2, axis=1)
+    if s2 is None:
+        s2 = s1.copy()
+    cor_fft = s1 * s2.conj()
+    correlation = np.fft.ifft(cor_fft, axis=1)
+    return np.real(correlation)
 
 
 def subtract_masked_data_mean(data, mask):
@@ -54,14 +60,15 @@ def subtract_masked_data_mean(data, mask):
         data (|ndarray|): data
         mask (|ndarray|): mask (i.e. data to ignore)
     Returns:
-        data (|ndarray|): (data - <data>_q) / max(data)
+        data (|ndarray|): data - <data>_q
     """
-    d_sum = np.sum(data * mask, axis=1)
+    data[mask == 0] = 0
+    d_sum = np.sum(data, axis=1)
     count = np.sum(mask, axis=1)
-    d_zro = np.zeros_like(d_sum)
-    d_avg = np.divide(d_sum, count, out=d_zro, where=count != 0)
-    d = (data.T - d_avg).T
-    d *= mask  # re-zero masked pixels
+    zs = np.zeros_like(d_sum, dtype=float)
+    data_avg = np.divide(d_sum, count, out=zs, where=count != 0)
+    d = (data.T - data_avg).T
+    d[mask == 0] = 0  # re-zero masked pixels
     return d
 
 
@@ -77,21 +84,20 @@ def data_correlation(n, data, mask, cached=False):
         mask (|ndarray|): mask (i.e. data to ignore)
         cached (bool): provide ffts instead of computing
     Returns:
-        ccf (|ndarray|): cross correlation function of data
+        ccf (|ndarray|): cross correlation of data
     """
-    zros = np.zeros_like(data)
-    d = data * mask
+    data[mask == 0] = 0
+    d_roll = None
+    m_roll = None
     if not cached:
-        d = subtract_masked_data_mean(d, mask)
-    if n == 0:
-        d_cf = correlate(s1=d, cached=cached)
-        m_cf = correlate(s1=mask, cached=cached)
-    else:
-        d_roll = np.roll(d, n, axis=0)
-        m_roll = np.roll(mask, n, axis=0)
-        d_cf = correlate(s1=d, s2=d_roll, cached=cached)
-        m_cf = correlate(s1=mask, s2=m_roll, cached=cached)
-    return np.divide(d_cf, m_cf, out=zros, where=m_cf != 0)
+        data = subtract_masked_data_mean(data=data, mask=mask)
+    if n > 0:
+        d_roll = np.roll(data, shift=n, axis=0)
+        m_roll = np.roll(mask, shift=n, axis=0)
+    d_cf = correlate(s1=data, s2=d_roll, cached=cached)
+    m_cf = correlate(s1=mask, s2=m_roll, cached=cached)
+    zs = np.zeros_like(data, dtype=float)
+    return np.divide(d_cf, m_cf, out=zs, where=m_cf != 0)
 
 
 def compute_data_correlations(data, mask):
@@ -106,15 +112,12 @@ def compute_data_correlations(data, mask):
     Returns:
         correlations (dict): correlations of data
     """
-    d = data * mask
-    d = subtract_masked_data_mean(d, mask)
-    d = np.fft.fft(d, axis=1)
-    mask = np.fft.fft(mask, axis=1)
+    data[mask == 0] = 0
     q_range = data.shape[0]
-    correlations = {n: data_correlation(n=n, data=d,
-                                        mask=mask, cached=True)
-                    for n in range(q_range)}
-    return correlations
+    data = subtract_masked_data_mean(data=data, mask=mask)
+    d = np.fft.fft(data, axis=1)
+    m = np.fft.fft(mask, axis=1)
+    return [data_correlation(n=n, data=d, mask=m, cached=True) for n in range(q_range)]
 
 
 class FXS:
@@ -177,7 +180,7 @@ class FXS:
 
     @property
     def run_var(self):
-        return self._run_sum2 - self._run_sum ** 2
+        return np.array([rs2 - rs ** 2 for rs, rs2 in zip(self._run_sum, self._run_sum2)])
 
     def __str__(self):
         out = "Fluctuation X-ray Scattering\n"
@@ -197,7 +200,7 @@ class FXS:
     def add_frame(self, dataframe):
         if isinstance(dataframe, reborn.dataframe.DataFrame):
             if dataframe.validate():
-                print("Dataframe is valid, adding to analysis ..." + 4 * "\t", end="\r")
+                print("Dataframe is valid, adding to analysis ...")
                 self._n_patterns += 1
                 self._frame_geom = dataframe.get_pad_geometry()
                 self._frame_beam = dataframe.get_beam()
@@ -211,8 +214,8 @@ class FXS:
                 if self._run_sum_correlations is None:
                     self._run_sum_correlations = self._frame_correlations
                 else:
-                    for k, v in self._frame_correlations.items():
-                        self._run_sum_correlations[k] += v
+                    for i, fc in enumerate(self._frame_correlations):
+                        self._run_sum_correlations[i] += fc
 
                 if self._run_max is None:
                     self._run_max = self._frame_data
@@ -236,9 +239,9 @@ class FXS:
                     for i, fd in enumerate(self._frame_data):
                         self._run_sum2[i] += fd ** 2
             else:
-                print("Dataframe not valid, skipping ..." + 4 * "\t", end="\r")
+                print("Dataframe not valid, skipping ...")
         else:
-            print("Only dataframe addition is supported at this time.", end="\r")
+            print("Only dataframe addition is supported at this time.")
 
     def merge_fxs(self, fxso):
         if isinstance(fxso, FXS):
@@ -247,8 +250,8 @@ class FXS:
             if self._run_sum_correlations is None:
                 self._run_sum_correlations = fxso.run_sum_correlations
             else:
-                for k, v in fxso.run_sum_correlations.items():
-                    self._run_sum_correlations[k] += v
+                for i, c in enumerate(fxso.run_sum_correlations):
+                    self._run_sum_correlations[i] += c
 
             if self._run_max is None:
                 self._run_max = fxso.run_max
@@ -272,45 +275,105 @@ class FXS:
                 for i, fd in enumerate(fxso.run_sum2):
                     self._run_sum2[i] += fd
         else:
-            print("Only merging FXS objects is supported at this time.", end="\r")
+            print("Only merging FXS objects is supported at this time.")
 
     def get_run_correlations(self):
-        n = self._n_patterns
-        return {k: v / n for k, v in self._run_sum_correlations.items()}
+        return [c / self._n_patterns for c in self._run_sum_correlations]
 
     def get_auto_correlations(self):
         return self._run_sum_correlations[0] / self._n_patterns
 
-    def get_saxs(self, pattern, statistic=np.mean):
+    def get_saxs(self, pattern, mask=None, statistic=None):
         if self._radial_profiler is None:
             p = None
         else:
-            p = self._radial_profiler.get_profile_statistic(pattern, statistic=statistic)
+            p = self._radial_profiler.quickstats(data=pattern, weights=mask)
+            if statistic is not None:
+                p = p[statistic]
         return p
 
     def to_dict(self):
-        kam_cor = self.get_run_correlations()
-        base_keys = [f'analysis/kam_correlations/{k}' for k in kam_cor.keys()] + \
-                    ['analysis/saxs', 'analysis/n_patterns',
-                     'analysis/run_max', 'analysis/run_min',
-                     'analysis/run_sum', 'analysis/run_sum2',
-                     'analysis/geometry/n_q_bins', 'analysis/geometry/n_phi_bins',
-                     'analysis/geometry/q_max', 'analysis/geometry/q_min',
-                     'analysis/geometry/phi_max', 'analysis/geometry/phi_min',
-                     'meta/experiment_id', 'meta/run_id']
-        nq = self._polar_assembler.n_q_bins
-        nphi = self._polar_assembler.n_phi_bins
+        fxs_dict = {'experiment_id': self.experiment_id,
+                    'run_id': self.run_id,
+                    'analysis/n_patterns': self.n_patterns,
+                    'analysis/run_max': self.run_max,
+                    'analysis/run_min': self.run_min,
+                    'analysis/run_sum': self.run_sum,
+                    'analysis/run_sum2': self._run_sum2,
+                    'analysis/geometry/n_q_bins': self._polar_assembler.n_q_bins,
+                    'analysis/geometry/n_phi_bins': self._polar_assembler.n_phi_bins}
         qs = self._polar_assembler.q_mags
         phis = self._polar_assembler.phis
+        fxs_dict.update({'analysis/geometry/q_max': qs[-1],
+                         'analysis/geometry/q_min': qs[0],
+                         'analysis/geometry/phi_max': phis[-1],
+                         'analysis/geometry/phi_min': phis[0]})
+        kam_cor = self.get_run_correlations()
+        base_keys = [f'analysis/kam_correlations/{k}' for k in range(len(kam_cor))]
+        base_vals = kam_cor
         rsum = np.array(self._run_sum)
-        sxs = self.get_saxs(pattern=rsum / self.n_patterns, statistic=np.mean)
-        if sxs is None:
-            saxs = 'None'
-        else:
-            saxs = sxs
-        base_vals = [v for v in kam_cor.values()] + \
-                    [saxs, self.n_patterns,
-                     self.run_max, self.run_min, self.run_sum, self._run_sum2,
-                     nq, nphi, qs[-1], qs[0], phis[-1], phis[0],
-                     self.experiment_id, self.run_id]
-        return dict(zip(base_keys, base_vals))
+        sxs = self.get_saxs(pattern=rsum / self.n_patterns, statistic=None)
+        if isinstance(sxs, list):
+            radial_stats = ['mean', 'sdev', 'sum', 'sum2', 'weight_sum']
+            base_keys += [f'analysis/saxs/{s}' for s in radial_stats]
+            base_vals += [s for s in sxs]
+        fxs_dict.update(dict(zip(base_keys, base_vals)))
+        return fxs_dict
+
+
+def kam_analysis(framegetter=None, polar_assembler=None, radial_profiler=None,
+                 start=0, stop=None, nq_bins=100,
+                 np_bins=100, parallel=False, n_processes=None,
+                 process_id=None, verbose=False):
+    if framegetter is None:
+        raise ValueError('framegetter cannot be None')
+    if polar_assembler is None:
+        raise ValueError('polar assembler cannot be None')
+    if radial_profiler is None:
+        raise ValueError('radial profiler cannot be None')
+    if parallel:
+        if Parallel is None:
+            raise ImportError('You need the joblib package to run analysis in parallel mode.')
+        if not isinstance(framegetter, dict):
+            if framegetter.init_params is None:
+                raise ValueError('This FrameGetter does not have init_params attribute needed to make a replica')
+            framegetter = {'framegetter': type(framegetter),
+                           'kwargs': framegetter.init_params}
+        fsa = Parallel(n_jobs=n_processes)(delayed(kam_analysis)(framegetter=framegetter,
+                                                                 polar_assembler=polar_assembler,
+                                                                 radial_profiler=radial_profiler,
+                                                                 start=0,
+                                                                 stop=None,
+                                                                 nq_bins=nq_bins,
+                                                                 np_bins=np_bins,
+                                                                 parallel=False,
+                                                                 n_processes=n_processes,
+                                                                 process_id=i,
+                                                                 verbose=verbose)
+                                           for i in range(n_processes))
+        main_fxs_analysis = fsa[0]
+        for f in fsa[1:]:
+            main_fxs_analysis.merge_fxs(f)
+        return main_fxs_analysis
+    if isinstance(framegetter, dict):
+        framegetter = framegetter['framegetter'](**framegetter['kwargs'])
+    fxs_analysis = FXS(experiment_id=framegetter.experiment_id,
+                       run_id=framegetter.run_id,
+                       polar_assembler=polar_assembler,
+                       radial_profiler=radial_profiler)
+    if stop is None:
+        stop = framegetter.n_frames
+    frame_ids = np.arange(start, stop, dtype=int)
+    if process_id is not None:
+        frame_ids = np.array_split(frame_ids, n_processes)[process_id]
+    for (n, i) in enumerate(frame_ids):
+        if verbose:
+            print(f'Frame {i:3d} ({n / len(frame_ids) * 100:0.2g})')
+            print(f'{i} of {stop} ({i / stop * 100} %)')
+        dataframe = framegetter.get_frame(i)
+        if dataframe is None:
+            continue
+        if dataframe.validate() is False:
+            continue
+        fxs_analysis.add_frame(dataframe)
+    return fxs_analysis

@@ -119,6 +119,11 @@ class Beam:
         self._beam_vec = utils.vec_norm(np.array(vec))
 
     @property
+    def k_in(self):
+        r""" Incident wavevector. """
+        return self.beam_vec * 2 * np.pi / self.wavelength
+
+    @property
     def polarization_vec(self):
         r""" The principle polarization vector :math:`\hat{E}_1`.  This should be orthogonal to the incident beam
         direction.  The complementary polarization vector is :math:`\hat{E}_2 = \hat{b} \times \hat{E}_1`"""

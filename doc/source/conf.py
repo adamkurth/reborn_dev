@@ -41,6 +41,7 @@ intersphinx_mapping = {'python': ('http://docs.python.org/2', None),
 rst_epilog = """
 .. |examples|  replace:: :ref:`examples`
 .. |binning|  replace:: :ref:`binning`
+.. |detector_documentation|  replace:: :ref:`detector documentation <doc_detectors>`
 
 .. |Beam|  replace:: :class:`Beam <reborn.source.Beam>`
 .. |ClCore|  replace:: :mod:`ClCore <reborn.simulate.clcore.ClCore>`
@@ -58,6 +59,7 @@ rst_epilog = """
 .. |slice|  replace:: `slice <https://docs.python.org/dev/library/functions.html#slice>`__
 .. |sliced|  replace:: `sliced <https://docs.python.org/dev/library/functions.html#slice>`__
 
+.. |reborn|  replace:: `reborn <https://kirianlab.gitlab.io/reborn/>`__
 .. |Jungfrau|  replace:: `Jungfrau <https://lcls.slac.stanford.edu/detectors/jungfrau>`__
 .. |xraylib|  replace:: `xraylib <https://github.com/tschoonj/xraylib/wiki>`__
 .. |pyopencl|  replace:: `pyopencl <https://documen.tician.de/pyopencl/index.html>`__
@@ -372,3 +374,20 @@ texinfo_documents = [
 # texinfo_no_detailmenu = False
 
 math_number_all = True
+
+# Monkey-patch functools.wraps
+# See: https://github.com/sphinx-doc/sphinx/issues/1711
+# import functools
+# def no_op_wraps(func):
+#     """
+#     Replaces functools.wraps in order to undo wrapping when generating Sphinx documentation
+#     """
+#     if func.__module__ is None or 'MY_PACKAGE_NAME' not in func.__module__:
+#         return functools.orig_wraps(func)
+#     def wrapper(decorator):
+#         return func
+#     return wrapper
+# functools.orig_wraps = functools.wraps
+# functools.wraps = no_op_wraps
+# import contextlib
+# contextlib.wraps = no_op_wraps

@@ -604,8 +604,13 @@ def write_file_md5(file_path, md5_path=None):
         hasher = hashlib.md5()
         hasher.update(f.read())
         md5 = str(hasher.hexdigest())
-    with open(md5_path, 'w', encoding="utf-8") as f:
-        f.write(md5)
+    md5_prev = None
+    if os.path.exists(md5_path):
+        with open(md5_path, 'r', encoding="utf-8") as f:
+            md5_prev = f.readline()
+    if md5 != md5_prev:
+        with open(md5_path, 'w', encoding="utf-8") as f:
+            f.write(md5)
     return md5_path
 
 

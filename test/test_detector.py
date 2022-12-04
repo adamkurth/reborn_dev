@@ -314,3 +314,15 @@ def test_names():
     assert(pads[0].name == '0')
     assert(pads[1].name == '1')
     assert(pads[2].name == '2')
+
+def test_masks():
+    pads = detector.cspad_2x2_pad_geometry_list()
+    mask1 = [p.ones() for p in pads]
+    mask2 = [p.ones() for p in pads]
+    mask1[0][0, 0] = 0
+    f1 = tempdir+'/one.mask'
+    f2 = tempdir+'/two.mask'
+    detector.save_pad_masks(f1, mask1)
+    detector.save_pad_masks(f2, mask2)
+    mask3 = detector.load_pad_masks([f1, f2])
+    assert(mask3[0][0, 0] == 0)

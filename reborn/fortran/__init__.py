@@ -15,6 +15,7 @@
 
 import os
 import sys
+import glob
 import importlib
 import numpy.f2py
 from ..utils import debug, check_file_md5, write_file_md5
@@ -90,6 +91,7 @@ def import_f90(source_file, extra_args='', hash=True, verbose=False, with_omp=Fa
     debug('module_name =', modulename)
     # If not auto-compiling, just try to import and fail if import doesn't work
     if not autocompile:
+        debug('autocompile off')
         return importlib.import_module(modulename)
     # By default we will not recompile the source unless needed.
     do_compile = False
@@ -103,7 +105,13 @@ def import_f90(source_file, extra_args='', hash=True, verbose=False, with_omp=Fa
     compile_args = {'modulename': modulename, 'extension': '.f90', 'extra_args': extra_args,
                     'verbose': verbose}#, 'full_output': False}
     if do_compile:
-        debug('Compiling...', source, 'to', modulename)
+
+        bins = glob.glob(modulename+'.cpython*')
+        if len(bins) > 0:
+            for b in bins:
+                print('Removing', b)
+                os.remove(b)
+        print('Compiling...', source_file, 'to', modulename)
         fp = numpy.f2py.compile(source, **compile_args)
         # print(('='*40+'\n')*5)
         # import inspect
@@ -138,3 +146,4 @@ omp_test_f = import_f90(os.path.join(dir, 'omp_test'), autocompile=autocompile, 
 density_f = import_f90(os.path.join(dir, 'density'), autocompile=autocompile, extra_args=omp_args)
 scatter_f = import_f90(os.path.join(dir, 'scatter'), autocompile=autocompile, extra_args=omp_args)
 polar_f = import_f90(os.path.join(dir, 'polar'), autocompile=autocompile, extra_args=omp_args)
+crystal_f = import_f90(os.path.join(dir, 'crystal'), autocompile=autocompile, extra_args=omp_args)

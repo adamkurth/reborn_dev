@@ -13,8 +13,10 @@
 # You should have received a copy of the GNU General Public License
 # along with reborn.  If not, see <https://www.gnu.org/licenses/>.
 
+from . import fluctuations
+from . import masking
 from . import optimize
 from . import peaks
 from . import runstats
+from . import saxs
 from . import svd
-from . import fluctuations

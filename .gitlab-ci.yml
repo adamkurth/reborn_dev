@@ -22,6 +22,8 @@ tests:
   script:
   - cd $reborn/test
   - pytest -v
+  only:
+  - testing
 
 doc:
   script:
@@ -30,8 +32,8 @@ doc:
   - export XDG_RUNTIME_DIR=/tmp/runtime-root
   - cd $reborn/developer
   - bash update_docs.sh
-  except:
-  - master
+  only:
+  - testing
 
 pages:
   script:

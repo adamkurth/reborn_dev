@@ -170,13 +170,19 @@ Mac OS notes
 The Linux notes mostly apply to Mac OS also.  Presumably you will need to install xcode and use homebrew, conda,
 or similar to get the gfortran compiler.
 
-To get pyopencl to recognize the CPU and GPU on a Mac (as of Apr 2022), run:
+To get pyopencl to recognize the CPU and GPU on a Mac (Intel/AMD as of Apr 2022), run:
 
 .. code-block:: bash
 
     conda install ocl_icd_wrapper_apple
 
-Details from this `site <https://documen.tician.de/pyopencl/misc.html#using-vendor-supplied-opencl-drivers-mainly-on-linux>`_.
+Details from this `site <https://documen.tician.de/pyopencl/misc.html#using-vendor-supplied-opencl-drivers-mainly-on-linux>`_. Warning, the pyopencl documentation suggests installing ``oclgrind``, this is not recommended as that package is intended for debugging and will break normal operations of pyopencl.
+
+On M1 devices install ``pocl`` through conda:
+
+.. code-block:: bash
+
+    conda install pocl
 
 
 Windows 10 Notes
@@ -199,13 +205,21 @@ If you get a runtime error involving
 then please read the relevant section concerning "Installable Client Drivers" (ICDs) above.
 
 If you get a segmentation fault immediately when you try to use pyopencl, you might need to try a different ICD.  For
-example, if the ICD set up by conda fails, try installing one using apt.
+example, if the ICD set up by conda fails, try installing one using apt. `POCL <http://portablecl.org/>`_ works reasonably well with Intel/AMD/M1 devices.
 
 **Intel GPUs on Ubuntu**
 
 If you have an Ubuntu-like OS and a laptop with an intel GPU you might find
 `this github page <https://github.com/intel/compute-runtime/releases>`_ helpful.  After following the instructions
 there, you should then read the relevant section concerning GPUs above.
+
+**AMD GPUs on Ubuntu**
+
+`AMD drivers <https://www.amd.com/en/support/linux-drivers>`_ rely on outdated libraries (and may break your graphics driver if you are not careful), try installing ``pocl`` through the system package manager (the conda supplied package is broken on certain AMD devices):
+
+.. code-block:: bash
+
+    apt-get install pocl
 
 **Scientific Linux 6**
 

@@ -19,13 +19,16 @@ Classes for analyzing/simulating diffraction data contained in pixel array detec
 
 import os
 import json
+import time
 import numpy as np
 import pkg_resources
+from functools import wraps
 from . import utils, source, const, fortran
 try:
     from .fortran import polar_f
 except ImportError:
     polar_f = None
+from .misc import polar
 
 
 pnccd_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/pnccd_geometry.json')
@@ -38,7 +41,7 @@ jungfrau4m_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/jung
 rayonix_mx340_xfel_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/rayonix_mx340_xfel_geometry.json')
 
 
-debug = False
+debug = 0
 
 
 def _dbgmsg(*args, **kwargs):
@@ -49,13 +52,17 @@ def _dbgmsg(*args, **kwargs):
 
 def cached(method):
     r""" Experimental decorator for caching results from a method.  Assumes no arguments are needed. """
+    @wraps(method)
     def wrapper(self, *args, **kwargs):
         r""" Method wrapper. """
         if self.do_cache:
             attr = '__cached__'+method.__name__
             if hasattr(self, attr):
                 _dbgmsg('Returning cached result:', attr)
+                return getattr(self, attr)
             out = method(self, *args, **kwargs)
+            if isinstance(out, np.ndarray):
+                out.flags.writeable = False
             setattr(self, attr, out)
             return out
         out = method(self, *args, **kwargs)
@@ -746,6 +753,37 @@ class PADGeometry:
         q2 = np.dot(q_vecs, beam.e2_vec)
         return np.arctan2(q2, q1)
 
+    def streak_mask(self, vec=None, angle=None):
+        r""" Create a streak mask.  Given the "streak vector" :math:`\vec{s}` that defines the plane of the streak,
+        calculate the angles between outgoing pixel vector :math:`\vec{p}` and that plane:
+        :math:`\phi = \pi/2 - |\arccos(\vec{s}\cdot \vec{p})|`.  Then mask all pixels for which :math:`\phi` is less
+        than the specified angle.
+
+        Note:
+            If you want to mask a liquid jet, then the streak vector should be :math:`\vec{s} \times \vec{b}` where the
+            vector :math:`\vec{b}` points along the beam direction and :math:`\vec{s}` points along the liquid jet.
+
+        Arguments:
+            vec (|ndarray|): Vector describing plane of streak
+            angle (float): Mask everything within this angle
+
+        Returns: |ndarray|
+        """
+        phi = np.abs(np.dot(self.s_vecs(), np.array(vec)))
+        mask = self.ones(dtype=int).ravel()
+        mask[phi < np.cos(90*np.pi/180 - angle)] = 0
+        return mask
+
+    def edge_mask(self, n=1):
+        r""" Mask pixels along the perimeter of the PAD.
+
+        Arguments:
+            n (int): How many pixels to mask.
+
+        Returns: |ndarray|
+        """
+        return edge_mask(self.ones(dtype=int), n)
+
     def beamstop_mask(self, beam=None, q_min=None, q_max=None, min_angle=None, max_angle=None, min_radius=None,
                       max_radius=None):
         r"""
@@ -838,6 +876,12 @@ class PADGeometry:
         For convenience: np.random.random((self.n_ss, self.n_fs))
         """
         return np.random.random((self.n_ss, self.n_fs), *args, **kwargs)  # pylint: disable=no-member
+
+    def poisson(self, lam=1.0):
+        r"""
+        For convenience: np.random.poisson(lam=lam, size=(self.n_ss, self.n_fs))
+        """
+        return np.random.poisson(lam=lam, size=(self.n_ss, self.n_fs))
 
     @cached
     def max_resolution(self, beam=None):
@@ -967,6 +1011,20 @@ class PADGeometryList(list):
     def to_dict_list(self):
         r""" Convert each |PADGeometry| to a dictionary, return as a list. """
         return [p.to_dict() for p in self]
+
+    def from_dict_list(self, dicts):
+        r""" Populate elements from list of dictionary objects.  """
+        dlist = []
+        for d in dicts:
+            pad = PADGeometry()
+            pad.from_dict(d)
+            dlist.append(pad)
+        if len(self) == 0:
+            for g in dlist:
+                self.append(g)
+        else:
+            for (i, g) in enumerate(dlist):
+                self[i] = g
 
     def save(self, filename):
         r""" Save this PADGeometryList in default json format. """
@@ -1220,6 +1278,14 @@ class PADGeometryList(list):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
         return self.concat_data([p.beamstop_mask(*args, **kwargs).ravel() for p in self])
 
+    def edge_mask(self, *args, **kwargs):
+        r""" Concatenates the output of the matching method in |PADGeometry|"""
+        return self.concat_data([p.edge_mask(*args, **kwargs).ravel() for p in self])
+
+    def streak_mask(self, *args, **kwargs):
+        r""" Concatenates the output of the matching method in |PADGeometry|"""
+        return self.concat_data([p.streak_mask(*args, **kwargs).ravel() for p in self])
+
     def zeros(self, *args, **kwargs):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
         return self.concat_data([p.zeros(*args, **kwargs).ravel() for p in self])
@@ -1231,6 +1297,10 @@ class PADGeometryList(list):
     def random(self, *args, **kwargs):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
         return self.concat_data([p.random(*args, **kwargs).ravel() for p in self])
+
+    def poisson(self, lam=1.0):
+        r""" Concatenates the output of the matching method in |PADGeometry|"""
+        return self.concat_data([p.poisson(lam=lam).ravel() for p in self])
 
     @cached
     def max_resolution(self, beam):
@@ -1636,6 +1706,8 @@ class PolarPADAssembler:
         phi_centers = np.linspace(phi_range[0], phi_range[1], n_phi_bins)
         phi_edges = np.linspace(phi_range[0] - phi_bin_size / 2, phi_range[1] + phi_bin_size / 2, n_phi_bins + 1)
         phi_min = phi_edges[0]
+        self.q_range = q_range
+        self.phi_range = phi_range
         self.q_bin_size = q_bin_size
         self.q_bin_centers = q_centers
         self.q_bin_edges = q_edges
@@ -1649,8 +1721,9 @@ class PolarPADAssembler:
         self.q_mags = q_mags
         self.phis = pad_geometry.azimuthal_angles(beam=beam)
         self.pad_geometry = pad_geometry
-        self.polar_shape = (self.n_q_bins, self.n_phi_bins)
-        self.solid_angles = pad_geometry.solid_angles()
+        self.polar_shape = (n_q_bins, n_phi_bins)
+        sa = pad_geometry.solid_angles()
+        self.solid_angles = pad_geometry.concat_data(sa)
 
     def _py_mean(self, data, mask):
         r""" Create the mean polar-binned average intensities.
@@ -1658,31 +1731,20 @@ class PolarPADAssembler:
             data (|ndarray|): The PAD data to be binned.
             mask (|ndarray|): A mask to indicate ignored pixels.
         """
-        _p = self.phis % (2 * np.pi)
-        _pi = np.floor((_p - self.phi_min) / self.phi_bin_size)
-        _qi = np.floor((self.q_mags - self.q_min) / self.q_bin_size)
-        q_index = _qi.astype(int)
-        p_index = _pi.astype(int)
-        # conditions
-        _cqn = q_index >= self.n_q_bins
-        _cq0 = q_index < 0
-        _cpn = p_index >= self.n_phi_bins
-        _cp0 = p_index < 0
-        _cq = _cqn | _cq0
-        _cp = _cpn | _cp0
-        cqp = _cq | _cp
-        conditions = (mask == 0) | cqp
-        keepers = ~conditions
-        qk = q_index[keepers]
-        pk = p_index[keepers]
-        dk = data[keepers]
-        # calculate average binned pixel
-        sum_ = np.zeros(self.polar_shape)
-        cnt = np.zeros(self.polar_shape, dtype=int)
-        for q, p, d in zip(qk, pk, dk):
-            cnt[q, p] += 1
-            sum_[q, p] += d
-        return sum_, cnt
+        pmean, pmask = polar.polar_mean(n_q_bins=self.polar_shape[0],
+                                        q_bin_size=self.q_bin_size,
+                                        q_min=self.q_min,
+                                        n_phi_bins=self.polar_shape[1],
+                                        phi_bin_size=self.phi_bin_size,
+                                        phi_min=self.phi_min,
+                                        qs=self.q_mags,
+                                        phis=self.phis,
+                                        weights=self.solid_angles,
+                                        data=data,
+                                        mask=mask)
+        polar_mask = pmask.reshape(self.polar_shape)
+        polar_mean = pmean.reshape(self.polar_shape)
+        return polar_mean, polar_mask
 
     def _f_mean(self, data, mask):
         r""" Create the mean polar-binned average intensities.
@@ -1690,40 +1752,46 @@ class PolarPADAssembler:
             data (|ndarray|): The PAD data to be binned.
             mask (|ndarray|): A mask to indicate ignored pixels.
         """
-        psum, count = polar_f.polar_binning(self.polar_shape[0],
-                                            self.q_bin_size,
-                                            self.q_min,
-                                            self.polar_shape[1],
-                                            self.phi_bin_size,
-                                            self.phi_min,
-                                            self.q_mags,
-                                            self.phis, data, mask)
-        cnt = count.reshape(self.polar_shape).astype(int)
-        sum_ = psum.reshape(self.polar_shape).astype(float)
-        return sum_, cnt
+        mean_, count = polar_f.polar_binning.polar_mean(self.polar_shape[0],
+                                                        self.q_bin_size,
+                                                        self.q_min,
+                                                        self.polar_shape[1],
+                                                        self.phi_bin_size,
+                                                        self.phi_min,
+                                                        self.q_mags,
+                                                        self.phis,
+                                                        mask,
+                                                        # self.solid_angles,
+                                                        data,
+                                                        self.solid_angles)
+
+        polar_mask = count.reshape(self.polar_shape).astype(float)
+        polar_mean = mean_.reshape(self.polar_shape).astype(float)
+        return polar_mean, polar_mask
 
     def get_mean(self, data, mask=None, py=False):
         r""" Create the mean polar-binned average intensities.
         Arguments:
             data (list or |ndarray|): The PAD data to be binned.
             mask (list or |ndarray|): A mask to indicate ignored pixels.
+            py (bool): run fortran code if False (default=False)
         """
-        sa = self.pad_geometry.concat_data(self.solid_angles)
         if mask is None:
             mask = np.ones_like(data)
-        data = self.pad_geometry.concat_data(data) * sa
-        mask = concat_pad_data(mask) * sa
+        data = self.pad_geometry.concat_data(data) # * self.solid_angles
+        mask = self.pad_geometry.concat_data(mask)
 
         # calculate average binned pixel
-        if py:
-            sum_, cnt = self._py_mean(data, mask)
+        if py or polar_f is None:
+            polar_mean, polar_mask = self._py_mean(data, mask)
         else:
-            if polar_f is None:
-                sum_, cnt = self._py_mean(data, mask)
-            else:
-                sum_, cnt = self._f_mean(data, mask)
-        mean_ = np.divide(sum_, cnt, out=np.zeros_like(sum_), where=cnt != 0)
-        return mean_, cnt
+            polar_mean, polar_mask = self._f_mean(data, mask)
+        return polar_mean, polar_mask
+
+    def quickstats(self, data, mask=None):
+        return polar.get_polar_stats(data, self.q_bin_centers, self.phi_bin_centers, weights=mask,
+                                     n_q_bins=self.n_q_bins, q_min=self.q_range[0], q_max=self.q_range[1],
+                                     n_p_bins=self.n_phi_bins, p_min=self.phi_range[0], p_max=self.phi_range[1])
 
     def get_sdev(self, data, mask=None):
         r""" Create polar-binned standard deviation.  Not implemented yet."""
@@ -2008,6 +2076,8 @@ class RadialProfiler:
         mpat = self.concat_data(mpat)
         data = self.concat_data(data)
         data = data.copy()
+        if np.issubdtype(data.dtype, np.integer):
+            data = data.astype(float)
         data -= mpat
         if as_list:
             data = self._pad_geometry.split_data(data)
@@ -2167,6 +2237,15 @@ def load_pad_masks(file_name):
 
     Returns: List of |ndarray| objects with int type.
     """
+    if isinstance(file_name, list):
+        masks = [load_pad_masks(f) for f in file_name]
+        mask = masks[0]
+        nmask = len(masks)
+        npad = len(mask)
+        for m in range(1, nmask):
+            for p in range(npad):
+                mask[p] *= masks[m][p]
+        return mask
     out = np.load(file_name)
     keys = list(out.keys())
     n = int(len(out) - 1)
@@ -2337,14 +2416,14 @@ def dict_default(dictionary, key, default):
 
 
 def _slice_to_tuple(slc):
-    r""" Special conversion of slice type to tuple. """
+    r""" Special conversion of slice type to tuple.  This is for storing slices in json file format. """
     if slc is None:
         return None
-    if isinstance(slc, list):
+    if isinstance(slc, list):  # Convert to tuple and try again
         return _slice_to_tuple(tuple(slc))
     if isinstance(slc, slice):
         return slc.start, slc.stop, slc.step
-    if isinstance(slc, tuple):
+    if isinstance(slc, tuple):  # Presumably we have multiple dimensions, hence multiple slices
         return tuple(_slice_to_tuple(s) for s in slc)
     if isinstance(slc, int):
         return slc
@@ -2352,7 +2431,7 @@ def _slice_to_tuple(slc):
 
 
 def _tuple_to_slice(slc):
-    r""" Special conversion of tuple to slice. """
+    r""" Special conversion of tuple to slice.  This is for storing slices in json format. """
     if slc is None:
         return None
     if isinstance(slc, slice):

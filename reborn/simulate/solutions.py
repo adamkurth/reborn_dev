@@ -15,6 +15,7 @@
 # along with reborn.  If not, see <https://www.gnu.org/licenses/>.
 import pkg_resources
 import numpy as np
+from scipy import signal
 from .. import utils, const, detector
 r_e = const.r_e
 eV = const.eV
@@ -28,7 +29,7 @@ def water_number_density():
     return 33.3679e27
 
 
-@utils.memoize
+# @utils.memoize
 def _get_hura_water_data():
     with open(file_name, 'r') as f:
         h = f.readline()
@@ -38,7 +39,20 @@ def _get_hura_water_data():
     Q = d[:, 0]
     errors = d[:, -1]
     intensities = d[:, 1:-1]
-    return 1e10 * Q, intensities, temperatures
+    return 1e10 * Q.copy(), intensities.copy(), temperatures.copy()
+
+
+# @utils.memoize
+def _get_hura_water_data_smoothed():
+    Q, intensities, temperatures = _get_hura_water_data()
+    for i in range(intensities.shape[1]):
+        p = intensities[:, i]
+        intensities[:, i] = signal.savgol_filter(p, window_length=11, polyorder=2)
+    return Q.copy(), intensities.copy(), temperatures.copy()
+
+# @utils.memoize
+# def _get_clark_water_data():
+#     with open(file_name)
 
 
 def get_water_profile(q, temperature=298):

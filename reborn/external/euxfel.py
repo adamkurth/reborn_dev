@@ -31,9 +31,17 @@ try:
     import extra_data
 except:
     extra_data = None
-    print('You do not have the extra_data python package installed.')
 
-debug = True
+debug = False
+
+
+def check_extra_data():
+    r""" Check if the extra_data package is installed.  """
+    if extra_data is None:
+        print('You do not have the extra_data python package installed.')
+        print('Look here: https://rtd.xfel.eu/docs/data-analysis-user-documentation/en/latest/index.html')
+        print('Look here: https://extra-data.readthedocs.io/en/latest/index.html')
+        raise ImportError('The extra_data package is required.')
 
 
 def debug_message(*args, caller=True, **kwargs):
@@ -56,6 +64,7 @@ def inspect_available_data(experiment_id, run_id, source=None):
         source (str): data source (example='SPB_XTD9_XGM/XGM/DOOCS').
     """
     debug_message('opening run')
+    check_extra_data()
     run = extra_data.open_run(proposal=experiment_id, run=run_id, data='raw')
     debug_message('gathering sources')
     print(f'Data Sources:\n\n{run.all_sources}\n\n')
@@ -85,13 +94,17 @@ class EuXFELFrameGetter(reborn.fileio.getters.FrameGetter):
     current_train_stack = None
     current_train_id = None
     beam = None
+    mask = None
+    n_trains = None
 
     def __init__(self, experiment_id, run_id,
-                 geom=None, beam=None, pad_detectors='*/DET/*',
+                 geom=None, beam=None, mask=None,
+                 pad_detectors='*/DET/*',
                  pad_detector_motor='SPB_IRU_AGIPD1M/MOTOR/Z_STEPPER',
                  xray_wavelength_detector='SA1_XTD2_XGM/XGM/DOOCS',
                  max_events=None):
         debug_message('Initializing superclass')
+        check_extra_data()
         super().__init__()
         self.init_params = {'experiment_id': experiment_id,
                             'run_id': run_id,
@@ -104,6 +117,7 @@ class EuXFELFrameGetter(reborn.fileio.getters.FrameGetter):
         self.pad_detectors = pad_detectors
         debug_message('setting geometry')
         self.pad_geometry = geom
+        self.mask = mask
         # extra data first loads a run
         # in the background this is opening an HDF5 file
         # we are loading the processed data (dark calibrated)
@@ -121,6 +135,7 @@ class EuXFELFrameGetter(reborn.fileio.getters.FrameGetter):
         debug_message('building detector index')
         detectors = [s for s in sources if '/DET/' in s]
         train_shots = dict()
+        self.n_trains = len(run.train_ids)
         for d in detectors:
             t_shots = run[d, 'image.data'].data_counts()
             train_shots.update(t_shots.to_dict())
@@ -143,6 +158,11 @@ class EuXFELFrameGetter(reborn.fileio.getters.FrameGetter):
         detector_position = pad_detector_motor_position.as_single_value()  # result is in mm
         vec = np.array([0, 0, 1e-3 * detector_position])  # convert to m (reborn is in SI)
         self.pad_geometry = self.update_detector_distance(vector=vec)
+        if self.beam is None:
+            train_id, fn = self.frames[0]
+            _, wavelength = self.photon_data.train_from_id(train_id)  # result is in nm
+            debug_message('setting Beam')
+            self.beam = Beam(wavelength=wavelength * 1e-9)
 
     def update_detector_distance(self, vector=np.array([0, 0, 1e-3])):
         r"""
@@ -189,6 +209,7 @@ class EuXFELFrameGetter(reborn.fileio.getters.FrameGetter):
         debug_message('getting detector stage position')
         debug_message('setting PADGeometry')
         df.set_pad_geometry(self.pad_geometry)
+        df.set_mask(self.mask)
         df.set_raw_data(stacked_pulse)
         debug_message('retrieving x-ray data')
         _, wavelength = self.photon_data.train_from_id(train_id)  # result is in nm

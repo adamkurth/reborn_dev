@@ -7,12 +7,5 @@ The |pyqtgraph| package is great for interacting with data.  It has many nice fe
 |matplotlib|.  However, it is not nearly as well documented as |matplotlib|.  Here are some common things we do with
 |pyqtgraph|.
 
-Keeping a window open
----------------------
+The examples have been moved to the example gallery: look here :ref:`plot_pyqtgraph`.
 
-If you write a script and your pyqtgraph window closes, try this:
-
-.. code-block:: python
-
-    pg.image(data)
-    pg.QtGui.QApplication.instance().exec_()
