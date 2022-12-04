@@ -12,6 +12,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with reborn.  If not, see <https://www.gnu.org/licenses/>.
+import time
 import numpy as np
 try:
     from joblib import delayed
@@ -157,11 +158,14 @@ def get_profile_runstats(framegetter=None, n_bins=1000, q_range=None,
     if include_median:
         pmedian = np.zeros((frame_numbers.size, n_bins))
     nf = len(frame_numbers)
+    t0 = time.time()
     for (n, i) in enumerate(frame_numbers):
-        message(f'Process {process_id:2d}; Frame {i:6d}; {n:6d} of {nf:6d}; {n / nf * 100:0.2g}% complete.')
+        ts = time.ctime()
+        print(f'{ts}: Frame {i:6d} ({n / len(frame_ids) * 100:0.2g}%, {(time.time() - t0) / 60:.1f} minutes)')
+        # message(f'Process {process_id:2d}; Frame {i:6d}; {n:6d} of {nf:6d}; {n / nf * 100:0.2g}% complete.')
         dat = framegetter.get_frame(frame_number=i)
         if dat is None:
-            message(f'Frame {i:6d} is None!!!')
+            print(f'{ts}: Frame {i:6d} is None!!!')
             continue
         pstats = get_profile_stats(dataframe=dat, n_bins=n_bins, q_range=q_range, include_median=include_median)
         pmean[n, :] = pstats['mean']
