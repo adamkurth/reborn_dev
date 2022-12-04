@@ -174,11 +174,12 @@ def padstats(framegetter=None, start=0, stop=None, parallel=False, n_processes=N
     mask = None
     t0 = time.time()
     for (n, i) in enumerate(frame_ids):
+        ts = time.ctime()
         if verbose:
-            print(f'Frame {i:6d} ({n / len(frame_ids) * 100:0.2g}%, {(time.time()-t0)/60:.1f} minutes)')
+            print(f'{ts}: Frame {i:6d} ({n / len(frame_ids) * 100:0.2g}%, {(time.time()-t0)/60:.1f} minutes)')
         dat = framegetter.get_frame(frame_number=i)
         if dat is None:
-            print(f'Frame {i:6d} is None!!!')
+            print(f'{ts}: Frame {i:6d} is None!!!')
             continue
         rdat = dat.get_raw_data_flat()
         if rdat is None:
