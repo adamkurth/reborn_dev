@@ -164,7 +164,7 @@ def get_profile_runstats(framegetter=None, n_bins=1000, q_range=None,
         dt = time.time() - t0
         tr = dt*(nf-n)/(n+1)
         print(f'{ts}: Process {process_id:2d}: Frame {i:6d} ({n:6d} of {nf:6d}): {n/nf*100:0.2g}% @'
-              f' {dt/60:.1f} min. => {tr:.1f} min. remaining')
+              f' {dt/60:.1f} min. => {tr/60:.1f} min. remaining')
         # message(f'Process {process_id:2d}; Frame {i:6d}; {n:6d} of {nf:6d}; {n / nf * 100:0.2g}% complete.')
         dat = framegetter.get_frame(frame_number=i)
         if dat is None:
