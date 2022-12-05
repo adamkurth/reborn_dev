@@ -234,21 +234,21 @@ def padstats(framegetter=None, start=0, stop=None, parallel=False, n_processes=1
     # Handle loading errors in case a crash happened in the midst of saving the checkpoint
     if checkpoint_file:
         cpfs = sorted(glob.glob(checkpoint_file + '*'))
-        if len(cpfs) > 0:
-            broken = True
-            while broken:
-                if len(cpfs) > 0:
-                    c = cpfs.pop()
-                    try:
-                        jumpstart = int(c.split('_')[-1])
-                        logger.info(f'Starting with checkpoint file {c}')
-                        checkpoint = load_padstats(c)
-                        broken = False
-                        first = False
-                    except Exception as e:
-                        logger.warning(f"Problem loading file {c}")
-                        checkpoint = dict()
-                        jumpstart = 0
+        broken = True
+        while broken:
+            if len(cpfs) > 0:
+                c = cpfs.pop()
+                try:
+                    logger.info(f'Loading checkpoint file {c}')
+                    checkpoint = load_padstats(c)
+                    jumpstart = int(c.split('_')[-1])
+                    broken = False
+                    first = False
+                    logger.info(f'Starting at frame {jumpstart}')
+                except Exception as e:
+                    logger.warning(f"Problem loading file {c}")
+                    checkpoint = dict()
+                    jumpstart = 0
     cpstart = checkpoint.get('start', start)
     cpstop = checkpoint.get('stop', stop)
     if (cpstart != start) or (cpstop != stop):
@@ -268,19 +268,23 @@ def padstats(framegetter=None, start=0, stop=None, parallel=False, n_processes=1
                       'n_frames', 'sum', 'min',
                       'max', 'sum2', 'beam',
                       'start', 'stop', 'wavelengths']
+    fpsf = 0  # Frames processed so far
     for n in range(jumpstart, tot_frames):
+        fpsf += 1
         i = frame_ids[n]
-        ts = time.ctime()
-        dt = time.time() - t0
-        tr = dt*(tot_frames-jumpstart-n)/(n+1)
-        logger.info(f"Frame {i} ({n} of {tot_frames}): {n/tot_frames*100:.1f}% @ {dt/60:.1f} min. => {tr/60:.1f} min. "
+        dt = time.time() - t0  # Total processing time so far
+        ftp = tot_frames - jumpstart  # Total frames to process
+        atpf = dt / fpsf  # Average time per frame
+        tr = atpf*(ftp - fpsf)  # Time remaining
+        freq = 1/atpf if atpf > 0 else 0
+        logger.info(f"Frame {i} ({n} of {tot_frames}): {freq:.2f} Hz => {tr/60:.1f} min. remain"
                     f"remaining'")
         # ==========================================================================
         # This is the actual processing.  Very simple.
         # ==========================================================================
         dat = framegetter.get_frame(frame_number=i)
         if dat is None:
-            print(f'{ts}: Frame {i:6d} is None!!!')
+            logger.warning(f'Frame {i:6d} is None')
             continue
         rdat = dat.get_raw_data_flat()
         if rdat is None:
@@ -351,6 +355,7 @@ def padstats(framegetter=None, start=0, stop=None, parallel=False, n_processes=1
                       max_pad, sum_pad2, beam,
                       start, stop, wavelengths]
     runstats = dict(zip(run_stats_keys, run_stats_vals))
+    logger.info('Returning final dictionary')
     return runstats
 
 
