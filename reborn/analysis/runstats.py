@@ -165,10 +165,13 @@ def padstats(framegetter=None, start=0, stop=None, parallel=False, n_processes=1
         config = default_padstats_config()
     # For logging status to a file
     log_file = config.get('log_file', None)
+    if log_file:
+        os.makedirs(os.path.dirname(log_file), exist_ok=True)
     # Checkpoints to resume data compilation in case of a crash or timeout
     checkpoint_file = config.get('checkpoint_file', None)
     if checkpoint_file is not None:
         checkpoint_file += f'_checkpoint_{n_processes}_{_process_id}'
+        os.makedirs(os.path.dirname(checkpoint_file), exist_ok=True)
     checkpoint_interval = config.get('checkpoint_interval', 500)
     # Using python's fancy logger package
     logger = get_padstats_logger(log_file, n_processes, _process_id)
@@ -322,6 +325,12 @@ def padstats(framegetter=None, start=0, stop=None, parallel=False, n_processes=1
                     logger.info(f'Removing previous checkpoint file {pcpf}')
                     os.remove(pcpf)
                 pcpf = cpf
+    w = np.where(wavelengths > 0)
+    if len(w) > 0:
+        avg_wavelength = np.sum(wavelengths[w]) / len(w[0])
+        beam = Beam(wavelength=avg_wavelength)
+    else:
+        logger.warning('No beam info found!')
     run_stats_vals = [dataset_id, pad_geometry, mask,
                       n_frames, sum_pad, min_pad,
                       max_pad, sum_pad2, beam,
