@@ -258,7 +258,7 @@ def padstats(framegetter=None, start=0, stop=None, parallel=False, n_processes=1
         i = frame_ids[n]
         ts = time.ctime()
         dt = time.time() - t0
-        tr = dt*(tot_frames-n)/(n+1)
+        tr = dt*(tot_frames-jumpstart-n)/(n+1)
         logger.info(f"Frame {i} ({n} of {tot_frames}): {n/tot_frames*100:.1f}% @ {dt/60:.1f} min. => {tr/60:.1f} min. "
                     f"remaining'")
         # ==========================================================================
