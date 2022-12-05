@@ -92,7 +92,7 @@ class PixelHistogram:
 
 
 def default_padstats_config():
-    config = dict(log_file=None, checkpoint_file=None, checkpoint_interval=500)
+    config = dict(log_file=None, checkpoint_file=None, checkpoint_interval=500, message_prefix="")
     return config
 
 
@@ -166,6 +166,7 @@ def padstats(framegetter=None, start=0, stop=None, parallel=False, n_processes=1
     if config is None:
         config = default_padstats_config()
     # For logging status to a file
+    message_prefix = config.get("message_prefix", "")
     log_file = config.get('log_file', None)
     if log_file:
         os.makedirs(os.path.dirname(log_file), exist_ok=True)
@@ -176,7 +177,7 @@ def padstats(framegetter=None, start=0, stop=None, parallel=False, n_processes=1
         os.makedirs(os.path.dirname(checkpoint_file), exist_ok=True)
     checkpoint_interval = config.get('checkpoint_interval', 500)
     # Using python's fancy logger package
-    logger = get_padstats_logger(log_file, n_processes, _process_id)
+    logger = get_padstats_logger(log_file, n_processes, _process_id, message_prefix)
     logger.info('Begin processing')
     logger.info(f"framegetter={framegetter}, start={start}, stop={stop}, parallel={parallel}, n_processes="
                 f"{n_processes}, _process_id={_process_id}, histogram_params={histogram_params}, config={config}")
