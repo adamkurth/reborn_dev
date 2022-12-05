@@ -100,13 +100,15 @@ def default_histogram_config():
     return dict(bin_min=-30, bin_max=100, n_bins=100)
 
 
-def get_padstats_logger(filename=None, n_processes=1, process_id=0):
+def get_padstats_logger(filename=None, n_processes=1, process_id=0, message_prefix=""):
     logger = logging.getLogger(name='padstats')
     logger.setLevel(logging.INFO)
     pid = ""
+    if len(message_prefix) > 0:
+        message_prefix += " - "
     if process_id >= 0:
         pid = f" process {process_id+1} of {n_processes} -"
-    formatter = logging.Formatter(f'%(asctime)s - %(name)s -{pid} %(levelname)s - %(message)s')
+    formatter = logging.Formatter(f'{message_prefix}%(asctime)s - %(name)s -{pid} %(levelname)s - %(message)s')
     console_handler = logging.StreamHandler(stream=sys.stdout)
     console_handler.setFormatter(formatter)
     console_handler.setLevel(level=logging.INFO)
