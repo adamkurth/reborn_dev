@@ -107,8 +107,8 @@ def get_padstats_logger(filename=None, n_processes=1, process_id=0, message_pref
     if len(message_prefix) > 0:
         message_prefix += " - "
     if process_id >= 0:
-        pid = f" process {process_id+1} of {n_processes} -"
-    formatter = logging.Formatter(f'{message_prefix}%(asctime)s - %(name)s -{pid} %(levelname)s - %(message)s')
+        pid = f" Process {process_id+1} of {n_processes} -"
+    formatter = logging.Formatter(f'%(asctime)s - %(name)s -{pid} %(levelname)s - {message_prefix}%(message)s')
     console_handler = logging.StreamHandler(stream=sys.stdout)
     console_handler.setFormatter(formatter)
     console_handler.setLevel(level=logging.INFO)
@@ -167,6 +167,7 @@ def padstats(framegetter=None, start=0, stop=None, parallel=False, n_processes=1
         config = default_padstats_config()
     # For logging status to a file
     message_prefix = config.get("message_prefix", "")
+    print("============================", message_prefix)
     log_file = config.get('log_file', None)
     if log_file:
         os.makedirs(os.path.dirname(log_file), exist_ok=True)
