@@ -167,7 +167,6 @@ def padstats(framegetter=None, start=0, stop=None, parallel=False, n_processes=1
         config = default_padstats_config()
     # For logging status to a file
     message_prefix = config.get("message_prefix", "")
-    print("============================", message_prefix)
     log_file = config.get('log_file', None)
     if log_file:
         os.makedirs(os.path.dirname(log_file), exist_ok=True)
@@ -237,6 +236,7 @@ def padstats(framegetter=None, start=0, stop=None, parallel=False, n_processes=1
         if len(cpfs) > 0:
             c = cpfs[-1]
             jumpstart = int(c.split('_')[-1])
+            logger.info(f'Starting with checkpoint file {c}')
             checkpoint = load_padstats(c)
             first = False
     cpstart = checkpoint.get('start', start)
