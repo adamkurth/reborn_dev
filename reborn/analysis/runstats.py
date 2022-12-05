@@ -237,17 +237,18 @@ def padstats(framegetter=None, start=0, stop=None, parallel=False, n_processes=1
         if len(cpfs) > 0:
             broken = True
             while broken:
-                c = cpfs.pop()
-                try:
-                    jumpstart = int(c.split('_')[-1])
-                    logger.info(f'Starting with checkpoint file {c}')
-                    checkpoint = load_padstats(c)
-                    broken = False
-                    first = False
-                except Exception as e:
-                    logger.warning(f"Problem loading file {c}")
-                    checkpoint = dict()
-                    jumpstart = 0
+                if len(cpfs) > 0:
+                    c = cpfs.pop()
+                    try:
+                        jumpstart = int(c.split('_')[-1])
+                        logger.info(f'Starting with checkpoint file {c}')
+                        checkpoint = load_padstats(c)
+                        broken = False
+                        first = False
+                    except Exception as e:
+                        logger.warning(f"Problem loading file {c}")
+                        checkpoint = dict()
+                        jumpstart = 0
     cpstart = checkpoint.get('start', start)
     cpstop = checkpoint.get('stop', stop)
     if (cpstart != start) or (cpstop != stop):
