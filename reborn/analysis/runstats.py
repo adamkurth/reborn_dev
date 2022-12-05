@@ -14,8 +14,11 @@
 # along with reborn.  If not, see <https://www.gnu.org/licenses/>.
 
 r""" Utilities for gathering statistics from data runs. """
-
+import os
+import sys
+import logging
 import time
+import glob
 from functools import partial
 import numpy as np
 import pyqtgraph as pg
@@ -88,9 +91,43 @@ class PixelHistogram:
         self.histogram.flat[idx] += 1
 
 
-def padstats(framegetter=None, start=0, stop=None, parallel=False, n_processes=None, process_id=None,
-             histogram_params=None, verbose=False):
-    r""" Given a |FrameGetter| subclass instance, fetch the mean intensity, mean squared intensity, minimum,
+def default_padstats_config():
+    config = dict(log_file=None, checkpoint_file=None, checkpoint_interval=500)
+    return config
+
+
+def default_histogram_config():
+    return dict(bin_min=-30, bin_max=100, n_bins=100)
+
+
+def get_padstats_logger(filename=None, n_processes=1, process_id=0):
+    logger = logging.getLogger(name='padstats')
+    logger.setLevel(logging.INFO)
+    pid = ""
+    if process_id >= 0:
+        pid = f" process {process_id+1} of {n_processes} -"
+    formatter = logging.Formatter(f'%(asctime)s - %(name)s -{pid} %(levelname)s - %(message)s')
+    console_handler = logging.StreamHandler(stream=sys.stdout)
+    console_handler.setFormatter(formatter)
+    console_handler.setLevel(level=logging.INFO)
+    logger.addHandler(console_handler)
+    if filename is not None:
+        if len(filename) < 4 or filename[-4:] != '.log':
+            filename += '.log'
+        if process_id > 0:
+            filename = filename.replace('.log', f'_{process_id:02d}.log')
+        file_handler = logging.FileHandler(filename=filename)
+        file_handler.setFormatter(formatter)
+        file_handler.setLevel(level=logging.INFO)
+        logger.addHandler(file_handler)
+    return logger
+
+
+def padstats(framegetter=None, start=0, stop=None, parallel=False, n_processes=1, _process_id=0,
+             histogram_params=None, verbose=True, config=None):
+    r""" Gather PAD statistics for a dataset.
+
+    Given a |FrameGetter| subclass instance, fetch the mean intensity, mean squared intensity, minimum,
     and maximum intensities, and optionally a pixel-by-pixel intensity histogram.  The function can run in a
     multiprocessing mode through recursion via the joblib library.
 
@@ -123,10 +160,26 @@ def padstats(framegetter=None, start=0, stop=None, parallel=False, n_processes=N
                                     n_pixels=None)
 
     Returns: dict """
+    # Config dictionary for some advanced settings
+    if config is None:
+        config = default_padstats_config()
+    # For logging status to a file
+    log_file = config.get('log_file', None)
+    # Checkpoints to resume data compilation in case of a crash or timeout
+    checkpoint_file = config.get('checkpoint_file', None)
+    if checkpoint_file is not None:
+        checkpoint_file += f'_checkpoint_{n_processes}_{_process_id}'
+    checkpoint_interval = config.get('checkpoint_interval', 500)
+    # Using python's fancy logger package
+    logger = get_padstats_logger(log_file, n_processes, _process_id)
+    logger.info('Begin processing')
+    logger.info(f"framegetter={framegetter}, start={start}, stop={stop}, parallel={parallel}, n_processes="
+                f"{n_processes}, _process_id={_process_id}, histogram_params={histogram_params}, config={config}")
     histogram = None
     if framegetter is None:
         raise ValueError('framegetter cannot be None')
     if parallel:
+        # If parallel set to true, then this process will simply launch the other processes and compile results
         if Parallel is None:
             raise ImportError('You need the joblib package to run padstats in parallel mode.')
         if not isinstance(framegetter, dict):
@@ -134,10 +187,11 @@ def padstats(framegetter=None, start=0, stop=None, parallel=False, n_processes=N
                 raise ValueError('This FrameGetter does not have init_params attribute needed to make a replica')
             framegetter = {'framegetter': type(framegetter), 'kwargs': framegetter.init_params}
         out = Parallel(n_jobs=n_processes)(delayed(padstats)(framegetter=framegetter, start=start, stop=stop,
-                                                             parallel=False, n_processes=n_processes, process_id=i,
-                                                             histogram_params=histogram_params, verbose=verbose)
+                parallel=False, n_processes=n_processes, _process_id=i+1, histogram_params=histogram_params,
+                                                             verbose=verbose, config=config)
                                                              for i in range(n_processes))
         tot = out[0]
+        tot['wavelengths'] = np.concatenate([o['wavelengths'] for o in out])
         for o in out[1:]:
             if isinstance(o['sum'], np.ndarray):
                 tot['sum'] += o['sum']
@@ -159,37 +213,64 @@ def padstats(framegetter=None, start=0, stop=None, parallel=False, n_processes=N
     if stop is None:
         stop = framegetter.n_frames
     frame_ids = np.arange(start, stop, dtype=int)
-    if process_id is not None:
-        frame_ids = np.array_split(frame_ids, n_processes)[process_id]
+    if _process_id is not None:
+        frame_ids = np.array_split(frame_ids, n_processes)[_process_id-1]
+    else:
+        _process_id = 1
     first = True
-    sum_pad = None
-    sum_pad2 = None
-    min_pad = None
-    max_pad = None
-    beam_wavelength = 0
-    beam_frames = 0
-    n_frames = 0
-    dataset_id = None
-    pad_geometry = None
-    mask = None
     t0 = time.time()
-    for (n, i) in enumerate(frame_ids):
+    tot_frames = len(frame_ids)
+    jumpstart = 0
+    pcpf = None
+    checkpoint = dict()
+    # Check if there is an existing checkpoint file that we can start from
+    if checkpoint_file:
+        cpfs = sorted(glob.glob(checkpoint_file + '*'))
+        if len(cpfs) > 0:
+            c = cpfs[-1]
+            jumpstart = int(c.split('_')[-1])
+            checkpoint = load_padstats(c)
+            first = False
+    cpstart = checkpoint.get('start', start)
+    cpstop = checkpoint.get('stop', stop)
+    if (cpstart != start) or (cpstop != stop):
+        logger.warning('Checkpoint start/stop does not match - Rejecting!')
+        checkpoint = dict()
+    dataset_id = checkpoint.get('dataset_id', None)
+    pad_geometry = checkpoint.get('pad_geometry', None)
+    mask = checkpoint.get('mask', None)
+    n_frames = checkpoint.get('n_frames', 0)
+    sum_pad = checkpoint.get('sum', None)
+    min_pad = checkpoint.get('min', None)
+    max_pad = checkpoint.get('max', None)
+    sum_pad2 = checkpoint.get('sum2', None)
+    beam = checkpoint.get('beam', None)
+    wavelengths = checkpoint.get('wavelengths', None)
+    run_stats_keys = ['dataset_id', 'pad_geometry', 'mask',
+                      'n_frames', 'sum', 'min',
+                      'max', 'sum2', 'beam',
+                      'start', 'stop', 'wavelengths']
+    for n in range(jumpstart, tot_frames):
+        i = frame_ids[n]
         ts = time.ctime()
-        if verbose:
-            print(f'{ts}: Frame {i:6d} ({n / len(frame_ids) * 100:0.2g}%, {(time.time()-t0)/60:.1f} minutes)')
+        dt = time.time() - t0
+        tr = dt*(tot_frames-n)/(n+1)
+        logger.info(f"Frame {i} ({n} of {tot_frames}): {n/tot_frames*100}% @ {dt/60:.1f} min. => {tr/60:.1f} min. "
+                    f"remaining'")
+        # ==========================================================================
+        # This is the actual processing.  Very simple.
+        # ==========================================================================
         dat = framegetter.get_frame(frame_number=i)
         if dat is None:
             print(f'{ts}: Frame {i:6d} is None!!!')
             continue
         rdat = dat.get_raw_data_flat()
         if rdat is None:
+            logger.warning(f'Raw data is None')
             continue
-        if dat.validate():
-            beam_data = dat.get_beam()
-            beam_wavelength += beam_data.wavelength
-            beam_frames += 1
         if first:
             s = rdat.size
+            wavelengths = np.zeros(tot_frames)
             sum_pad = np.zeros(s)
             sum_pad2 = np.zeros(s)
             max_pad = rdat
@@ -200,6 +281,9 @@ def padstats(framegetter=None, start=0, stop=None, parallel=False, n_processes=N
                     histogram_params['n_pixels'] = rdat.size
                 histogram = PixelHistogram(**histogram_params)
             first = False
+        if dat.validate():
+            beam_data = dat.get_beam()
+            wavelengths[n] = beam_data.wavelength
         sum_pad += rdat
         sum_pad2 += rdat ** 2
         min_pad = np.minimum(min_pad, rdat)
@@ -213,23 +297,36 @@ def padstats(framegetter=None, start=0, stop=None, parallel=False, n_processes=N
         if histogram is not None:
             histogram.add_frame(rdat, mask=dat.get_mask_flat())
         n_frames += 1
-    if beam_frames == 0:
-        beam = None
-    else:
-        avg_wavelength = beam_wavelength / beam_frames
-        beam = Beam(wavelength=avg_wavelength)
-    run_stats_keys = ['dataset_id', 'pad_geometry', 'mask',
-                      'n_frames', 'sum', 'min',
-                      'max', 'sum2', 'beam',
-                      'start', 'stop']
+        # End processing ========================================================
+        if (checkpoint_file is not None) and ((n+1) % checkpoint_interval == 0):
+            beam = None
+            w = np.where(wavelengths > 0)
+            if len(w) > 0:
+                avg_wavelength = np.sum(wavelengths[w]) / len(w[0])
+                beam = Beam(wavelength=avg_wavelength)
+            else:
+                logger.warning('No beam info found!')
+            run_stats_vals = [dataset_id, pad_geometry, mask,
+                              n_frames, sum_pad, min_pad,
+                              max_pad, sum_pad2, beam,
+                              start, stop, wavelengths]
+            runstats = dict(zip(run_stats_keys, run_stats_vals))
+            if histogram is not None:
+                runstats['histogram'] = histogram.histogram
+            runstats['histogram_params'] = histogram_params
+            if not os.path.exists(checkpoint_file):
+                cpf = checkpoint_file + f'_{n+1:07d}'
+                logger.info(f'Saving checkpoint file {cpf}')
+                save_padstats(runstats, cpf)
+                if (pcpf is not None):
+                    logger.info(f'Removing previous checkpoint file {pcpf}')
+                    os.remove(pcpf)
+                pcpf = cpf
     run_stats_vals = [dataset_id, pad_geometry, mask,
                       n_frames, sum_pad, min_pad,
                       max_pad, sum_pad2, beam,
-                      start, stop]
+                      start, stop, wavelengths]
     runstats = dict(zip(run_stats_keys, run_stats_vals))
-    if histogram is not None:
-        runstats['histogram'] = histogram.histogram
-    runstats['histogram_params'] = histogram_params
     return runstats
 
 
