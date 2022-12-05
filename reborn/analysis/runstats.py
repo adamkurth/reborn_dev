@@ -231,14 +231,22 @@ def padstats(framegetter=None, start=0, stop=None, parallel=False, n_processes=1
     pcpf = None
     checkpoint = dict()
     # Check if there is an existing checkpoint file that we can start from
+    # Handle loading errors in case a crash happened in the midst of saving the checkpoint
     if checkpoint_file:
         cpfs = sorted(glob.glob(checkpoint_file + '*'))
         if len(cpfs) > 0:
-            c = cpfs[-1]
-            jumpstart = int(c.split('_')[-1])
-            logger.info(f'Starting with checkpoint file {c}')
-            checkpoint = load_padstats(c)
-            first = False
+            broken = True
+            while broken:
+                c = cpfs.pop()
+                jumpstart = int(c.split('_')[-1])
+                logger.info(f'Starting with checkpoint file {c}')
+                try:
+                    checkpoint = load_padstats(c)
+                    broken = False
+                    first = False
+                except Exception as e:
+                    logger.warning(f"Problem loading file {c}")
+                    checkpoint = dict()
     cpstart = checkpoint.get('start', start)
     cpstop = checkpoint.get('stop', stop)
     if (cpstart != start) or (cpstop != stop):
