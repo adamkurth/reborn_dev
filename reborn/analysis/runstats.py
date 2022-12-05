@@ -215,6 +215,7 @@ def padstats(framegetter=None, start=0, stop=None, parallel=False, n_processes=1
         framegetter = framegetter['framegetter'](**framegetter['kwargs'])
     if stop is None:
         stop = framegetter.n_frames
+    stop = min(stop, framegetter.n_frames)
     frame_ids = np.arange(start, stop, dtype=int)
     if _process_id is not None:
         frame_ids = np.array_split(frame_ids, n_processes)[_process_id-1]
