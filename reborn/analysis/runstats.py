@@ -92,27 +92,34 @@ class PixelHistogram:
 
 
 def default_padstats_config():
-    config = dict(log_file=None, checkpoint_file=None, checkpoint_interval=500, message_prefix="", debug=True)
+    r""" Get a default padstats config dictionary to specify logging, checkpoints, messaging, debugging, and the method
+    by which the results from multiple processes are reduced.
+    """
+    config = dict(log_file=None, checkpoint_file=None, checkpoint_interval=500, message_prefix="", debug=True,
+                  reduce_from_checkpoints=True)
     return config
 
 
 def default_histogram_config():
+    r""" Get a default dictionary for the creation of PAD histogram.  These numbers are probably no good for you!"""
     return dict(bin_min=-30, bin_max=100, n_bins=100)
 
 
 def get_padstats_logger(filename=None, n_processes=1, process_id=0, message_prefix="", debug=True):
+    r""" Setup padstats logging using the python logging package.  Helps maintain consistent form of logs in both
+    stdout and log files.  Specifies which process is running and so on. """
     logger = logging.getLogger(name='padstats')
     if debug:
         level = logging.DEBUG
     else:
         level = logging.Info
     logger.setLevel(level)
-    pid = ""
-    if len(message_prefix) > 0:
-        message_prefix += " - "
-    if process_id >= 0:
-        pid = f" Process {process_id+1} of {n_processes} -"
-    formatter = logging.Formatter(f'%(asctime)s - %(name)s -{pid} %(levelname)s - {message_prefix}%(message)s')
+    # pid = ""
+    # if len(message_prefix) > 0:
+    #     message_prefix += " - "
+    pid = f" Process {process_id+1} of {n_processes} -"
+    formatter = " - ".join(["%(asctime)s", "%(levelname)s", "%(name)s", f"{pid}", f"{message_prefix} %(message)s"])
+    formatter = logging.Formatter(formatter)
     console_handler = logging.StreamHandler(stream=sys.stdout)
     console_handler.setFormatter(formatter)
     console_handler.setLevel(level=level)
@@ -122,11 +129,23 @@ def get_padstats_logger(filename=None, n_processes=1, process_id=0, message_pref
             filename += '.log'
         if process_id > 0:
             filename = filename.replace('.log', f'_{process_id:02d}.log')
+        os.makedirs(os.path.dirname(filename), exist_ok=True)
         file_handler = logging.FileHandler(filename=filename)
         file_handler.setFormatter(formatter)
         file_handler.setLevel(level=level)
         logger.addHandler(file_handler)
+        logger.info(f"\n\n\n    New run: process {process_id} of {n_processes}\n\n\n")
+        logger.info(f"Logging to file {filename}")
+    else:
+        logger.info(f"No logfile specified.")
     return logger
+
+
+class PADStats:
+    def __init__(self, framegetter=None, start=0, stop=None, parallel=False, n_processes=1, _process_id=0,
+             histogram_params=None, verbose=True, logger=None):
+        self.framegetter =
+
 
 
 def padstats(framegetter=None, start=0, stop=None, parallel=False, n_processes=1, _process_id=0,
@@ -166,29 +185,49 @@ def padstats(framegetter=None, start=0, stop=None, parallel=False, n_processes=1
                                     n_pixels=None)
 
     Returns: dict """
-    # Config dictionary for some advanced settings
+    #================================================================================================
+    # This is a rather simple function in principle, but 90% of the code deals with complications created by our efforts
+    # to
+    # (1) Systematically log the status of processing with log files and stdout.
+    # (2) Allow for checkpoint files in order to deal with timeouts or other cases in which a run cannot be completed.
+    # (3) Run with multiple processes using the joblib library, which is convenient in some ways but has issues with
+    #     the reduction of arrays.  This should be fixed using e.g. multiplrocessing.
+    #=================================================================================================
+    # Config dictionary for some advanced settings.  See get_default_padstats_config function.
     if config is None:
         config = default_padstats_config()
-    # For logging status to a file
+    # Sometimes we want to prefix a run number or experiment ID (for example).
     message_prefix = config.get("message_prefix", "")
+    # Where to put the log file.
     log_file = config.get('log_file', None)
+    # Using python's fancy logger package
+    logger = get_padstats_logger(log_file, n_processes, _process_id, message_prefix)
     if log_file:
-        os.makedirs(os.path.dirname(log_file), exist_ok=True)
-    # Checkpoints to resume data compilation in case of a crash or timeout
+        logger.info(f'Logging file base {log_file}')
+    # Checkpoints to resume in case of a crash or timeout
     checkpoint_file = config.get('checkpoint_file', None)
     if checkpoint_file is not None:
         checkpoint_file += f'_checkpoint_{n_processes}_{_process_id}'
         os.makedirs(os.path.dirname(checkpoint_file), exist_ok=True)
+        logging.info(f"Checkpoint file base: {checkpoint_file}")
+    # Choose if you want to reduce (i.e. combine) data from the processes by having each process save to disk, and then
+    # load the files one at a time.  This avoids the issue of having in memory the results of all processes at once,
+    # which could cause memory overload.
+    reduce_from_checkpoints = config.get("reduce_from_checkpoints", True)
+    if checkpoint_file is None:
+        logging.warning(f"There will be no checkpoint files!")
+        reduce_from_checkpoints = False
     checkpoint_interval = config.get('checkpoint_interval', 500)
-    # Using python's fancy logger package
-    logger = get_padstats_logger(log_file, n_processes, _process_id, message_prefix)
+    if checkpoint_file:
+        logging.info(f"Checkpoint file base: {checkpoint_file}, Interval: {checkpoint_interval}")
     logger.info('Begin processing')
-    logger.info(f"framegetter={framegetter}, start={start}, stop={stop}, parallel={parallel}, n_processes="
-                f"{n_processes}, _process_id={_process_id}, histogram_params={histogram_params}, config={config}")
+    logger.debug(f"start={start}, stop={stop}, parallel={parallel}, n_processes={n_processes}, "
+                 f"_process_id={_process_id}, config={config}, histogram_params={histogram_params}")
     histogram = None
     if framegetter is None:
         raise ValueError('framegetter cannot be None')
     if parallel:
+        logger.info(f"Enter parallel branch")
         # If parallel set to true, then this process will simply launch the other processes and compile results
         if Parallel is None:
             raise ImportError('You need the joblib package to run padstats in parallel mode.')
@@ -197,44 +236,54 @@ def padstats(framegetter=None, start=0, stop=None, parallel=False, n_processes=1
                 raise ValueError('This FrameGetter does not have init_params attribute needed to make a replica')
             logger.info(f"Launching {n_processes} parallel processes")
             framegetter = {'framegetter': type(framegetter), 'kwargs': framegetter.init_params}
+        # The output "out" below can be huge if there are lots of processes.  We use the "reduce_from_checkpoints"
+        # config setting to avoid returning all of them.  In that case, we fetch the results of each process from
+        # the final checkpoints saved to disk.
         out = Parallel(n_jobs=n_processes)(delayed(padstats)(framegetter=framegetter, start=start, stop=stop,
                 parallel=False, n_processes=n_processes, _process_id=i+1, histogram_params=histogram_params,
                                                              verbose=verbose, config=config)
                                                              for i in range(n_processes))
         logger.info(f'Compiling results from {n_processes} processes')
-        tot = out[0]
-        logger.debug('wavelengths')
-        tot['wavelengths'] = np.concatenate([o['wavelengths'] for o in out])
-        for o in out[1:]:
-            logger.debug('sum')
-            if isinstance(o['sum'], np.ndarray):
-                tot['sum'] += o['sum']
-            logger.debug('sum2')
-            if isinstance(o['sum2'], np.ndarray):
-                tot['sum2'] += o['sum2']
-            logger.debug('min')
-            if isinstance(o['min'], np.ndarray):
-                tot['min'] = np.minimum(tot['min'], o['min'])
-            logger.debug('max')
-            if isinstance(o['max'], np.ndarray):
-                tot['max'] = np.minimum(tot['max'], o['max'])
+        tot = None
+        # All this nonsense below involving loading of checkpoint files and so on should be done properly using
+        # reduce methods provided by a good parallel processing package.  It is a workaround that is presently needed
+        # because we are using the joblib package, which has no such capability.
+        for i in range(n_processes):
+            if reduce_from_checkpoints:
+                # Try to load the checkpoint.  Name is unknown because we don't know how many frames it processed,
+                # so we must search... this is ugly.  FIXME.
+                cpf = config["checkpoint_file"] + f'_checkpoint_{n_processes}_{i+1}'
+                logger.info(f"Reducing checkpoint {i}; seeking {checkpoint_file}*")
+                cpf = sorted(glob.glob(cpf + '*'))[-1]
+                logger.info(f"Checkpoint file {cpf}")
+                o = load_padstats(cpf)
+            else:
+                o = out[i]
+            if tot is None:
+                tot = o
+                continue
+            tot['wavelengths'] = np.concatenate([tot['wavelengths'], o['wavelengths']])
+            tot['sum'] = tot['sum'] + o['sum'] if isinstance(o['sum'], np.ndarray) else tot['sum']
+            tot['sum2'] = tot['sum2'] + o['sum2'] if isinstance(o['sum2'], np.ndarray) else tot['sum2']
+            tot['min'] = np.minimum(tot['min'], o['min']) if isinstance(o['min'], np.ndarray) else tot['min']
+            tot['max'] = np.minimum(tot['max'], o['max']) if isinstance(o['max'], np.ndarray) else tot['max']
             if histogram_params is not None:
                 if isinstance(o['histogram'], np.ndarray):
-                    logger.debug('histogram')
-                    tot['histogram'] += o['histogram']
-            logger.debug('start')
+                    tot['histogram'] += o['histogram'] if isinstance(o['histogram'], np.ndarray) else tot['histogram']
             tot['start'] = min(tot['start'], o['start'])
-            logger.debug('stop')
             tot['stop'] = max(tot['stop'], o['stop'])
             tot['n_frames'] += o['n_frames']
-            logger.debug('n_frames', tot['n_frames'])
         logger.info('Returning compiled dictionary')
         return tot
+    logger.info('Single process branch')
     if isinstance(framegetter, dict):
+        logger.info('Creating framegetter')
         framegetter = framegetter['framegetter'](**framegetter['kwargs'])
+        logger.debug("Created framegetter")
     if stop is None:
         stop = framegetter.n_frames
     stop = min(stop, framegetter.n_frames)
+    logger.info(f"Nominal stop point for the entire run: {stop}")
     frame_ids = np.arange(start, stop, dtype=int)
     if _process_id is not None:
         frame_ids = np.array_split(frame_ids, n_processes)[_process_id-1]
@@ -243,28 +292,28 @@ def padstats(framegetter=None, start=0, stop=None, parallel=False, n_processes=1
     first = True
     t0 = time.time()
     tot_frames = len(frame_ids)
+    logger.info(f"Total frames for this process: {tot_frames}")
     jumpstart = 0
     pcpf = None
     checkpoint = dict()
     # Check if there is an existing checkpoint file that we can start from
     # Handle loading errors in case a crash happened in the midst of saving the checkpoint
     if checkpoint_file:
+        logger.info("Seeking checkpoint files")
         cpfs = sorted(glob.glob(checkpoint_file + '*'))
-        broken = True
-        while broken:
-            if len(cpfs) > 0:
-                c = cpfs.pop()
-                try:
-                    logger.info(f'Loading checkpoint file {c}')
-                    checkpoint = load_padstats(c)
-                    jumpstart = int(c.split('_')[-1])
-                    broken = False
-                    first = False
-                    logger.info(f'Starting at frame {jumpstart}')
-                except Exception as e:
-                    logger.warning(f"Problem loading file {c}")
-                    checkpoint = dict()
-                    jumpstart = 0
+        while len(cpfs) > 0:
+            c = cpfs.pop()
+            try:
+                logger.info(f'Loading checkpoint file {c}')
+                checkpoint = load_padstats(c)
+                jumpstart = int(c.split('_')[-1])
+                first = False
+                logger.info(f'Starting at frame {jumpstart}')
+                break
+            except Exception as e:
+                logger.warning(f"Problem loading file {c}")
+                checkpoint = dict()
+                jumpstart = 0
     cpstart = checkpoint.get('start', start)
     cpstop = checkpoint.get('stop', stop)
     if (cpstart != start) or (cpstop != stop):
@@ -364,6 +413,8 @@ def padstats(framegetter=None, start=0, stop=None, parallel=False, n_processes=1
                     logger.info(f'Removing previous checkpoint file {pcpf}')
                     os.remove(pcpf)
                 pcpf = cpf
+    # TODO: The code below is redundant and prone to error.  It's a bandaid unit I work out the appropriate logic.
+    #
     logger.debug('Update beam with average wavelength')
     w = np.where(wavelengths > 0)
     if len(w) > 0:
@@ -376,6 +427,9 @@ def padstats(framegetter=None, start=0, stop=None, parallel=False, n_processes=1
                       max_pad, sum_pad2, beam,
                       start, stop, wavelengths]
     runstats = dict(zip(run_stats_keys, run_stats_vals))
+    if reduce_from_checkpoints:
+        logger.info("Returning None (main process will reduce via checkpoint files)")
+        return None
     logger.info('Returning final dictionary')
     return runstats
 
