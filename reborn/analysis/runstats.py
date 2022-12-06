@@ -195,6 +195,7 @@ def padstats(framegetter=None, start=0, stop=None, parallel=False, n_processes=1
         if not isinstance(framegetter, dict):
             if framegetter.init_params is None:
                 raise ValueError('This FrameGetter does not have init_params attribute needed to make a replica')
+            logger.info(f"Launching {n_processes} parallel processes")
             framegetter = {'framegetter': type(framegetter), 'kwargs': framegetter.init_params}
         out = Parallel(n_jobs=n_processes)(delayed(padstats)(framegetter=framegetter, start=start, stop=stop,
                 parallel=False, n_processes=n_processes, _process_id=i+1, histogram_params=histogram_params,
@@ -292,8 +293,7 @@ def padstats(framegetter=None, start=0, stop=None, parallel=False, n_processes=1
         atpf = dt / fpsf  # Average time per frame
         tr = atpf*(ftp - fpsf)  # Time remaining
         freq = 1/atpf if atpf > 0 else 0
-        logger.info(f"Frame {i} ({n} of {tot_frames}): {freq:.2f} Hz => {tr/60:.1f} min. remain"
-                    f"remaining'")
+        logger.info(f"Frame {i} ({n} of {tot_frames}): {freq:.2f} Hz => {tr/60:.1f} min. remain")
         # ==========================================================================
         # This is the actual processing.  Very simple.
         # ==========================================================================
@@ -338,7 +338,7 @@ def padstats(framegetter=None, start=0, stop=None, parallel=False, n_processes=1
             histogram.add_frame(rdat, mask=dat.get_mask_flat())
         n_frames += 1
         # End processing ========================================================
-        if (checkpoint_file is not None) and ((n+1) % checkpoint_interval == 0):
+        if (checkpoint_file is not None) and (((n+1) % checkpoint_interval == 0) or (n == tot_frames - 1)):
             logger.debug("Processing checkpoint")
             beam = None
             w = np.where(wavelengths > 0)
