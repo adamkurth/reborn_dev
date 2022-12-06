@@ -293,7 +293,7 @@ def padstats(framegetter=None, start=0, stop=None, parallel=False, n_processes=1
         atpf = dt / fpsf  # Average time per frame
         tr = atpf*(ftp - fpsf)  # Time remaining
         freq = 1/atpf if atpf > 0 else 0
-        logger.info(f"Frame {i} ({n} of {tot_frames}): {freq:.2f} Hz => {tr/60:.1f} min. remain")
+        logger.info(f"Frame {i} ({n+1} of {tot_frames}): {freq:.2f} Hz => {tr/60:.1f} min. remain")
         # ==========================================================================
         # This is the actual processing.  Very simple.
         # ==========================================================================
