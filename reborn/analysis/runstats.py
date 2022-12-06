@@ -356,7 +356,7 @@ def padstats(framegetter=None, start=0, stop=None, parallel=False, n_processes=1
                 runstats['histogram'] = histogram.histogram
             runstats['histogram_params'] = histogram_params
             if not os.path.exists(checkpoint_file):
-                logger.debug('Previous checkpoint file:', pcpf)
+                logger.debug(f'Previous checkpoint file: {pcpf}')
                 cpf = checkpoint_file + f'_{n+1:07d}'
                 logger.info(f'Saving checkpoint file {cpf}')
                 save_padstats(runstats, cpf)
