@@ -92,7 +92,7 @@ class PixelHistogram:
 
 
 def default_padstats_config():
-    config = dict(log_file=None, checkpoint_file=None, checkpoint_interval=500, message_prefix="")
+    config = dict(log_file=None, checkpoint_file=None, checkpoint_interval=500, message_prefix="", debug=True)
     return config
 
 
@@ -100,9 +100,13 @@ def default_histogram_config():
     return dict(bin_min=-30, bin_max=100, n_bins=100)
 
 
-def get_padstats_logger(filename=None, n_processes=1, process_id=0, message_prefix=""):
+def get_padstats_logger(filename=None, n_processes=1, process_id=0, message_prefix="", debug=True):
     logger = logging.getLogger(name='padstats')
-    logger.setLevel(logging.INFO)
+    if debug:
+        level = logging.DEBUG
+    else:
+        level = logging.Info
+    logger.setLevel(level)
     pid = ""
     if len(message_prefix) > 0:
         message_prefix += " - "
@@ -111,7 +115,7 @@ def get_padstats_logger(filename=None, n_processes=1, process_id=0, message_pref
     formatter = logging.Formatter(f'%(asctime)s - %(name)s -{pid} %(levelname)s - {message_prefix}%(message)s')
     console_handler = logging.StreamHandler(stream=sys.stdout)
     console_handler.setFormatter(formatter)
-    console_handler.setLevel(level=logging.INFO)
+    console_handler.setLevel(level=level)
     logger.addHandler(console_handler)
     if filename is not None:
         if len(filename) < 4 or filename[-4:] != '.log':
@@ -120,7 +124,7 @@ def get_padstats_logger(filename=None, n_processes=1, process_id=0, message_pref
             filename = filename.replace('.log', f'_{process_id:02d}.log')
         file_handler = logging.FileHandler(filename=filename)
         file_handler.setFormatter(formatter)
-        file_handler.setLevel(level=logging.INFO)
+        file_handler.setLevel(level=level)
         logger.addHandler(file_handler)
     return logger
 
@@ -196,23 +200,34 @@ def padstats(framegetter=None, start=0, stop=None, parallel=False, n_processes=1
                 parallel=False, n_processes=n_processes, _process_id=i+1, histogram_params=histogram_params,
                                                              verbose=verbose, config=config)
                                                              for i in range(n_processes))
+        logger.info(f'Compiling results from {n_processes} processes')
         tot = out[0]
+        logger.debug('wavelengths')
         tot['wavelengths'] = np.concatenate([o['wavelengths'] for o in out])
         for o in out[1:]:
+            logger.debug('sum')
             if isinstance(o['sum'], np.ndarray):
                 tot['sum'] += o['sum']
+            logger.debug('sum2')
             if isinstance(o['sum2'], np.ndarray):
                 tot['sum2'] += o['sum2']
+            logger.debug('min')
             if isinstance(o['min'], np.ndarray):
                 tot['min'] = np.minimum(tot['min'], o['min'])
+            logger.debug('max')
             if isinstance(o['max'], np.ndarray):
                 tot['max'] = np.minimum(tot['max'], o['max'])
             if histogram_params is not None:
                 if isinstance(o['histogram'], np.ndarray):
+                    logger.debug('histogram')
                     tot['histogram'] += o['histogram']
+            logger.debug('start')
             tot['start'] = min(tot['start'], o['start'])
+            logger.debug('stop')
             tot['stop'] = max(tot['stop'], o['stop'])
             tot['n_frames'] += o['n_frames']
+            logger.debug('n_frames', tot['n_frames'])
+        logger.info('Returning compiled dictionary')
         return tot
     if isinstance(framegetter, dict):
         framegetter = framegetter['framegetter'](**framegetter['kwargs'])
@@ -283,6 +298,7 @@ def padstats(framegetter=None, start=0, stop=None, parallel=False, n_processes=1
         # This is the actual processing.  Very simple.
         # ==========================================================================
         dat = framegetter.get_frame(frame_number=i)
+        logger.debug("Got frame")
         if dat is None:
             logger.warning(f'Frame {i:6d} is None')
             continue
@@ -291,6 +307,7 @@ def padstats(framegetter=None, start=0, stop=None, parallel=False, n_processes=1
             logger.warning(f'Raw data is None')
             continue
         if first:
+            logger.debug('Initializing arrays')
             s = rdat.size
             wavelengths = np.zeros(tot_frames)
             sum_pad = np.zeros(s)
@@ -304,6 +321,7 @@ def padstats(framegetter=None, start=0, stop=None, parallel=False, n_processes=1
                 histogram = PixelHistogram(**histogram_params)
             first = False
         if dat.validate():
+            logger.debug('Data validated')
             beam_data = dat.get_beam()
             wavelengths[n] = beam_data.wavelength
         sum_pad += rdat
@@ -321,6 +339,7 @@ def padstats(framegetter=None, start=0, stop=None, parallel=False, n_processes=1
         n_frames += 1
         # End processing ========================================================
         if (checkpoint_file is not None) and ((n+1) % checkpoint_interval == 0):
+            logger.debug("Processing checkpoint")
             beam = None
             w = np.where(wavelengths > 0)
             if len(w) > 0:
@@ -337,6 +356,7 @@ def padstats(framegetter=None, start=0, stop=None, parallel=False, n_processes=1
                 runstats['histogram'] = histogram.histogram
             runstats['histogram_params'] = histogram_params
             if not os.path.exists(checkpoint_file):
+                logger.debug('Previous checkpoint file:', pcpf)
                 cpf = checkpoint_file + f'_{n+1:07d}'
                 logger.info(f'Saving checkpoint file {cpf}')
                 save_padstats(runstats, cpf)
@@ -344,6 +364,7 @@ def padstats(framegetter=None, start=0, stop=None, parallel=False, n_processes=1
                     logger.info(f'Removing previous checkpoint file {pcpf}')
                     os.remove(pcpf)
                 pcpf = cpf
+    logger.debug('Update beam with average wavelength')
     w = np.where(wavelengths > 0)
     if len(w) > 0:
         avg_wavelength = np.sum(wavelengths[w]) / len(w[0])
