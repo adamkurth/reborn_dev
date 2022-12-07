@@ -146,12 +146,6 @@ def get_padstats_logger(filename=None, n_processes=1, process_id=0, message_pref
     return logger
 
 
-# class PADStats:
-#     def __init__(self, framegetter=None, start=0, stop=None, parallel=False, n_processes=1, _process_id=0,
-#              histogram_params=None, verbose=True, logger=None):
-#         self.framegetter =
-
-
 def padstats(framegetter=None, start=0, stop=None, parallel=False, n_processes=1, _process_id=0,
              histogram_params=None, verbose=True, config=None):
     r""" Gather PAD statistics for a dataset.
@@ -272,7 +266,7 @@ def padstats(framegetter=None, start=0, stop=None, parallel=False, n_processes=1
             tot['min'] = np.minimum(tot['min'], o['min']) if isinstance(o['min'], np.ndarray) else tot['min']
             tot['max'] = np.minimum(tot['max'], o['max']) if isinstance(o['max'], np.ndarray) else tot['max']
             if histogram_params is not None:
-                if isinstance(o['histogram'], np.ndarray):
+                if isinstance(o.get('histogram'), np.ndarray):
                     tot['histogram'] += o['histogram'] if isinstance(o['histogram'], np.ndarray) else tot['histogram']
             tot['start'] = min(tot['start'], o['start'])
             tot['stop'] = max(tot['stop'], o['stop'])
