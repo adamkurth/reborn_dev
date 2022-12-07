@@ -260,17 +260,23 @@ def padstats(framegetter=None, start=0, stop=None, parallel=False, n_processes=1
             if tot is None:
                 tot = o
                 continue
-            tot['wavelengths'] = np.concatenate([tot['wavelengths'], o['wavelengths']])
-            tot['sum'] = tot['sum'] + o['sum'] if isinstance(o['sum'], np.ndarray) else tot['sum']
-            tot['sum2'] = tot['sum2'] + o['sum2'] if isinstance(o['sum2'], np.ndarray) else tot['sum2']
-            tot['min'] = np.minimum(tot['min'], o['min']) if isinstance(o['min'], np.ndarray) else tot['min']
-            tot['max'] = np.minimum(tot['max'], o['max']) if isinstance(o['max'], np.ndarray) else tot['max']
-            if histogram_params is not None:
-                if isinstance(o.get('histogram'), np.ndarray):
-                    tot['histogram'] += o['histogram'] if isinstance(o['histogram'], np.ndarray) else tot['histogram']
             tot['start'] = min(tot['start'], o['start'])
             tot['stop'] = max(tot['stop'], o['stop'])
-            tot['n_frames'] += o['n_frames']
+            tot['wavelengths'] = np.concatenate([tot['wavelengths'], o['wavelengths']])
+            if isinstance(o.get('sum'), np.ndarray):
+                tot['sum'] = tot['sum'] + o['sum']
+                tot['sum2'] = tot['sum2'] + o['sum2']
+                tot['min'] = np.minimum(tot['min'], o['min'])
+                tot['max'] = np.minimum(tot['max'], o['max'])
+                if histogram_params is not None:
+                    if 'histogram' not in tot.keys():
+                        logger.warning('No histogram found in reduced dictionary')
+                    if 'histogram' not in o.keys():
+                        logger.warning(f'No histogram found in process {i} checkpoint')
+                    if isinstance(o.get('histogram'), np.ndarray):
+                        if 'histogram' in o.keys():
+                            tot['histogram'] += o['histogram']
+                tot['n_frames'] += o['n_frames']
         logger.info('Returning compiled dictionary')
         return tot
     logger.info('Single process branch')
