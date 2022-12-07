@@ -109,6 +109,10 @@ def get_padstats_logger(filename=None, n_processes=1, process_id=0, message_pref
     r""" Setup padstats logging using the python logging package.  Helps maintain consistent form of logs in both
     stdout and log files.  Specifies which process is running and so on. """
     logger = logging.getLogger(name='padstats')
+    # if logger.hasHandlers():
+    #     logger.handlers.clear()
+    logger.propagate = False
+    # print(logger.handlers)
     if debug:
         level = logging.DEBUG
     else:
@@ -134,10 +138,11 @@ def get_padstats_logger(filename=None, n_processes=1, process_id=0, message_pref
         file_handler.setFormatter(formatter)
         file_handler.setLevel(level=level)
         logger.addHandler(file_handler)
-        logger.info(f"\n\n\n    New run: process {process_id} of {n_processes}\n\n\n")
+        logger.info(f"\n  New run, process {process_id} of {n_processes}\n")
         logger.info(f"Logging to file {filename}")
     else:
         logger.info(f"No logfile specified.")
+    # print(logger.handlers)
     return logger
 
 
@@ -145,7 +150,6 @@ def get_padstats_logger(filename=None, n_processes=1, process_id=0, message_pref
 #     def __init__(self, framegetter=None, start=0, stop=None, parallel=False, n_processes=1, _process_id=0,
 #              histogram_params=None, verbose=True, logger=None):
 #         self.framegetter =
-
 
 
 def padstats(framegetter=None, start=0, stop=None, parallel=False, n_processes=1, _process_id=0,
