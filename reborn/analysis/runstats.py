@@ -141,10 +141,10 @@ def get_padstats_logger(filename=None, n_processes=1, process_id=0, message_pref
     return logger
 
 
-class PADStats:
-    def __init__(self, framegetter=None, start=0, stop=None, parallel=False, n_processes=1, _process_id=0,
-             histogram_params=None, verbose=True, logger=None):
-        self.framegetter =
+# class PADStats:
+#     def __init__(self, framegetter=None, start=0, stop=None, parallel=False, n_processes=1, _process_id=0,
+#              histogram_params=None, verbose=True, logger=None):
+#         self.framegetter =
 
 
 
