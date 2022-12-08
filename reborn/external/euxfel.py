@@ -159,10 +159,16 @@ class EuXFELFrameGetter(reborn.fileio.getters.FrameGetter):
         vec = np.array([0, 0, 1e-3 * detector_position])  # convert to m (reborn is in SI)
         self.pad_geometry = self.update_detector_distance(vector=vec)
         if self.beam is None:
-            train_id, fn = self.frames[0]
-            _, wavelength = self.photon_data.train_from_id(train_id)  # result is in nm
-            debug_message('setting Beam')
-            self.beam = Beam(wavelength=wavelength * 1e-9)
+            for f in range(len(self.frames)):
+                train_id, fn = self.frames[f]
+                try:
+                    _, wavelength = self.photon_data.train_from_id(train_id)  # result is in nm
+                except Exception as e:
+                    print(str(e))
+                    continue
+                debug_message('setting Beam')
+                self.beam = Beam(wavelength=wavelength * 1e-9)
+                break
 
     def update_detector_distance(self, vector=np.array([0, 0, 1e-3])):
         r"""
@@ -192,11 +198,19 @@ class EuXFELFrameGetter(reborn.fileio.getters.FrameGetter):
             if train_id == self.current_train_id:
                 stacked = self.current_train_stack
             else:
-                stacked = self._get_train_stack(train_id)
+                try:
+                    stacked = self._get_train_stack(train_id)
+                except Exception as e:
+                        print(str(e))
+                    return None
                 self.current_train_id = train_id
                 self.current_train_stack = stacked
         else:
-            stacked = self._get_train_stack(train_id)
+            try:
+                stacked = self._get_train_stack(train_id)
+            except Exception as e:
+                print(str(e))
+                return None
             self.current_train_id = train_id
             self.current_train_stack = stacked
         stacked_pulse = stacked[fn]
@@ -212,7 +226,10 @@ class EuXFELFrameGetter(reborn.fileio.getters.FrameGetter):
         df.set_mask(self.mask)
         df.set_raw_data(stacked_pulse)
         debug_message('retrieving x-ray data')
-        _, wavelength = self.photon_data.train_from_id(train_id)  # result is in nm
+        try:
+            _, wavelength = self.photon_data.train_from_id(train_id)  # result is in nm
+        except ValueError:
+            return None
         debug_message('setting Beam')
         self.beam = Beam(wavelength=wavelength * 1e-9)
         df.set_beam(self.beam)
