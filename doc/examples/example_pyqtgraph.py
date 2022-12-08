@@ -56,17 +56,17 @@ legend.setPen(plot.getAxis("left").pen())
 legend.setPos(100, 0)
 
 # %%
-# Formatting fonts:
+# Formatting fonts (failing...):
 
-font = plot.getAxis("left").label.font()
-font.setFamily("Serif")
-font.setPixelSize(20)
-plot.getAxis("left").label.setFont(font)
-plot.getAxis("left").setTickFont(font)
-plot.getAxis("bottom").label.setFont(font)
-plot.getAxis("bottom").setTickFont(font)
-plot.getPlotItem().titleLabel.item.setFont(font)
-plot.show()
+# font = plot.getAxis("left").label.font()
+# font.setFamily("Serif")
+# font.setPixelSize(20)
+# plot.getAxis("left").label.setFont(font)
+# plot.getAxis("left").setTickFont(font)
+# plot.getAxis("bottom").label.setFont(font)
+# plot.getAxis("bottom").setTickFont(font)
+# plot.getPlotItem().titleLabel.item.setFont(font)
+# plot.show()
 
 # %%
 # If you run a script and find that the plot window appears for an instant and vanishes,
