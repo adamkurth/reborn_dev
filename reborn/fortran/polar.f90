@@ -20,53 +20,114 @@ module polar_binning
 ! EDITS
 ! ---------------------------------------------------------------------
 ! 2022/09/16 (rca): Created module from standalone subroutine.
+! 2022/12/06 (rca): Fixed polar_mean logic to calculate weighted mean
+!                   correctly. Added subroutine to compute bin indices.
 !**********************************************************************
     implicit none
     contains
 
-    subroutine polar_mean(nq, qbin_size, qmin, np, pbin_size, pmin, qs, phis, weight, data, mask, pmean, pmask)
-        ! TODO: Needs documentation
-        ! It appears that if both mask and weights are equal to 1 everywhere, then the returned pmean is actually the
-        ! sum of intensities.  Is that expected?  The use case should be explained.
+    subroutine polar_bin_indices(nq, qbin_size, qmin, np, pbin_size, pmin, qs, phis, q_index, p_index)
+    ! Fetch polar binning index mapping
+    !
+    ! INPUTS:
+    ! nq: Number of q bins.
+    ! qbin_size: Size of q bin.
+    ! qmin: The *center* position of the minimum q bin.
+    ! np: Number of phi bins.
+    ! pbin_size: Size of phi bin.
+    ! pmin: The *center* position of the minimum phi bin.
+    ! qs: Flattened 1D array of q vectors that correspond to the above scattering intensities.
+    ! phis: Flattened 1D array of phi angles that correspond to the above scattering intensities.
+    !
+    ! RETURNS:
+    ! q_index: q polar mapping index (value of 0 means out of bounds)
+    ! p_index: phi polar mapping index (value of 0 means out of bounds)
+        implicit none
+        real(kind=8), parameter :: tp = 8.d0 * datan(1.d0)  ! 2 * pi
+        integer(kind=8), intent(in) :: nq, np
+        real(kind=8), intent(in) :: qbin_size, qmin, pbin_size, pmin, qs(:), phis(:)
+        integer(kind=8), intent(out) :: q_index(size(qs)), p_index(size(phis))
+        integer(kind=8) :: i, pi, qi
+        real(kind=8) :: p, q
+        do i = 1, size(qs)
+            q = qs(i)
+            qi = int(floor((q - qmin) / qbin_size))
+            if (qi < 0) then
+                qi = 0
+                cycle
+            end if
+            if (qi > nq) then
+                qi = 0
+                cycle
+            end if
+            q_index(i) = qi
+        end do
+        do i = 1, size(phis)
+            p = modulo(phis(i), tp)
+            pi = int(floor((p - pmin) / pbin_size))
+            if (pi < 0) then
+                pi = 0
+                cycle
+            end if
+            if (pi > np) then
+                pi = 0
+                cycle
+            end if
+            p_index(i) = pi
+        end do
+    end subroutine polar_bin_indices
+
+    subroutine polar_bin_avg(nq, qbin_size, qmin, np, pbin_size, pmin, qs, phis, weights, data, mask, pmean, pmask)
+    ! Calculate polar-binned mean:
+    ! 1) weighted intensities.
+    ! 2) weights.
+    !
+    ! INPUTS:
+    ! nq: Number of q bins.
+    ! qbin_size: Size of q bin.
+    ! qmin: The *center* position of the minimum q bin.
+    ! np: Number of phi bins.
+    ! pbin_size: Size of phi bin.
+    ! pmin: The *center* position of the minimum phi bin.
+    ! qs: Flattened 1D array of q vectors that correspond to the above scattering intensities.
+    ! phis: Flattened 1D array of phi angles that correspond to the above scattering intensities.
+    ! weights: For weighted average. This should be the product of the mask (if 0 means ignore), the polarization
+    !          factor, the solid angle of the pixel, and any other relevant weighting.
+    ! data: Flattened 1D array of scattering intensities (do not correct for polarization, solid angle).
+    ! mask: Flattened 1D array of mask (0 to ignore; 1 to include).
+    ! pmean: Polar binned mean of data (each data point is multiplied by the corresponding weight).
+    ! pmask: Polar binned mean of weights multiplied by mask.
         implicit none
         real(kind=8), parameter :: pi = 4.d0 * datan(1.d0)
         integer(kind=8), intent(in) :: nq, np
-        real(kind=8), intent(in) :: qbin_size, qmin, pbin_size, pmin, qs(:), phis(:), weight(:), data(:), mask(:)
+        real(kind=8), intent(in) :: qbin_size, qmin, pbin_size, pmin, qs(:), phis(:), weights(:), data(:), mask(:)
         real(kind=8), intent(out), dimension(nq * np) :: pmask, pmean
-        integer(kind=8) :: count(nq * np), i, ii, p_index, q_index
-        real(kind=8) :: dsum(nq * np), p, q, weights(nq * np)
+        integer(kind=8) :: count(nq * np), i, ii, p_index(size(qs)), q_index(size(phis))
+        real(kind=8) :: dsum(nq * np), p, q, wsum(nq * np)
         dsum = 0.d0
+        wsum = 0.d0
         count = 0
-        weights = 0.d0
+        call polar_bin_indices(nq, qbin_size, qmin, np, pbin_size, pmin, qs, phis, q_index, p_index)
         do i = 1, size(data)
             if (mask(i) == 0) cycle
-            q = qs(i)
-            q_index = int(floor((q - qmin) / qbin_size))
-            if (q_index < 0) cycle
-            if (q_index >= nq) cycle
-!            p = phis(i)
-!            p_index = modulo(int(floor((p - pmin) / pbin_size)), np)
-            p = modulo(phis(i), 2 * pi)
-            p_index = int(floor((p - pmin) / pbin_size))
-            if (p_index < 0) cycle
-            if (p_index >= np) cycle
+            q = q_index(i)
+            if (q == 0) cycle
+            p = p_index(i)
+            if (p == 0) cycle
             ! bin data
-            ii = np * q_index + p_index + 1
+            ii = np * q + p + 1
             count(ii) = count(ii) + 1
-            dsum(ii) = dsum(ii) + data(i)
-            weights(ii) = weights(ii) + weight(i)
+            dsum(ii) = dsum(ii) + data(i) * weights(i)
+            wsum(ii) = wsum(ii) + weights(i)
         end do
         where (count /= 0)
+            pmean = dsum / count
             pmask = weights / count
         elsewhere
+            pmean = 0
             pmask = 0
         end where
-        where (pmask /= 0)
-            pmean = dsum / pmask
-        elsewhere
-            pmean = 0
-        end where
-    end subroutine polar_mean
+    end subroutine polar_bin_avg
 
     subroutine polar_stats(pattern, q, p, weights, n_q_bins, q_min, q_max, n_p_bins, p_min, p_max, sum_, sum2, w_sum, initialize)
     ! Calculate polar-binned statistics:
@@ -116,8 +177,8 @@ module polar_binning
         if (j < 1) cycle
         if (k > n_p_bins) cycle
         if (k < 1) cycle
-        sum_(k, j) = sum_(k, j) + pattern(i)*weights(i)
-        sum2(k, j) = sum2(k, j) + pattern(i)**2*weights(i)
+        sum_(k, j) = sum_(k, j) + pattern(i) * weights(i)
+        sum2(k, j) = sum2(k, j) + pattern(i) ** 2 * weights(i)
         w_sum(k, j) = w_sum(k, j) + weights(i)
     end do
     end subroutine polar_stats
