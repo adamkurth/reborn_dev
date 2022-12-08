@@ -22,7 +22,7 @@ polar_shape = (n_q_bins, n_phi_bins)
 data_points = n_q_bins * n_phi_bins * 2
 
 q_range = [0, 1]
-qs = np.linspace(0, 1, data_points)
+qs = np.linspace(q_range[0], q_range[1], data_points)
 q_bin_size = (q_range[1] - q_range[0]) / float(n_q_bins - 1)
 q_min = q_range[0] - q_bin_size / 2
 phi_bin_size = 2 * np.pi / n_phi_bins

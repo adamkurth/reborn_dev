@@ -122,7 +122,7 @@ module polar_binning
         end do
         where (count /= 0)
             pmean = dsum / count
-            pmask = weights / count
+            pmask = wsum / count
         elsewhere
             pmean = 0
             pmask = 0
