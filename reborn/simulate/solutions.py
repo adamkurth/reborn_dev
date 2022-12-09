@@ -21,8 +21,9 @@ r_e = const.r_e
 eV = const.eV
 
 
-file_name = pkg_resources.resource_filename('reborn', 'data/scatter/water_scattering_data.txt')
-
+hura_data = pkg_resources.resource_filename('reborn', 'data/scatter/water/hura.txt')
+clark_data = pkg_resources.resource_filename('reborn', 'data/scatter/water/clark.txt')
+water_data = pkg_resources.resource_filename('reborn', 'data/scatter/water/water.dat')
 
 def water_number_density():
     """ Number density of water in SI units. """
@@ -31,14 +32,25 @@ def water_number_density():
 
 # @utils.memoize
 def _get_hura_water_data():
-    with open(file_name, 'r') as f:
+    with open(hura_data, 'r') as f:
         h = f.readline()
     h = h.split()[1:-1]
     temperatures = np.array([float(v) for v in h]) + 273.16
-    d = np.loadtxt(file_name, skiprows=1)
+    d = np.loadtxt(hura_data, skiprows=1)
     Q = d[:, 0]
-    errors = d[:, -1]
+    # errors = d[:, -1]
     intensities = d[:, 1:-1]
+    return 1e10 * Q.copy(), intensities.copy(), temperatures.copy()
+
+
+def _get_clark_water_data():
+    with open(clark_data, 'r') as f:
+        h = f.readline()
+    h = h.split()[1:]
+    temperatures = np.array([float(v) for v in h])
+    d = np.loadtxt(clark_data, skiprows=1)
+    Q = d[:, 0]
+    intensities = d[:, 1:]
     return 1e10 * Q.copy(), intensities.copy(), temperatures.copy()
 
 
@@ -47,43 +59,15 @@ def _get_hura_water_data_smoothed():
     Q, intensities, temperatures = _get_hura_water_data()
     for i in range(intensities.shape[1]):
         p = intensities[:, i]
-        intensities[:, i] = signal.savgol_filter(p, window_length=11, polyorder=2)
+        intensities[:, i] = signal.savgol_filter(p, window_length=21, polyorder=2)
     return Q.copy(), intensities.copy(), temperatures.copy()
 
-# @utils.memoize
-# def _get_clark_water_data():
-#     with open(file_name)
 
-
-def get_water_profile(q, temperature=298):
-    """
-    Depreciated: Use :func:`water_scattering_factor_squared <reborn.simulate.solutions.water_scattering_factor_squared>`
-    """
-    utils.depreciate("Use the function water_scattering_factor_squared instead of get_water_profile.")
-    return water_scattering_factor_squared(q=q, temperature=temperature, volume=None)
-
-
-def water_scattering_factor_squared(q, temperature=298, volume=None):
-    """
-    Get water scattering profile :math:`|F(q)|^2` via interpolations of Greg Hura's PhD thesis data (emailed to us
-    directly from Greg).  Interpolates the data for given q-vector magnitudes and temperatures.  Temperatures of
-    1, 11, 25, 44, 55, 66, 77 degrees Celcius are included in the data.  Note that this is the scattering factors
-    :math:`|F(q)|^2` per water molecule, so you should multiply your intensity by the number of water molecules.
-    The number density of water is approximately 33.3679e27 / m^3.  You may optionally provide the volume and the result
-    will be multiplied by the number of water molecules.
-
-    Arguments:
-        q (|ndarray|) : The momentum transfer vector magnitudes.
-        temperature (float): Desired water temperature in Kelvin.
-        volume (float): If provided, the scattering factor will be multiplied by the number of molecules in this volume.
-
-    Returns:
-        |ndarray| : The scattering factor :math:`|F(q)|^2` , possibly multiplied by the number of water molecules if you
-                    specified a volume.
-    """
-    # Interpolate profiles according to temperature (weighted average)
-    # If out of range, choose nearest temperature
-    qmag, intensity, temp = _get_hura_water_data()
+def _get_hura_interpolated(q, temperature=298, volume=None, smoothed=False):
+    if smoothed:
+        qmag, intensity, temp = _get_hura_water_data_smoothed()
+    else:
+        qmag, intensity, temp = _get_hura_water_data()
     temp_idx = np.interp(temperature, temp, np.arange(temp.size))
     if temp_idx <= 0:
         Iavg = intensity[:, 0]
@@ -96,6 +80,89 @@ def water_scattering_factor_squared(q, temperature=298, volume=None):
     if volume is not None:
         F2 *= volume * water_number_density()
     return F2
+
+
+def _get_clark_interpolated(q, temperature=298, volume=None):
+    qmag, intensity, temp = _get_clark_water_data()
+    temp_idx = np.interp(temperature, temp, np.arange(temp.size))
+    if temp_idx <= 0:
+        Iavg = intensity[:, 0]
+    elif temp_idx >= (temp.size-1):
+        Iavg = intensity[:, 0]
+    else:
+        a = temp_idx % 1
+        Iavg = (1 - a) * intensity[:, int(np.floor(temp_idx))] + a * intensity[:, int(np.ceil(temp_idx))]
+    F2 = np.interp(q, qmag, Iavg)
+    if volume is not None:
+        F2 *= volume * water_number_density()
+    return F2
+
+
+def _get_water_interpolated(q, temperature=298, volume=None):
+    with open(water_data, 'r') as f:
+        h = f.readline()
+    h = h.split()[1:]
+    temp = np.array([float(v) for v in h]) + 273.16
+    d = np.loadtxt(water_data, skiprows=1)
+    qmag = d[:, 0]*1e10
+    intensity = d[:, 1:]
+    print(intensity.shape)
+    temp_idx = np.interp(temperature, temp, np.arange(temp.size))
+    if temp_idx <= 0:
+        Iavg = intensity[:, 0]
+    elif temp_idx >= (temp.size-1):
+        Iavg = intensity[:, temp.size-1]
+    else:
+        a = temp_idx % 1
+        Iavg = (1 - a) * intensity[:, int(np.floor(temp_idx))] + a * intensity[:, int(np.ceil(temp_idx))]
+    F2 = np.interp(q, qmag, Iavg)
+    if volume is not None:
+        F2 *= volume * water_number_density()
+    return F2
+
+
+def get_water_profile(q, temperature=298):
+    """
+    Depreciated: Use :func:`water_scattering_factor_squared <reborn.simulate.solutions.water_scattering_factor_squared>`
+    """
+    utils.depreciate("Use the function water_scattering_factor_squared instead of get_water_profile.")
+    return water_scattering_factor_squared(q=q, temperature=temperature, volume=None)
+
+
+def water_scattering_factor_squared(q, temperature=298, volume=None):
+    """
+    Get water scattering profile :math:`|F(q)|^2` via interpolations/smoothing of the data from Hura et al.
+    2003 (Phys Chem 5, 1981) and Clark et al. 2010 (PNAS 107, 14003–14007).  Temperatures from 1-77 C are
+    included.  Note that the returned values are the scattering factors :math:`|F(q)|^2` per water molecule,
+    so you should multiply this by the number of water molecules exposed to the x-ray beam.  The number density of
+    water is approximately 33.3679e27 / m^3.  You may optionally provide the volume and the result will be multiplied by
+    the number of water molecules.
+
+    Arguments:
+        q (|ndarray|) : The momentum transfer vector magnitudes.
+        temperature (float): Desired water temperature in Kelvin.
+        volume (float): If provided, the scattering factor will be multiplied by the number of molecules in this volume.
+
+    Returns:
+        |ndarray| : The scattering factor :math:`|F(q)|^2` , possibly multiplied by the number of water molecules if you
+                    specified a volume.
+    """
+    # Interpolate profiles according to temperature (weighted average)
+    # If out of range, choose nearest temperature
+    return _get_water_interpolated(q, temperature=temperature, volume=volume)
+    # qmag, intensity, temp = _get_hura_water_data_smoothed()
+    # temp_idx = np.interp(temperature, temp, np.arange(temp.size))
+    # if temp_idx <= 0:
+    #     Iavg = intensity[:, 0]
+    # elif temp_idx >= (temp.size-1):
+    #     Iavg = intensity[:, 0]
+    # else:
+    #     a = temp_idx % 1
+    #     Iavg = (1 - a) * intensity[:, int(np.floor(temp_idx))] + a * intensity[:, int(np.ceil(temp_idx))]
+    # F2 = np.interp(q, qmag, Iavg)
+    # if volume is not None:
+    #     F2 *= volume * water_number_density()
+    # return F2
 
 
 def get_pad_solution_intensity(pad_geometry, beam, thickness=10.0e-6, liquid='water', temperature=298.0, poisson=True):
