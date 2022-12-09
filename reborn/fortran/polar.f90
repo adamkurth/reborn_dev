@@ -51,7 +51,7 @@ module polar_binning
         real(kind=8) :: p, q
         do i = 1, size(qs)
             q = qs(i)
-            qi = int(floor((q - qmin) / qbin_size))
+            qi = int(floor((q - qmin) / qbin_size)) + 1
             if (qi < 0) then
                 qi = 0
                 cycle
@@ -64,7 +64,7 @@ module polar_binning
         end do
         do i = 1, size(phis)
             p = modulo(phis(i), tp)
-            pi = int(floor((p - pmin) / pbin_size))
+            pi = int(floor((p - pmin) / pbin_size)) + 1
             if (pi < 0) then
                 pi = 0
                 cycle
@@ -109,13 +109,14 @@ module polar_binning
         count = 0
         call polar_bin_indices(nq, qbin_size, qmin, np, pbin_size, pmin, qs, phis, q_index, p_index)
         do i = 1, size(data)
+!            print *, q_index(i), p_index(i), data(i), weights(i), mask(i)
             if (mask(i) == 0) cycle
             q = q_index(i)
             if (q == 0) cycle
             p = p_index(i)
             if (p == 0) cycle
             ! bin data
-            ii = np * q + p + 1
+            ii = np * (q-1) + p! + 1
             count(ii) = count(ii) + 1
             dsum(ii) = dsum(ii) + data(i) * weights(i)
             wsum(ii) = wsum(ii) + weights(i)
