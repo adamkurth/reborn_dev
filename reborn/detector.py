@@ -24,10 +24,6 @@ import numpy as np
 import pkg_resources
 from functools import wraps
 from . import utils, source, const, fortran
-try:
-    from .fortran import polar_f
-except ImportError:
-    polar_f = None
 from .misc import polar
 
 
@@ -1734,7 +1730,7 @@ class PolarPADAssembler:
         """
         if mask is None:
             mask = np.ones_like(data)
-        data = self.pad_geometry.concat_data(data) # * self.solid_angles
+        data = self.pad_geometry.concat_data(data)  # * self.solid_angles
         mask = self.pad_geometry.concat_data(mask)
         # calculate average binned pixel
         args = [self.polar_shape[0], self.q_bin_size, self.q_min,
