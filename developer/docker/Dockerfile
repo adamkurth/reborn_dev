@@ -21,4 +21,5 @@ RUN ln -s /etc/OpenCL/vendors/pocl.icd /usr/local/miniconda/envs/reborn/etc/Open
 RUN /usr/local/miniconda/envs/reborn/bin/python -c 'import PyQt5, OpenGL, pyopencl; print(pyopencl.get_platforms())'
 # The following is for the sphinx-gallery qt scraper.  Hopefully we can remove the dependency.
 RUN export DEBIAN_FRONTEND=noninteractive && \
+    apt-get -q -y update && \
     apt-get -q -y install xvfb
