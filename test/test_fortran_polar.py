@@ -35,6 +35,27 @@ data = np.zeros(data_points)
 mask = np.ones(data_points)
 data[index % 2 == 0] = 1
 
+# TEST CASE DATA:
+#
+# Data: [1. 0. 1. 0. 1. 0. 1. 0. 1. 0. 1. 0.]
+#
+#     Q --->                                              Phi
+# 0                      0.5                      1        |
+# 1-----------------------|-----------------------|  0     |
+# |   0         AVG=0.5   |             AVG=0     |        \/
+# |       1               |                       |
+# |           0           |                       |
+# |-----------------------|-----------------------|
+# |                1   0  |             AVG=0.5   |
+# |                       |  1                    |  pi
+# |  AVG=0.5              |      0                |
+# |-----------------------|-----------------------|
+# |                       |          1   0        |
+# |                       |                   1   |
+# |   AVG=0               |  AVG=0.5              |
+# |-----------------------|-----------------------0  2 pi
+
+
 args = [polar_shape[0], q_bin_size, q_min,
         polar_shape[1], phi_bin_size, phi_min,
         qs, phis, mask,  # weights
@@ -49,8 +70,12 @@ def test_polar_indices_python_fortran_match():
 
 
 def test_polar_simple():
+    print('===================================================HELLO')
+    print(qs)
+    print(phis*3/(2*np.pi))
+    print(data)
     pmean, pmask = polar.get_polar_bin_mean_fortran(*args)
-
+    print(pmean)
     assert pmask[0, 1] == 0
     assert pmask[1, 1] == 0.5
 
