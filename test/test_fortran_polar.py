@@ -67,11 +67,11 @@ args = [polar_shape[0], q_bin_size, q_min,
         data, mask]
 
 
-# def test_polar_indices_python_fortran_match():
-#     q_index_p, p_index_p = polar.get_polar_bin_indices_python(*args[:-3])
-#     q_index_f, p_index_f = polar.get_polar_bin_indices_fortran(*args[:-3])
-#     assert q_index_p.all() == q_index_f.all()
-#     assert p_index_p.all() == p_index_f.all()
+def test_polar_indices_python_fortran_match():
+    q_index_p, p_index_p = polar.get_polar_bin_indices_python(*args[:-3])
+    q_index_f, p_index_f = polar.get_polar_bin_indices_fortran(*args[:-3])
+    assert q_index_p.all() == q_index_f.all()
+    assert p_index_p.all() == p_index_f.all()
 
 
 def test_polar_simple():

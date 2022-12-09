@@ -39,6 +39,9 @@ def get_polar_bin_indices_fortran(n_q_bins, q_bin_size, q_min,
                                   qs, phis):
     args = [n_q_bins, q_bin_size, q_min, n_phi_bins, phi_bin_size, phi_min, qs, phis]
     q_index, p_index = fortran.polar_f.polar_binning.polar_bin_indices(*args)
+    # compensate fortran indexing from 1 instead of 0
+    q_index -= 1
+    p_index -= 1
     return q_index.astype(int), p_index.astype(int)
 
 
