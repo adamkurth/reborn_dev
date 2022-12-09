@@ -202,6 +202,8 @@ class PADStats:
             self.logger.info('Creating framegetter')
             self.framegetter = framegetter['framegetter'](**framegetter['kwargs'])
             self.logger.debug("Created framegetter")
+        else:
+            self.framegetter = framegetter
         if self.parallel:
             if Parallel is None:
                 raise ImportError('You need the joblib package to run padstats in parallel mode.')
