@@ -24,7 +24,7 @@ class Plugin():
         self.widget.show()
 
 
-class Widget(QtGui.QWidget):
+class Widget(Qt.QtWidgets.QWidget):
 
     previous_mask = None
 
