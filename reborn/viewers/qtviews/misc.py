@@ -17,7 +17,7 @@ import pyqtgraph as pg
 from pyqtgraph import QtCore, QtGui
 
 
-class CollapsibleBox(QtGui.QWidget):
+class CollapsibleBox(pg.Qt.QtWidgets.QWidget):
     def __init__(self, title="", parent=None):
         super(CollapsibleBox, self).__init__(parent)
         self.toggle_button = QtGui.QToolButton(text=title, checkable=True, checked=False)

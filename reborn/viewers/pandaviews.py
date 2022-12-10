@@ -359,7 +359,7 @@ class DataFrameSortFilterProxyModel(QtCore.QSortFilterProxyModel):
         raise NotImplementedError("Use setFilterString, setFilterList, or setFilterFunc instead")
 
 
-class DynamicFilterLineEdit(QtGui.QLineEdit):
+class DynamicFilterLineEdit(pg.Qt.QtWidgets.QLineEdit):
     """Filter textbox for a DataFrameTable"""
     def __init__(self, *args, **kwargs):
         self._always_dynamic = kwargs.pop('always_dynamic', False)
