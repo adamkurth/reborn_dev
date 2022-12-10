@@ -1,4 +1,4 @@
-FROM ubuntu:20.04
+FROM ubuntu:22.04
 RUN export DEBIAN_FRONTEND=noninteractive && \
     apt-get -q -y update && \
     apt-get -q -y install apt-utils curl make gfortran pocl-opencl-icd libgl1-mesa-glx && \

@@ -1,5 +1,5 @@
 # This image has the dependencies of reborn pre-installed.  It was created with developer/docker/build_docker.sh
-image: registry.gitlab.com/kirianlab/reborn/ubuntu-20.04:latest
+image: registry.gitlab.com/kirianlab/reborn/ubuntu-22.04:latest
 
 before_script:
   - export reborn=$(pwd)
