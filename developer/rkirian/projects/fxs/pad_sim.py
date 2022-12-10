@@ -6,7 +6,7 @@ import pyqtgraph as pg
 from reborn import utils, source, detector, dataframe, const
 from reborn.target import crystal, atoms, placer
 from reborn.fileio.getters import FrameGetter
-from reborn.simulate import gas, clcore
+from reborn.simulate import solutions, gas, clcore
 from reborn.viewers.qtviews import view_pad_data
 
 ###################################################################
@@ -29,24 +29,25 @@ detector_distance = [2.4, 0.5]
 beamstop_size = 5e-3
 photon_energy = 7000 * eV
 pulse_energy = 0.5e-3
-drop_radius = 70e-9 / 2
+drop_radius = 120e-9 / 2
 beam_diameter = 0.5e-6
 map_resolution = 0.1e-9  # Minimum resolution for 3D density map
 map_oversample = 2  # Oversampling factor for 3D density map
 cell = 200e-10  # Unit cell size (assume P1, cubic)
 pdb_file = ['1SS8', '3IYF', '1PCQ', '2LYZ', 'BDNA25_sp.pdb'][0]
 protein_concentration = 10  # Protein concentration in mg/ml = kg/m^3
-gas_params = {'path_length': [0, None], 'gas_type': 'he', 'pressure': 100e-5, 'n_simulation_steps': 3}
+gas_params = {'path_length': [0, None], 'gas_type': 'he', 'pressure': 100e-6, 'n_simulation_steps': 5}
 random_seed = 2022  # Seed for random number generator (choose None to make it random)
 gpu_double_precision = False
 gpu_group_size = 32
-poisson = 1
-protein = 1
+poisson = 0
+protein = 0
+one_particle = 0
 droplet = 1
 correct_sa = 0
 atomistic = 0
-one_particle = 1
-gas_background = 0
+gas_background = 1
+bulk_water = 1
 view = 1
 
 #########################################################################
@@ -68,7 +69,8 @@ for i in range(len(pad_geometry_file)):
 mask = pads.beamstop_mask(beam=beam, min_radius=beamstop_size)
 f_dens_water = atoms.xraylib_scattering_density('H2O', water_density, photon_energy, approximate=True)
 q_mags = pads.q_mags(beam=beam)
-cryst = crystal.CrystalStructure(pdb_file, spacegroup='P1', unitcell=(cell, cell, cell, rad90, rad90, rad90))
+cryst = crystal.CrystalStructure(pdb_file, spacegroup='P1', unitcell=(cell, cell, cell, rad90, rad90, rad90),
+                                 create_bio_assembly=True)
 dmap = crystal.CrystalDensityMap(cryst, map_resolution, map_oversample)
 f = cryst.molecule.get_scattering_factors(beam=beam)
 r_vecs = cryst.molecule.get_centered_coordinates()
@@ -94,6 +96,14 @@ print('PDB:', pdb_file)
 print('Molecules per drop:', n_proteins_per_drop)
 print('Particle diameter:', protein_diameter)
 print('Density map grid size: (%d, %d, %d)' % tuple(dmap.shape))
+
+#######################################################################
+# Bulk water profile
+##########################################################################
+if bulk_water:
+    waterprof = solutions.water_scattering_factor_squared(q=q_mags)
+    waterprof *= solutions.water_number_density()
+    waterprof *= pads.f2phot(beam)
 
 ########################################################################
 # Gas background
@@ -132,6 +142,8 @@ class DropletGetter(FrameGetter):
         pattern = np.abs(a_gpu.get()) ** 2 * pads.f2phot(beam)
         if gas_background:
             pattern += gasbak
+        if bulk_water:
+            pattern += 4*np.pi*(dd/2)**3/3 * waterprof
         if poisson:
             pattern = np.random.poisson(pattern)
         if correct_sa:

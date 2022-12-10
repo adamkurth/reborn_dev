@@ -394,6 +394,8 @@ class LCLSFrameGetter(fileio.getters.FrameGetter):
             if cachedir is not None:
                 debug_message('Caching event Ids:', cachefile)
                 fileio.misc.save_pickle(self.event_ids, cachefile)
+        if len(self.event_ids) > max_events:
+            self.event_ids = self.event_ids[:max_events]
         self.n_frames = len(self.event_ids)
         self.has_indexing = idx
         if self.has_indexing:

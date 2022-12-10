@@ -24,10 +24,6 @@ import numpy as np
 import pkg_resources
 from functools import wraps
 from . import utils, source, const, fortran
-try:
-    from .fortran import polar_f
-except ImportError:
-    polar_f = None
 from .misc import polar
 
 
@@ -1725,50 +1721,6 @@ class PolarPADAssembler:
         sa = pad_geometry.solid_angles()
         self.solid_angles = pad_geometry.concat_data(sa)
 
-    def _py_mean(self, data, mask):
-        r""" Create the mean polar-binned average intensities.
-        Arguments:
-            data (|ndarray|): The PAD data to be binned.
-            mask (|ndarray|): A mask to indicate ignored pixels.
-        """
-        pmean, pmask = polar.polar_mean(n_q_bins=self.polar_shape[0],
-                                        q_bin_size=self.q_bin_size,
-                                        q_min=self.q_min,
-                                        n_phi_bins=self.polar_shape[1],
-                                        phi_bin_size=self.phi_bin_size,
-                                        phi_min=self.phi_min,
-                                        qs=self.q_mags,
-                                        phis=self.phis,
-                                        weights=self.solid_angles,
-                                        data=data,
-                                        mask=mask)
-        polar_mask = pmask.reshape(self.polar_shape)
-        polar_mean = pmean.reshape(self.polar_shape)
-        return polar_mean, polar_mask
-
-    def _f_mean(self, data, mask):
-        r""" Create the mean polar-binned average intensities.
-        Arguments:
-            data (|ndarray|): The PAD data to be binned.
-            mask (|ndarray|): A mask to indicate ignored pixels.
-        """
-        mean_, count = polar_f.polar_binning.polar_mean(self.polar_shape[0],
-                                                        self.q_bin_size,
-                                                        self.q_min,
-                                                        self.polar_shape[1],
-                                                        self.phi_bin_size,
-                                                        self.phi_min,
-                                                        self.q_mags,
-                                                        self.phis,
-                                                        mask,
-                                                        # self.solid_angles,
-                                                        data,
-                                                        self.solid_angles)
-
-        polar_mask = count.reshape(self.polar_shape).astype(float)
-        polar_mean = mean_.reshape(self.polar_shape).astype(float)
-        return polar_mean, polar_mask
-
     def get_mean(self, data, mask=None, py=False):
         r""" Create the mean polar-binned average intensities.
         Arguments:
@@ -1778,15 +1730,14 @@ class PolarPADAssembler:
         """
         if mask is None:
             mask = np.ones_like(data)
-        data = self.pad_geometry.concat_data(data) # * self.solid_angles
+        data = self.pad_geometry.concat_data(data)  # * self.solid_angles
         mask = self.pad_geometry.concat_data(mask)
-
         # calculate average binned pixel
-        if py or polar_f is None:
-            polar_mean, polar_mask = self._py_mean(data, mask)
-        else:
-            polar_mean, polar_mask = self._f_mean(data, mask)
-        return polar_mean, polar_mask
+        args = [self.polar_shape[0], self.q_bin_size, self.q_min,
+                self.polar_shape[1], self.phi_bin_size, self.phi_min,
+                self.q_mags, self.phis, self.solid_angles, data, mask]
+        polar_mean_data, polar_mean_mask = polar.get_polar_bin_mean(*args, python=py)
+        return polar_mean_data, polar_mean_mask
 
     def quickstats(self, data, mask=None):
         return polar.get_polar_stats(data, self.q_bin_centers, self.phi_bin_centers, weights=mask,
