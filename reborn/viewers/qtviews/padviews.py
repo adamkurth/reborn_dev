@@ -31,6 +31,7 @@ from reborn.external.pyqtgraph import MultiHistogramLUTWidget #, ImageItem
 # We are using pyqtgraph's wrapper for pyqt because it helps deal with the different APIs in pyqt5 and pyqt4...
 import pyqtgraph as pg
 from pyqtgraph.Qt import QtGui, QtCore
+import pyqtgraph.Qt.QtWidgets as qwgt
 from pyqtgraph import ImageItem
 from reborn.utils import get_caller
 
@@ -61,7 +62,7 @@ class PADViewMainWindow(pg.Qt.QtWidgets.QMainWindow):
         self.main = main
     def closeEvent(self, *args, **kwargs):
         if self.main:
-            QtGui.QApplication.instance().closeAllWindows()
+            pg.mkQApp().closeAllWindows()
 
 
 def ensure_dataframe(data, parent=None):
@@ -213,27 +214,27 @@ class PADView(QtCore.QObject):
     def setup_ui(self):
         r""" Creates the main interface: QMainWindow, menubar, statusbar, viewbox, etc."""
         self.debug("setup_ui")
-        self.main_window = PADViewMainWindow(main=self.main) #QtGui.QMainWindow()
+        self.main_window = PADViewMainWindow(main=self.main)
         self.menubar = self.main_window.menuBar()
         self.statusbar = self.main_window.statusBar()
-        self.hbox = QtGui.QHBoxLayout()
-        self.splitter = QtGui.QSplitter(QtCore.Qt.Horizontal)
-        # self.side_panel = QtGui.QWidget()
-        # self.side_panel_layout = QtGui.QVBoxLayout()
+        self.hbox = qwgt.QHBoxLayout()
+        self.splitter = qwgt.QSplitter(QtCore.Qt.Horizontal)
+        # self.side_panel = qwgt.QWidget()
+        # self.side_panel_layout = qwgt.QVBoxLayout()
         # self.side_panel_layout.setAlignment(QtCore.Qt.AlignTop)
         # box = misc.CollapsibleBox('Display') ###########################
-        # lay = QtGui.QGridLayout()
-        # lay.addWidget(QtGui.QLabel('CMap min:'), 1, 1)
-        # maxspin = QtGui.QSpinBox()
+        # lay = qwgt.QGridLayout()
+        # lay.addWidget(qwgt.QLabel('CMap min:'), 1, 1)
+        # maxspin = qwgt.QSpinBox()
         # lay.addWidget(maxspin, 1, 2)
         # box.setContentLayout(lay)
         # self.side_panel_layout.addWidget(box)
         # box = misc.CollapsibleBox('Analysis') ###########################
-        # lay = QtGui.QGridLayout()
+        # lay = qwgt.QGridLayout()
         # row = 0
         # row += 1
-        # lay.addWidget(QtGui.QLabel('Polarization Correction'), row, 1)
-        # polarization_button = QtGui.QCheckBox()
+        # lay.addWidget(qwgt.QLabel('Polarization Correction'), row, 1)
+        # polarization_button = qwgt.QCheckBox()
         # # polarization_button.toggled.connect()
         # lay.addWidget(polarization_button, row, 2, alignment=QtCore.Qt.AlignCenter)
         # row += 1
@@ -251,7 +252,7 @@ class PADView(QtCore.QObject):
         self.histogram = MultiHistogramLUTWidget()
         self.splitter.addWidget(self.histogram)
         self.hbox.addWidget(self.splitter)
-        self.main_widget = QtGui.QWidget()
+        self.main_widget = qwgt.QWidget()
         self.main_widget.setLayout(self.hbox)
         self.main_window.setCentralWidget(self.main_widget)
 
@@ -284,7 +285,7 @@ class PADView(QtCore.QObject):
         r""" Connect menu items (e.g. "File") so that they actually do something when clicked. """
         self.debug("setup_menubar")
         def add_menu(append_to, name, short=None, tip=None, connect=None):
-            action = QtGui.QAction(name, self.main_window)
+            action = qwgt.QAction(name, self.main_window)
             if short: action.setShortcut(short)
             if tip: action.setStatusTip(tip)
             if connect: action.triggered.connect(connect)
@@ -338,7 +339,8 @@ class PADView(QtCore.QObject):
 
     def set_shortcut(self, shortcut, func):
         r""" Setup one keyboard shortcut so it connects to some function, assuming no arguments are needed. """
-        self._shortcuts.append(QtGui.QShortcut(QtGui.QKeySequence(shortcut), self.main_window).activated.connect(func))
+        self._shortcuts.append(qwgt.QShortcut(QtGui.QKeySequence(shortcut), self.main_window).activated.connect(
+            func))
 
     def setup_shortcuts(self):
         r""" Connect all standard keyboard shortcuts to functions. """
@@ -392,7 +394,7 @@ class PADView(QtCore.QObject):
         self.debug("set_colormap")
         self.histogram.gradient.loadPreset(preset)
         self.histogram.setImageItems(self.pad_image_items)
-        pg.QtGui.QApplication.processEvents()
+        pg.mkQApp().processEvents()
 
     def get_levels(self):
         r""" Get the minimum and maximum levels of the current image display. """
@@ -615,7 +617,7 @@ class PADView(QtCore.QObject):
 
     def choose_mask_color(self):
         self.debug()
-        color = QtGui.QColorDialog.getColor()
+        color = qwgt.QColorDialog.getColor()
         if color is None:
             self.debug('Color is None', 1)
             return
@@ -689,8 +691,8 @@ class PADView(QtCore.QObject):
     def save_masks(self):
         r""" Save list of masks in pickle or reborn mask format. """
         self.debug("save_masks")
-        options = QtGui.QFileDialog.Options()
-        file_name, file_type = QtGui.QFileDialog.getSaveFileName(self.main_window, "Save Masks", "mask",
+        options = qwgt.QFileDialog.Options()
+        file_name, file_type = qwgt.QFileDialog.getSaveFileName(self.main_window, "Save Masks", "mask",
                                                           "reborn Mask File (*.mask);;Python Pickle (*.pkl)",
                                                                  options=options)
         if file_name == "":
@@ -708,8 +710,8 @@ class PADView(QtCore.QObject):
     def load_masks(self):
         r""" Load list of masks that have been saved in pickle or reborn mask format. """
         self.debug("load_masks")
-        options = QtGui.QFileDialog.Options()
-        file_name, file_type = QtGui.QFileDialog.getOpenFileName(self.main_window, "Load Masks", "mask",
+        options = qwgt.QFileDialog.Options()
+        file_name, file_type = qwgt.QFileDialog.getOpenFileName(self.main_window, "Load Masks", "mask",
                                                           "reborn Mask File (*.mask);;Python Pickle (*.pkl)",
                                                                  options=options)
         if file_name == "":
@@ -877,8 +879,8 @@ class PADView(QtCore.QObject):
     def save_pad_geometry(self):
         r""" Save list of pad geometry specifications in json format. """
         self.debug("save_pad_geometry")
-        options = QtGui.QFileDialog.Options()
-        file_name, file_type = QtGui.QFileDialog.getSaveFileName(self.main_window, "Save PAD Geometry", "geometry",
+        options = qwgt.QFileDialog.Options()
+        file_name, file_type = qwgt.QFileDialog.getSaveFileName(self.main_window, "Save PAD Geometry", "geometry",
                                                           "reborn PAD Geometry File (*.json);;",
                                                                  options=options)
         if file_name == "":
@@ -889,8 +891,8 @@ class PADView(QtCore.QObject):
     def load_pad_geometry(self):
         r""" Load list of pad geometry specifications in json format. """
         self.debug("load_pad_geometry")
-        options = QtGui.QFileDialog.Options()
-        file_name, file_type = QtGui.QFileDialog.getOpenFileName(self.main_window, "Load PAD Geometry", "geometry",
+        options = qwgt.QFileDialog.Options()
+        file_name, file_type = qwgt.QFileDialog.getOpenFileName(self.main_window, "Load PAD Geometry", "geometry",
                                                           "reborn PAD Geometry File (*.json);;",
                                                                  options=options)
         if file_name == "":
@@ -902,8 +904,8 @@ class PADView(QtCore.QObject):
     def save_beam(self):
         r""" Save beam specifications in json format. """
         self.debug("save_beam")
-        options = QtGui.QFileDialog.Options()
-        file_name, file_type = QtGui.QFileDialog.getSaveFileName(self.main_window, "Save Beam", "beam",
+        options = qwgt.QFileDialog.Options()
+        file_name, file_type = qwgt.QFileDialog.getSaveFileName(self.main_window, "Save Beam", "beam",
                                                           "reborn Beam File (*.json);;",
                                                                  options=options)
         if file_name == "":
@@ -914,8 +916,8 @@ class PADView(QtCore.QObject):
     def load_beam(self):
         r""" Load beam specifications in json format. """
         self.debug("load_beam")
-        options = QtGui.QFileDialog.Options()
-        file_name, file_type = QtGui.QFileDialog.getOpenFileName(self.main_window, "Load Beam", "beam",
+        options = qwgt.QFileDialog.Options()
+        file_name, file_type = qwgt.QFileDialog.getOpenFileName(self.main_window, "Load Beam", "beam",
                                                           "reborn Beam File (*.json);;",
                                                                  options=options)
         if file_name == "":
@@ -993,8 +995,8 @@ class PADView(QtCore.QObject):
 
     def edit_ring_radii(self):
         self.debug("edit_ring_radii")
-        text, ok = QtGui.QInputDialog.getText(self.main_window, "Enter ring radii (dict format)", "Ring radii",
-                                              QtGui.QLineEdit.Normal,
+        text, ok = qwgt.QInputDialog.getText(self.main_window, "Enter ring radii (dict format)", "Ring radii",
+                                              qwgt.QLineEdit.Normal,
                                               '{"q_mags":[], "d_spacings":[1e-10, 5e-10], "radii":[], "angles":[], '
                                               '"pens":[]}')
         if ok:
@@ -1241,8 +1243,8 @@ class PADView(QtCore.QObject):
 
     def load_geometry_file(self):
         self.debug("load_geometry_file")
-        options = QtGui.QFileDialog.Options()
-        file_name, file_type = QtGui.QFileDialog.getOpenFileName(self.main_window, "Load geometry file", "",
+        options = qwgt.QFileDialog.Options()
+        file_name, file_type = qwgt.QFileDialog.getOpenFileName(self.main_window, "Load geometry file", "",
                                                           "CrystFEL geom (*.geom)", options=options)
         if file_name == "":
             return
@@ -1282,8 +1284,8 @@ class PADView(QtCore.QObject):
 
     def open_data_file_dialog(self):
         self.debug("open_data_file_dialog")
-        options = QtGui.QFileDialog.Options()
-        file_name, file_type = QtGui.QFileDialog.getOpenFileName(self.main_window, "Load data file", "",
+        options = qwgt.QFileDialog.Options()
+        file_name, file_type = qwgt.QFileDialog.getOpenFileName(self.main_window, "Load data file", "",
                                                           "Python Pickle (*.pkl)", options=options)
         if file_name == "":
             return
@@ -1293,8 +1295,8 @@ class PADView(QtCore.QObject):
     def save_data_file_dialog(self):
         r""" Save list of masks in pickle or reborn mask format. """
         self.debug("save_data_file_dialog")
-        options = QtGui.QFileDialog.Options()
-        file_name, file_type = QtGui.QFileDialog.getSaveFileName(self.main_window, "Save Data Frame", "data",
+        options = qwgt.QFileDialog.Options()
+        file_name, file_type = qwgt.QFileDialog.getSaveFileName(self.main_window, "Save Data Frame", "data",
                                                                  "Python Pickle (*.pkl)", options=options)
         if file_name == "":
             return
@@ -1375,7 +1377,7 @@ class PADView(QtCore.QObject):
 
     def get_text(self, title="Title", label="Label", text="Text"):
         r""" Simple popup widget that allows the capture of a text string."""
-        text, ok = QtGui.QInputDialog.getText(self.main_window, title, label, QtGui.QLineEdit.Normal, text)
+        text, ok = qwgt.QInputDialog.getText(self.main_window, title, label, qwgt.QLineEdit.Normal, text)
         return text
 
     def get_float(self, title="Title", label="Label", text="Text"):
@@ -1420,8 +1422,8 @@ class PADView(QtCore.QObject):
         p.save(filename)
 
     def save_file_dialog(self, title='Filepath', default='file', types=None):
-        options = QtGui.QFileDialog.Options()
-        name, type = QtGui.QFileDialog.getSaveFileName(self.main_window, title, default, types, options=options)
+        options = qwgt.QFileDialog.Options()
+        name, type = qwgt.QFileDialog.getSaveFileName(self.main_window, title, default, types, options=options)
         return name, type
 
     def tic(self, *args, **kwargs):

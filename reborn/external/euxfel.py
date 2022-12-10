@@ -201,7 +201,7 @@ class EuXFELFrameGetter(reborn.fileio.getters.FrameGetter):
                 try:
                     stacked = self._get_train_stack(train_id)
                 except Exception as e:
-                        print(str(e))
+                    print(str(e))
                     return None
                 self.current_train_id = train_id
                 self.current_train_stack = stacked
