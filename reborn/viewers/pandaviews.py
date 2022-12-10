@@ -410,7 +410,7 @@ class DynamicFilterLineEdit(pg.Qt.QtWidgets.QLineEdit):
         self.host.filter(col_ix, text)
 
 
-class DynamicFilterMenuAction(QtGui.QWidgetAction):
+class DynamicFilterMenuAction(pg.Qt.QtWidgets.QWidgetAction):
     """Filter textbox in column-header right-click menu"""
     def __init__(self, parent, menu, col_ix):
         """Filter textbox in column right-click menu
