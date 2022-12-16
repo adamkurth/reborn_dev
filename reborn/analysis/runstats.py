@@ -58,7 +58,7 @@ class PixelHistogram:
         self.n_pixels = int(n_pixels)
         self.bin_delta = (self.bin_max - self.bin_min) / (self.n_bins - 1)
         self._idx = np.arange(self.n_pixels, dtype=int)
-        self.histogram = np.zeros((self.n_pixels, self.n_bins), dtype=int)
+        self.histogram = np.zeros((self.n_pixels, self.n_bins), dtype=np.uint16)
 
     def get_bin_centers(self):
         r""" Returns an 1D array of histogram bin centers. """
@@ -334,6 +334,7 @@ class PADStats:
         stats['step'] = self.step
         stats['wavelengths'] = self.wavelengths
         if self.histogrammer is not None:
+            self.logger.debug(f'Histrogram shape: {np.shape(self.histogrammer.histogram)}')
             stats['histogram'] = self.histogrammer.histogram
             stats['histogram_params'] = self.histogram_params
         return stats
@@ -430,7 +431,9 @@ class PADStats:
             self.beam.wavelength = np.median(self.wavelengths[self.wavelengths > 0])
         self.logger.info('Processing completed')
         if self.reduce_from_checkpoints:
+            self.logger.info('Returning checkpoint file path')
             return self.previous_checkpoint_file
+        self.logger.info('Returning dictionary')
         return self.to_dict()
     def process_parallel(self):
         self.logger.info(f"Launching {self.n_processes} parallel processes")
