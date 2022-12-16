@@ -15,6 +15,7 @@ from config import get_config
 def get_runstats(run_number=1, n_processes=1, max_frames=1e6, overwrite=False):
     r""" Fetches some PAD statistics for a run.  See reborn docs. """
     config = get_config(run_number=run_number)
+    config['runstats']['message_prefix'] = f"Run {run_number}"
     savefile = config['results_directory']+f'/runstats/{run_number:04d}.pkl'
     os.makedirs(os.path.dirname(savefile), exist_ok=True)
     if os.path.exists(savefile) and not overwrite:
@@ -68,7 +69,7 @@ def analyze_histogram(run_number, n_processes=1, debug=0, overwrite=False):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('-r', '--run', type=int, default=154, help='Run number')
+    parser.add_argument('-r', '--run', type=int, required=True, help='Run number')
     parser.add_argument('--view', action='store_true', help='View stats')
     parser.add_argument('--max_events', type=int, default=1e7, help='Maximum number of events to process')
     parser.add_argument('-j', '--n_processes', type=int, default=8, help='Number of parallel processes')
