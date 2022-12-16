@@ -150,9 +150,12 @@ class PADStats:
             self.stop = self.framegetter.n_frames
         self.stop = min(self.stop, self.framegetter.n_frames)
     @staticmethod
-    def get_default_config():
+    def get_default_config(histogram=True):
+        hp = None
+        if histogram:
+            hp = dict(bin_min=-30, bin_max=100, n_bins=100, zero_photon_peak=0, one_photon_peak=30)
         return dict(log_file=None, checkpoint_file=None, checkpoint_interval=500, message_prefix="", debug=True,
-                  reduce_from_checkpoints=True)
+                  reduce_from_checkpoints=True, histogram_params=hp)
     def setup_logger(self):
         r""" Setup padstats logging using the python logging package.  Helps maintain consistent form of logs in both
         stdout and log files.  Specifies which process is running and so on. """

@@ -13,13 +13,9 @@
 # You should have received a copy of the GNU General Public License
 # along with reborn.  If not, see <https://www.gnu.org/licenses/>.
 import numpy as np
-import reborn
 from reborn.analysis.masking import StreakMasker
-from reborn import detector
-from reborn.external.pyqtgraph import ImView
 from reborn.viewers.qtviews.padviews import PADView
 import pyqtgraph as pg
-from pyqtgraph import QtGui, QtCore
 
 
 class Plugin():

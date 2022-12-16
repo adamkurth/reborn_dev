@@ -17,7 +17,9 @@ from reborn import detector
 import numpy as np
 import json
 from pyqtgraph import QtGui
+import pyqtgraph.Qt.QtWidgets as qwgt
 from functools import partial
+
 
 class Plugin():
 
@@ -29,115 +31,115 @@ class Plugin():
         self.widget.show()
 
 
-class Widget(QtGui.QWidget):
+class Widget(qwgt.QWidget):
     editor_widget = None
     def __init__(self, padview):
         super().__init__()
         self.padview = padview
         self.setWindowTitle('Shift Detector')
-        self.layout = QtGui.QGridLayout()
+        self.layout = qwgt.QGridLayout()
         row = 0
 
         row += 1
-        self.layout.addWidget(QtGui.QLabel('x shift (microns)'), row, 1)
-        self.xsr_button = QtGui.QPushButton("-")
+        self.layout.addWidget(qwgt.QLabel('x shift (microns)'), row, 1)
+        self.xsr_button = qwgt.QPushButton("-")
         self.xsr_button.clicked.connect(partial(self.shift_x, direction=-1.0))
         self.layout.addWidget(self.xsr_button, row, 2)
-        sb = QtGui.QDoubleSpinBox()
+        sb = qwgt.QDoubleSpinBox()
         sb.setMinimum(-1e10)
         sb.setMaximum(+1e10)
         sb.setValue(1000)
         self.xs_spinbox = sb
         self.layout.addWidget(self.xs_spinbox, row, 3)
-        self.xs_button = QtGui.QPushButton("+")
+        self.xs_button = qwgt.QPushButton("+")
         self.xs_button.clicked.connect(partial(self.shift_x, direction=1.0))
         self.layout.addWidget(self.xs_button, row, 4)
 
         row += 1
-        self.layout.addWidget(QtGui.QLabel('y shift (microns)'), row, 1)
-        self.ysr_button = QtGui.QPushButton("-")
+        self.layout.addWidget(qwgt.QLabel('y shift (microns)'), row, 1)
+        self.ysr_button = qwgt.QPushButton("-")
         self.ysr_button.clicked.connect(partial(self.shift_y, direction=-1.0))
         self.layout.addWidget(self.ysr_button, row, 2)
-        sb = QtGui.QDoubleSpinBox()
+        sb = qwgt.QDoubleSpinBox()
         sb.setMinimum(-1e10)
         sb.setMaximum(+1e10)
         sb.setValue(1000)
         self.ys_spinbox = sb
         self.layout.addWidget(self.ys_spinbox, row, 3)
-        self.ys_button = QtGui.QPushButton("+")
+        self.ys_button = qwgt.QPushButton("+")
         self.ys_button.clicked.connect(partial(self.shift_y, direction=1.0))
         self.layout.addWidget(self.ys_button, row, 4)
 
         row += 1
-        self.layout.addWidget(QtGui.QLabel('z shift (microns)'), row, 1)
-        self.zsr_button = QtGui.QPushButton("-")
+        self.layout.addWidget(qwgt.QLabel('z shift (microns)'), row, 1)
+        self.zsr_button = qwgt.QPushButton("-")
         self.zsr_button.clicked.connect(partial(self.shift_z, direction=-1.0))
         self.layout.addWidget(self.zsr_button, row, 2)
-        sb = QtGui.QDoubleSpinBox()
+        sb = qwgt.QDoubleSpinBox()
         sb.setMinimum(-1e10)
         sb.setMaximum(+1e10)
         sb.setValue(1000)
         self.zs_spinbox = sb
         self.layout.addWidget(self.zs_spinbox, row, 3)
-        self.zs_button = QtGui.QPushButton("+")
+        self.zs_button = qwgt.QPushButton("+")
         self.zs_button.clicked.connect(partial(self.shift_z, direction=1.0))
         self.layout.addWidget(self.zs_button, row, 4)
 
         row += 1
-        self.layout.addWidget(QtGui.QLabel('x rotation (degrees)'), row, 1)
-        self.xrr_button = QtGui.QPushButton("-")
+        self.layout.addWidget(qwgt.QLabel('x rotation (degrees)'), row, 1)
+        self.xrr_button = qwgt.QPushButton("-")
         self.xrr_button.clicked.connect(partial(self.rotate_x, direction=-1.0))
         self.layout.addWidget(self.xrr_button, row, 2)
-        sb = QtGui.QDoubleSpinBox()
+        sb = qwgt.QDoubleSpinBox()
         sb.setMinimum(-90)
         sb.setMaximum(+90)
         sb.setValue(1)
         self.xr_spinbox = sb
         self.layout.addWidget(self.xr_spinbox, row, 3)
-        self.xr_button = QtGui.QPushButton("+")
+        self.xr_button = qwgt.QPushButton("+")
         self.xr_button.clicked.connect(partial(self.rotate_x, direction=1.0))
         self.layout.addWidget(self.xr_button, row, 4)
 
         row += 1
-        self.layout.addWidget(QtGui.QLabel('y rotation (degrees)'), row, 1)
-        self.yrr_button = QtGui.QPushButton("-")
+        self.layout.addWidget(qwgt.QLabel('y rotation (degrees)'), row, 1)
+        self.yrr_button = qwgt.QPushButton("-")
         self.yrr_button.clicked.connect(partial(self.rotate_y, direction=-1.0))
         self.layout.addWidget(self.yrr_button, row, 2)
-        sb = QtGui.QDoubleSpinBox()
+        sb = qwgt.QDoubleSpinBox()
         sb.setMinimum(-90)
         sb.setMaximum(+90)
         sb.setValue(1)
         self.yr_spinbox = sb
         self.layout.addWidget(self.yr_spinbox, row, 3)
-        self.yr_button = QtGui.QPushButton("+")
+        self.yr_button = qwgt.QPushButton("+")
         self.yr_button.clicked.connect(partial(self.rotate_y, direction=1.0))
         self.layout.addWidget(self.yr_button, row, 4)
 
         row += 1
-        self.layout.addWidget(QtGui.QLabel('z rotation (degrees)'), row, 1)
-        self.zrr_button = QtGui.QPushButton("-")
+        self.layout.addWidget(qwgt.QLabel('z rotation (degrees)'), row, 1)
+        self.zrr_button = qwgt.QPushButton("-")
         self.zrr_button.clicked.connect(partial(self.rotate_z, direction=-1.0))
         self.layout.addWidget(self.zrr_button, row, 2)
-        sb = QtGui.QDoubleSpinBox()
+        sb = qwgt.QDoubleSpinBox()
         sb.setMinimum(-90)
         sb.setMaximum(+90)
         sb.setValue(1)
         self.zr_spinbox = sb
         self.layout.addWidget(self.zr_spinbox, row, 3)
-        self.zr_button = QtGui.QPushButton("+")
+        self.zr_button = qwgt.QPushButton("+")
         self.zr_button.clicked.connect(partial(self.rotate_z, direction=1.0))
         self.layout.addWidget(self.zr_button, row, 4)
 
         row += 1
-        self.direct_button = QtGui.QPushButton('Direct Edit Geometry')
+        self.direct_button = qwgt.QPushButton('Direct Edit Geometry')
         self.direct_button.clicked.connect(self.open_editor)
         self.layout.addWidget(self.direct_button, row, 1)
 
         self.setLayout(self.layout)
-        QtGui.QShortcut(QtGui.QKeySequence('left'), self).activated.connect(partial(self.shift_x, direction=-1.0))
-        QtGui.QShortcut(QtGui.QKeySequence('right'), self).activated.connect(partial(self.shift_x, direction=1.0))
-        QtGui.QShortcut(QtGui.QKeySequence('up'), self).activated.connect(partial(self.shift_y, direction=-1.0))
-        QtGui.QShortcut(QtGui.QKeySequence('down'), self).activated.connect(partial(self.shift_y, direction=1.0))
+        qwgt.QShortcut(QtGui.QKeySequence('left'), self).activated.connect(partial(self.shift_x, direction=-1.0))
+        qwgt.QShortcut(QtGui.QKeySequence('right'), self).activated.connect(partial(self.shift_x, direction=1.0))
+        qwgt.QShortcut(QtGui.QKeySequence('up'), self).activated.connect(partial(self.shift_y, direction=-1.0))
+        qwgt.QShortcut(QtGui.QKeySequence('down'), self).activated.connect(partial(self.shift_y, direction=1.0))
         
     def rotate_x(self, direction=1.0):
         ang = -float(self.xr_spinbox.value())*direction*np.pi/180
@@ -196,18 +198,18 @@ class Widget(QtGui.QWidget):
             self.editor_widget.show()
 
 
-class DirectEditor(QtGui.QWidget):
+class DirectEditor(qwgt.QWidget):
     def __init__(self, padview=None):
         super().__init__()
         self.padview = padview
         self.padview.sig_geometry_changed.connect(self.geometry_updated)
         self.setWindowTitle("PAD Geometry Editor")
         # self.resize(300,270)
-        self.editor = QtGui.QTextEdit()
+        self.editor = qwgt.QTextEdit()
         self.geometry_updated()
-        self.update_button = QtGui.QPushButton("Update Geometry (Ctrl+Return)")
+        self.update_button = qwgt.QPushButton("Update Geometry (Ctrl+Return)")
         self.update_button.setShortcut("Ctrl+Return")
-        layout = QtGui.QVBoxLayout()
+        layout = qwgt.QVBoxLayout()
         layout.addWidget(self.editor)
         layout.addWidget(self.update_button)
         self.setLayout(layout)

@@ -16,7 +16,6 @@
 import numpy as np
 import pyqtgraph as pg
 import pyqtgraph.opengl as gl
-from pyqtgraph.Qt import QtGui
 
 # Some default bright colors.  Might need to make this list longer in the future.
 colors = [pg.glColor([255, 0, 0]),
@@ -56,7 +55,7 @@ class Volumetric3D(object):
 
     def __init__(self):
 
-        self.app = pg.mkQApp()  # QtGui.QApplication([])
+        self.app = pg.mkQApp()
         self.w = gl.GLViewWidget()
         self.maxDist = 0
         self.defaultWidth = 5
@@ -207,7 +206,7 @@ class Scatter3D(object):
 
     def __init__(self, title=None):
 
-        self.app = pg.mkQApp() #QtGui.QApplication([])
+        self.app = pg.mkQApp()
         self.w = gl.GLViewWidget()
         self.w.window().setWindowTitle(title)
         self.defaultColor = pg.glColor([255, 255, 255])

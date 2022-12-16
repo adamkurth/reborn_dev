@@ -13,8 +13,9 @@
 # You should have received a copy of the GNU General Public License
 # along with reborn.  If not, see <https://www.gnu.org/licenses/>.
 
-from pyqtgraph import QtGui, QtCore
-import numpy as np
+from pyqtgraph import QtCore
+import pyqtgraph.Qt.QtWidgets as qwgt
+
 
 class Plugin():
     widget = None
@@ -23,56 +24,56 @@ class Plugin():
         self.widget.show()
 
 
-class Widget(QtGui.QWidget):
+class Widget(qwgt.QWidget):
 
     def __init__(self, padview):
         super().__init__()
         self.padview = padview
         self.setWindowTitle('Peakfinder')
-        self.layout = QtGui.QGridLayout()
+        self.layout = qwgt.QGridLayout()
         row = 0
         row += 1
-        self.layout.addWidget(QtGui.QLabel('Activate Peakfinder'), row, 1)
-        self.activate_peakfinder_button = QtGui.QCheckBox()
+        self.layout.addWidget(qwgt.QLabel('Activate Peakfinder'), row, 1)
+        self.activate_peakfinder_button = qwgt.QCheckBox()
         self.activate_peakfinder_button.toggled.connect(self.do_action)
         self.layout.addWidget(self.activate_peakfinder_button, row, 2, alignment=QtCore.Qt.AlignCenter)
         row += 1
-        self.layout.addWidget(QtGui.QLabel('Show SNR Transform'), row, 1)
-        self.activate_snrview_button = QtGui.QCheckBox()
+        self.layout.addWidget(qwgt.QLabel('Show SNR Transform'), row, 1)
+        self.activate_snrview_button = qwgt.QCheckBox()
         self.activate_snrview_button.toggled.connect(self.do_action)
         self.layout.addWidget(self.activate_snrview_button, row, 2, alignment=QtCore.Qt.AlignCenter)
         row += 1
-        self.layout.addWidget(QtGui.QLabel('SNR Threshold'), row, 1)
-        self.snr_spinbox = QtGui.QDoubleSpinBox()
+        self.layout.addWidget(qwgt.QLabel('SNR Threshold'), row, 1)
+        self.snr_spinbox = qwgt.QDoubleSpinBox()
         self.snr_spinbox.setMinimum(0)
         self.snr_spinbox.setValue(6)
         self.layout.addWidget(self.snr_spinbox, row, 2)
         row += 1
-        self.layout.addWidget(QtGui.QLabel('Inner Size'), row, 1)
-        self.inner_spinbox = QtGui.QSpinBox()
+        self.layout.addWidget(qwgt.QLabel('Inner Size'), row, 1)
+        self.inner_spinbox = qwgt.QSpinBox()
         self.inner_spinbox.setMinimum(1)
         self.inner_spinbox.setValue(1)
         self.layout.addWidget(self.inner_spinbox, row, 2)
         row += 1
-        self.layout.addWidget(QtGui.QLabel('Center Size'), row, 1)
-        self.center_spinbox = QtGui.QSpinBox()
+        self.layout.addWidget(qwgt.QLabel('Center Size'), row, 1)
+        self.center_spinbox = qwgt.QSpinBox()
         self.center_spinbox.setMinimum(1)
         self.center_spinbox.setValue(5)
         self.layout.addWidget(self.center_spinbox, row, 2)
         row += 1
-        self.layout.addWidget(QtGui.QLabel('Outer Size'), row, 1)
-        self.outer_spinbox = QtGui.QSpinBox()
+        self.layout.addWidget(qwgt.QLabel('Outer Size'), row, 1)
+        self.outer_spinbox = qwgt.QSpinBox()
         self.outer_spinbox.setMinimum(2)
         self.outer_spinbox.setValue(10)
         self.layout.addWidget(self.outer_spinbox, row, 2)
         row += 1
-        self.layout.addWidget(QtGui.QLabel('Max Filter Iterations'), row, 1)
-        self.iter_spinbox = QtGui.QSpinBox()
+        self.layout.addWidget(qwgt.QLabel('Max Filter Iterations'), row, 1)
+        self.iter_spinbox = qwgt.QSpinBox()
         self.iter_spinbox.setMinimum(3)
         self.iter_spinbox.setValue(3)
         self.layout.addWidget(self.iter_spinbox, row, 2)
         row += 1
-        self.update_button = QtGui.QPushButton("Update Peakfinder")
+        self.update_button = qwgt.QPushButton("Update Peakfinder")
         self.update_button.clicked.connect(self.do_action)
         self.layout.addWidget(self.update_button, row, 1, 1, 2)
         self.setLayout(self.layout)

@@ -15,7 +15,8 @@
 
 import reborn
 import pyqtgraph as pg
-from pyqtgraph import QtGui, QtCore
+from pyqtgraph import QtCore
+import pyqtgraph.Qt.QtWidgets as qwgt
 
 
 class Plugin():
@@ -31,14 +32,14 @@ class Plugin():
                         beam=dataframe.get_beam(), n_phi_bins=100)
         profile, _ = profiler.get_mean(padview.get_pad_display_data())
         self.widget.plot_widget.setImage(profile.T)
-        pg.QtGui.QApplication.processEvents()
+        qwgt.QApplication.processEvents()
 
 
-class Widget(QtGui.QWidget):
+class Widget(qwgt.QWidget):
     def __init__(self, padview, plugin):
         super().__init__()
-        self.hbox = QtGui.QHBoxLayout()
-        self.splitter = QtGui.QSplitter(QtCore.Qt.Horizontal)
+        self.hbox = qwgt.QHBoxLayout()
+        self.splitter = qwgt.QSplitter(QtCore.Qt.Horizontal)
         self.hbox.addWidget(self.splitter)
         self.padview = padview
         self.plugin = plugin

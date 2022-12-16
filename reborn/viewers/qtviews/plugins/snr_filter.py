@@ -15,7 +15,8 @@
 
 from time import time
 from reborn.viewers.qtviews.padviews import get_caller
-from pyqtgraph.Qt import QtGui, QtCore
+from pyqtgraph.Qt import QtCore
+import pyqtgraph.Qt.QtWidgets as qwgt
 from reborn.analysis.peaks import boxsnr
 
 class Plugin():
@@ -24,51 +25,51 @@ class Plugin():
         self.widget = Widget(padview)
         self.widget.show()
 
-class Widget(QtGui.QWidget):
+class Widget(qwgt.QWidget):
 
     def __init__(self, padview):
         super().__init__()
         self.padview = padview
         self.setWindowTitle('SNR Filter')
-        self.layout = QtGui.QGridLayout()
+        self.layout = qwgt.QGridLayout()
         row = 0
         row += 1
-        self.layout.addWidget(QtGui.QLabel('Update Colorbar'), row, 1)
-        self.update_colorbar_button = QtGui.QCheckBox()
+        self.layout.addWidget(qwgt.QLabel('Update Colorbar'), row, 1)
+        self.update_colorbar_button = qwgt.QCheckBox()
         self.update_colorbar_button.setChecked(True)
         self.layout.addWidget(self.update_colorbar_button, row, 2, alignment=QtCore.Qt.AlignCenter)
         row += 1
-        self.layout.addWidget(QtGui.QLabel('Inner Size'), row, 1)
-        self.inner_spinbox = QtGui.QSpinBox()
+        self.layout.addWidget(qwgt.QLabel('Inner Size'), row, 1)
+        self.inner_spinbox = qwgt.QSpinBox()
         self.inner_spinbox.setMinimum(0)
         self.inner_spinbox.setValue(0)
         self.layout.addWidget(self.inner_spinbox, row, 2)
         row += 1
-        self.layout.addWidget(QtGui.QLabel('Center Size'), row, 1)
-        self.center_spinbox = QtGui.QSpinBox()
+        self.layout.addWidget(qwgt.QLabel('Center Size'), row, 1)
+        self.center_spinbox = qwgt.QSpinBox()
         self.center_spinbox.setMinimum(1)
         self.center_spinbox.setValue(5)
         self.layout.addWidget(self.center_spinbox, row, 2)
         row += 1
-        self.layout.addWidget(QtGui.QLabel('Outer Size'), row, 1)
-        self.outer_spinbox = QtGui.QSpinBox()
+        self.layout.addWidget(qwgt.QLabel('Outer Size'), row, 1)
+        self.outer_spinbox = qwgt.QSpinBox()
         self.outer_spinbox.setMinimum(1)
         self.outer_spinbox.setValue(10)
         self.layout.addWidget(self.outer_spinbox, row, 2)
         row += 1
-        self.layout.addWidget(QtGui.QLabel('Threshold'), row, 1)
-        self.thresh_spinbox = QtGui.QDoubleSpinBox()
+        self.layout.addWidget(qwgt.QLabel('Threshold'), row, 1)
+        self.thresh_spinbox = qwgt.QDoubleSpinBox()
         self.thresh_spinbox.setMinimum(0)
         self.thresh_spinbox.setValue(8)
         self.layout.addWidget(self.thresh_spinbox, row, 2)
         row += 1
-        self.layout.addWidget(QtGui.QLabel('Iterations'), row, 1)
-        self.iter_spinbox = QtGui.QSpinBox()
+        self.layout.addWidget(qwgt.QLabel('Iterations'), row, 1)
+        self.iter_spinbox = qwgt.QSpinBox()
         self.iter_spinbox.setMinimum(1)
         self.iter_spinbox.setValue(2)
         self.layout.addWidget(self.iter_spinbox, row, 2)
         row += 1
-        self.update_button = QtGui.QPushButton("Apply Filter")
+        self.update_button = qwgt.QPushButton("Apply Filter")
         self.update_button.clicked.connect(self.apply_snr_filter)
         self.layout.addWidget(self.update_button, row, 1, 1, 2)
         self.setLayout(self.layout)

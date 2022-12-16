@@ -15,21 +15,22 @@
 
 import pyqtgraph as pg
 from pyqtgraph import QtCore, QtGui
+import pyqtgraph.Qt.QtWidgets as qwgt
 
 
 class CollapsibleBox(pg.Qt.QtWidgets.QWidget):
     def __init__(self, title="", parent=None):
         super(CollapsibleBox, self).__init__(parent)
-        self.toggle_button = QtGui.QToolButton(text=title, checkable=True, checked=False)
+        self.toggle_button = qwgt.QToolButton(text=title, checkable=True, checked=False)
         self.toggle_button.setStyleSheet("QToolButton { border: none; }")
         self.toggle_button.setToolButtonStyle(QtCore.Qt.ToolButtonTextBesideIcon)
         self.toggle_button.setArrowType(QtCore.Qt.RightArrow)
         self.toggle_button.pressed.connect(self.on_pressed)
         self.toggle_animation = QtCore.QParallelAnimationGroup(self)
-        self.content_area = QtGui.QScrollArea(maximumHeight=0, minimumHeight=0)
-        self.content_area.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Fixed)
-        self.content_area.setFrameShape(QtGui.QFrame.NoFrame)
-        lay = QtGui.QVBoxLayout(self)
+        self.content_area = qwgt.QScrollArea(maximumHeight=0, minimumHeight=0)
+        self.content_area.setSizePolicy(qwgt.QSizePolicy.Expanding, qwgt.QSizePolicy.Fixed)
+        self.content_area.setFrameShape(qwgt.QFrame.NoFrame)
+        lay = qwgt.QVBoxLayout(self)
         lay.setSpacing(0)
         lay.setContentsMargins(0, 0, 0, 0)
         lay.addWidget(self.toggle_button)
@@ -69,23 +70,23 @@ class CollapsibleBox(pg.Qt.QtWidgets.QWidget):
 if __name__ == "__main__":
     import sys
     import random
-    qt_app = QtGui.QApplication(sys.argv)
+    qt_app = qwgt.QApplication(sys.argv)
     w = pg.Qt.QtWidgets.QMainWindow()
-    w.setCentralWidget(QtGui.QWidget())
-    dock = QtGui.QDockWidget("Collapsible Demo")
+    w.setCentralWidget(qwgt.QWidget())
+    dock = qwgt.QDockWidget("Collapsible Demo")
     w.addDockWidget(QtCore.Qt.LeftDockWidgetArea, dock)
-    scroll = QtGui.QScrollArea()
+    scroll = qwgt.QScrollArea()
     dock.setWidget(scroll)
-    content = QtGui.QWidget()
+    content = qwgt.QWidget()
     scroll.setWidget(content)
     scroll.setWidgetResizable(True)
-    vlay = QtGui.QVBoxLayout(content)
+    vlay = qwgt.QVBoxLayout(content)
     for i in range(10):
         box = CollapsibleBox("Collapsible Box Header-{}".format(i))
         vlay.addWidget(box)
-        lay = QtGui.QVBoxLayout()
+        lay = qwgt.QVBoxLayout()
         for j in range(8):
-            label = QtGui.QLabel("{}".format(j))
+            label = qwgt.QLabel("{}".format(j))
             color = QtGui.QColor(*[random.randint(0, 255) for _ in range(3)])
             label.setStyleSheet("background-color: {}; color : white;".format(color.name()))
             label.setAlignment(QtCore.Qt.AlignCenter)
