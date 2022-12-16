@@ -31,14 +31,14 @@ class Widget(qwgt.QWidget):
 
     def __init__(self, padview):
         super().__init__()
-        bold = qwgt.QFont()
+        bold = QtGui()
         bold.setBold(True)
         self.padview = padview
         self.setWindowTitle('Mask Editor')
         self.layout = qwgt.QGridLayout()
         row = 0
         row += 1
-        bold = qwgt.QFont()
+        bold = QtGui()
         bold.setBold(True)
         label = qwgt.QLabel('** Type spacebar to do mask action **')
         label.setFont(bold)
