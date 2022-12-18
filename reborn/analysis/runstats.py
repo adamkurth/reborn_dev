@@ -42,7 +42,7 @@ class PixelHistogram:
     bin_max = None  #: The maximum value corresponding to histogram bin *centers*.
     n_bins = None  #: The number of histogram bins.
 
-    def __init__(self, bin_min=None, bin_max=None, n_bins=None, n_pixels=None):
+    def __init__(self, bin_min=None, bin_max=None, n_bins=None, n_pixels=None, **kwargs):
         r""" Creates an intensity histogram for each pixel in a PAD.  For a PAD with N pixels in total, this class
         will produce an array of shape (M, N) assuming that you requested M bins in the histogram.
 
@@ -747,3 +747,278 @@ def analyze_histogram(stats, n_processes=1, debug=0):
             offset[i] = c0
         dbgmsg(f"Pixel {i} of {n_pixels} ({i*100/float(n_pixels):0.2f}%), gain={gain[i]}, offset={offset[i]}")
     return dict(gain=gain, offset=offset)
+
+
+class ParallelAnalyzer:
+    def __init__(self, framegetter=None, start=0, stop=None, step=1, parallel=False, n_processes=1, process_id=0,
+                       config=None):
+        r""" A skeleton for parallel processing with logging and checkpoints.  Do the following to make this worK:
+
+        Put all needed parameters in a single config dictionary and provide the dictionary at startup.
+
+        Define the add_frame method.  It should handle the DataFrames that come from the FrameGetter.  (Make sure it
+        can handle a None type.)  This should build up results.
+
+        Define the save and load methods, which should save/load the current state of the data that you are compiling.
+
+        Define the concatenate method, which should combine data from different chunks when handled by different
+        processors.
+
+        Define the from_dict and to_dict methods, which should convert all the relevant data into a dictionary.
+
+        config["message_prefix"] = Prefix to log messages
+
+
+        """
+        self.analyzer_name = None  # Re-define this to something more sensible
+        self.start = start  # Global start for the full run/framegetter
+        self.stop = stop  # Global stop point for the full run/framegetter
+        self.step = step  # Global step size for the full run/framegetter
+        self.parallel = parallel  # If parallel is true, the processing will be divided into multiple processes
+        self.n_processes = n_processes
+        self.process_id = process_id  # Don't set this manually; it is handled internally
+        self.config = config
+        self.logger = None
+        self.setup_logger()
+        self.framegetter = None
+        self.framegetter_dict = None  # Needed to create replicas of the framegetter in sub-processes
+        self.setup_framegetter(framegetter)
+        self.current_checkpoint_number = 0
+        self.previous_checkpoint_file = None
+        self.checkpoint_interval = None
+        self.checkpoint_file_base = None
+        self.reduce_from_checkpoints = None  # Reduce/concatenate data by first saving to disk (minimize memory use)
+        self.setup_checkpoints()
+        self.initialized = False
+        self.n_chunk = None  # Total frames expected for this chunk of the run (with possible bad frames)
+        self.n_processed = 0  # Number of frames actually processed contributing to the stats (not counting bad frames)
+        if self.stop is None:
+            self.stop = self.framegetter.n_frames
+        self.stop = min(self.stop, self.framegetter.n_frames)
+        self.processing_index = 0
+        self.framegetter_index = 0
+    def setup_logger(self):
+        r""" Setup logger.  This is affected by the config dictionary keys 'debug', 'message_prefix', 'log_file' """
+        # Sometimes we want to prefix a run number or experiment ID (for example).
+        message_prefix = self.config.get("message_prefix", "")
+        # Where to put the log file.
+        logger = logging.getLogger(name=self.analyzer_name)
+        self.logger = logger
+        if len(logger.handlers) > 0:
+            return
+        logger.propagate = False
+        if self.config.get('debug'):
+            level = logging.DEBUG
+        else:
+            level = logging.INFO
+        logger.setLevel(level)
+        pid = f"Process {self.process_id} of {self.n_processes}"
+        if self.process_id == 0:
+            pid = f"Process 0 (main)"
+        formatter = " - ".join(["%(asctime)s", "%(levelname)s", "%(name)s", f"{pid}", f"{message_prefix} %(message)s"])
+        formatter = logging.Formatter(formatter)
+        console_handler = logging.StreamHandler(stream=sys.stdout)
+        console_handler.setFormatter(formatter)
+        console_handler.setLevel(level=level)
+        logger.addHandler(console_handler)
+        filename = self.config.get('log_file')
+        if filename is not None:
+            if len(filename) < 4 or filename[-4:] != '.log':
+                filename += '.log'
+            if self.process_id > 0:
+                filename = filename.replace('.log', f'_{self.process_id:02d}.log')
+            os.makedirs(os.path.dirname(filename), exist_ok=True)
+            if self.config.get('clear_logs', False):
+                if os.path.exists(filename):
+                    self.logger.info(f'Removing log file {filename}')
+                    os.remove(filename)
+            file_handler = logging.FileHandler(filename=filename)
+            file_handler.setFormatter(formatter)
+            file_handler.setLevel(level=level)
+            logger.addHandler(file_handler)
+            logger.info("\n"+"="*40+f"\nNew run, process {self.process_id} of {self.n_processes}\n"+"="*40)
+            logger.info(f"Logging to file {filename}")
+        else:
+            logger.info(f"No logfile specified.")
+
+    def setup_framegetter(self, framegetter):
+        r""" Setup the framegetter.  If running in parallel then we need to prepare a dictionary that allows the
+        framegetter to be created within another process.  If not, then we might need to utilize said dictionary
+        to create a framegetter instance. """
+        if isinstance(framegetter, dict):
+            self.framegetter_dict = framegetter
+            self.logger.info('Creating framegetter')
+            self.framegetter = framegetter['framegetter'](**framegetter['kwargs'])
+            self.logger.debug("Created framegetter")
+        else:
+            self.framegetter = framegetter
+        if self.parallel:
+            if Parallel is None:
+                raise ImportError('You need the joblib package to run padstats in parallel mode.')
+            if self.framegetter_dict is None:
+                if framegetter.init_params is None:
+                    raise ValueError('This FrameGetter does not have init_params attribute needed to make a replica')
+                self.framegetter_dict = {'framegetter': type(framegetter), 'kwargs': framegetter.init_params}
+
+    def setup_checkpoints(self):
+        r""" Setup checkpoints in the case of timeouts.  Affected by config keys 'checkpoint_file' and
+        'checkpoint_interval' """
+        checkpoint_file = self.config.get('checkpoint_file', None)
+        if checkpoint_file is not None:
+            checkpoint_file += f'_checkpoint_{self.n_processes}_{self.process_id}'
+            os.makedirs(os.path.dirname(checkpoint_file), exist_ok=True)
+            logging.info(f"Checkpoint file base: {checkpoint_file}")
+        self.reduce_from_checkpoints = self.config.get("reduce_from_checkpoints", True)
+        if checkpoint_file is None:
+            logging.warning(f"There will be no checkpoint files!")
+            self.reduce_from_checkpoints = False
+        checkpoint_interval = self.config.get('checkpoint_interval', 500)
+        if checkpoint_file:
+            logging.info(f"Checkpoint file base: {checkpoint_file}, Interval: {checkpoint_interval}")
+        self.checkpoint_interval = checkpoint_interval
+        self.checkpoint_file_base = checkpoint_file
+        if self.config.get('clear_checkpoints', False):
+            cpfs = sorted(glob.glob(self.checkpoint_file_base + '*'))
+            for f in cpfs:
+                self.logger.info(f'Removing checkpoint file {f}')
+                os.remove(f)
+
+    def save_checkpoint(self):
+        r""" Saves a checkpoint file.  Uses the save method, which a user can override.  User should not override
+        this method. """
+        if self.checkpoint_file_base is None:
+            return
+        cframe = self.processing_index
+        if not (((cframe+1) % self.checkpoint_interval == 0) or (cframe == self.n_chunk - 1)):
+            return
+        self.logger.debug("Processing checkpoint")
+        self.logger.debug(f'Previous checkpoint file: {self.previous_checkpoint_file}')
+        cpf = self.checkpoint_file_base + f'_{cframe + 1:07d}'
+        self.logger.info(f'Saving checkpoint file {cpf}')
+        self.save(cpf)
+        if self.previous_checkpoint_file is not None:
+            self.logger.info(f'Removing previous checkpoint file {self.previous_checkpoint_file}')
+            os.remove(self.previous_checkpoint_file)
+        self.previous_checkpoint_file = cpf
+
+    def load_checkpoint(self):
+        r""" Loads a checkpoint file.  Uses the load method, which a user can override.  User should not override
+        this method. """
+        if self.checkpoint_file_base:
+            self.logger.info(f"Seeking checkpoint files {self.checkpoint_file_base}*")
+            cpfs = sorted(glob.glob(self.checkpoint_file_base + '*'))
+            self.logger.info(f"Found {len(cpfs)} possible checkpoints")
+            while len(cpfs) > 0:
+                c = cpfs.pop()
+                try:
+                    self.logger.info(f'Loading checkpoint file {c}')
+                    stats = self.load_file(c)
+                    if self.start != stats['start'] or self.stop != stats['stop'] or self.step != stats['step']:
+                        self.logger.warning('The start/stop/step of the checkpoint are mismatched with this job')
+                    idx = int(c.split('_')[-1])
+                    self.from_dict(stats)
+                    self.logger.info(f'Starting at frame {idx}')
+                    self.processing_index = idx
+                    break
+                except Exception as e:
+                    self.logger.warning(f"Problem loading file {c}")
+
+    def add_frame(self, dat):
+        pass
+
+    def clear_data(self):
+        pass
+
+    def initialize_data(self, rdat):
+        pass
+
+    def to_dict(self):
+        return dict()
+
+    def from_dict(self, stats):
+        pass
+
+    def save(self, filename):
+        pass
+
+    def load(self, filename):
+        pass
+
+    def concatenate(self, stats):
+        pass
+
+    def process_frames(self):
+        if self.parallel:
+            return self.process_parallel()
+        self.logger.info(f"Global start frame: {self.start}")
+        self.logger.info(f"Global stop frame: {self.stop}")
+        self.logger.info(f"Global step size: {self.step}")
+        frame_ids = np.arange(self.start, self.stop, self.step, dtype=int)
+        frame_ids = np.array_split(frame_ids, self.n_processes)[self.process_id - 1]
+        t0 = time.time()
+        self.n_processed = 0
+        self.processing_index = 0
+        self.framegetter_index = 0
+        self.n_chunk = len(frame_ids)
+        self.logger.info(f"Total frames for this process: {self.n_chunk}")
+        if self.n_chunk == 0:
+            return None
+        self.load_checkpoint()  # This will fast forward if possible.  Affects processing indices
+        fpsf = 0  # Frames processed so far (not counting those restored from checkpoint)
+        ftp = self.n_chunk - self.processing_index  # Total frames to process (not counting
+        for n in range(self.processing_index, self.n_chunk):
+            self.processing_index = n
+            self.framegetter_index = frame_ids[n]
+            fpsf += 1
+            fg_idx = frame_ids[n]
+            dt = time.time() - t0  # Total processing time so far
+            atpf = dt / fpsf  # Average time per frame
+            tr = atpf*(ftp - fpsf)  # Time remaining
+            freq = 1/atpf if atpf > 0 else 0
+            self.logger.info(f"Frame ID {fg_idx} (# {n+1} of {self.n_chunk}) - {freq:.2f} Hz => {tr / 60:.1f} min. "
+                             f"remaining")
+            dat = self.framegetter.get_frame(frame_number=fg_idx)
+            if dat is None:
+                self.logger.warning('Frame is None')
+            self.add_frame(dat)
+            self.n_processed += 1
+            self.save_checkpoint()
+        self.logger.info('Processing completed')
+        if self.reduce_from_checkpoints:
+            return self.previous_checkpoint_file
+        return self.to_dict()
+    @staticmethod
+    def process(framegetter=None, start=0, stop=None, step=1, parallel=False, n_processes=1, process_id=0, config=None):
+        ps = cls(framegetter=framegetter, start=start, stop=stop, step=step, parallel=parallel,
+                  n_processes=n_processes, process_id=process_id, config=config)
+        ps.process_frames()
+        return ps.to_dict()
+    def process_parallel(self):
+        self.logger.info(f"Launching {self.n_processes} parallel processes")
+        n = self.n_processes
+        fg = self.framegetter_dict
+        conf = self.config
+        out = Parallel(n_jobs=n)(delayed(self.process)(framegetter=fg, start=self.start, stop=self.stop, step=self.step,
+                parallel=False, n_processes=n, process_id=i+1, config=conf) for i in range(n))
+        self.logger.info(f"Compiling results from {self.n_processes} processes")
+        self.clear_data()
+        for i in range(self.n_processes):
+            stats = out[i]
+            if stats is None:
+                self.logger.info(f"No results from process {i}")
+                continue
+            if isinstance(stats, str):
+                self.logger.info(f"Loading checkpoint file {stats}")
+                stats = self.load_dictionary(stats)
+            if stats is None:
+                self.logger.info(f"No results from process {i}")
+                continue
+            # if stats['n_frames'] == 0:
+            #     self.logger.info(f"No results from process {i}")
+            #     continue
+            self.logger.info(f"Concatenating results from process {i} ({stats['n_frames']} frames).")
+            self.concatenate(stats)
+        d = self.to_dict()
+        self.logger.info(f"{d['n_frames']} frames combined.")
+        self.logger.info(f"Done")
+        return d
