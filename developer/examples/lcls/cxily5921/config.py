@@ -28,7 +28,7 @@ def base_config():
     config['n_q_bins'] = 500
     config['q_range'] = [0, 3e10]
     # runstats configurations
-    histogram_config = dict(bin_min=-100, bin_max=100, n_bins=100)
+    histogram_config = dict(bin_min=-5, bin_max=20, n_bins=100, zero_photon_peak=0, one_photon_peak=8)
     runstats_config = dict(log_file=None,
                            checkpoint_file=None,
                            checkpoint_interval=250,
@@ -41,9 +41,12 @@ def base_config():
 def get_config(run_number):
     # This is the place to modify the config according to run number (e.g. detector geometry, etc.)
     config = base_config()
+    run = f"r{run_number:04d}"
+    results = config['results_directory'] + '/runstats/' + run + '/'  # e.g. ./results/runstats/r0045/
     config['run_number'] = run_number
-    config['runstats']['checkpoint_file'] = f"{config['results_directory']}/runstats/checkpoints/r{run_number:04d}/r{run_number:04d}"
-    config['runstats']['log_file'] = f"{config['results_directory']}/runstats/checkpoints/r{run_number:04d}/r{run_number:04d}" 
+    config['runstats']['checkpoint_file'] = results + "checkpoints/" + run
+    config['runstats']['log_file'] = results + "logs/" + run 
+    config['runstats']['results_directory'] = results 
     config['runstats']['message_prefix'] = f"Run {run_number}: "
     return config
 

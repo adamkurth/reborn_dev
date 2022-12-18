@@ -1,5 +1,6 @@
 #!/bin/bash
 run="${1#0}"
+[ -d 'results/sbatch' ] || mkdir results/sbatch
 if [ "$run" == "all" ]; then
 	for r in $(./available_runs.sh); do ./runstats_sbatch.sh "$r"; done
 	exit

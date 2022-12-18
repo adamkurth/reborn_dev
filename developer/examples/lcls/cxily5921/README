@@ -1,0 +1,10 @@
+This directory has some example code for the LY59 experiment.
+
+Before you start running any scripts on the LCLS computers, source the setup script:
+
+> source setup.sh
+
+The above will ensure that your python environment is configured and the reborn
+package is in your python path.
+
+

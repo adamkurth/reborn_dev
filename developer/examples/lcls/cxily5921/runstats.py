@@ -16,10 +16,11 @@ def get_runstats(run_number=1, n_processes=1, max_frames=1e6, overwrite=False):
     r""" Fetches some PAD statistics for a run.  See reborn docs. """
     config = get_config(run_number=run_number)
     config['runstats']['message_prefix'] = f"Run {run_number}"
-    savefile = config['results_directory']+f'/runstats/{run_number:04d}.pkl'
-    os.makedirs(os.path.dirname(savefile), exist_ok=True)
+    #savefile = config['results_directory']+f'/runstats/{run_number:04d}/{run_number:04d}.pkl'
+    savefile = config['runstats']['results_directory'] + f"r{run_number:04d}.pkl"
+    #os.makedirs(os.path.dirname(savefile), exist_ok=True)
     if os.path.exists(savefile) and not overwrite:
-        print('loading', savefile)
+        print('Loading', savefile)
         return analysis.runstats.load_padstats(savefile)
     # We provide the FrameGetter subclass (not instance) and the arguments to initialize the FrameGetter
     framegetter = {'framegetter': LCLSFrameGetter, 
@@ -33,7 +34,7 @@ def get_runstats(run_number=1, n_processes=1, max_frames=1e6, overwrite=False):
         stop = None
     stats = analysis.runstats.padstats(n_processes=n_processes, parallel=True, framegetter=framegetter,
                                        config=config['runstats'])
-    print('saving', savefile)
+    print('Saving', savefile)
     analysis.runstats.save_padstats(stats, savefile)
     return stats
 
@@ -56,7 +57,7 @@ def view_runstats(stats=None, geom=None, mask=None, **kwargs):
 
 def analyze_histogram(run_number, n_processes=1, debug=0, overwrite=False):
     config = get_config(run_number=run_number)
-    savefile = config['results_directory']+f'/runstats/histogram_{run_number:04d}.pkl'
+    savefile = config['results_directory']+f'/runstats/{run_number:04d}/histogram_{run_number:04d}.pkl'
     os.makedirs(os.path.dirname(savefile), exist_ok=True)
     if os.path.exists(savefile) and not overwrite:
         print('loading', savefile)
