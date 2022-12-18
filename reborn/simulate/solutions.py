@@ -106,7 +106,6 @@ def _get_water_interpolated(q, temperature=298, volume=None):
     d = np.loadtxt(water_data, skiprows=1)
     qmag = d[:, 0]*1e10
     intensity = d[:, 1:]
-    print(intensity.shape)
     temp_idx = np.interp(temperature, temp, np.arange(temp.size))
     if temp_idx <= 0:
         Iavg = intensity[:, 0]

@@ -750,6 +750,7 @@ def analyze_histogram(stats, n_processes=1, debug=0):
 
 
 class ParallelAnalyzer:
+
     def __init__(self, framegetter=None, start=0, stop=None, step=1, parallel=False, n_processes=1, process_id=0,
                        config=None):
         r""" A skeleton for parallel processing with logging and checkpoints.  Do the following to make this worK:
@@ -797,6 +798,7 @@ class ParallelAnalyzer:
         self.stop = min(self.stop, self.framegetter.n_frames)
         self.processing_index = 0
         self.framegetter_index = 0
+
     def setup_logger(self):
         r""" Setup logger.  This is affected by the config dictionary keys 'debug', 'message_prefix', 'log_file' """
         # Sometimes we want to prefix a run number or experiment ID (for example).
@@ -898,7 +900,8 @@ class ParallelAnalyzer:
         self.save(cpf)
         if self.previous_checkpoint_file is not None:
             self.logger.info(f'Removing previous checkpoint file {self.previous_checkpoint_file}')
-            os.remove(self.previous_checkpoint_file)
+            if os.path.exists(self.previous_checkpoint_file):
+                os.remove(self.previous_checkpoint_file)
         self.previous_checkpoint_file = cpf
 
     def load_checkpoint(self):
@@ -929,7 +932,7 @@ class ParallelAnalyzer:
     def clear_data(self):
         pass
 
-    def initialize_data(self, rdat):
+    def initialize_data(self):
         pass
 
     def to_dict(self):
@@ -987,12 +990,14 @@ class ParallelAnalyzer:
         if self.reduce_from_checkpoints:
             return self.previous_checkpoint_file
         return self.to_dict()
+
     @staticmethod
     def process(framegetter=None, start=0, stop=None, step=1, parallel=False, n_processes=1, process_id=0, config=None):
         ps = cls(framegetter=framegetter, start=start, stop=stop, step=step, parallel=parallel,
                   n_processes=n_processes, process_id=process_id, config=config)
         ps.process_frames()
         return ps.to_dict()
+
     def process_parallel(self):
         self.logger.info(f"Launching {self.n_processes} parallel processes")
         n = self.n_processes

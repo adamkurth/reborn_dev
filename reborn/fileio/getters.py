@@ -15,6 +15,7 @@
 import time, threading
 from abc import ABC, abstractmethod, abstractproperty
 import numpy as np
+from ..dataframe import DataFrame
 
 
 class FrameGetter(ABC):
@@ -131,12 +132,11 @@ class FrameGetter(ABC):
             print('DEBUG:FrameGetterABC:', *args, **kwargs)
 
     @abstractmethod
-    def get_data(self, frame_number=0):
+    def get_data(self, frame_number=0) -> DataFrame:
         r"""
         This is the only method you should override when making a subclass.
         """
         pass
-        return None
 
     def _get_data_cache_forward(self, frame_number=0):
         r"""
@@ -191,7 +191,7 @@ class FrameGetter(ABC):
     def pandas_dataframe(self, df):
         self._pandas_dataframe = df
 
-    def get_frame(self, frame_number=0, wrap_around=True, log_history=True):
+    def get_frame(self, frame_number=0, wrap_around=True, log_history=True) -> DataFrame:
         r""" Do not override this method. """
         dat = None
         tic = time.time()
@@ -220,17 +220,17 @@ class FrameGetter(ABC):
         self.history[self.history_index] = self.current_frame
         self.history_index = int((self.history_index + 1) % self.history_length)
 
-    def get_history_previous(self):
+    def get_history_previous(self) -> DataFrame:
         r""" Do not override this method. """
         self.history_index = int((self.history_index - 1) % self.history_length)
         return self.get_frame(self.history[self.history_index], log_history=False)
 
-    def get_history_next(self):
+    def get_history_next(self) -> DataFrame:
         r""" Do not override this method. """
         self.history_index = int((self.history_index + 1) % self.history_length)
         return self.get_frame(self.history[self.history_index], log_history=False)
 
-    def get_next_frame(self, skip=1, wrap_around=True):
+    def get_next_frame(self, skip=1, wrap_around=True) -> DataFrame:
         r""" Do not override this method. """
         df = None
         for _ in range(self.n_frames):
@@ -240,7 +240,7 @@ class FrameGetter(ABC):
             break
         return df
 
-    def get_previous_frame(self, skip=1, wrap_around=True):
+    def get_previous_frame(self, skip=1, wrap_around=True) -> DataFrame:
         r""" Do not override this method. """
         df = None
         for _ in range(self.n_frames):
@@ -250,7 +250,7 @@ class FrameGetter(ABC):
             break
         return df
 
-    def get_random_frame(self):
+    def get_random_frame(self) -> DataFrame:
         r""" Do not override this method. """
         df = None
         for _ in range(self.n_frames):
@@ -260,7 +260,7 @@ class FrameGetter(ABC):
             break
         return df
 
-    def get_first_frame(self):
+    def get_first_frame(self) -> DataFrame:
         r""" Get first frame (and skip empty frames if self.skip_empty_frames is True)."""
         df = self.get_frame(frame_number=0)
         if df is None:
