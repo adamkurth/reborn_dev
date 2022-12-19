@@ -10,7 +10,7 @@ def base_config():
     config = dict(experiment_id='cxix53120',
                   results_directory='results',
                   cachedir='cache/',
-                  debug=1)
+                  debug=0)
     # detector configurations (we make a dictionary for every available PAD detector)
     # required keys: pad_id, geometry
     # possible keys: mask, motions
@@ -33,7 +33,7 @@ def base_config():
                            checkpoint_file=None,
                            checkpoint_interval=250,
                            message_prefix='',
-                           debug=True,
+                           debug=False,
                            histogram_params=histogram_config)
     config['runstats'] = runstats_config
     return config

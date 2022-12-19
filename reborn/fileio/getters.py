@@ -12,7 +12,8 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with reborn.  If not, see <https://www.gnu.org/licenses/>.
-import time, threading
+import time
+import threading
 from abc import ABC, abstractmethod, abstractproperty
 import numpy as np
 from ..dataframe import DataFrame
