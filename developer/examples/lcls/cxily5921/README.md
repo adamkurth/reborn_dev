@@ -24,6 +24,17 @@ source setup.sh
 The above will ensure that your python environment is configured (on psana machines) and 
 the reborn package is in your python path.
 
+## Configurations
+
+The `config.py` module contains the various configurations for analysis.  See the contents
+of the file for more details.  Ask Roberto if there are questions.
+
+## Example data
+
+The configurations are presently set to load and analyze data from experiment ID `cxix53120`.  If you don't
+have access you can ask Andy for access.  When the beamtime starts we will switch to the 
+proper `cxily5921` experiment ID.
+
 ## Viewing individual frames
 
 ```bash
@@ -47,7 +58,8 @@ first N frames, you can add the `--max_events` flag.  For other options, do this
 ```bash
 ./runstats --help
 ```
- 
+
+
 
 
 
