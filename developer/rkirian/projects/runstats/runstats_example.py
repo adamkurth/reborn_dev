@@ -43,38 +43,40 @@ histogram_params = dict(bin_min=0, bin_max=20, n_bins=21)
 # Test with single processor
 config = dict(log_file="logs/padstats", checkpoint_file='checkpoints/padstats', checkpoint_interval=21,
               message_prefix='Test Run -', reduce_from_checkpoints=True, histogram_params=histogram_params)
-# stats = runstats.padstats(framegetter=framegetter, config=config)
-# assert stats['sum'].flat[0] == n_frames
-# assert np.sum(np.abs(np.sum(stats['histogram'], axis=1) - n_frames)) == 0
-# # runstats.view_padstats(stats, histogram=True)
-#
-# # Test reloading of checkpoints from the above
-# print('='*50)
-# stats = runstats.padstats(framegetter=framegetter, config=config)
-# # runstats.view_padstats(stats, histogram=True)
-# assert stats['sum'].flat[0] == n_frames
-# delete_checkpoints()
-# print('='*50)
-#
-# # Test start/stop/step
-# stats = runstats.padstats(framegetter=framegetter, start=1, stop=6, step=2, config=config)
-# # runstats.view_padstats(stats, histogram=True)
-# assert stats['sum'].flat[0] == 3
-# print('='*50)
-# delete_checkpoints()
-#
-# # Test multiple processes
-# stats = runstats.padstats(framegetter=framegetter, n_processes=4, config=config)
-# # runstats.view_padstats(stats, histogram=True)
-# delete_checkpoints()
-# print('='*50)
-#
-# # Test fewer frames than processes
-# framegetter = Getter(geom=geom, mask=mask, beam=beam, n_frames=3)
-# stats = runstats.padstats(framegetter=framegetter, n_processes=4, config=config)
-# # runstats.view_padstats(stats, histogram=True)
-# delete_checkpoints()
+stats = runstats.padstats(framegetter=framegetter, config=config)
+assert stats['sum'].flat[0] == n_frames
+assert np.sum(np.abs(np.sum(stats['histogram'], axis=1) - n_frames)) == 0
+# runstats.view_padstats(stats, histogram=True)
 
+# Test reloading of checkpoints from the above
+print('='*50)
+stats = runstats.padstats(framegetter=framegetter, config=config)
+# runstats.view_padstats(stats, histogram=True)
+assert stats['sum'].flat[0] == n_frames
+delete_checkpoints()
+print('='*50)
+
+# Test start/stop/step
+stats = runstats.padstats(framegetter=framegetter, start=1, stop=6, step=2, config=config)
+# runstats.view_padstats(stats, histogram=True)
+assert stats['sum'].flat[0] == 3
+print('='*50)
+delete_checkpoints()
+
+# Test multiple processes
+stats = runstats.padstats(framegetter=framegetter, n_processes=4, config=config)
+# runstats.view_padstats(stats, histogram=True)
+delete_checkpoints()
+print('='*50)
+
+# Test fewer frames than processes
+framegetter = Getter(geom=geom, mask=mask, beam=beam, n_frames=3)
+stats = runstats.padstats(framegetter=framegetter, n_processes=4, config=config)
+# runstats.view_padstats(stats, histogram=True)
+delete_checkpoints()
+
+
+sys.exit()
 
 # Test input args that cannot be serialized
 f = open('tst', 'w')
@@ -85,7 +87,6 @@ stats = runstats.padstats(framegetter=framegetter, n_processes=4, config=config)
 delete_checkpoints()
 
 
-sys.exit()
 #
 # n_processes = 5
 # shutil.rmtree("logs", ignore_errors=True)

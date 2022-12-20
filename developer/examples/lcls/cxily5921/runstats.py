@@ -1,14 +1,12 @@
 #!/usr/bin/env python
 import os
 import argparse
-import reborn.fileio.misc
 try:
     from joblib import Parallel, delayed
 except ImportError:
-    Parallel = None
-    delayed = None
+    Parallel = delayed = None
 from reborn.external.lcls import LCLSFrameGetter
-from reborn import analysis
+from reborn.analysis.runstats import padstats, save_padstats, load_padstats, view_padstats
 from config import get_config
 
 
@@ -18,12 +16,12 @@ def get_runstats(run_number=1, n_processes=1, max_frames=None, overwrite=False):
     savefile = config['runstats']['results_directory'] + f"r{run_number:04d}.pkl"
     if os.path.exists(savefile) and not overwrite:
         print('Loading', savefile)
-        return analysis.runstats.load_padstats(savefile)
+        return load_padstats(savefile)
     framegetter = LCLSFrameGetter(run_number=run_number, max_events=max_frames, experiment_id=config['experiment_id'],
-                              pad_detectors=config['pad_detectors'], cachedir=config['cachedir'])
-    stats = analysis.runstats.padstats(n_processes=n_processes, framegetter=framegetter, config=config['runstats'])
+                                  pad_detectors=config['pad_detectors'], cachedir=config['cachedir'])
+    stats = padstats(framegetter=framegetter, stop=max_frames, n_processes=n_processes, config=config['runstats'])
     print('Saving', savefile)
-    analysis.runstats.save_padstats(stats, savefile)
+    save_padstats(stats, savefile)
     return stats
 
 
@@ -40,7 +38,7 @@ def view_runstats(stats=None, geom=None, mask=None, **kwargs):
         stats['mask'] = mask
     if geom is not None:
         stats['pad_geometry'] = geom
-    analysis.runstats.view_padstats(stats)
+    view_padstats(stats)
 
 #
 # def analyze_histogram(run_number, n_processes=1, debug=0, overwrite=False):
@@ -72,4 +70,4 @@ if __name__ == '__main__':
         # hist = analyze_histogram(run_number=args.run, n_processes=args.n_processes, debug=1, overwrite=False)
         # stats['gain'] = hist['gain']
         # stats['offset'] = hist['offset']
-        analysis.runstats.view_padstats(stats, histogram=True)
+        view_padstats(stats, histogram=True)

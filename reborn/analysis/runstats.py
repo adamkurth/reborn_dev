@@ -20,7 +20,6 @@ import logging
 import time
 import glob
 from abc import ABC, abstractmethod
-from functools import partial
 import numpy as np
 import pyqtgraph as pg
 try:
@@ -191,7 +190,7 @@ class ParallelAnalyzer(ABC):
             logger.info(f"No logfile specified.  Specify it by adding 'log_file' to the config dictionary.")
 
     def _setup_framegetter(self, framegetter):
-        r""" Setup the framegetter.  If running in parallel then we need to prepare a dictionary that allows the
+        r""" Set up the framegetter.  If running in parallel then we need to prepare a dictionary that allows the
         framegetter to be created within another process.  If not, then we might need to utilize said dictionary
         to create a framegetter instance. """
         if callable(framegetter):
@@ -527,15 +526,9 @@ class PADStats(ParallelAnalyzer):
         self.wavelengths = None  # Array of all wavelengths
         self.gain = None
         self.offset = None
-    # @staticmethod
-    # def get_default_config(histogram=True):
-    #     hp = None
-    #     if histogram:
-    #         hp = dict(bin_min=-30, bin_max=100, n_bins=100, zero_photon_peak=0, one_photon_peak=30)
-    #     return dict(log_file=None, checkpoint_file=None, checkpoint_interval=500, message_prefix="", debug=True,
-    #               reduce_from_checkpoints=True, histogram_params=hp)
     def setup_histogram(self):
         if self.histogram_params is not None:
+            self.logger.info('Setting up histogram')
             if self.histogram_params.get('n_pixels', None) is None:
                 self.histogram_params['n_pixels'] = self.sum_pad.shape[0]
             self.histogrammer = PixelHistogram(**self.histogram_params)
@@ -569,6 +562,7 @@ class PADStats(ParallelAnalyzer):
         if self.histogrammer is not None:
             self.histogrammer.add_frame(rdat)  #, mask=dat.get_mask_flat())
     def finalize(self):
+        self.logger.info('Finalizing analysis')
         if self.histogrammer is not None:
             self.logger.info('Attempting to get gain and offset from histogram')
             self.gain, self.offset = self.histogrammer.gain_and_offset()
@@ -660,20 +654,12 @@ class PADStats(ParallelAnalyzer):
             self.histogrammer.histogram += stats['histogram']
 
 
-def padstats(framegetter=None, start=0, stop=None, step=None, n_processes=1, config=None):
+def padstats(framegetter=None, start=0, stop=None, step=1, n_processes=1, config=None):
     r""" Gather PAD statistics for a dataset.
 
     Given a |FrameGetter| subclass instance, fetch the mean intensity, mean squared intensity, minimum,
     and maximum intensities, and optionally a pixel-by-pixel intensity histogram.  The function can run on multiple
     processors via the joblib library.  Logfiles and checkpoint files are created.
-
-    Note:
-        If you run the function in parallel mode, you cannot pass a |FrameGetter| instance from the main process to the
-        children processes.  Each process must initialize its own instance of the |FrameGetter|.  Instead of
-        passing a class instance, you must instead pass in a dictionary with the 'framegetter' key set to the desired
-        |FrameGetter| subclass (not an instance of the subclass), and the 'kwargs' key set to the keyword arguments
-        needed to instantiate the subclass.
-        For example: dict(framegetter=LCLSFrameGetter, kwargs=dict(experiment_id='cxilu1817', run_number=150))
 
     The return of this function is a dictionary with the following keys:
 
@@ -717,7 +703,6 @@ def padstats(framegetter=None, start=0, stop=None, step=None, n_processes=1, con
         start (int): Which frame to start with.
         stop (int): Which frame to stop at.
         step (int): Step size between frames (default 1).
-        parallel (bool): Set to true to use joblib for parallel processing.
         n_processes (int): How many processes to run in parallel (if parallel=True).
         config (dict): The configuration dictionary explained above.
 

@@ -9,8 +9,11 @@ class Getter(abc.ABC):
         self._kwargs = kwargs
         return self
     def factory(self):
+        cls = type(self)
+        args = self._args
+        kwargs = self._kwargs
         def f():
-            return type(self)(*self._args, **self._kwargs)
+            return cls(*args, **kwargs)
         return f
 class Getter2(Getter):
     def __init__(self, a, b=None):

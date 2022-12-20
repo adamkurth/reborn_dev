@@ -104,8 +104,11 @@ class FrameGetter(ABC):
     def factory(self):
         r""" Returns a function that, when called, will replicate this class instance.  Useful if you need to
         replicate a class instance within parallel processes. """
+        t = type(self)
+        args = self._args
+        kwargs = self._kwargs
         def factory():
-            return type(self)(*self._args, **self._kwargs)
+            return t(*args, **kwargs)
         return factory
 
     @property
