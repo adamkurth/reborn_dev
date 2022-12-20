@@ -38,7 +38,6 @@ class FrameGetter(ABC):
 
         class MyFrameGetter(FrameGetter):
             def __init__(self, arguments, **kwargs):
-                super().__init__(**kwargs)
                 # Do whatever is needed to set up the data source.
                 # Be sure to set the n_frames attribute:
                 self.n_frames = something_based_on_arguments
@@ -50,27 +49,6 @@ class FrameGetter(ABC):
     are, and the get_data method should be defined such that it returns a properly constructed |DataFrame| instance.
     The |FrameGetter| base class will then implement other conveniences such as get_next_frame(), get_previous_frame(),
     etc.
-
-    Some advanced notes:
-
-    COPYING: Please understand that it is not always straightforward to copy a |FrameGetter| because, for example,
-    it might have pointers to file objects that should not be accessed by multiple threads.  If you want your
-    subclass to allow copies, then you need to store all of the initialization keyword parameters in the init_params
-    dictionary.
-
-    PARALLEL PROCESSING: Parallel processing is not problematic so long as you create a new |FrameGetter| instance
-    within each process.  Our current strategy for this is to pass the init_params dictionary mentioned above
-    (needed for creating a copy) along with your |FrameGetter| subclass type.  We create a dictionary like so:
-
-    .. code-block:: Python
-
-        fgd = {"framegetter": YourSubclass, "kwargs": your_init_params}
-
-    Next, you can create a new instance of the |FrameGetter| like so:
-
-    .. code-block:: Python
-
-        fg = fgd["framegetter"](**fgd["kwargs"])
 
     POSTPROCESSING: Sometimes you have a |FrameGetter| subclass that serves up data, but for each frame you need to
     perform a couple of extra manipulations to the |DataFrame| that are not already implemented in your subclass.  For
@@ -88,7 +66,6 @@ class FrameGetter(ABC):
 
     In the above, the mygetter instance will peform the usual steps when you call the get_frame method, but the list
     of postprocessor functions will first intercept the |DataFrame| s before they are returned.
-
     """
 
     _n_frames = 1
@@ -105,16 +82,31 @@ class FrameGetter(ABC):
     _cached_data = None
     _cache_forward = False
     _debug = 0
+    _args = None
+    _kwargs = None
     postprocessors = []
 
-    def __init__(self, postprocessors=None):
-        if postprocessors is not None:
-            self.postprocessors = postprocessors
+    def __init__(self):
+        pass
+
+    def __new__(cls, *args, **kwargs):
+        self = object.__new__(cls)
+        self._args = args
+        self._kwargs = kwargs
+        self.postprocessors = kwargs.get('postprocessors', [])
+        return self
 
     def __copy__(self):
         if self.init_params is not None:
             return type(self)(**self.init_params)
         raise ValueError('Cannot copy because init_params is not defined for this FrameGetter subclass.')
+
+    def factory(self):
+        r""" Returns a function that, when called, will replicate this class instance.  Useful if you need to
+        replicate a class instance within parallel processes. """
+        def factory():
+            return type(self)(*self._args, **self._kwargs)
+        return factory
 
     @property
     def n_frames(self):

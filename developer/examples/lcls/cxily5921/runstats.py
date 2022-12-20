@@ -12,26 +12,15 @@ from reborn import analysis
 from config import get_config
 
 
-def get_runstats(run_number=1, n_processes=1, max_frames=1e6, overwrite=False):
+def get_runstats(run_number=1, n_processes=1, max_frames=None, overwrite=False):
     r""" Fetches some PAD statistics for a run.  See reborn docs. """
     config = get_config(run_number=run_number)
-    config['runstats']['message_prefix'] = f"Run {run_number}"
-    #savefile = config['results_directory']+f'/runstats/{run_number:04d}/{run_number:04d}.pkl'
     savefile = config['runstats']['results_directory'] + f"r{run_number:04d}.pkl"
-    #os.makedirs(os.path.dirname(savefile), exist_ok=True)
     if os.path.exists(savefile) and not overwrite:
         print('Loading', savefile)
         return analysis.runstats.load_padstats(savefile)
-    # We provide the FrameGetter subclass (not instance) and the arguments to initialize the FrameGetter
-    framegetter = {'framegetter': LCLSFrameGetter, 
-                   'kwargs': {'run_number': run_number,
-                              'max_events': max_frames,
-                              'experiment_id': config['experiment_id'], 
-                              'pad_detectors': config['pad_detectors'],
-                              'cachedir': config['cachedir']}}
-    # Reborn does the standard processing pipeline, parallelized with joblib
-    if max_frames == 1e6:
-        stop = None
+    framegetter = LCLSFrameGetter(run_number=run_number, max_events=max_frames, experiment_id=config['experiment_id'],
+                              pad_detectors=config['pad_detectors'], cachedir=config['cachedir'])
     stats = analysis.runstats.padstats(n_processes=n_processes, framegetter=framegetter, config=config['runstats'])
     print('Saving', savefile)
     analysis.runstats.save_padstats(stats, savefile)
