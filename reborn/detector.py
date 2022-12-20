@@ -924,6 +924,8 @@ class PADGeometry:
         if not isinstance(binning, int):
             raise ValueError('binning should be an integer')
         p = self.copy()
+        p._parent_data_slice = None
+        p._parent_data_shape = None
         p.n_fs = int(p.n_fs / binning)
         p.n_ss = int(p.n_ss / binning)
         p.t_vec += (p.fs_vec + p.ss_vec) * (binning - 1) / 2
