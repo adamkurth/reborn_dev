@@ -9,6 +9,7 @@ before_script:
   - bash test_minimal_dependencies.sh
   - bash cleanup_everything.sh
   - source activate reborn # This was set up in developer/docker/build_docker.sh
+  - export PYOPENCL_COMPILER_OUTPUT=1
 #  - conda list # Helpful for debugging in the future...
 #  - python --version
 #  - cat /usr/local/miniconda/envs/reborn/etc/OpenCL/vendors/pocl.icd

@@ -1496,12 +1496,12 @@ class DummyFrameGetter(FrameGetter):
             if pad_geometry is None:
                 if isinstance(data, np.ndarray):
                     data = [data]
-                self.logger.warn('Making up some *GARBAGE* PAD geometry because you did not provide a geometry.')
+                logger.warning('Making up some *GARBAGE* PAD geometry because you did not provide a geometry.')
                 pad_geometry = []
                 shft = 0
                 for dat in data:
                     if len(dat.shape) == 1:
-                        self.logger.warn('Your PAD data is a 1D array and you did not provide geometry information.')
+                        logger.warning('Your PAD data is a 1D array and you did not provide geometry information.')
                     pad = detector.PADGeometry(distance=1.0, pixel_size=1.0, shape=dat.shape)
                     pad.t_vec[0] += shft
                     shft += pad.shape()[0]
@@ -1509,7 +1509,7 @@ class DummyFrameGetter(FrameGetter):
             pad_geometry = detector.PADGeometryList(pad_geometry)
             # Handling of beam info:
             if beam is None:
-                self.logger.warn('Making up some *GARBAGE* beam information because you provided no specification.')
+                logger.warning('Making up some *GARBAGE* beam information because you provided no specification.')
                 beam = source.Beam(photon_energy=9000 * 1.602e-19)
             self.dataframe = DataFrame(raw_data=data, pad_geometry=pad_geometry, beam=beam, mask=mask)
         self.n_frames = 1
