@@ -23,32 +23,36 @@ rad90 = np.pi/2
 ##########################################################################
 # Configurations
 #######################################################################
-pad_geometry_file = [detector.epix100_geom_file, detector.jungfrau4m_geom_file]
-pad_binning = [2, 2]
-detector_distance = [2.4, 0.5]
-beamstop_size = 5e-3
-photon_energy = 7000 * eV
+poisson = 1  # Include Poisson noise
+protein = 1  # Include protein contrast in diffraction amplitudes
+one_particle = 0  # Fix particle counts to one per drop
+droplet = 1  # Include droplet diffraction
+correct_sa = 0  # Correct for solid angles (helpful for viewing multiple detectors with different pixel sizes)
+atomistic = 0  # Do the all-atom protein simulation
+gas_background = 1  # Include gas background
+bulk_water = 1  # Include bulk water background
+view = 1  # View diffraction
+pad_geometry_file = [detector.epix100_geom_file, detector.jungfrau4m_geom_file]  # Can be list of detectors
+pad_binning = [2, 2]  # For speed, bin the pixels
+detector_distance = [2.4, 0.5]  # Average distances of detectors
+beamstop_size = 5e-3  # Mask beamstop region
+photon_energy = 7000 * eV  # All units are SI
 pulse_energy = 0.5e-3
-drop_radius = 100e-9 / 2
-beam_diameter = 0.5e-6
-map_resolution = 0.1e-9  # Minimum resolution for 3D density map
-map_oversample = 2  # Oversampling factor for 3D density map
-cell = 200e-10  # Unit cell size (assume P1, cubic)
+drop_radius = 100e-9 / 2  # Average droplet radius
+drop_radius_fwhm = 0  # FWHM of droplet radius distribution (tophat distribution at present)
+beam_diameter = 0.5e-6  # FWHM of x-ray beam (tophat profile at present)
+map_resolution = 0.1e-9  # Minimum resolution for 3D density map.  Beware of overloading GPU memory...
+map_oversample = 2  # Oversampling factor for 3D density map.  Beware of overloading GPU memory...
+cell = 200e-10  # Unit cell size (assume P1, cubic).  Fake unit cell affects the density map.
 pdb_file = ['1SS8', '3IYF', '1PCQ', '2LYZ', 'BDNA25_sp.pdb'][0]
 protein_concentration = 10  # Protein concentration in mg/ml = kg/m^3
-gas_params = {'path_length': [0, None], 'gas_type': 'he', 'pressure': 100e-6, 'n_simulation_steps': 5}
+# Parameters for gas background calculation.  Give the full path through which x-rays interact with the gas.
+gas_params = {'path_length': [0, None], 'gas_type': 'he', 'pressure': 100e-6, 'n_simulation_steps': 5,
+              'temperature': 293}
 random_seed = 2022  # Seed for random number generator (choose None to make it random)
 gpu_double_precision = False
 gpu_group_size = 32
-poisson = 1
-protein = 1
-one_particle = 1
-droplet = 1
-correct_sa = 0
-atomistic = 0
-gas_background = 1
-bulk_water = 1
-view = 1
+
 
 #########################################################################
 # Derived parameters
@@ -60,15 +64,15 @@ if not isinstance(pad_geometry_file, list):
     pad_geometry_file = [pad_geometry_file]
     detector_distance = [detector_distance]
     pad_binning = [pad_binning]
-pads = detector.PADGeometryList()
+geom = detector.PADGeometryList()
 for i in range(len(pad_geometry_file)):
     p = detector.load_pad_geometry_list(pad_geometry_file[i]).binned(pad_binning[i])
     p.center_at_origin()
     p.translate([0, 0, detector_distance[i]])
-    pads += p
-mask = pads.beamstop_mask(beam=beam, min_radius=beamstop_size)
+    geom += p
+mask = geom.beamstop_mask(beam=beam, min_radius=beamstop_size)
 f_dens_water = atoms.xraylib_scattering_density('H2O', water_density, photon_energy, approximate=True)
-q_mags = pads.q_mags(beam=beam)
+q_mags = geom.q_mags(beam=beam)
 cryst = crystal.CrystalStructure(pdb_file, spacegroup='P1', unitcell=(cell, cell, cell, rad90, rad90, rad90),
                                  create_bio_assembly=True)
 dmap = crystal.CrystalDensityMap(cryst, map_resolution, map_oversample)
@@ -81,9 +85,9 @@ F = fftshift(fftn(rho))
 rho_cell = fftshift(rho)
 gpucore = clcore.ClCore(double_precision=gpu_double_precision, group_size=gpu_group_size)
 F_gpu = gpucore.to_device(F)
-q_vecs_gpu = gpucore.to_device(pads.q_vecs(beam=beam))
-q_mags_gpu = gpucore.to_device(pads.q_mags(beam=beam))
-amps_gpu = gpucore.to_device(shape=pads.n_pixels, dtype=gpucore.complex_t)
+q_vecs_gpu = gpucore.to_device(geom.q_vecs(beam=beam))
+q_mags_gpu = gpucore.to_device(geom.q_mags(beam=beam))
+amps_gpu = gpucore.to_device(shape=geom.n_pixels, dtype=gpucore.complex_t)
 q_min = dmap.q_min
 q_max = dmap.q_max
 protein_number_density = protein_concentration/cryst.molecule.get_molecular_weight()
@@ -97,22 +101,30 @@ print('Molecules per drop:', n_proteins_per_drop)
 print('Particle diameter:', protein_diameter)
 print('Density map grid size: (%d, %d, %d)' % tuple(dmap.shape))
 
+#####################################################################
+# Conversion of structure factors |F(q)|^2 to photon counts.  This includes classical electron radius, incident fluence,
+# solid angles of pixels, and polarization factor:  I(q) = r_e^2 J0 dOmega P(q) |F(q)|^2
+##########################################################################
+f2p = const.r_e**2 * beam.photon_number_fluence * geom.solid_angles() * geom.polarization_factors(beam=beam)
+
 #######################################################################
-# Bulk water profile
+# Bulk water profile.  Multiply this by the volume of water illuminated (i.e. droplet volume)
 ##########################################################################
 if bulk_water:
     waterprof = solutions.water_scattering_factor_squared(q=q_mags)
     waterprof *= solutions.water_number_density()
-    waterprof *= pads.f2phot(beam)
+    waterprof *= f2p
 
 ########################################################################
-# Gas background
+# Gas background.  This is the same for all shots.
 ########################################################################
 if gas_background:
-    gasbak = gas.get_gas_background(pads, beam, **gas_params)
+    gasbak = gas.get_gas_background(geom, beam, **gas_params)
 
 ###########################################################################
-# Water droplet with protein, 2D PAD simulation
+# Water droplet with protein, 2D PAD simulation.
+# We make a subclass of the reborn "FrameGetter" base class to serve up DataFrames.
+# This FrameGetter subclass can be replaced with the LCLSFrameGetter subclass for the analysis of real data.
 ##########################################################################
 class DropletGetter(FrameGetter):
     def __init__(self):
@@ -121,7 +133,7 @@ class DropletGetter(FrameGetter):
     def get_data(self, frame_number=0):
         t = time()
         np.random.seed(int(frame_number))
-        dd = drop_radius*2 #+ (np.random.rand()-0.5)*drop_radius/5
+        dd = drop_radius*2 + (np.random.rand()-0.5)*drop_radius_fwhm
         nppd = int(protein_number_density*4/3*np.pi*(dd/2)**3)
         if one_particle:
             nppd = 1
@@ -139,7 +151,7 @@ class DropletGetter(FrameGetter):
                                                R=R, U=U, a=a_gpu, add=True)
         if droplet > 0:
             gpucore.sphere_form_factor(r=dd / 2, q=q_mags_gpu, a=a_gpu, dens=f_dens_water, add=True)
-        pattern = np.abs(a_gpu.get()) ** 2 * pads.f2phot(beam)
+        pattern = f2p * np.abs(a_gpu.get()) ** 2
         if gas_background:
             pattern += gasbak
         if bulk_water:
@@ -147,9 +159,9 @@ class DropletGetter(FrameGetter):
         if poisson:
             pattern = np.random.poisson(pattern)
         if correct_sa:
-            pattern *= 1e6/pads.solid_angles()
+            pattern *= 1e6 / geom.solid_angles()
         print(time() - t, 'seconds')
-        df = dataframe.DataFrame(pad_geometry=pads, beam=beam, raw_data=pattern, mask=mask)
+        df = dataframe.DataFrame(pad_geometry=geom, beam=beam, raw_data=pattern, mask=mask)
         return df
 
 fg = DropletGetter()

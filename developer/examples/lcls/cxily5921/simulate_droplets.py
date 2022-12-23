@@ -59,6 +59,7 @@ gpu_group_size = 32
 #########################################################################
 if random_seed is not None:
     np.random.seed(random_seed)  # Make random numbers that are reproducible
+# Set up geometry and beam
 beam = source.Beam(photon_energy=photon_energy, diameter_fwhm=beam_diameter, pulse_energy=pulse_energy)
 if not isinstance(pad_geometry_file, list):
     pad_geometry_file = [pad_geometry_file]
@@ -71,6 +72,7 @@ for i in range(len(pad_geometry_file)):
     p.translate([0, 0, detector_distance[i]])
     geom += p
 mask = geom.beamstop_mask(beam=beam, min_radius=beamstop_size)
+print("Set up density map from PDB file")
 f_dens_water = atoms.xraylib_scattering_density('H2O', water_density, photon_energy, approximate=True)
 q_mags = geom.q_mags(beam=beam)
 cryst = crystal.CrystalStructure(pdb_file, spacegroup='P1', unitcell=(cell, cell, cell, rad90, rad90, rad90),
@@ -83,6 +85,7 @@ rho = dmap.place_atoms_in_map(x, f, mode='nearest')  # FIXME: replace 'nearest' 
 rho[rho != 0] -= f_dens_water * dmap.voxel_volume  # FIXME: Need a better model for solvent envelope
 F = fftshift(fftn(rho))
 rho_cell = fftshift(rho)
+print("Set up GPU")
 gpucore = clcore.ClCore(double_precision=gpu_double_precision, group_size=gpu_group_size)
 F_gpu = gpucore.to_device(F)
 q_vecs_gpu = gpucore.to_device(geom.q_vecs(beam=beam))
@@ -92,7 +95,7 @@ q_min = dmap.q_min
 q_max = dmap.q_max
 protein_number_density = protein_concentration/cryst.molecule.get_molecular_weight()
 n_proteins_per_drop = int(protein_number_density*4/3*np.pi*drop_radius**3)
-protein_diameter = cryst.molecule.max_atomic_pair_distance  # Nominal particle size
+protein_diameter = cryst.molecule.get_size()  # Nominal particle size
 
 # pg.image(np.sum(np.fft.fftshift(np.real(rho)), axis=2))
 
@@ -111,6 +114,7 @@ f2p = const.r_e**2 * beam.photon_number_fluence * geom.solid_angles() * geom.pol
 # Bulk water profile.  Multiply this by the volume of water illuminated (i.e. droplet volume)
 ##########################################################################
 if bulk_water:
+    print("Simulate bulk water background")
     waterprof = solutions.water_scattering_factor_squared(q=q_mags)
     waterprof *= solutions.water_number_density()
     waterprof *= f2p
@@ -119,6 +123,7 @@ if bulk_water:
 # Gas background.  This is the same for all shots.
 ########################################################################
 if gas_background:
+    print("Simulate gas background")
     gasbak = gas.get_gas_background(geom, beam, **gas_params)
 
 ###########################################################################
@@ -137,7 +142,7 @@ class DropletGetter(FrameGetter):
         nppd = int(protein_number_density*4/3*np.pi*(dd/2)**3)
         if one_particle:
             nppd = 1
-        print(nppd, 'particles')
+        print('Simulating', nppd, 'particles')
         p_vecs = placer.particles_in_a_sphere(sphere_diameter=dd, n_particles=nppd, particle_diameter=protein_diameter)
         a_gpu = amps_gpu * 0
         if protein:
@@ -163,9 +168,16 @@ class DropletGetter(FrameGetter):
         print(time() - t, 'seconds')
         df = dataframe.DataFrame(pad_geometry=geom, beam=beam, raw_data=pattern, mask=mask)
         return df
-
+print("Creating frame getter")
 fg = DropletGetter()
-df = fg.get_next_frame()
+print("Estimate time needed per pattern")
+t0 = time()
+for i in range(10):
+    print(i)
+    dat = fg.get_next_frame()
+    intensities = dat.get_raw_data_flat()
+    # intensities = dat.get_raw_data_list()
+print((time()-t0)/10, 'seconds per pattern')
 if view:
-    pv = fg.get_padview(hold_levels=True)
+    pv = fg.get_padview(hold_levels=True, debug_level=3)
     pv.start()

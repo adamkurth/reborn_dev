@@ -14,6 +14,7 @@
 # along with reborn.  If not, see <https://www.gnu.org/licenses/>.
 
 # -*- coding: utf-8 -*-
+import sys
 import os
 import time
 import glob
@@ -23,17 +24,18 @@ import json
 import numpy as np
 import pkg_resources
 import functools
-import reborn
-from reborn import source, detector, utils
-from reborn.dataframe import DataFrame
-from reborn.fileio.getters import FrameGetter
-from reborn.external.pyqtgraph import MultiHistogramLUTWidget #, ImageItem
-# We are using pyqtgraph's wrapper for pyqt because it helps deal with the different APIs in pyqt5 and pyqt4...
+import logging
 import pyqtgraph as pg
 from pyqtgraph.Qt import QtGui, QtCore
 import pyqtgraph.Qt.QtWidgets as qwgt
 from pyqtgraph import ImageItem
-from reborn.utils import get_caller
+from ... import source, detector, utils, fileio
+from ...dataframe import DataFrame
+from ...fileio.getters import FrameGetter
+from ...external.pyqtgraph import MultiHistogramLUTWidget #, ImageItem
+
+
+logger = logging.getLogger(__name__)
 
 # Add some pre-defined colormaps (called "gradients" in pyqtgraph)
 g = pg.graphicsItems.GradientEditorItem.Gradients
@@ -41,18 +43,6 @@ g['bipolar2'] = {'ticks': [(0.0, (255, 0, 0, 255)), (0.5, (0, 0, 0, 255)), (1.0,
 pg.graphicsItems.GradientEditorItem.Gradients = g
 
 plugin_path = pkg_resources.resource_filename('reborn.viewers.qtviews', 'plugins')
-
-
-def write(msg):
-    """
-    Write a message to the terminal.
-
-    Arguments:
-        msg: The text message to write
-
-    Returns: None
-    """
-    print(msg)
 
 
 class PADViewMainWindow(pg.Qt.QtWidgets.QMainWindow):
@@ -89,6 +79,7 @@ class PADView(QtCore.QObject):
 
     # Note that most of the interface was created using the QT Designer tool.  There are many attributes that are
     # not visible here.
+    logger = None
     frame_getter = None
     _dataframe = None
     debug_level = 0  # Levels are 0: no messages, 1: basic messages, 2: more verbose, 3: extremely verbose
@@ -147,6 +138,7 @@ class PADView(QtCore.QObject):
             dataframe_preprocessor (function): Experimental.
         """
         self.debug_level = debug_level
+        self.setup_logger()
         self.debug('Initializing PADView instance.')
         super().__init__()
         self.main = main
@@ -169,7 +161,22 @@ class PADView(QtCore.QObject):
         # self.sig_geometry_changed.connect(self.update_rings)
         self.debug('Initialization complete.')
 
-    def debug(self, *args, level=1, caller=False, **kwargs):
+    def setup_logger(self):
+        logger = logging.getLogger(__name__)
+        self.logger = logger
+        if len(logger.handlers) > 0:
+            return
+        logger.propagate = False
+        level = logging.DEBUG
+        logger.setLevel(level)
+        formatter = " - ".join(["%(asctime)s", "%(levelname)s", "%(name)s", "%(message)s"])
+        formatter = logging.Formatter(formatter)
+        console_handler = logging.StreamHandler(stream=sys.stdout)
+        console_handler.setFormatter(formatter)
+        console_handler.setLevel(level=level)
+        logger.addHandler(console_handler)
+
+    def debug(self, msg, level=1):
         r"""
         Print debug messages according to the self.debug variable.
 
@@ -182,11 +189,8 @@ class PADView(QtCore.QObject):
                 3: extremely verbose
         Returns: None
         """
-        if self.debug_level >= level:
-            c = ''
-            if caller:
-                c = get_caller(1)
-            print('DEBUG:PADView:'+c, *args, **kwargs)
+        if level >= self.debug_level:
+            self.logger.debug(msg)
 
     @property
     def dataframe(self):
@@ -209,7 +213,7 @@ class PADView(QtCore.QObject):
         #     d = self.dataframe.get_raw_data_flat()
         #     self.dataframe.set_raw_data(d*0)
         #     self.dataframe.clear_processed_data()
-        self.debug('Attempted to set dataframe to wrong type!!!!', '(', val, ')')
+        self.debug(f'Attempted to set dataframe to wrong type!!!! {val}')
 
     def setup_ui(self):
         r""" Creates the main interface: QMainWindow, menubar, statusbar, viewbox, etc."""
@@ -333,7 +337,7 @@ class PADView(QtCore.QObject):
         for plg in sorted(glob.glob(os.path.join(plugin_path, '*.py'))):
             plugin_name = os.path.basename(plg).replace('.py', '')
             self.plugin_names.append(plugin_name)
-            self.debug('\tSetup plugin ' + plugin_name, level=1)
+            self.debug('\tSetup plugin ' + plugin_name)
             add_menu(plugin_menu, plugin_name.replace('_', ' '),
                      connect=functools.partial(self.run_plugin, plugin_name))
 
@@ -430,7 +434,7 @@ class PADView(QtCore.QObject):
             br = self.get_view_bounding_rect()
             s = min(br[2], br[3])
             size = (s/4, s/4)
-        self.debug((size, pos).__str__(), 1)
+        self.debug((size, pos).__str__())
         pos = (pos[0] - size[0]/2, pos[1] - size[0]/2)
         roi = pg.RectROI(pos=pos, size=size, centered=True, sideScalers=True)
         roi.name = 'rectangle'
@@ -553,7 +557,7 @@ class PADView(QtCore.QObject):
             self.hide_fast_scan_directions()
 
     def show_all_geom_info(self):
-        self.debug()
+        self.debug("show_all_geom_info")
         self.show_pad_borders()
         self.show_grid()
         self.show_pad_labels()
@@ -561,7 +565,7 @@ class PADView(QtCore.QObject):
         self.show_coordinate_axes()
 
     def hide_all_geom_info(self):
-        self.debug()
+        self.debug("hide_all_geom_info")
         self.hide_pad_borders()
         self.hide_grid()
         self.hide_pad_labels()
@@ -569,14 +573,14 @@ class PADView(QtCore.QObject):
         self.hide_coordinate_axes()
 
     def toggle_all_geom_info(self):
-        self.debug()
+        self.debug("toggle_all_geom_info")
         if self.scan_arrows is None:
             self.show_all_geom_info()
         else:
             self.hide_all_geom_info()
 
     def show_pad_labels(self):
-        self.debug()
+        self.debug("show_pad_labels")
         if self.pad_labels is None:
             self.pad_labels = []
             pad_geometry = self.dataframe.get_pad_geometry()
@@ -593,14 +597,14 @@ class PADView(QtCore.QObject):
                 self.viewbox.addItem(lab)
 
     def hide_pad_labels(self):
-        self.debug()
+        self.debug("hide_pad_labels")
         if self.pad_labels is not None:
             for lab in self.pad_labels:
                 self.viewbox.removeItem(lab)
             self.pad_labels = None
 
     def toggle_pad_labels(self):
-        self.debug()
+        self.debug("toggle_pad_labels")
         if self.pad_labels is None:
             self.show_pad_labels()
         else:
@@ -616,13 +620,13 @@ class PADView(QtCore.QObject):
         im.setTransform(trans)
 
     def choose_mask_color(self):
-        self.debug()
+        self.debug("choose_mask_color")
         color = qwgt.QColorDialog.getColor()
         if color is None:
-            self.debug('Color is None', 1)
+            self.debug('Color is None')
             return
         if not color.isValid():
-            self.debug('Color is invalid', 1)
+            self.debug('Color is invalid')
             return
         self.mask_color[0] = color.red()
         self.mask_color[1] = color.green()
@@ -698,13 +702,13 @@ class PADView(QtCore.QObject):
         if file_name == "":
             return
         if file_type == 'Python Pickle (*.pkl)':
-            write('Saving masks: ' + file_name)
+            print('Saving masks: ' + file_name)
             with open(file_name, "wb") as f:
                 pickle.dump(self.dataframe.get_mask_list(), f)
         if file_type == 'reborn Mask File (*.mask)':
             if file_name.split('.')[-1] != 'mask':
                 file_name += '.mask'
-            write('Saving masks: ' + file_name)
+            print('Saving masks: ' + file_name)
             detector.save_pad_masks(file_name, self.dataframe.get_mask_list())
 
     def load_masks(self):
@@ -723,7 +727,7 @@ class PADView(QtCore.QObject):
             mask = detector.load_pad_masks(file_name)
         self.dataframe.set_mask(mask)
         self.update_masks()
-        write('Loaded mask: ' + file_name)
+        print('Loaded mask: ' + file_name)
 
     def get_hovering_roi_indices(self, flat=True):
         r"""Get the indices within the ROI that the mouse is presently hovering over.  flat=True indicates that you wish
@@ -742,7 +746,7 @@ class PADView(QtCore.QObject):
         p_vecs = geom.position_vecs()
         v_vecs = self.vector_to_view_coords(p_vecs)[:, 0:2]
         if roi.name == 'rectangle':  # Find all pixels within the rectangle
-            self.debug('\tGetting rectangle ROI indices', 1)
+            self.debug('\tGetting rectangle ROI indices')
             sides = [roi.size()[1], roi.size()[0]]
             corner = np.array([roi.pos()[0], roi.pos()[1]])
             angle = roi.angle() * np.pi / 180
@@ -753,7 +757,7 @@ class PADView(QtCore.QObject):
             ind2 = np.dot(d, v2)
             inds = (ind1 >= 0) * (ind1 <= sides[0]) * (ind2 >= 0) * (ind2 <= sides[1])
         elif roi.name == 'circle':
-            self.debug('\tGetting circle ROI indices', 1)
+            self.debug('\tGetting circle ROI indices')
             radius = roi.size()[0]/2.
             center = np.array([roi.pos()[0], roi.pos()[1]]) + radius
             inds = np.sqrt(np.sum((v_vecs - center)**2, axis=1)) < radius
@@ -885,7 +889,7 @@ class PADView(QtCore.QObject):
                                                                  options=options)
         if file_name == "":
             return
-        self.debug('Saving PAD geometry to file: %s' % file_name)
+        self.debug(f'Saving PAD geometry to file: {file_name}')
         detector.save_pad_geometry_list(file_name, self.dataframe.get_pad_geometry())
 
     def load_pad_geometry(self):
@@ -897,7 +901,7 @@ class PADView(QtCore.QObject):
                                                                  options=options)
         if file_name == "":
             return
-        self.debug('Loading PAD geometry from file: %s' % file_name)
+        self.debug(f'Loading PAD geometry from file: {file_name}')
         pads = detector.load_pad_geometry_list(file_name)
         self.update_pad_geometry(pads)
 
@@ -910,7 +914,7 @@ class PADView(QtCore.QObject):
                                                                  options=options)
         if file_name == "":
             return
-        self.debug('Saving Beam to file: %s' % file_name)
+        self.debug(f'Saving Beam to file: {file_name}')
         source.save_beam(self.dataframe.get_beam(), file_name)
 
     def load_beam(self):
@@ -922,7 +926,7 @@ class PADView(QtCore.QObject):
                                                                  options=options)
         if file_name == "":
             return
-        self.debug('Loading Beam from file: %s' % file_name)
+        self.debug('Loading Beam from file: {file_name}')
         beam = source.load_beam(file_name)
         self.update_beam(beam)
 
@@ -1035,25 +1039,25 @@ class PADView(QtCore.QObject):
         radii, angles, q_mags, d_spacings = input
         if radii is not None:
             pens *= int(len(radii) / len(pens))
-            self.debug('add_rings:radii', radii, ', pens', pens)
+            # self.debug('add_rings:radii', radii, ', pens', pens)
             for (r, p) in zip(radii, pens):
                 self.add_ring(radius=r, pen=p)
             return True
         if angles is not None:
             pens *= int(len(angles) / len(pens))
-            self.debug('add_rings:angles', angles, ', pens', pens)
+            # self.debug('add_rings:angles', angles, ', pens', pens)
             for (r, p) in zip(angles, pens):
                 self.add_ring(angle=r, pen=p)
             return True
         if q_mags is not None:
             pens *= int(len(q_mags) / len(pens))
-            self.debug('add_rings:q_mags', q_mags, ', pens', pens)
+            # self.debug('add_rings:q_mags', q_mags, ', pens', pens)
             for (r, p) in zip(q_mags, pens):
                 self.add_ring(q_mag=r, pen=p)
             return True
         if d_spacings is not None:
             pens *= int(len(d_spacings) / len(pens))
-            self.debug('add_rings:d_spacings', d_spacings, ', pens', pens)
+            # self.debug('add_rings:d_spacings', d_spacings, ', pens', pens)
             if repeat is True:
                 d_spacings = [d_spacings[0]/i for i in range(1, 21)]
             for (r, p) in zip(d_spacings, pens):
@@ -1062,7 +1066,7 @@ class PADView(QtCore.QObject):
         return False
 
     def add_ring(self, radius=None, angle=None, q_mag=None, d_spacing=None, pen=None):
-        self.debug('add_ring', radius, angle, q_mag, d_spacing, pen)
+        self.debug('add_ring') #, radius, angle, q_mag, d_spacing, pen)
         if angle is not None:
             if angle >= np.pi:
                 return False
@@ -1189,13 +1193,13 @@ class PADView(QtCore.QObject):
     def show_frame(self, frame_number=0):
         self.debug("show_frame")
         self.dataframe = self.frame_getter.get_frame(frame_number=frame_number)
-        self.debug(self.dataframe, level=2)
+        # self.debug(self.dataframe, level=2)
         self.update_display()
 
     def show_first_frame(self):
         self.debug("show_first_frame")
         self.dataframe = self.frame_getter.get_first_frame()
-        self.debug(self.dataframe, level=2)
+        # self.debug(self.dataframe, level=2)
         self.update_display()
 
     def update_display(self, dataframe=None):
@@ -1259,8 +1263,8 @@ class PADView(QtCore.QObject):
         mask_data, pad_display_data, beam, pad_geometry
         """
         self.debug("load_pickled_dataframe")
-        dataframe = reborn.fileio.misc.load_pickle(file_name)
-        write('Loaded pickled dictionary:' + list(dataframe.keys()).__str__())
+        dataframe = fileio.misc.load_pickle(file_name)
+        print('Loaded pickled dictionary:' + list(dataframe.keys()).__str__())
         self.update_masks(dataframe['mask'])
         self.set_pad_display_data(dataframe['pad_display_data'])
         self.beam = dataframe['beam']
@@ -1276,7 +1280,7 @@ class PADView(QtCore.QObject):
         dataframe['mask_data'] = [m.astype(np.uint8) for m in self.mask_data]
         dataframe['pad_geometry'] = self.pad_geometry
         dataframe['beam'] = self.beam
-        write('Saving pickled dictionary:' + list(dataframe.keys()).__str__())
+        print('Saving pickled dictionary:' + list(dataframe.keys()).__str__())
         if file_name.split('.')[-1] != 'pkl':
             file_name = file_name + '.pkl'
         with open(file_name, "wb") as f:
@@ -1403,7 +1407,7 @@ class PADView(QtCore.QObject):
     # FIXME: purpose is for debugging.
     def call_method_by_name(self, method_name=None, *args, **kwargs):
         r""" Call a method via it's name in string format. Try not to do this... """
-        self.debug()
+        self.debug("call_method_by_name")
         if method_name is None:
             method_name = self.get_text('Call method', 'Method name', '')
         self.debug('method_name: ' + method_name)
@@ -1412,12 +1416,12 @@ class PADView(QtCore.QObject):
             method(*args, **kwargs)
 
     def save_screenshot_dialog(self):
-        self.debug()
+        self.debug("save_screenshot_dialog")
         filepath, _ = self.save_file_dialog(title='Screenshot', default='padview_screenshot.jpg')
         self.save_screenshot(filepath)
 
     def save_screenshot(self, filename):
-        self.debug(':', filename)
+        self.debug('save_screenshot')
         p = self.main_window.grab()
         p.save(filename)
 
@@ -1426,16 +1430,15 @@ class PADView(QtCore.QObject):
         name, type = qwgt.QFileDialog.getSaveFileName(self.main_window, title, default, types, options=options)
         return name, type
 
-    def tic(self, *args, **kwargs):
-        level = kwargs.pop('level', 2)
-        self.debug('tic', '  '*len(self._tic_times), *args, *kwargs, level=level)
+    def tic(self, msg, level=1):
+        self.debug('tic' + '  '*len(self._tic_times) + msg, level=level)
         self._tic_times.append(time.time())
 
-    def toc(self, level=2):
+    def toc(self, level=1):
         if len(self._tic_times) == 0:
             print('Something is wrong with tic/toc')
         tic = self._tic_times.pop()
-        self.debug('toc', '  '*len(self._tic_times), time.time()-tic, 'seconds.', level=level)
+        self.debug('toc' + '  '*len(self._tic_times) + f"{time.time()-tic} seconds.", level=level)
 
 
 def view_pad_data(data=None, pad_geometry=None, show=True, title=None, **kwargs):
@@ -1493,12 +1496,12 @@ class DummyFrameGetter(FrameGetter):
             if pad_geometry is None:
                 if isinstance(data, np.ndarray):
                     data = [data]
-                self.debug('WARNING: Making up some *GARBAGE* PAD geometry because you did not provide a geometry.')
+                self.logger.warn('Making up some *GARBAGE* PAD geometry because you did not provide a geometry.')
                 pad_geometry = []
                 shft = 0
                 for dat in data:
                     if len(dat.shape) == 1:
-                        print('WARNING: Your PAD data is a 1D array and you did not provide geometry information.')
+                        self.logger.warn('Your PAD data is a 1D array and you did not provide geometry information.')
                     pad = detector.PADGeometry(distance=1.0, pixel_size=1.0, shape=dat.shape)
                     pad.t_vec[0] += shft
                     shft += pad.shape()[0]
@@ -1506,9 +1509,9 @@ class DummyFrameGetter(FrameGetter):
             pad_geometry = detector.PADGeometryList(pad_geometry)
             # Handling of beam info:
             if beam is None:
-                self.debug('WARNING: Making up some *GARBAGE* beam information because you provided no specification.')
+                self.logger.warn('Making up some *GARBAGE* beam information because you provided no specification.')
                 beam = source.Beam(photon_energy=9000 * 1.602e-19)
-            self.dataframe = reborn.dataframe.DataFrame(raw_data=data, pad_geometry=pad_geometry, beam=beam, mask=mask)
+            self.dataframe = DataFrame(raw_data=data, pad_geometry=pad_geometry, beam=beam, mask=mask)
         self.n_frames = 1
 
     def get_data(self, frame_number=0):
