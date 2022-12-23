@@ -12,9 +12,11 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with reborn.  If not, see <https://www.gnu.org/licenses/>.
-import time, threading
+import time
+import threading
 from abc import ABC, abstractmethod, abstractproperty
 import numpy as np
+from ..dataframe import DataFrame
 
 
 class FrameGetter(ABC):
@@ -36,7 +38,6 @@ class FrameGetter(ABC):
 
         class MyFrameGetter(FrameGetter):
             def __init__(self, arguments, **kwargs):
-                super().__init__(**kwargs)
                 # Do whatever is needed to set up the data source.
                 # Be sure to set the n_frames attribute:
                 self.n_frames = something_based_on_arguments
@@ -48,27 +49,6 @@ class FrameGetter(ABC):
     are, and the get_data method should be defined such that it returns a properly constructed |DataFrame| instance.
     The |FrameGetter| base class will then implement other conveniences such as get_next_frame(), get_previous_frame(),
     etc.
-
-    Some advanced notes:
-
-    COPYING: Please understand that it is not always straightforward to copy a |FrameGetter| because, for example,
-    it might have pointers to file objects that should not be accessed by multiple threads.  If you want your
-    subclass to allow copies, then you need to store all of the initialization keyword parameters in the init_params
-    dictionary.
-
-    PARALLEL PROCESSING: Parallel processing is not problematic so long as you create a new |FrameGetter| instance
-    within each process.  Our current strategy for this is to pass the init_params dictionary mentioned above
-    (needed for creating a copy) along with your |FrameGetter| subclass type.  We create a dictionary like so:
-
-    .. code-block:: Python
-
-        fgd = {"framegetter": YourSubclass, "kwargs": your_init_params}
-
-    Next, you can create a new instance of the |FrameGetter| like so:
-
-    .. code-block:: Python
-
-        fg = fgd["framegetter"](**fgd["kwargs"])
 
     POSTPROCESSING: Sometimes you have a |FrameGetter| subclass that serves up data, but for each frame you need to
     perform a couple of extra manipulations to the |DataFrame| that are not already implemented in your subclass.  For
@@ -86,7 +66,6 @@ class FrameGetter(ABC):
 
     In the above, the mygetter instance will peform the usual steps when you call the get_frame method, but the list
     of postprocessor functions will first intercept the |DataFrame| s before they are returned.
-
     """
 
     _n_frames = 1
@@ -103,16 +82,34 @@ class FrameGetter(ABC):
     _cached_data = None
     _cache_forward = False
     _debug = 0
+    _args = None
+    _kwargs = None
     postprocessors = []
 
-    def __init__(self, postprocessors=None):
-        if postprocessors is not None:
-            self.postprocessors = postprocessors
+    def __init__(self):
+        pass
+
+    def __new__(cls, *args, **kwargs):
+        self = object.__new__(cls)
+        self._args = args
+        self._kwargs = kwargs
+        self.postprocessors = kwargs.get('postprocessors', [])
+        return self
 
     def __copy__(self):
         if self.init_params is not None:
             return type(self)(**self.init_params)
         raise ValueError('Cannot copy because init_params is not defined for this FrameGetter subclass.')
+
+    def factory(self):
+        r""" Returns a function that, when called, will replicate this class instance.  Useful if you need to
+        replicate a class instance within parallel processes. """
+        t = type(self)
+        args = self._args
+        kwargs = self._kwargs
+        def factory():
+            return t(*args, **kwargs)
+        return factory
 
     @property
     def n_frames(self):
@@ -131,12 +128,11 @@ class FrameGetter(ABC):
             print('DEBUG:FrameGetterABC:', *args, **kwargs)
 
     @abstractmethod
-    def get_data(self, frame_number=0):
+    def get_data(self, frame_number=0) -> DataFrame:
         r"""
         This is the only method you should override when making a subclass.
         """
         pass
-        return None
 
     def _get_data_cache_forward(self, frame_number=0):
         r"""
@@ -191,7 +187,7 @@ class FrameGetter(ABC):
     def pandas_dataframe(self, df):
         self._pandas_dataframe = df
 
-    def get_frame(self, frame_number=0, wrap_around=True, log_history=True):
+    def get_frame(self, frame_number=0, wrap_around=True, log_history=True) -> DataFrame:
         r""" Do not override this method. """
         dat = None
         tic = time.time()
@@ -220,17 +216,17 @@ class FrameGetter(ABC):
         self.history[self.history_index] = self.current_frame
         self.history_index = int((self.history_index + 1) % self.history_length)
 
-    def get_history_previous(self):
+    def get_history_previous(self) -> DataFrame:
         r""" Do not override this method. """
         self.history_index = int((self.history_index - 1) % self.history_length)
         return self.get_frame(self.history[self.history_index], log_history=False)
 
-    def get_history_next(self):
+    def get_history_next(self) -> DataFrame:
         r""" Do not override this method. """
         self.history_index = int((self.history_index + 1) % self.history_length)
         return self.get_frame(self.history[self.history_index], log_history=False)
 
-    def get_next_frame(self, skip=1, wrap_around=True):
+    def get_next_frame(self, skip=1, wrap_around=True) -> DataFrame:
         r""" Do not override this method. """
         df = None
         for _ in range(self.n_frames):
@@ -240,7 +236,7 @@ class FrameGetter(ABC):
             break
         return df
 
-    def get_previous_frame(self, skip=1, wrap_around=True):
+    def get_previous_frame(self, skip=1, wrap_around=True) -> DataFrame:
         r""" Do not override this method. """
         df = None
         for _ in range(self.n_frames):
@@ -250,7 +246,7 @@ class FrameGetter(ABC):
             break
         return df
 
-    def get_random_frame(self):
+    def get_random_frame(self) -> DataFrame:
         r""" Do not override this method. """
         df = None
         for _ in range(self.n_frames):
@@ -260,7 +256,7 @@ class FrameGetter(ABC):
             break
         return df
 
-    def get_first_frame(self):
+    def get_first_frame(self) -> DataFrame:
         r""" Get first frame (and skip empty frames if self.skip_empty_frames is True)."""
         df = self.get_frame(frame_number=0)
         if df is None:

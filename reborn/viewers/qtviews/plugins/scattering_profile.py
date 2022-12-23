@@ -16,8 +16,8 @@
 import numpy as np
 import reborn
 import pyqtgraph as pg
-from pyqtgraph import QtGui, QtCore
-
+from pyqtgraph import QtCore
+import pyqtgraph.Qt.QtWidgets as qwgt
 
 class Plugin():
     widget = None
@@ -49,7 +49,7 @@ class Plugin():
         self.widget.plot_widget.plot(self.current_q/1e10, self.current_profile, clear=True)
         if self.widget.water_checkbox.isChecked():
             self.plot_water_profile()
-        pg.QtGui.QApplication.processEvents()
+        qwgt.QApplication.processEvents()
     def update_geometry(self):
         self.padview.debug()
         pads = self.padview.dataframe.get_pad_geometry()
@@ -68,45 +68,45 @@ class Plugin():
         self.water_profile *= c
         self.water_plot = self.widget.plot_widget.plot(self.profiler.bin_centers/1e10, self.water_profile, clear=False)
         print(self.water_plot)
-        pg.QtGui.QApplication.processEvents()
+        qwgt.QApplication.processEvents()
 
 
-class Widget(QtGui.QMainWindow):
+class Widget(qwgt.QMainWindow):
     def __init__(self, padview, plugin):
         super().__init__()
         self.padview = padview
         self.plugin = plugin
         self.setWindowTitle('Scattering Profile')
-        vbox = QtGui.QVBoxLayout()
+        vbox = qwgt.QVBoxLayout()
 
         self.plot_widget = pg.PlotWidget()
         vbox.addWidget(self.plot_widget)
 
-        hbox = QtGui.QHBoxLayout()
+        hbox = qwgt.QHBoxLayout()
 
-        b = QtGui.QPushButton("Update Profile")
+        b = qwgt.QPushButton("Update Profile")
         b.clicked.connect(self.plugin.update_profile)
         hbox.addWidget(b)
 
-        h = QtGui.QHBoxLayout()
-        self.polarization_checkbox = QtGui.QCheckBox()
+        h = qwgt.QHBoxLayout()
+        self.polarization_checkbox = qwgt.QCheckBox()
         h.addWidget(self.polarization_checkbox, alignment=QtCore.Qt.AlignRight)
-        h.addWidget(QtGui.QLabel('Correct Polarization'))
+        h.addWidget(qwgt.QLabel('Correct Polarization'))
         hbox.addLayout(h)
 
-        h = QtGui.QHBoxLayout()
-        self.solid_angle_checkbox = QtGui.QCheckBox()
+        h = qwgt.QHBoxLayout()
+        self.solid_angle_checkbox = qwgt.QCheckBox()
         h.addWidget(self.solid_angle_checkbox, alignment=QtCore.Qt.AlignRight)
-        h.addWidget(QtGui.QLabel('Correct Solid Angles'))
+        h.addWidget(qwgt.QLabel('Correct Solid Angles'))
         hbox.addLayout(h)
 
-        h = QtGui.QHBoxLayout()
-        self.water_checkbox = QtGui.QCheckBox()
+        h = qwgt.QHBoxLayout()
+        self.water_checkbox = qwgt.QCheckBox()
         h.addWidget(self.water_checkbox, alignment=QtCore.Qt.AlignRight)
-        h.addWidget(QtGui.QLabel('Add Water Profile'))
+        h.addWidget(qwgt.QLabel('Add Water Profile'))
         hbox.addLayout(h)
 
         vbox.addLayout(hbox)
-        main_widget = QtGui.QWidget()
+        main_widget = qwgt.QWidget()
         main_widget.setLayout(vbox)
         self.setCentralWidget(main_widget)

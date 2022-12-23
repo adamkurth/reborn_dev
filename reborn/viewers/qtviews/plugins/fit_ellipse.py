@@ -17,7 +17,8 @@ import os
 import numpy as np
 import reborn
 import pyqtgraph as pg
-from pyqtgraph import QtGui, QtCore
+from pyqtgraph import QtCore
+import pyqtgraph.Qt.QtWidgets as qwgt
 from reborn.analysis.optimize import fit_ellipse_pad
 
 
@@ -28,7 +29,7 @@ class Plugin():
         self.widget = Widget(padview)
 
 
-class Widget(QtGui.QWidget):
+class Widget(qwgt.QWidget):
 
     show_ellipse = False
     ellipse_items = []
@@ -38,38 +39,38 @@ class Widget(QtGui.QWidget):
         super().__init__()
         self.padview = padview
         self.setWindowTitle('Fit Ellipse')
-        self.layout = QtGui.QGridLayout()
+        self.layout = qwgt.QGridLayout()
         row = 0
         row += 1
-        self.layout.addWidget(QtGui.QLabel('Show Ellipse'), row, 1)
-        self.show_ellipse_button = QtGui.QCheckBox()
+        self.layout.addWidget(qwgt.QLabel('Show Ellipse'), row, 1)
+        self.show_ellipse_button = qwgt.QCheckBox()
         self.show_ellipse_button.setChecked(True)
         self.show_ellipse = True
         self.show_ellipse_button.toggled.connect(self.toggle_show_ellipse)
         self.layout.addWidget(self.show_ellipse_button, row, 2, alignment=QtCore.Qt.AlignCenter)
         row += 1
-        self.layout.addWidget(QtGui.QLabel('Mask Below Thresh'), row, 1)
-        self.mask_below_button = QtGui.QCheckBox()
+        self.layout.addWidget(qwgt.QLabel('Mask Below Thresh'), row, 1)
+        self.mask_below_button = qwgt.QCheckBox()
         self.mask_below_button.setChecked(True)
         self.layout.addWidget(self.mask_below_button, row, 2, alignment=QtCore.Qt.AlignCenter)
         row += 1
-        self.update_button = QtGui.QPushButton("Fit Ellipse")
+        self.update_button = qwgt.QPushButton("Fit Ellipse")
         self.update_button.clicked.connect(self.fit_ellipse)
         self.layout.addWidget(self.update_button, row, 1, 1, 2)
         row += 1
-        self.update_geometry_button = QtGui.QPushButton("Update Beam Center")
+        self.update_geometry_button = qwgt.QPushButton("Update Beam Center")
         self.update_geometry_button.clicked.connect(self.update_beam_center)
         self.layout.addWidget(self.update_geometry_button, row, 1, 1, 2)
         row += 1
-        self.dspace_button = QtGui.QPushButton("Update Distance")
+        self.dspace_button = qwgt.QPushButton("Update Distance")
         self.dspace_button.clicked.connect(self.update_distance)
         self.layout.addWidget(self.dspace_button, row, 1, 1, 2)
         row += 1
-        self.layout.addWidget(QtGui.QLabel(u"Q=2π/d (A)"), row, 1)
-        self.qmag = QtGui.QLineEdit("2")
+        self.layout.addWidget(qwgt.QLabel(u"Q=2π/d (A)"), row, 1)
+        self.qmag = qwgt.QLineEdit("2")
         self.layout.addWidget(self.qmag, row, 2)
         row += 1
-        self.q_button = QtGui.QPushButton("Show Q Ring")
+        self.q_button = qwgt.QPushButton("Show Q Ring")
         self.q_button.clicked.connect(self.show_q_ring)
         self.layout.addWidget(self.q_button, row, 1, 1, 2)
         self.setLayout(self.layout)

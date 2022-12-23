@@ -15,6 +15,7 @@
 
 import numpy as np
 from pyqtgraph import QtGui, QtCore
+import pyqtgraph.Qt.QtWidgets as qwgt
 from reborn.external.pyqtgraph import MultiHistogramLUTWidget
 import pyqtgraph as pg
 import reborn
@@ -35,14 +36,14 @@ class Plugin():
         self.widget.show()
 
 
-class Widget(QtGui.QWidget):
+class Widget(qwgt.QWidget):
     data_diff = None
     autoscale = True
     def __init__(self, padview):
         super().__init__()
         self.padview = padview
-        self.hbox = QtGui.QHBoxLayout()
-        self.splitter = QtGui.QSplitter(QtCore.Qt.Horizontal)
+        self.hbox = qwgt.QHBoxLayout()
+        self.splitter = qwgt.QSplitter(QtCore.Qt.Horizontal)
         self.graphics_view = pg.GraphicsView()
         self.viewbox = pg.ViewBox()
         self.viewbox.invertX()
@@ -110,7 +111,7 @@ class Widget(QtGui.QWidget):
         # self.debug(get_caller(), 1)
         self.histogram.gradient.loadPreset(preset)
         self.histogram.setImageItems(self.images)
-        pg.QtGui.QApplication.processEvents()
+        pg.qwgt.QApplication.processEvents()
 
     def set_levels_by_percentiles(self, percents=(1, 99), colormap=None):
         r""" Set upper and lower levels according to percentiles.  This is based on :func:`numpy.percentile`. """

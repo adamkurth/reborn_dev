@@ -18,7 +18,7 @@ r"""
 Utilities for manipulating molecules.
 """
 import numpy as np
-from ..utils import max_pair_distance
+from ..misc.vectors import max_pair_distance
 from . import atoms
 from .. import const
 
@@ -94,6 +94,12 @@ class Molecule(object):
         if self._max_atomic_pair_distance is None:
             self._max_atomic_pair_distance = max_pair_distance(self.coordinates)
         return self._max_atomic_pair_distance
+
+    def get_size(self):
+        r""" Quickly get molecule size (max edge of enclosing rectangle). """
+        r = self.coordinates
+        d = max(np.max(r[:, 0]) - np.min(r[:, 0]), np.max(r[:, 1]) - np.min(r[:, 1]))
+        return max(d, np.max(r[:, 2]) - np.min(r[:, 2]))
 
     def get_molecular_weight(self):
         r"""

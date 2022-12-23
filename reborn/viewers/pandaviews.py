@@ -47,7 +47,6 @@ To build your own widget, subclass DataFrameWidget
 import numpy as np
 import pyqtgraph as pg
 from pyqtgraph import QtGui, QtCore
-import pyqtgraph.Qt.QtWidgets as qwgt
 import pandas
 import operator
 import sys
@@ -145,7 +144,7 @@ class DataFrameModel(QtCore.QAbstractTableModel):
 
     def data(self, index, role=QtCore.Qt.DisplayRole):
         #if role == QtCore.Qt.BackgroundRole:
-        #    return qwgt.QColor(255,255,204)
+        #    return QtGui.QColor(255,255,204)
         if role in (QtCore.Qt.DisplayRole, DataFrameModel.RawDataRole, DataFrameModel.RawIndexRole):
             if not index.isValid():
                 return QtCore.QVariant()
@@ -429,9 +428,9 @@ class DynamicFilterMenuAction(pg.Qt.QtWidgets.QWidgetAction):
         self.parent_menu = menu
 
         # Build Widgets
-        widget = qwgt.QWidget()
-        layout = qwgt.QHBoxLayout()
-        self.label = qwgt.QLabel('Filter')
+        widget = QtGui.QWidget()
+        layout = QtGui.QHBoxLayout()
+        self.label = QtGui.QLabel('Filter')
         self.text_box = DynamicFilterLineEdit()
         self.text_box.bind_dataframewidget(self.parent(), col_ix)
         self.text_box.returnPressed.connect(self._close_menu)
@@ -447,7 +446,7 @@ class DynamicFilterMenuAction(pg.Qt.QtWidgets.QWidgetAction):
         self.parent_menu.close()
 
 
-class FilterListMenuWidget(qwgt.QWidgetAction):
+class FilterListMenuWidget(QtGui.QWidgetAction):
     """Filter textbox in column-right click menu"""
     def __init__(self, parent, menu, col_ix):
         """Filter textbox in column right-click menu
@@ -468,9 +467,9 @@ class FilterListMenuWidget(qwgt.QWidgetAction):
         self.col_ix = col_ix
 
         # Build Widgets
-        widget = qwgt.QWidget()
-        layout = qwgt.QVBoxLayout()
-        self.list = qwgt.QListWidget()
+        widget = QtGui.QWidget()
+        layout = QtGui.QVBoxLayout()
+        self.list = QtGui.QListWidget()
         self.list.setFixedHeight(100)
 
         layout.addWidget(self.list)
@@ -493,7 +492,7 @@ class FilterListMenuWidget(qwgt.QWidgetAction):
         disp_col = set(self.parent().df[col]) # Entries currently displayed
 
         def _build_item(item, state=None):
-            i = qwgt.QListWidgetItem('%s' % item)
+            i = QtGui.QListWidgetItem('%s' % item)
             i.setFlags(i.flags() | QtCore.Qt.ItemIsUserCheckable)
             if state is None:
                 if item in disp_col:
@@ -571,7 +570,7 @@ class FilterListMenuWidget(qwgt.QWidgetAction):
         self.parent()._enable_widgeted_cells()
 
 
-class DataFrameItemDelegate(qwgt.QStyledItemDelegate):
+class DataFrameItemDelegate(QtGui.QStyledItemDelegate):
     """Implements WidgetedCell"""
 
     def __init__(self):
@@ -620,7 +619,7 @@ class DataFrameItemDelegate(qwgt.QStyledItemDelegate):
             return super(DataFrameItemDelegate, self).paint(painter, option, index)
 
 
-class DataFrameWidget(qwgt.QTableView):
+class DataFrameWidget(QtGui.QTableView):
 
     dataFrameChanged = QtCore.pyqtSignal()
     cellClicked = QtCore.pyqtSignal(int, int)
@@ -719,13 +718,13 @@ class DataFrameWidget(qwgt.QTableView):
         if row_ix < 0 or col_ix < 0:
             return #out of bounds
 
-        menu = qwgt.QMenu(self)
+        menu = QtGui.QMenu(self)
         menu = self.make_cell_context_menu(menu, row_ix, col_ix)
         menu.exec_(self.mapToGlobal(event.pos()))
 
     def _header_menu(self, pos):
         """Create popup menu used for header"""
-        menu = qwgt.QMenu(self)
+        menu = QtGui.QMenu(self)
         col_ix = self.horizontalHeader().logicalIndexAt(pos)
         if col_ix == -1:
             # Out of bounds
@@ -812,7 +811,7 @@ class DataFrameWidget(qwgt.QTableView):
         """Convinence function to get standard icons from Qt"""
         if not icon_name.startswith('SP_'):
             icon_name = 'SP_' + icon_name
-        icon = getattr(qwgt.QStyle, icon_name, None)
+        icon = getattr(QtGui.QStyle, icon_name, None)
         if icon is None:
             raise Exception("Unknown icon %s" % icon_name)
         return self.style().standardIcon(icon)
@@ -836,13 +835,13 @@ class DataFrameWidget(qwgt.QTableView):
     def custom_filter(self, col_ix):
         print('This is column', col_ix, '. Custom filter not yet implemented')
 
-# class DataFramePlotWidget(qwgt.QWidget):
+# class DataFramePlotWidget(QtGui.QWidget):
 #     def __init__(self, df, col):
 #         super().__init__()
 #
 
 
-class DataFrameApp(qwgt.QMainWindow):
+class DataFrameApp(QtGui.QMainWindow):
     """Sample DataFrameTable Application"""
     def __init__(self, df, title="Inspecting DataFrame"):
         super(DataFrameApp, self).__init__()
@@ -868,7 +867,7 @@ class DataFrameApp(qwgt.QMainWindow):
         self.setWindowTitle(title)
 
 
-# class ExampleWidgetForWidgetedCell(qwgt.QComboBox):
+# class ExampleWidgetForWidgetedCell(QtGui.QComboBox):
 #     """
 #     To implement a persistent state for the widgetd cell, you must provide
 #     a `getWidgetedCellState` and `setWidgetedCellState` methods.  This is how
@@ -897,7 +896,7 @@ def view_pandas_dataframe(df):
 
 # if __name__ == '__main__':
 #     # Create a quick example
-#     _app = qwgt.QApplication(sys.argv)
+#     _app = QtGui.QApplication(sys.argv)
 #     from analysis.compile_metadata import get_pandas_dataframe
 #     from analysis.lib.dfwidget import DataFrameApp
 #

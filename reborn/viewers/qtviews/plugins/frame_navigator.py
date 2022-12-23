@@ -13,7 +13,8 @@
 # You should have received a copy of the GNU General Public License
 # along with reborn.  If not, see <https://www.gnu.org/licenses/>.
 
-from pyqtgraph import QtGui, QtCore
+from pyqtgraph import QtCore
+import pyqtgraph.Qt.QtWidgets as qwgt
 
 
 class Plugin():
@@ -32,43 +33,43 @@ class Plugin():
 
 def push(label, func, layout):
     r""" Make QPushButton, connect to function, add to layout"""
-    b = QtGui.QPushButton(label, None)
+    b = qwgt.QPushButton(label, None)
     b.clicked.connect(func)
     layout.addWidget(b)
     return b
 
 def label(label, layout):
-    b = QtGui.QLabel(None)
+    b = qwgt.QLabel(None)
     b.setText(str(label))
     layout.addWidget(b)
     return b
 
 def text(label, layout):
-    b = QtGui.QLineEdit(None)
+    b = qwgt.QLineEdit(None)
     b.setText(str(label))
     layout.addWidget(b)
     return b
 
-class Widget(QtGui.QWidget):
+class Widget(qwgt.QWidget):
     def __init__(self, padview):
         super().__init__()
         self.padview = padview
         self.setWindowTitle('Frame Navigator')
-        self.layout = QtGui.QVBoxLayout()
+        self.layout = qwgt.QVBoxLayout()
         # ======  Back  |  Next  |  Rand  ================
-        layout = QtGui.QHBoxLayout()
+        layout = qwgt.QHBoxLayout()
         push("Back", self.show_previous_frame, layout)
         push("Next", self.show_next_frame, layout)
         push("Rand", padview.show_random_frame, layout)
         self.layout.addLayout(layout)
         # ====== Go to frame  =============================
-        layout = QtGui.QHBoxLayout()
+        layout = qwgt.QHBoxLayout()
         push("Go to frame", self.show_frame, layout)
         self.goto = text("1", layout)
         self.goto.returnPressed.connect(self.show_frame)
         self.layout.addLayout(layout)
         # ====== Play  | Rate  ============================
-        layout = QtGui.QHBoxLayout()
+        layout = qwgt.QHBoxLayout()
         self.play = push("Play", self.toggle_play, layout)
         self.play_timer = QtCore.QTimer()
         self.play_timer.timeout.connect(self.show_next_frame)
@@ -76,15 +77,15 @@ class Widget(QtGui.QWidget):
         self.rate = text("1", layout)
         self.layout.addLayout(layout)
         # ====== Frame X of Y   ===========================
-        layout = QtGui.QHBoxLayout()
+        layout = qwgt.QHBoxLayout()
         self.frame_num = label('', layout)
         self.layout.addLayout(layout)
         # ====== Frame ID: Z  ==============================
-        layout = QtGui.QHBoxLayout()
+        layout = qwgt.QHBoxLayout()
         self.frame_id = label('', layout)
         self.layout.addLayout(layout)
         # ====== Skip  |              |  ===================
-        layout = QtGui.QHBoxLayout()
+        layout = qwgt.QHBoxLayout()
         label('Skip:', layout)
         self.skip = text('1', layout)
         self.layout.addLayout(layout)

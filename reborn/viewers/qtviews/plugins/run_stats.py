@@ -13,14 +13,14 @@
 # You should have received a copy of the GNU General Public License
 # along with reborn.  If not, see <https://www.gnu.org/licenses/>.
 
-from time import time
 import multiprocessing
-from reborn.viewers.qtviews.padviews import get_caller
-from pyqtgraph.Qt import QtGui, QtCore
+from pyqtgraph.Qt import QtCore
+import pyqtgraph.Qt.QtWidgets as qwgt
 from reborn.analysis.runstats import padstats, padstats_framegetter
 from reborn.viewers.qtviews.padviews import PADView
 
 cpu_count = multiprocessing.cpu_count()
+
 
 class Plugin():
     widget = None
@@ -28,7 +28,7 @@ class Plugin():
         self.widget = Widget(padview)
         self.widget.show()
 
-class Widget(QtGui.QWidget):
+class Widget(qwgt.QWidget):
 
     stats = None
     worker = None
@@ -38,59 +38,59 @@ class Widget(QtGui.QWidget):
         super().__init__()
         self.padview = padview
         self.setWindowTitle('Run Stats')
-        self.layout = QtGui.QGridLayout()
+        self.layout = qwgt.QGridLayout()
         row = 0
         row += 1
-        self.layout.addWidget(QtGui.QLabel('Start Frame'), row, 1)
-        self.start_frame_spinbox = QtGui.QSpinBox()
+        self.layout.addWidget(qwgt.QLabel('Start Frame'), row, 1)
+        self.start_frame_spinbox = qwgt.QSpinBox()
         self.start_frame_spinbox.setMinimum(0)
         self.start_frame_spinbox.setMaximum(self.padview.frame_getter.n_frames)
         self.start_frame_spinbox.setValue(0)
         self.layout.addWidget(self.start_frame_spinbox, row, 2)
         row += 1
-        self.layout.addWidget(QtGui.QLabel('Stop Frame'), row, 1)
-        self.stop_frame_spinbox = QtGui.QSpinBox()
+        self.layout.addWidget(qwgt.QLabel('Stop Frame'), row, 1)
+        self.stop_frame_spinbox = qwgt.QSpinBox()
         self.stop_frame_spinbox.setMinimum(1)
         self.stop_frame_spinbox.setMaximum(self.padview.frame_getter.n_frames)
         self.stop_frame_spinbox.setValue(self.padview.frame_getter.n_frames)
         self.layout.addWidget(self.stop_frame_spinbox, row, 2)
         row += 1
-        self.layout.addWidget(QtGui.QLabel('N Processes'), row, 1)
-        self.np_spinbox = QtGui.QSpinBox()
+        self.layout.addWidget(qwgt.QLabel('N Processes'), row, 1)
+        self.np_spinbox = qwgt.QSpinBox()
         self.np_spinbox.setMinimum(1)
         self.np_spinbox.setMaximum(cpu_count)
         self.np_spinbox.setValue(1)
         self.layout.addWidget(self.np_spinbox, row, 2)
         # row += 1
-        # self.layout.addWidget(QtGui.QLabel('Threshold'), row, 1)
-        # self.thresh_spinbox = QtGui.QDoubleSpinBox()
+        # self.layout.addWidget(qwgt.QLabel('Threshold'), row, 1)
+        # self.thresh_spinbox = qwgt.QDoubleSpinBox()
         # self.thresh_spinbox.setMinimum(0)
         # self.thresh_spinbox.setValue(8)
         # self.layout.addWidget(self.thresh_spinbox, row, 2)
         # row += 1
-        # self.layout.addWidget(QtGui.QLabel('Iterations'), row, 1)
-        # self.iter_spinbox = QtGui.QSpinBox()
+        # self.layout.addWidget(qwgt.QLabel('Iterations'), row, 1)
+        # self.iter_spinbox = qwgt.QSpinBox()
         # self.iter_spinbox.setMinimum(1)
         # self.iter_spinbox.setValue(2)
         # self.layout.addWidget(self.iter_spinbox, row, 2)
         # row += 1
-        # self.layout.addWidget(QtGui.QLabel('Start'), row, 1)
-        # self.start_button = QtGui.QCheckBox()
+        # self.layout.addWidget(qwgt.QLabel('Start'), row, 1)
+        # self.start_button = qwgt.QCheckBox()
         # self.start_button.setChecked(True)
         # self.layout.addWidget(self.start_button, row, 2, alignment=QtCore.Qt.AlignCenter)
         row += 1
-        self.start_button = QtGui.QPushButton("Start")
+        self.start_button = qwgt.QPushButton("Start")
         self.start_button.clicked.connect(self.get_padstats)
         self.layout.addWidget(self.start_button, row, 1, 1, 2)
         self.setLayout(self.layout)
         row += 1
-        self.stop_button = QtGui.QPushButton("Stop")
+        self.stop_button = qwgt.QPushButton("Stop")
         self.stop_button.clicked.connect(self.terminate_thread)
         self.stop_button.setEnabled(False)
         self.layout.addWidget(self.stop_button, row, 1, 1, 2)
         self.setLayout(self.layout)
         row += 1
-        self.show_button = QtGui.QPushButton("Show")
+        self.show_button = qwgt.QPushButton("Show")
         self.show_button.clicked.connect(self.show_padstats)
         self.show_button.setEnabled(False)
         self.layout.addWidget(self.show_button, row, 1, 1, 2)

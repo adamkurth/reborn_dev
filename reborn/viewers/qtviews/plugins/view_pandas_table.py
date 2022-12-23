@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with reborn.  If not, see <https://www.gnu.org/licenses/>.
 
-from pyqtgraph.Qt import QtGui
+import pyqtgraph.Qt.QtWidgets as qwgt
 from reborn.viewers.pandaviews import DataFrameWidget
 
 class Plugin():
@@ -27,13 +27,13 @@ class DFW(DataFrameWidget):
         super().__init__(*args, **kwargs)
 
 
-class Widget(QtGui.QWidget):
+class Widget(qwgt.QWidget):
 
     def __init__(self, padview):
         super().__init__()
         self.padview = padview
         self.setWindowTitle('Pandas Table')
-        self.layout = QtGui.QGridLayout()
+        self.layout = qwgt.QGridLayout()
         row = 0
         row += 1
         self.pandas_widget = DFW(self.padview.main_window, self.padview.frame_getter.pandas_dataframe) #.reset_index())
