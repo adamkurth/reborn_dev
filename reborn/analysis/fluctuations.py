@@ -14,7 +14,10 @@
 # along with reborn.  If not, see <https://www.gnu.org/licenses/>.
 
 import numpy as np
+import random
 import reborn.dataframe
+from reborn import detector
+from .runstats import ParallelAnalyzer
 try:
     from joblib import delayed
     from joblib import Parallel
@@ -120,205 +123,159 @@ def compute_data_correlations(data, mask):
     return [data_correlation(n=n, data=d, mask=m, cached=True) for n in range(q_range)]
 
 
-class FXS:
-    _experiment_id = None
-    _frame_beam = None
-    _frame_data = None
-    _frame_geom = None
-    _frame_mask = None
-    _frame_correlations = None
-    _frame_polar_data = None
-    _frame_polar_mask = None
-    _n_patterns = None
-    _polar_assembler = None
-    _radial_profiler = None
-    _run_id = None
-    _run_max = None
-    _run_min = None
-    _run_sum = None
-    _run_sum2 = None
-    _run_sum_correlations = None
+class FXSError(Exception):
+    def __int__(self, message):
+        super.__init__(message)
 
-    def __init__(self, experiment_id=None, run_id=None, polar_assembler=None, radial_profiler=None):
-        self._experiment_id = experiment_id
-        self._run_id = run_id
-        self._polar_assembler = polar_assembler
-        self._radial_profiler = radial_profiler
-        self._n_patterns = 0
 
-    @property
-    def experiment_id(self):
-        return self._experiment_id
+class FXS(ParallelAnalyzer):
 
-    @property
-    def run_id(self):
-        return self._run_id
+    beam = None
+    initial_frame = None
+    n_patterns = None
+    np_bins = None
+    nq_bins = None
+    pad_geometry = None
+    polar_assembler = None
+    run_sum_correlations = None
 
-    @property
-    def n_patterns(self):
-        return self._n_patterns
+    def __init__(self, framegetter=None, **kwargs):
+        r"""
+        Class to compute angular cross correlations.
 
-    @property
-    def run_sum_correlations(self):
-        return self._run_sum_correlations
-
-    @property
-    def run_max(self):
-        return self._run_max
-
-    @property
-    def run_min(self):
-        return self._run_min
-
-    @property
-    def run_sum(self):
-        return self._run_sum
-
-    @property
-    def run_sum2(self):
-        return self._run_sum2
-
-    @property
-    def run_var(self):
-        return np.array([rs2 - rs ** 2 for rs, rs2 in zip(self._run_sum, self._run_sum2)])
+        Arguments:
+            experiment_id (str): Experiment identifier (optional, default='default').
+            run_id (int): Run identifier (optional, default=0).
+            n_q_bins (int): Number of q bins for polar binning (optional, default=100).
+            n_phi_bins (int): Number of phi bins for polar binning (optional, default=100).
+            q_range (tuple): Polar binning q range (optional, default=(qmin, qmax) from geometry).
+            phi_range (tuple): Polar binning phi range (optional, default=(0,2pi)).
+            max_iterations (int): Number of shots in data to check for beam and geometry (optional, default=1e4).
+            beam (|Beam|): X-ray beam (optional, default is read from data).
+            pad_geometry (|PADGeometryList|): Detector geometry (optional, default is read from data).
+        """
+        super().__init__(framegetter=framegetter, **kwargs)
+        self.framegetter = framegetter
+        self.experiment_id = kwargs.get('experiment_id', 'default')
+        self.run_id = kwargs.get('run_id', 0)
+        self.polar_assembler = self.setup_polar_pad_assembler(**kwargs)
+        self.n_patterns = 0
 
     def __str__(self):
-        out = "Fluctuation X-ray Scattering\n"
-        out += f"    Experiment ID: {self.experiment_id}\n"
+        out = f"    Experiment ID: {self.experiment_id}\n"
         out += f"           Run ID: {self.run_id}\n"
-        if self._polar_assembler is None:
-            out += f"  Polar Assembler: None\n"
-        else:
-            out += f"  Polar Assembler: Assigned\n"
-        if self._radial_profiler is None:
-            out += f"  Radial Profiler: None\n"
-        else:
-            out += f"  Radial Profiler: Assigned\n"
-        out += f"Averaged Patterns: {self.n_patterns}\n"
+        out += f"Patterns Averaged: {self.n_patterns}\n"
         return out
 
-    def add_frame(self, dataframe):
-        if isinstance(dataframe, reborn.dataframe.DataFrame):
-            if dataframe.validate():
-                print("Dataframe is valid, adding to analysis ...")
-                self._n_patterns += 1
-                self._frame_geom = dataframe.get_pad_geometry()
-                self._frame_beam = dataframe.get_beam()
-                self._frame_data = dataframe.get_raw_data_list()
-                self._frame_mask = dataframe.get_mask_list()
+    def get_setup_data(self, **kwargs):
+        beam = kwargs.get('beam', None)
+        pad_geometry = kwargs.get('pad_geometry', None)
+        max_iterations = kwargs.get('max_iterations', 1e4)
+        if (pad_geometry is None) or (beam is None):
+            frames = random.sample(range(max_iterations), max_iterations)
+            for i in frames:
+                data = self.framegetter.get_frame(frame_number=i)
+                if data.validate():
+                    self.initial_frame = i
+                    pad_geometry = data.get_pad_geometry()
+                    beam = data.get_beam()
+                    break
+        return pad_geometry, beam
 
-                self._frame_polar_data, self._frame_polar_mask = self._polar_assembler.get_mean(data=self._frame_data,
-                                                                                                mask=self._frame_mask)
-                self._frame_correlations = compute_data_correlations(self._frame_polar_data,
-                                                                     self._frame_polar_mask)
-                if self._run_sum_correlations is None:
-                    self._run_sum_correlations = self._frame_correlations
-                else:
-                    for i, fc in enumerate(self._frame_correlations):
-                        self._run_sum_correlations[i] += fc
-
-                if self._run_max is None:
-                    self._run_max = self._frame_data
-                else:
-                    self._run_max = np.maximum(self._run_max, self._frame_data)
-
-                if self._run_min is None:
-                    self._run_min = self._frame_data
-                else:
-                    self._run_min = np.minimum(self._run_min, self._frame_data)
-
-                if self._run_sum is None:
-                    self._run_sum = self._frame_data
-                else:
-                    for i, fd in enumerate(self._frame_data):
-                        self._run_sum[i] += fd
-
-                if self._run_sum2 is None:
-                    self._run_sum2 = [fd ** 2 for fd in self._frame_data]
-                else:
-                    for i, fd in enumerate(self._frame_data):
-                        self._run_sum2[i] += fd ** 2
-            else:
-                print("Dataframe not valid, skipping ...")
+    def setup_polar_pad_assembler(self, **kwargs):
+        self.logger.info('Setting up PolarPADAssembler')
+        self.nq_bins = kwargs.get('n_q_bins', 100)
+        self.logger.info(f'n_q_bins: {self.nq_bins}')
+        self.np_bins = kwargs.get('n_phi_bins', 100)
+        self.logger.info(f'n_phi_bins: {self.np_bins}')
+        q_range = kwargs.get('q_range', None)
+        phi_range = kwargs.get('phi_range', None)
+        self.pad_geometry, self.beam = self.get_setup_data(**kwargs)
+        if (self.pad_geometry is None) or (self.beam is None):
+            msg = 'PADGeometry or Beam are None; likely not enough iterations or bad run.'
+            self.logger.warning(msg)
+            raise FXSError(msg)
         else:
-            print("Only dataframe addition is supported at this time.")
+            self.logger.info(f'beam found')
+            self.logger.info(f'pad_geometry found')
+        assembler = detector.PolarPADAssembler(pad_geometry=self.pad_geometry,
+                                               beam=self.beam,
+                                               n_q_bins=self.nq_bins,
+                                               q_range=q_range,
+                                               n_phi_bins=self.np_bins,
+                                               phi_range=phi_range)
+        return assembler
 
-    def merge_fxs(self, fxso):
-        if isinstance(fxso, FXS):
-            self._n_patterns += fxso.n_patterns
-
-            if self._run_sum_correlations is None:
-                self._run_sum_correlations = fxso.run_sum_correlations
+    def add_frame(self, dat):
+        if isinstance(dat, reborn.dataframe.DataFrame):
+            if dat.validate():
+                self.logger.warning("Dataframe is valid, adding to analysis ...")
+                frame_data = dat.get_raw_data_list()
+                frame_mask = dat.get_mask_list()
+                frame_polar_data, frame_polar_mask = self.polar_assembler.get_mean(data=frame_data,
+                                                                                   mask=frame_mask)
+                frame_correlations = compute_data_correlations(frame_polar_data, frame_polar_mask)
+                if self.run_sum_correlations is None:
+                    self.run_sum_correlations = frame_correlations
+                else:
+                    for i, fc in enumerate(frame_correlations):
+                        self.run_sum_correlations[i] += fc
+                self.n_patterns += 1
             else:
-                for i, c in enumerate(fxso.run_sum_correlations):
-                    self._run_sum_correlations[i] += c
-
-            if self._run_max is None:
-                self._run_max = fxso.run_max
-            else:
-                self._run_max = np.maximum(self._run_max, fxso.run_max)
-
-            if self._run_min is None:
-                self._run_min = fxso.run_min
-            else:
-                self._run_min = np.minimum(self._run_min, fxso.run_min)
-
-            if self._run_sum is None:
-                self._run_sum = fxso.run_sum
-            else:
-                for i, fd in enumerate(fxso.run_sum):
-                    self._run_sum[i] += fd
-
-            if self._run_sum2 is None:
-                self._run_sum2 = fxso.run_sum2
-            else:
-                for i, fd in enumerate(fxso.run_sum2):
-                    self._run_sum2[i] += fd
+                self.logger.warning("Dataframe not valid, skipping ...")
         else:
-            print("Only merging FXS objects is supported at this time.")
-
-    def get_run_correlations(self):
-        return [c / self._n_patterns for c in self._run_sum_correlations]
-
-    def get_auto_correlations(self):
-        return self._run_sum_correlations[0] / self._n_patterns
-
-    def get_saxs(self, pattern, mask=None, statistic=None):
-        if self._radial_profiler is None:
-            p = None
-        else:
-            p = self._radial_profiler.quickstats(data=pattern, weights=mask)
-            if statistic is not None:
-                p = p[statistic]
-        return p
+            self.logger.warning("Only dataframe addition is supported at this time.")
 
     def to_dict(self):
-        fxs_dict = {'experiment_id': self.experiment_id,
-                    'run_id': self.run_id,
-                    'analysis/n_patterns': self.n_patterns,
-                    'analysis/run_max': self.run_max,
-                    'analysis/run_min': self.run_min,
-                    'analysis/run_sum': self.run_sum,
-                    'analysis/run_sum2': self._run_sum2,
-                    'analysis/geometry/n_q_bins': self._polar_assembler.n_q_bins,
-                    'analysis/geometry/n_phi_bins': self._polar_assembler.n_phi_bins}
-        qs = self._polar_assembler.q_mags
-        phis = self._polar_assembler.phis
-        fxs_dict.update({'analysis/geometry/q_max': qs[-1],
-                         'analysis/geometry/q_min': qs[0],
-                         'analysis/geometry/phi_max': phis[-1],
-                         'analysis/geometry/phi_min': phis[0]})
-        kam_cor = self.get_run_correlations()
-        base_keys = [f'analysis/kam_correlations/{k}' for k in range(len(kam_cor))]
-        base_vals = kam_cor
-        rsum = np.array(self._run_sum)
-        sxs = self.get_saxs(pattern=rsum / self.n_patterns, statistic=None)
-        if isinstance(sxs, list):
-            radial_stats = ['mean', 'sdev', 'sum', 'sum2', 'weight_sum']
-            base_keys += [f'analysis/saxs/{s}' for s in radial_stats]
-            base_vals += [s for s in sxs]
+        fxs_dict = dict(experiment_id=self.experiment_id,
+                        run_id=self.run_id,
+                        n_patterns=self.n_patterns,
+                        initial_frame=self.initial_frame)
+        qr = self.polar_assembler.q_range
+        pr = self.polar_assembler.phi_range
+        asm_dict = dict(n_q_bins=self.nq_bins,
+                        q_min=qr[0],
+                        q_max=qr[1],
+                        n_phi_bins=self.np_bins,
+                        phi_min=pr[0],
+                        phi_max=pr[1])
+        fxs_dict.update(asm_dict)
+        base_keys = [f'run_sum_correlations/{k}' for k in range(len(self.run_sum_correlations))]
+        base_vals = self.run_sum_correlations
         fxs_dict.update(dict(zip(base_keys, base_vals)))
         return fxs_dict
+
+    def clear_data(self):
+        self.initial_frame = None
+        self.n_patterns = 0
+        self.np_bins = None
+        self.nq_bins = None
+        self.polar_assembler = None
+        self.run_sum_correlations = None
+
+    def from_dict(self, stats):
+        self.clear_data()
+        self.experiment_id = stats['experiment_id']
+        self.run_id = stats['run_id']
+        self.initial_frame = stats['initial_frame']
+        self.n_patterns = stats['n_patterns']
+        self.nq_bins = stats['n_q_bins']
+        self.np_bins = stats['n_phi_bins']
+        self.polar_assembler = self.setup_polar_pad_assembler(q_range=(stats['q_min'], stats['q_max']),
+                                                              phi_range=(stats['phi_min'], stats['phi_max']),
+                                                              max_iterations=stats['max_iterations'])
+        self.run_sum_correlations = [f'run_sum_correlations/{k}' for k in range(len(self.run_sum_correlations))]
+
+    def concatenate(self, stats):
+        self.logger.warning('Merging')
+        self.n_patterns += stats['n_patterns']
+        self.np_bins = stats['n_phi_bins']
+        self.nq_bins = stats['n_q_bins']
+        if self.run_sum_correlations is None:
+            self.run_sum_correlations = stats['run_sum_correlations']
+        else:
+            for i, c in enumerate(stats.run_sum_correlations):
+                self.run_sum_correlations[i] += c
 
 
 def kam_analysis(framegetter=None, polar_assembler=None, radial_profiler=None,
@@ -377,3 +334,6 @@ def kam_analysis(framegetter=None, polar_assembler=None, radial_profiler=None,
             continue
         fxs_analysis.add_frame(dataframe)
     return fxs_analysis
+
+
+# FXSBackwardsComaptible(framegetter=None, polar_assembler=None, radial_profiler=None, **kwargs)

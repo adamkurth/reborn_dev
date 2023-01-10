@@ -94,7 +94,6 @@ class ParallelAnalyzer(ABC):
         self.logger = None
         self._setup_logger()
         self.framegetter = None
-        self.framegetter_dict = None  # Needed to create replicas of the framegetter in sub-processes
         self._setup_framegetter(framegetter)
         self.current_checkpoint_number = 0
         self.previous_checkpoint_file = None
