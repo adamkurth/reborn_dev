@@ -1,5 +1,35 @@
 # Example Analysis Code for the LY59 Experiment.
 
+## Connecting to SLAC
+
+A convenient way to connect to SLAC's analysis computers is through NoMachine.
+
+Working configuration:
+```
+          Name: SLAC
+      Protocol: SSH
+          Host: psnxserv.slac.stanford.edu
+          Port: 22
+Authentication: Password
+         Proxy: No
+```
+
+The main analysis computer, psana, is not connected to the internet.
+Once you are on a login node, connect to psana. Do this:
+
+```bash
+ssh psana
+```
+
+The base psana environment is not suitable for analysis (it is based on python 2.7).
+To get the proper the analysis run:
+
+```bash
+source /reg/g/psdm/etc/psconda.sh -py3
+```
+
+This is included in the setup script (see Basic Setup).
+
 ## Basic setup
 
 We assume that you have cloned reborn into your scratch directory.  If not, do this:

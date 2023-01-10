@@ -1,0 +1,122 @@
+\documentclass[12pt]{article}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{geometry}[1 in]
+\usepackage{physics}
+
+\title{PS1 Aqueous Sample Preparation Procedure}
+\author{Roberto Alvarez, Richard Kirian, and Petra Fromme}
+\date{\today}
+
+\begin{document}
+    \maketitle
+
+    \section{Overview}
+    This note details how to prepare a PS1 solution from PS1 crystals. Provide 2-3 hours.
+
+    \section{Preparation}
+    We will need:
+    \begin{itemize}
+        \item Nine 1.5 mL eppendorf tube (epi)
+        \item 1000 $\mu$L pipette
+        \item 100 $\mu$L pipette
+        \item 10 $\mu$L pipette
+        \item Appropriate pipette tips
+        \item Settled PS1 crystals
+        \item 500 mL $G_{0}$
+        \item 500 mL $G_{100}$
+        \item Centrifuge
+        \item Microscope (optional)
+        \item UV-Vis Spectrophotometer
+        \item Calculator (recommended)
+        \item Lab notebook (always take notes!)
+    \end{itemize}
+
+    \section{Buffers}
+    \subsection{500 mL $G_{0}$}
+    5 mM MES pH 6.4; 0.02 \% $\beta$DDM
+    \begin{enumerate}
+        \item 450 mL nanopure H$_{2}$O
+        \item 6.25 mL 400 mM MES pH 6.4
+        \item 1 mL 10\% $\beta$DDM
+        \item Fill to volume
+    \end{enumerate}
+    \subsection{500 mL $G_{100}$}
+    5 mM MES pH 6.4, 100 mM MgSO$_{4}$; 0.02 \% $\beta$DDM
+    \begin{enumerate}
+        \item 400 mL nanopure H$_{2}$O
+        \item 50 mL 1 M MgSO$_{4}$
+        \item 6.25 mL 400 mM MES pH 6.4
+        \item 1 mL 10\% $\beta$DDM
+        \item Fill to volume
+    \end{enumerate}
+
+    \newpage
+
+    \section{Drying PS1 Crystals}
+    \begin{enumerate}
+        \item Weigh one 1.5 mL eppendorf tube.
+        \item Remove 90\% of the super-native solution from your crystal solutions.
+        \item Move the crystals to the weighed eppendorf tube.
+        \item Centrifuge the crystals at 14 krpm for 4 minutes.
+        \begin{itemize}
+            \item Place the tab of the eppendorf tube facing away from the axis of rotation. This will ensure we always know where the crystal pellet is.
+            \item Do not forget to balance the crystals with an equal volume of water.
+        \end{itemize}
+        \item Remove 90\% of the remaining super-native solution.
+        \item Repeat centrifuging and solution removal 2 more times.
+        \begin{itemize}
+            \item We want the crystal pellet to be ``bone-dry''
+        \end{itemize}
+        \item Weigh the eppendorf + crystal pellet.
+    \end{enumerate}
+    \begin{equation}
+        w_{\mathrm{pellet}} = w_{\mathrm{epi + pellet}} - w_{\mathrm{epi}}
+    \end{equation}
+
+    \section{Dissolving PS1 Crystals}
+    \begin{enumerate}
+        \item Add an equal amount of $G_{100}$ in $\mu$L to the weight of your pellet in mg.
+        \item Wash the pellet with the $G_{100}$.
+        \begin{itemize}
+            \item Pipette small amount of the $G_{100}$ from the side which does not have the pellet (opposite the eppendorf tube tab).
+            \item Bring the pipette directly over the pellet (without touching the pellet) and release the solution.
+            \item Wash until the pellet is no longer visible.
+        \end{itemize}
+        \item Let the solution stand for 30 minutes.
+    \end{enumerate}
+
+    \section{Optional: Testing Dissolved Crystals}
+    \begin{enumerate}
+        \item Add a small droplet (0.5 $\mu$L is fine) of the dissolved crystals to a microscope slide.
+        \item Under the microscope you should no longer see crystals.
+        \item Add a small droplet of $G_{0}$ to re-grow the crystals.
+        \begin{itemize}
+            \item Place the two droplet directly next to each other so there are only just touching.
+            \item Crystals should begin to form within 1-2 minutes.
+        \end{itemize}
+    \end{enumerate}
+
+    \section{Determining Chlorophyll Concentration}
+    \begin{enumerate}
+        \item Prepare 2 epis with 80\% acetone (800 $\mu$L) and 20\% H$_{2}$O (2 $\mu$L)
+        \item Prepare 4 epis with 80\% acetone (800 $\mu$L) and 19.5\% H$_{2}$O (19.5 $\mu$L)
+        \item Add 0.5 $\mu$L PS1
+        \begin{itemize}
+            \item \textbf{Option 1 (0.5 $\mu$L Capillary):} Grab capillary with calipers and place in the PS1 solution. Pull capillary out and clean with fiber-free cloth. Break capillary in half, drop in acetone-water solution, and vortex immediately until there is no green solution left in the capillary.
+            \item \textbf{Option 2 (Pipette):} Pipette 0.5 $\mu$L then dispense into the acetone-water solution. Before all the solution has left the pipette drop the pipette into the acetone-water epi. Vortex immediately until there is no green solution left in the pipette.
+        \end{itemize}
+        \item Centrifuge at 14 krpm for 4 minutes to remove denatured proteins.
+        \item Calibrate UV-Vis spectrophotometer with the two blank samples (no PS1).
+        \item Record absorption at 664 nm and 700 nm for the four prepared samples.
+        \item Dilute sample to desired concentration.
+    \end{enumerate}
+
+    \subsection*{Notes on Pipetting Acetone}
+    \begin{itemize}
+        \item Acetone must be pipetted once to equalize the vapor pressure in pipette
+        \item The pressure change from pipetting will evaporate some acetone, so the amount you set is never the amount that is lifted by the pipette.
+        \item Always measure the mass of the acetone.
+        \item 635 mg $\equiv$ 800 $\mu$L of Acetone
+    \end{itemize}
+\end{document}
