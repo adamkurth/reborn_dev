@@ -14,10 +14,10 @@
 # along with reborn.  If not, see <https://www.gnu.org/licenses/>.
 
 import numpy as np
-import random
 import reborn.dataframe
 from reborn import detector
-from .runstats import ParallelAnalyzer
+from .parallel import get_setup_data
+from .parallel import ParallelAnalyzer
 try:
     from joblib import delayed
     from joblib import Parallel
@@ -167,21 +167,6 @@ class FXS(ParallelAnalyzer):
         out += f"Patterns Averaged: {self.n_patterns}\n"
         return out
 
-    def get_setup_data(self, **kwargs):
-        beam = kwargs.get('beam', None)
-        pad_geometry = kwargs.get('pad_geometry', None)
-        max_iterations = kwargs.get('max_iterations', 1e4)
-        if (pad_geometry is None) or (beam is None):
-            frames = random.sample(range(max_iterations), max_iterations)
-            for i in frames:
-                data = self.framegetter.get_frame(frame_number=i)
-                if data.validate():
-                    self.initial_frame = i
-                    pad_geometry = data.get_pad_geometry()
-                    beam = data.get_beam()
-                    break
-        return pad_geometry, beam
-
     def setup_polar_pad_assembler(self, **kwargs):
         self.logger.info('Setting up PolarPADAssembler')
         self.nq_bins = kwargs.get('n_q_bins', 100)
@@ -190,7 +175,7 @@ class FXS(ParallelAnalyzer):
         self.logger.info(f'n_phi_bins: {self.np_bins}')
         q_range = kwargs.get('q_range', None)
         phi_range = kwargs.get('phi_range', None)
-        self.pad_geometry, self.beam = self.get_setup_data(**kwargs)
+        self.pad_geometry, self.beam, self.initial_frame = get_setup_data(framegetter=self.framegetter, **kwargs)
         if (self.pad_geometry is None) or (self.beam is None):
             msg = 'PADGeometry or Beam are None; likely not enough iterations or bad run.'
             self.logger.warning(msg)
@@ -334,6 +319,3 @@ def kam_analysis(framegetter=None, polar_assembler=None, radial_profiler=None,
             continue
         fxs_analysis.add_frame(dataframe)
     return fxs_analysis
-
-
-# FXSBackwardsComaptible(framegetter=None, polar_assembler=None, radial_profiler=None, **kwargs)
