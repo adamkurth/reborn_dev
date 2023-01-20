@@ -266,7 +266,6 @@ def xraylib_refractive_index(compound='H2O', density=1000, photon_energy=10000*e
         n += N * f * nZ
     n = 1 - (n * (h*c/photon_energy) ** 2 * r_e / (2 * np.pi))
     if approximate:
-        print(N*ne)
         n = 1 - r_e * N * ne * (h*c/photon_energy) ** 2 / (2 * np.pi)
     return n
 

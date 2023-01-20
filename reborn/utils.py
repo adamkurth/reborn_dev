@@ -33,21 +33,25 @@ logger = logging.getLogger()
 
 
 def docs():
-    r""" Open the reborn documentation in a web browser (if available)."""
-    docs_file_path = pkg_resources.resource_filename('reborn', '')
-    docs_file_path = os.path.join(docs_file_path, '..', 'doc', 'html', 'index.html')
+    r"""Open the reborn documentation in a web browser (if available)."""
+    docs_file_path = pkg_resources.resource_filename("reborn", "")
+    docs_file_path = os.path.join(docs_file_path, "..", "doc", "html", "index.html")
     if os.path.exists(docs_file_path):
-        docs_file_path = 'file://' + docs_file_path
+        docs_file_path = "file://" + docs_file_path
     else:
-        docs_file_path = 'https://rkirian.gitlab.io/reborn'
+        docs_file_path = "https://rkirian.gitlab.io/reborn"
     try:
         import webbrowser  # pylint: disable=import-outside-toplevel
     except ImportError:
-        print("Can't open docs because you need to install the webbrowser Python package.")
-        print("If using conda, perhaps you could run 'conda install webbrowser'")
-        print('You can otherwise point your webbrowser to https://rkirian.gitlab.io/reborn')
+        print(
+            """
+        Can't open docs because you need to install the webbrowser Python package.
+        If using conda, perhaps you could run 'conda install webbrowser'
+        You can otherwise point your webbrowser to https://rkirian.gitlab.io/reborn
+        """
+        )
         return
-    webbrowser.open('file://' + docs_file_path)
+    webbrowser.open("file://" + docs_file_path)
 
 
 def ensure_list(obj):
@@ -89,7 +93,7 @@ def vec_norm(vec):
     Returns:
         (|ndarray|): New unit vectors.  Array shape: (N, 3).
     """
-    vecnorm = np.sqrt(np.sum(vec ** 2, axis=(vec.ndim - 1)))
+    vecnorm = np.sqrt(np.sum(vec**2, axis=(vec.ndim - 1)))
     return (vec.T / vecnorm).T
 
 
@@ -120,9 +124,13 @@ def vec_shape(vec):
     """
     vec = atleast_2d(np.squeeze(vec))
     if len(vec.shape) != 2:
-        raise ValueError('Something is wrong with your vector array shape. It should be (N, 3)')
+        raise ValueError(
+            "Something is wrong with your vector array shape. It should be (N, 3)"
+        )
     if vec.shape[1] != 3:
-        raise ValueError('Something is wrong with your vector array shape. It should be (N, 3).')
+        raise ValueError(
+            "Something is wrong with your vector array shape. It should be (N, 3)."
+        )
     return vec
 
 
@@ -142,7 +150,7 @@ def depreciate(*args, caller=0, **kwargs):
     msg = "*** WARNING *** DEPRECIATION:"
     if caller >= 0:
         msg += get_caller(1)
-    msg += ':'
+    msg += ":"
     print(msg, *args, **kwargs)
 
 
@@ -162,7 +170,7 @@ def warn(*args, caller=0, **kwargs):
     msg = "WARNING:"
     if caller >= 0:
         msg += get_caller(1)
-    msg += ':'
+    msg += ":"
     print(msg, *args, **kwargs)
 
 
@@ -179,12 +187,12 @@ def debug(*args, caller=0, **kwargs):
 
     Returns: None
     """
-    if not configs['debug']:
+    if not configs["debug"]:
         return
     msg = "DEBUG:"
     if caller >= 0:
         msg += get_caller(1)
-    msg += ':'
+    msg += ":"
     print(msg, *args, **kwargs)
 
 
@@ -204,7 +212,7 @@ def error(*args, caller=0, **kwargs):
     msg = "ERROR:"
     if caller >= 0:
         msg += get_caller(1)
-    msg += ':'
+    msg += ":"
     print(msg, *args, **kwargs)
 
 
@@ -234,15 +242,25 @@ def rotation_about_axis(theta, vec):
     vec = vec_norm(np.array(vec)).reshape(3)
     ct = cos(theta)
     st = sin(theta)
-    rot = np.array([[ct + vec[0] ** 2 * (1 - ct),
-                     vec[0] * vec[1] * (1 - ct) - vec[2] * st,
-                     vec[0] * vec[2] * (1 - ct) + vec[1] * st],
-                    [vec[0] * vec[1] * (1 - ct) + vec[2] * st,
-                     ct + vec[1] ** 2 * (1 - ct),
-                     vec[1] * vec[2] * (1 - ct) - vec[0] * st],
-                    [vec[0] * vec[2] * (1 - ct) - vec[1] * st,
-                     vec[1] * vec[2] * (1 - ct) + vec[0] * st,
-                     ct + vec[2] ** 2 * (1 - ct)]])
+    rot = np.array(
+        [
+            [
+                ct + vec[0] ** 2 * (1 - ct),
+                vec[0] * vec[1] * (1 - ct) - vec[2] * st,
+                vec[0] * vec[2] * (1 - ct) + vec[1] * st,
+            ],
+            [
+                vec[0] * vec[1] * (1 - ct) + vec[2] * st,
+                ct + vec[1] ** 2 * (1 - ct),
+                vec[1] * vec[2] * (1 - ct) - vec[0] * st,
+            ],
+            [
+                vec[0] * vec[2] * (1 - ct) - vec[1] * st,
+                vec[1] * vec[2] * (1 - ct) + vec[0] * st,
+                ct + vec[2] ** 2 * (1 - ct),
+            ],
+        ]
+    )
     return rot.reshape(3, 3)
 
 
@@ -284,7 +302,7 @@ def random_beam_vector(div_fwhm):
     phi = np.random.random(1)[0] * 2 * np.pi
     rphi = rotation_about_axis(phi, [0, 0, 1.0])
     bvec = np.dot(rphi, bvec)
-    bvec /= np.sqrt(np.sum(bvec ** 2))
+    bvec /= np.sqrt(np.sum(bvec**2))
 
     return bvec
 
@@ -329,7 +347,7 @@ def __fake_numba_jit(*args, **kwargs):  # pylint: disable=unused-argument
 
     def decorator(func):
         r"""FIXME: Docstring."""
-        print('You need to install numba, else your code will run very slowly.')
+        print("You need to install numba, else your code will run very slowly.")
         return func
 
     return decorator
@@ -347,7 +365,7 @@ def memoize(function):
 
     @wraps(function)
     def wrapper(*args):
-        r""" FIXME: Docstring."""
+        r"""FIXME: Docstring."""
         if args in memo:
             return memo[args]
         rv = function(*args)
@@ -361,8 +379,11 @@ def max_pair_distance(*args, **kwargs):
     r"""
     Depreciated.  Use reborn.utils.vectors.max_pair_distance
     """
-    depreciate('Do not use reborn.utils.max_pair_distance.  Use reborn.misc.vectors.max_pair_distance.')
+    depreciate(
+        "Do not use reborn.utils.max_pair_distance.  Use reborn.misc.vectors.max_pair_distance."
+    )
     from .misc.vectors import max_pair_distance
+
     return max_pair_distance(*args, **kwargs)
 
 
@@ -392,7 +413,7 @@ def make_label_radial_shell(r_bin_vec, n_vec):
     # Initialise memory
     labels_radial = np.zeros((nx, ny, nz), dtype=np.int)
 
-    r_bin_vec_sq = r_bin_vec ** 2
+    r_bin_vec_sq = r_bin_vec**2
 
     for i in range(nx):
         i_sq = (i - nx_cent) ** 2
@@ -468,17 +489,27 @@ def get_FSC(f1, f2, labels_radial, n_radials):
     F1 = fftshift(fftn(f1))
     F2 = fftshift(fftn(f2))
 
-    radial_f1_f2 = radial_stats(f=F1 * np.conj(F2), labels_radial=labels_radial, n_radials=n_radials, mode="sum")
-    radial_f1 = radial_stats(f=(np.abs(F1) ** 2).astype(np.float64), labels_radial=labels_radial, n_radials=n_radials,
-                             mode="sum")
-    radial_f2 = radial_stats(f=(np.abs(F2) ** 2).astype(np.float64), labels_radial=labels_radial, n_radials=n_radials,
-                             mode="sum")
+    radial_f1_f2 = radial_stats(
+        f=F1 * np.conj(F2), labels_radial=labels_radial, n_radials=n_radials, mode="sum"
+    )
+    radial_f1 = radial_stats(
+        f=(np.abs(F1) ** 2).astype(np.float64),
+        labels_radial=labels_radial,
+        n_radials=n_radials,
+        mode="sum",
+    )
+    radial_f2 = radial_stats(
+        f=(np.abs(F2) ** 2).astype(np.float64),
+        labels_radial=labels_radial,
+        n_radials=n_radials,
+        mode="sum",
+    )
 
     return np.abs(radial_f1_f2) / np.abs((np.sqrt(radial_f1) * np.sqrt(radial_f2)))
 
 
 def atleast_1d(x):
-    r""" Expand dimensions of |ndarray|.  Add dimensions to the left-most index. """
+    r"""Expand dimensions of |ndarray|.  Add dimensions to the left-most index."""
     x = np.array(x)
     if x.ndim < 1:
         x = np.expand_dims(x, axis=0)
@@ -486,7 +517,7 @@ def atleast_1d(x):
 
 
 def atleast_2d(x):
-    r""" Expand dimensions of |ndarray|.  Add dimensions to the left-most index. """
+    r"""Expand dimensions of |ndarray|.  Add dimensions to the left-most index."""
     x = np.array(x)
     if x.ndim < 2:
         x = np.expand_dims(x, axis=0)
@@ -494,7 +525,7 @@ def atleast_2d(x):
 
 
 def atleast_3d(x):
-    r""" Expand dimensions of |ndarray|.  Add dimensions to the left-most index. """
+    r"""Expand dimensions of |ndarray|.  Add dimensions to the left-most index."""
     x = np.array(x)
     if x.ndim < 3:
         x = np.expand_dims(atleast_2d(x), axis=0)
@@ -502,7 +533,7 @@ def atleast_3d(x):
 
 
 def atleast_4d(x):
-    r""" Expand dimensions of |ndarray|.  Add dimensions to the left-most index. """
+    r"""Expand dimensions of |ndarray|.  Add dimensions to the left-most index."""
     x = np.array(x)
     if x.ndim < 4:
         x = np.expand_dims(atleast_3d(x), axis=0)
@@ -510,7 +541,7 @@ def atleast_4d(x):
 
 
 def binned_statistic(x, y, func, n_bins, bin_edges, fill_value=0):
-    r""" Similar to :func:`binned_statistic <scipy.stats.binned_statistic>` but faster because regular bin spacing
+    r"""Similar to :func:`binned_statistic <scipy.stats.binned_statistic>` but faster because regular bin spacing
     is assumed, and sparse matrix algorithms are used.  Speedups of ~30-fold have been observed.
 
     Based on the discussion found here:
@@ -549,11 +580,11 @@ def binned_statistic(x, y, func, n_bins, bin_edges, fill_value=0):
 
 
 def get_caller(n=0):
-    r""" Get the name of the function that calls this one. """
+    r"""Get the name of the function that calls this one."""
     stack = inspect.stack()
-    if len(stack) > (n+1):
-        return inspect.stack()[n+1][3]
-    return 'get_caller'
+    if len(stack) > (n + 1):
+        return inspect.stack()[n + 1][3]
+    return "get_caller"
 
 
 def check_file_md5(file_path, md5_path=None):
@@ -571,17 +602,17 @@ def check_file_md5(file_path, md5_path=None):
         bool
     """
     if md5_path is None:
-        md5_path = file_path+'.md5'
+        md5_path = file_path + ".md5"
     if not os.path.exists(md5_path):
         return False
-    with open(md5_path, 'r', encoding="utf-8") as f:
+    with open(md5_path, "r", encoding="utf-8") as f:
         md5 = f.readline()
-    with open(file_path, 'rb') as f:
+    with open(file_path, "rb") as f:
         hasher = hashlib.md5()
         hasher.update(f.read())
         new_md5 = str(hasher.hexdigest())
-    debug(md5_path, 'md5', md5)
-    debug(file_path, 'md5', new_md5)
+    debug(md5_path, "md5", md5)
+    debug(file_path, "md5", new_md5)
     if new_md5 == md5:
         return True
     return False
@@ -599,32 +630,38 @@ def write_file_md5(file_path, md5_path=None):
         str: the md5
     """
     if md5_path is None:
-        md5_path = file_path+'.md5'
-    with open(file_path, 'rb') as f:
+        md5_path = file_path + ".md5"
+    with open(file_path, "rb") as f:
         hasher = hashlib.md5()
         hasher.update(f.read())
         md5 = str(hasher.hexdigest())
     md5_prev = None
     if os.path.exists(md5_path):
-        with open(md5_path, 'r', encoding="utf-8") as f:
+        with open(md5_path, "r", encoding="utf-8") as f:
             md5_prev = f.readline()
     if md5 != md5_prev:
-        with open(md5_path, 'w', encoding="utf-8") as f:
+        with open(md5_path, "w", encoding="utf-8") as f:
             f.write(md5)
     return md5_path
 
 
 def git_sha():
-    r""" Return the SHA of the git repo is in the current directory.  Return None if the repo is not
+    r"""Return the SHA of the git repo is in the current directory.  Return None if the repo is not
     totally clean. Useful if you wish to keep track of the git version that produced your results.
 
     Returns: str
     """
-    out = subprocess.run(['git', 'diff'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
-    if out.stderr == b'':
-        if out.stdout == b'':
-            sha = subprocess.run(['git', 'rev-parse', '--verify', 'HEAD'], stdout=subprocess.PIPE,
-                                 stderr=subprocess.PIPE, check=True).stdout
+    out = subprocess.run(
+        ["git", "diff"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True
+    )
+    if out.stderr == b"":
+        if out.stdout == b"":
+            sha = subprocess.run(
+                ["git", "rev-parse", "--verify", "HEAD"],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                check=True,
+            ).stdout
             return sha.decode("utf-8").strip()
     return None
 
@@ -645,8 +682,6 @@ def google_docstring_test():
 
     .. note::
         This is a note to emphasize something important.
-
-    Unfortunately,
 
     Arguments:
         data (|ndarray| or list of |ndarray|): Data to get profiles from.

@@ -23,7 +23,7 @@ from scipy import constants as const
 
 from . import utils
 
-hc = const.h*const.c  # pylint: disable=invalid-name
+hc = const.h * const.c  # pylint: disable=invalid-name
 
 
 class Beam:
@@ -38,7 +38,7 @@ class Beam:
     # fluence (from pulse_energy and beam_diameter_fwhm)
 
     photon_energy = None
-    _beam_profile = 'tophat'
+    _beam_profile = "tophat"
     _beam_vec = None  #: Nominal direction of incident beam
     _polarization_vec = None
     _polarization_weight = 1  #: Weight of the first polarization vector
@@ -49,8 +49,16 @@ class Beam:
     diameter_fwhm = None
     pulse_energy_fwhm = 0
 
-    def __init__(self, file_name=None, beam_vec=np.array([0, 0, 1]), photon_energy=1.602e-15, wavelength=None,
-                 polarization_vec=np.array([1, 0, 0]), pulse_energy=1e-3, diameter_fwhm=1e-6):
+    def __init__(
+        self,
+        file_name=None,
+        beam_vec=np.array([0, 0, 1]),
+        photon_energy=1.602e-15,
+        wavelength=None,
+        polarization_vec=np.array([1, 0, 0]),
+        pulse_energy=1e-3,
+        diameter_fwhm=1e-6,
+    ):
         r"""
         Arguments:
             beam_vec (|ndarray|): Direction of incident beam.
@@ -73,19 +81,19 @@ class Beam:
         self.pulse_energy = pulse_energy
 
     def __str__(self):
-        out = ''
-        out += 'beam_vec: %s\n' % self.beam_vec.__str__()
-        out += 'polarization_vec: %s\n' % self._polarization_vec.__str__()
+        out = ""
+        out += "beam_vec: %s\n" % self.beam_vec.__str__()
+        out += "polarization_vec: %s\n" % self._polarization_vec.__str__()
         # out += 'wavelength: %s\n' % self.wavelength.__str__()
-        out += 'photon_energy: %s\n' % self.photon_energy.__str__()
-        out += 'photon_number_fluence: %s\n' % self.photon_number_fluence.__str__()
+        out += "photon_energy: %s\n" % self.photon_energy.__str__()
+        out += "photon_number_fluence: %s\n" % self.photon_number_fluence.__str__()
         return out
 
     def validate(self):
-        r""" Validate this Beam instance.  Presently, this method only checks that there is a wavelength."""
+        r"""Validate this Beam instance.  Presently, this method only checks that there is a wavelength."""
         if self.photon_energy is not None:
             return True
-        raise ValueError('Something is wrong with this Beam instance.')
+        raise ValueError("Something is wrong with this Beam instance.")
 
     @property
     def hash(self):
@@ -99,19 +107,21 @@ class Beam:
 
     @property
     def beam_profile(self):
-        r""" In the future this will be a means of specifying the profile of the incident x-rays.  The only option is
-         'tophat' for the time being.  Possibly in the future we could allow for complex wavefronts.  """
+        r"""In the future this will be a means of specifying the profile of the incident x-rays.  The only option is
+        'tophat' for the time being.  Possibly in the future we could allow for complex wavefronts."""
         return self._beam_profile
 
     @beam_profile.setter
     def beam_profile(self, val):
-        if val not in ['tophat']:
-            raise ValueError("beam.beam_profile must be 'tophat' or ... that's all for now...")
+        if val not in ["tophat"]:
+            raise ValueError(
+                "beam.beam_profile must be 'tophat' or ... that's all for now..."
+            )
         self._beam_profile = val
 
     @property
     def beam_vec(self):
-        r""" The nominal direction of the incident x-ray beam. """
+        r"""The nominal direction of the incident x-ray beam."""
         return self._beam_vec.copy()
 
     @beam_vec.setter
@@ -120,12 +130,12 @@ class Beam:
 
     @property
     def k_in(self):
-        r""" Incident wavevector. """
+        r"""Incident wavevector."""
         return self.beam_vec * 2 * np.pi / self.wavelength
 
     @property
     def polarization_vec(self):
-        r""" The principle polarization vector :math:`\hat{E}_1`.  This should be orthogonal to the incident beam
+        r"""The principle polarization vector :math:`\hat{E}_1`.  This should be orthogonal to the incident beam
         direction.  The complementary polarization vector is :math:`\hat{E}_2 = \hat{b} \times \hat{E}_1`"""
         return self._polarization_vec
 
@@ -133,22 +143,22 @@ class Beam:
     def polarization_vec(self, vec):
         self._polarization_vec = utils.vec_norm(np.array(vec))
         if np.dot(self._polarization_vec, self.beam_vec) > 1e-5:
-            raise ValueError('Your E-field vector is not orthogonal to your k vector!')
+            raise ValueError("Your E-field vector is not orthogonal to your k vector!")
 
     @property
     def e1_vec(self):
-        r""" The principle polarization vector :math:`\hat{E}_1`. """
+        r"""The principle polarization vector :math:`\hat{E}_1`."""
         return self._polarization_vec.copy()
 
     @property
     def e2_vec(self):
-        r""" The secondary polarization vector :math:`\hat{E}_2 = \hat{k}_0 \times \hat{E}_1`. """
+        r"""The secondary polarization vector :math:`\hat{E}_2 = \hat{k}_0 \times \hat{E}_1`."""
         return np.cross(self.beam_vec, self.e1_vec)
 
     @property
     def polarization_weight(self):
-        r""" The fraction of f of energy that goes into the principle polarization vector specified by the
-        polarization_vec attribute.  The fraction of the energy in the complementary polarization is of course (1-f). """
+        r"""The fraction of f of energy that goes into the principle polarization vector specified by the
+        polarization_vec attribute.  The fraction of the energy in the complementary polarization is of course (1-f)."""
         return self._polarization_weight
 
     @polarization_weight.setter
@@ -157,16 +167,16 @@ class Beam:
 
     @property
     def wavelength(self):
-        r""" Photon wavelength in meters."""
-        return hc/self.photon_energy
+        r"""Photon wavelength in meters."""
+        return hc / self.photon_energy
 
     @wavelength.setter
     def wavelength(self, value):
-        self.photon_energy = hc/value
+        self.photon_energy = hc / value
 
     @property
     def pulse_energy(self):
-        r""" Pulse energy in J."""
+        r"""Pulse energy in J."""
         return self._pulse_energy
 
     @pulse_energy.setter
@@ -175,26 +185,26 @@ class Beam:
 
     @property  # this cannot be set - set pulse energy instead
     def n_photons(self):
-        r""" Number of photons per pulse."""
+        r"""Number of photons per pulse."""
         return self.pulse_energy / self.photon_energy
 
     @property
     def fluence(self):
-        r""" Same as energy_fluence.  Don't use this method."""
+        r"""Same as energy_fluence.  Don't use this method."""
         return self.energy_fluence
 
     @property
     def photon_number_fluence(self):
-        r""" Pulse fluence in photons/m^2."""
-        return self.n_photons/(np.pi * self.diameter_fwhm**2 / 4.0)
+        r"""Pulse fluence in photons/m^2."""
+        return self.n_photons / (np.pi * self.diameter_fwhm**2 / 4.0)
 
     @property
     def energy_fluence(self):
-        r""" Pulse fluence in J/m^2."""
-        return self.pulse_energy/(np.pi * self.diameter_fwhm**2 / 4.0)
+        r"""Pulse fluence in J/m^2."""
+        return self.pulse_energy / (np.pi * self.diameter_fwhm**2 / 4.0)
 
     def to_dict(self):
-        r""" Convert beam to a dictionary.  It contains the following keys:
+        r"""Convert beam to a dictionary.  It contains the following keys:
         - photon_energy
         - beam_profile
         - beam_vec
@@ -206,51 +216,52 @@ class Beam:
         - diameter_fwhm
         - pulse_energy_fwhm
         """
-        return {'photon_energy': float_tuple(self.photon_energy),
-                'photon_energy_fwhm': float_tuple(self.photon_energy_fwhm),
-                'beam_profile': self.beam_profile,
-                'beam_vec': float_tuple(tuple(self.beam_vec)),
-                'polarization_vec': float_tuple(tuple(self.polarization_vec)),
-                'polarization_weight': float_tuple(self.polarization_weight),
-                'pulse_energy': float_tuple(self.pulse_energy),
-                'pulse_energy_fwhm': float_tuple(self.pulse_energy_fwhm),
-                'divergence_fwhm': float_tuple(self.divergence_fwhm),
-                'diameter_fwhm': float_tuple(self.diameter_fwhm)
-                }
+        return {
+            "photon_energy": float_tuple(self.photon_energy),
+            "photon_energy_fwhm": float_tuple(self.photon_energy_fwhm),
+            "beam_profile": self.beam_profile,
+            "beam_vec": float_tuple(tuple(self.beam_vec)),
+            "polarization_vec": float_tuple(tuple(self.polarization_vec)),
+            "polarization_weight": float_tuple(self.polarization_weight),
+            "pulse_energy": float_tuple(self.pulse_energy),
+            "pulse_energy_fwhm": float_tuple(self.pulse_energy_fwhm),
+            "divergence_fwhm": float_tuple(self.divergence_fwhm),
+            "diameter_fwhm": float_tuple(self.diameter_fwhm),
+        }
 
     def from_dict(self, dictionary):
-        r""" Loads beam from dictionary.  This goes along with the to_dict method."""
+        r"""Loads beam from dictionary.  This goes along with the to_dict method."""
         for k in list(dictionary.keys()):
             setattr(self, k, dictionary[k])
 
     def copy(self):
-        r""" Make a copy of this class instance. """
+        r"""Make a copy of this class instance."""
         b = Beam()
         b.from_dict(self.to_dict())
         return b
 
     def save_json(self, file_name):
-        r""" Save the beam as a json file. """
-        with open(file_name, 'w') as f:
+        r"""Save the beam as a json file."""
+        with open(file_name, "w") as f:
             json.dump(self.to_dict(), f, sort_keys=True, indent=0)
 
     def load_json(self, file_name):
-        r""" Save the beam as a json file. """
-        with open(file_name, 'r') as f:
+        r"""Save the beam as a json file."""
+        with open(file_name, "r") as f:
             d = json.load(f)
         self.from_dict(d)
 
     def save(self, file_name):
-        r""" Save the beam to file. """
+        r"""Save the beam to file."""
         self.save_json(file_name)
 
     def load(self, file_name):
-        r""" Load the beam from a file. """
+        r"""Load the beam from a file."""
         return self.load_json(file_name)
 
 
 def load_beam(file_path):
-    r""" Load a beam from a json file (loaded with :meth:`Beam.load_json() <reborn.source.Beam.load_json>` method)
+    r"""Load a beam from a json file (loaded with :meth:`Beam.load_json() <reborn.source.Beam.load_json>` method)
 
     Arguments:
         file_path (str): Path to beam json file
@@ -263,7 +274,7 @@ def load_beam(file_path):
 
 
 def save_beam(beam, file_path):
-    r""" Save a Beam to a json file (saved with :meth:`Beam.save_json() <reborn.source.Beam.save_json>` method)
+    r"""Save a Beam to a json file (saved with :meth:`Beam.save_json() <reborn.source.Beam.save_json>` method)
 
     Arguments:
         beam (|Beam|): The Beam instance to save.
