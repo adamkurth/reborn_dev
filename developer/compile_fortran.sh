@@ -20,6 +20,9 @@ flags="-DNPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION" #-DNPY_NO_DEPRECATED_API=NPY
 ${f2py} -c utils.f90 -m utils_f ${flags}
 ${f2py} -c interpolations.f90 -m interpolations_f ${flags}
 ${f2py} -c fortran_indexing.f90 -m fortran_indexing_f ${flags}
-${f2py} -c density.f90 -m density_f ${flags}
 ${f2py} -c peaks.f90 -m peaks_f ${flags} --f90flags='-fopenmp -O2' -lgomp
 ${f2py} -c omp_test.f90 -m omp_test_f ${flags} --f90flags='-fopenmp -O2' -lgomp
+${f2py} -c density.f90 -m density_f ${flags}
+${f2py} -c scatter.f90 -m scatter_f ${flags}
+${f2py} -c polar.f90 -m polar_f ${flags}
+${f2py} -c crystal.f90 -m crystal_f ${flags}

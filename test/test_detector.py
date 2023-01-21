@@ -58,7 +58,11 @@ def test_slicing():
     data_split2 = pads.split_data(data)
     # assert np.max(np.abs(data_split[0] - data_slice[0])) == 0
     assert np.max(np.abs(data_split2[0] - data_split[0])) == 0
-
+    pads3 = pads.copy()
+    pads3.change_parent_shape((1024, 1024))
+    data3 = data.copy()
+    data_split3 = pads3.split_data(data.copy())
+    assert np.max(np.abs(data_split3[0] - data_split[0])) == 0
 
 def make_pad_list():
     r""" Simply check the creation of a pad list. """

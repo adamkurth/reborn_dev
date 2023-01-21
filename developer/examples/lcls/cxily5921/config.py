@@ -20,7 +20,7 @@ def base_config():
     #           motions: dictionary
     #                    example: {'epics_pv':'CXI:DS1:MMS:06.RBV', 'vector':[0, 0, 1e-3]}
     jungfrau4m = dict(pad_id='jungfrau4M',
-                      geometry='calib/jungfrau_v01.json') # jungfrau4m_pad_geometry_list(detector_distance=0.5))
+                      geometry='calib/jungfrau_v02.json') # jungfrau4m_pad_geometry_list(detector_distance=0.5))
     epix100 = dict(pad_id='epix100',
                    geometry=epix100_pad_geometry_list(detector_distance=1))
     config['pad_detectors'] = [jungfrau4m]  # list allows for multiple detectors

@@ -64,7 +64,7 @@ def import_f90(source_file, extra_args='', hash=True, verbose=False, with_omp=Fa
         paths = sys.path
         debug(os.getcwd(), paths)
         if os.getcwd() not in paths:
-            paths.insert(0, os.getcwd())  # Add current directory to path **in the front**.
+            paths.insert(0, os.getcwd())  # Prepend current directory to path.
         for path in paths:
             fn = os.path.join(path, source_file)
             debug('Checking path:', fn)
@@ -105,7 +105,6 @@ def import_f90(source_file, extra_args='', hash=True, verbose=False, with_omp=Fa
     compile_args = {'modulename': modulename, 'extension': '.f90', 'extra_args': extra_args,
                     'verbose': verbose}#, 'full_output': False}
     if do_compile:
-
         bins = glob.glob(modulename+'.cpython*')
         if len(bins) > 0:
             for b in bins:
@@ -122,11 +121,10 @@ def import_f90(source_file, extra_args='', hash=True, verbose=False, with_omp=Fa
     try:
         debug('Importing...', modulename)
         module = importlib.import_module(modulename)
-    except ImportError:
+    except ImportError:  # This should not be necessary.  Remove it?
         debug('Import failed!')
         debug('Compiling again...', modulename)
         fp = numpy.f2py.compile(source, **compile_args)
-        # print(fp)
         debug('Importing again', modulename)
         module = importlib.import_module(modulename)
     debug('Module name:', module)

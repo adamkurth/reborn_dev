@@ -148,6 +148,7 @@ class PADGeometry:
     _t_vec = None
     _name = ''
     _parent_data_slice = None  # Slice of parent data block
+    _proper_parent_data_slice = None  # Slice of parent data block without ambiguous entries (None types)
     _parent_data_shape = None  # Shape of parent data block
     do_cache = False  # This is experimental... not sure if we really want to cache things like solid angles...
 
@@ -310,7 +311,12 @@ class PADGeometry:
     def parent_data_slice(self):
         r""" Optionally, this defines the slice of an |ndarray| that this geometry corresponds to.  This is helpful
         if you wish to work with the 3D arrays in psana, for example. """
-        return _tuple_to_slice(self._parent_data_slice)
+        if self._parent_data_slice is None:
+            return None
+        if self._proper_parent_data_slice is None:
+            self._proper_parent_data_slice = _explicit_slice(_tuple_to_slice(self._parent_data_slice),
+                                                             self.parent_data_shape)
+        return self._proper_parent_data_slice
 
     @parent_data_slice.setter
     def parent_data_slice(self, slc):
@@ -335,6 +341,12 @@ class PADGeometry:
         r""" Slice this 2D array from the parent data array. """
         data = np.reshape(data, self._parent_data_shape)
         return self.reshape(data[self.parent_data_slice])
+
+    def change_parent_shape(self, shape):
+        r""" Change the parent data shape (e.g from [400, 150] to [4, 100, 150]).  """
+        self.parent_data_slice = _reslice(self.parent_data_slice, self.parent_data_shape, shape)
+        self._proper_parent_data_slice = None
+        self.parent_data_shape = shape
 
     def to_dict(self):
         r""" Convert geometry to a dictionary.
@@ -1126,6 +1138,11 @@ class PADGeometryList(list):
         if False in [(self[0].parent_data_shape == s.parent_data_shape) for s in self]:
             raise ValueError("Your PADGeometry instances have different parent data shapes!")
         return self[0].parent_data_shape
+
+    def change_parent_shape(self, shape):
+        r""" See equivalent method in |PADGeometry|. """
+        for p in self:
+            p.change_parent_shape(shape)
 
     def reshape(self, data):
         r""" If parent_data_shape is defined, then reshape the data to that shape. """
@@ -2442,9 +2459,9 @@ def _slice_to_tuple(slc):
         return slc.start, slc.stop, slc.step
     if isinstance(slc, tuple):  # Presumably we have multiple dimensions, hence multiple slices
         return tuple(_slice_to_tuple(s) for s in slc)
-    if isinstance(slc, int):
-        return slc
-    raise ValueError(f'Cannot convert slice to tuple: {slc}')
+    if isinstance(slc, (int, np.int64)):
+        return int(slc)
+    raise ValueError(f'Cannot convert slice to tuple: {slc} {type(slc)}')
 
 
 def _tuple_to_slice(slc):
@@ -2454,7 +2471,7 @@ def _tuple_to_slice(slc):
     if isinstance(slc, slice):
         return slc
     if isinstance(slc, (tuple, list)):
-        if False not in [isinstance(s, int) for s in slc]:
+        if False not in [isinstance(s, (int, np.int64)) for s in slc]:
             return slice(slc[0], slc[1], slc[2])
         out = []
         for s in slc:
@@ -2464,3 +2481,44 @@ def _tuple_to_slice(slc):
                 out.append(s)
         return tuple(out)
     return slc
+
+
+def _explicit_slice(slice_, shape):
+    r""" Replace implicit slice indices with explicit indices. Example: the slice [100:] becomes [100:201:1].  Note
+    that the array shape is needed.
+    """
+    if isinstance(slice_, int):
+        return slice_
+    if isinstance(slice_, tuple):
+        return tuple(_explicit_slice(slc, shp) for slc, shp in zip(slice_, shape))
+    start = slice_.start
+    stop = slice_.stop
+    step = slice_.step
+    if start is None:
+        start = 0
+    if stop is None:
+        stop = shape
+    if step is None:
+        step = 1
+    return np.s_[start:stop:step]
+
+
+def _reslice(slice_, shape1, shape2):
+    r""" Convert slice from array of shape1 to an equivalent slice from an array of shape2.
+    Be careful - this is not always possible. """
+    if np.product(shape1) != np.product(shape2):
+        raise ValueError("The array sizes must be the same.")
+    slice_ = _explicit_slice(slice_, shape1)
+    flt1a = np.ravel_multi_index([s if isinstance(s, int) else s.start for s in slice_], shape1)
+    flt1b = np.ravel_multi_index([s if isinstance(s, int) else s.stop-1 for s in slice_], shape1)
+    slc2a = np.unravel_index(flt1a, shape2)
+    slc2b = list(np.unravel_index(flt1b, shape2))
+    slc2 = []
+    for i in range(len(slc2a)):
+        a = slc2a[i]
+        b = slc2b[i]
+        if a != b:
+            slc2.append(np.s_[a:b+1:1])
+        else:
+            slc2.append(a)
+    return tuple(slc2)
