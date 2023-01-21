@@ -41,115 +41,115 @@ class Widget(qwgt.QWidget):
         row += 1
         bold = QtGui.QFont()
         bold.setBold(True)
-        label = QtGui.QLabel('** Type spacebar to do mask action **')
+        label = qwgt.QLabel('** Type spacebar to do mask action **')
         label.setFont(bold)
         padview.set_shortcut(QtCore.Qt.Key_Space, self.apply_mask)
         QtGui.QShortcut(QtGui.QKeySequence(QtCore.Qt.Key_Space), self).activated.connect(self.apply_mask)
         self.layout.addWidget(label, row, 1)
         row += 1
-        self.clear_button = QtGui.QPushButton("Clear mask")
+        self.clear_button = qwgt.QPushButton("Clear mask")
         self.clear_button.clicked.connect(padview.clear_masks)
         self.layout.addWidget(self.clear_button, row, 1, 1, 2)
         row += 1
-        self.undo_button = QtGui.QPushButton("Undo")
+        self.undo_button = qwgt.QPushButton("Undo")
         self.undo_button.clicked.connect(padview.clear_masks)
         self.layout.addWidget(self.undo_button, row, 1, 1, 2)
         row += 1
-        self.visible_button = QtGui.QPushButton("Toggle mask visible")
+        self.visible_button = qwgt.QPushButton("Toggle mask visible")
         self.visible_button.clicked.connect(padview.toggle_masks)
         self.layout.addWidget(self.visible_button, row, 1, 1, 2)
         row += 1
-        self.color_button = QtGui.QPushButton("Choose mask color")
+        self.color_button = qwgt.QPushButton("Choose mask color")
         self.color_button.clicked.connect(padview.choose_mask_color)
         self.layout.addWidget(self.color_button, row, 1, 1, 2)
         row += 1
-        self.rroi_button = QtGui.QPushButton("Add rectangle ROI")
+        self.rroi_button = qwgt.QPushButton("Add rectangle ROI")
         self.rroi_button.clicked.connect(padview.add_rectangle_roi)
         self.layout.addWidget(self.rroi_button, row, 1, 1, 2)
         row += 1
-        self.rroi_button = QtGui.QPushButton("Add circle ROI")
+        self.rroi_button = qwgt.QPushButton("Add circle ROI")
         self.rroi_button.clicked.connect(padview.add_circle_roi)
         self.layout.addWidget(self.rroi_button, row, 1, 1, 2)
         row += 1
-        self.rroi_button = QtGui.QPushButton("Mask panel edges...")
+        self.rroi_button = qwgt.QPushButton("Mask panel edges...")
         self.rroi_button.clicked.connect(self.mask_panel_edges)
         self.layout.addWidget(self.rroi_button, row, 1, 1, 2)
         row += 1
-        self.rroi_button = QtGui.QPushButton("Mask panels by names...")
+        self.rroi_button = qwgt.QPushButton("Mask panels by names...")
         self.rroi_button.clicked.connect(self.mask_pads_by_names)
         self.layout.addWidget(self.rroi_button, row, 1, 1, 2)
         row += 1
-        label = QtGui.QLabel('What to do:')
+        label = qwgt.QLabel('What to do:')
         label.setFont(bold)
         self.layout.addWidget(label, row, 1)
         row += 1
-        self.layout.addWidget(QtGui.QLabel('Mask'), row, 1)
-        self.mask_radio = QtGui.QRadioButton('')
+        self.layout.addWidget(qwgt.QLabel('Mask'), row, 1)
+        self.mask_radio = qwgt.QRadioButton('')
         self.mask_radio.setChecked(True)
         self.layout.addWidget(self.mask_radio, row, 2, alignment=QtCore.Qt.AlignCenter)
         row += 1
-        self.layout.addWidget(QtGui.QLabel('Unmask'), row, 1)
-        self.unmask_radio = QtGui.QRadioButton('')
+        self.layout.addWidget(qwgt.QLabel('Unmask'), row, 1)
+        self.unmask_radio = qwgt.QRadioButton('')
         self.layout.addWidget(self.unmask_radio, row, 2, alignment=QtCore.Qt.AlignCenter)
         row += 1
-        self.layout.addWidget(QtGui.QLabel('Invert'), row, 1)
-        self.invert_radio = QtGui.QRadioButton('')
+        self.layout.addWidget(qwgt.QLabel('Invert'), row, 1)
+        self.invert_radio = qwgt.QRadioButton('')
         self.layout.addWidget(self.invert_radio, row, 2, alignment=QtCore.Qt.AlignCenter)
-        self.what_group = QtGui.QButtonGroup(self)
+        self.what_group = qwgt.QButtonGroup(self)
         self.what_group.addButton(self.mask_radio)
         self.what_group.addButton(self.unmask_radio)
         self.what_group.addButton(self.invert_radio)
         row += 1
-        label = QtGui.QLabel('Where to do it:')
+        label = qwgt.QLabel('Where to do it:')
         label.setFont(bold)
         self.layout.addWidget(label, row, 1)
         row += 1
-        self.layout.addWidget(QtGui.QLabel('Inside selected ROI'), row, 1)
-        self.inside_radio = QtGui.QRadioButton('')
+        self.layout.addWidget(qwgt.QLabel('Inside selected ROI'), row, 1)
+        self.inside_radio = qwgt.QRadioButton('')
         self.inside_radio.setChecked(True)
         self.layout.addWidget(self.inside_radio, row, 2, alignment=QtCore.Qt.AlignCenter)
         row += 1
-        self.layout.addWidget(QtGui.QLabel('Outside selected ROI'), row, 1)
-        self.outside_radio = QtGui.QRadioButton('')
+        self.layout.addWidget(qwgt.QLabel('Outside selected ROI'), row, 1)
+        self.outside_radio = qwgt.QRadioButton('')
         self.layout.addWidget(self.outside_radio, row, 2, alignment=QtCore.Qt.AlignCenter)
         row += 1
-        self.layout.addWidget(QtGui.QLabel('Everywhere'), row, 1)
-        self.everywhere_radio = QtGui.QRadioButton('')
+        self.layout.addWidget(qwgt.QLabel('Everywhere'), row, 1)
+        self.everywhere_radio = qwgt.QRadioButton('')
         self.layout.addWidget(self.everywhere_radio, row, 2, alignment=QtCore.Qt.AlignCenter)
-        self.where_group = QtGui.QButtonGroup(self)
+        self.where_group = qwgt.QButtonGroup(self)
         self.where_group.addButton(self.inside_radio)
         self.where_group.addButton(self.outside_radio)
         self.where_group.addButton(self.everywhere_radio)
         row += 1
-        label = QtGui.QLabel('Additional filters:')
+        label = qwgt.QLabel('Additional filters:')
         label.setFont(bold)
         self.layout.addWidget(label, row, 1)
         row += 1
-        self.layout.addWidget(QtGui.QLabel('Apply only above upper threshold'), row, 1)
-        self.above_upper_checkbox = QtGui.QCheckBox()
+        self.layout.addWidget(qwgt.QLabel('Apply only above upper threshold'), row, 1)
+        self.above_upper_checkbox = qwgt.QCheckBox()
         self.layout.addWidget(self.above_upper_checkbox, row, 2, alignment=QtCore.Qt.AlignCenter)
         row += 1
-        self.layout.addWidget(QtGui.QLabel('Apply only below upper threshold'), row, 1)
-        self.below_upper_checkbox = QtGui.QCheckBox()
+        self.layout.addWidget(qwgt.QLabel('Apply only below upper threshold'), row, 1)
+        self.below_upper_checkbox = qwgt.QCheckBox()
         self.layout.addWidget(self.below_upper_checkbox, row, 2, alignment=QtCore.Qt.AlignCenter)
         row += 1
-        self.layout.addWidget(QtGui.QLabel('Apply only above lower threshold'), row, 1)
-        self.above_lower_checkbox = QtGui.QCheckBox()
+        self.layout.addWidget(qwgt.QLabel('Apply only above lower threshold'), row, 1)
+        self.above_lower_checkbox = qwgt.QCheckBox()
         self.layout.addWidget(self.above_lower_checkbox, row, 2, alignment=QtCore.Qt.AlignCenter)
         row += 1
-        self.layout.addWidget(QtGui.QLabel('Apply only below lower threshold'), row, 1)
-        self.below_lower_checkbox = QtGui.QCheckBox()
+        self.layout.addWidget(qwgt.QLabel('Apply only below lower threshold'), row, 1)
+        self.below_lower_checkbox = qwgt.QCheckBox()
         self.layout.addWidget(self.below_lower_checkbox, row, 2, alignment=QtCore.Qt.AlignCenter)
         row += 1
-        self.layout.addWidget(QtGui.QLabel('Apply only to PAD under mouse cursor'), row, 1)
-        self.pad_under_mouse_checkbox = QtGui.QCheckBox()
+        self.layout.addWidget(qwgt.QLabel('Apply only to PAD under mouse cursor'), row, 1)
+        self.pad_under_mouse_checkbox = qwgt.QCheckBox()
         self.layout.addWidget(self.pad_under_mouse_checkbox, row, 2, alignment=QtCore.Qt.AlignCenter)
         row += 1
-        self.save_button = QtGui.QPushButton("Save masks...")
+        self.save_button = qwgt.QPushButton("Save masks...")
         self.save_button.clicked.connect(padview.save_masks)
         self.layout.addWidget(self.save_button, row, 1, 1, 2)
         row += 1
-        self.load_button = QtGui.QPushButton("Load masks...")
+        self.load_button = qwgt.QPushButton("Load masks...")
         self.load_button.clicked.connect(padview.load_masks)
         self.layout.addWidget(self.load_button, row, 1, 1, 2)
         self.setLayout(self.layout)
@@ -210,8 +210,8 @@ class Widget(qwgt.QWidget):
     def mask_panel_edges(self, n_pixels=None):
         padview = self.padview
         if n_pixels is None or n_pixels is False:
-            text, ok = QtGui.QInputDialog.getText(padview.main_window, "Edge mask", "Specify number of edge pixels to mask",
-                                                  QtGui.QLineEdit.Normal, "1")
+            text, ok = qwgt.QInputDialog.getText(padview.main_window, "Edge mask", "Specify number of edge pixels to mask",
+                                                  qwgt.QLineEdit.Normal, "1")
             if ok:
                 if text == '':
                     return
@@ -228,8 +228,8 @@ class Widget(qwgt.QWidget):
         if padview.pad_labels is None:
             padview.show_pad_labels()
             clear_labels = True
-        text, ok = QtGui.QInputDialog.getText(padview.main_window, "Enter PAD names (comma separated)", "PAD names",
-                                              QtGui.QLineEdit.Normal, "")
+        text, ok = qwgt.QInputDialog.getText(padview.main_window, "Enter PAD names (comma separated)", "PAD names",
+                                              qwgt.QLineEdit.Normal, "")
         print('ok', ok)
         if clear_labels:
             padview.hide_pad_labels()
