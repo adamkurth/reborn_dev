@@ -2,8 +2,8 @@ name: reborn
 channels:
   - conda-forge
 dependencies:
-  - python
-  - scipy               # Installing scipy will install the minimal dependencies
+  - python>=3.7
+  - scipy               # Installing scipy will install the minimal dependencies (numpy, etc.)
   - h5py                # Only if loading data using tools in reborn.external
   - matplotlib          # Only if you use the GUIs in reborn.viewers.mplviews
   - numba               # A few functions run faster with this
@@ -13,17 +13,17 @@ dependencies:
   - pyqtgraph           # Only if you want to use the Qt GUIs (reborn.viewers.qtviews)
   - pyopengl            # Only if you need 3D graphics
   - xraylib             # Only if you need scattering factors
-  - joblib              # For simple multiprocessing and pipelines
-  - pandas              # For tabular data displays
-  - joblib              # For parallel processing
-#  - pocl               # Possibly helpful if pyopencl doesn't work
-#  - ocl-icd-system     # Possibly helpful if pyopencl doesn't work
-#  - fortran-compiler   # Possibly helpful for strange computers (windows, mac)
-#  - make               # Possibly helpful for strange computers (windows, mac)
+  - joblib              # Only if you need parallelized pipelines
+  - pandas              # Only if you need tabular data displays
   - sphinx              # Only if you are building docs
   - memory_profiler     # Only if you are building docs
+  - fortran-compiler    # Only if you do not already have gfortran installed
+  - ocl-icd-system      # Only if you installed pyopencl and do not manage ICDs manually
   - pip                 # Only if you are building docs
-  - pip:
+#  - pocl               # Possibly helpful to run unit tests without a GPU
+#  - ocl_icd_wrapper_apple  # Possibly helpful for GPU simulations on Apple computers
+#  - make               # Only if you are building docs on Apple or Windows computers
+  - pip:                # Some packages only install via pip...
     - sphinx_rtd_theme  # Only if you are building docs
     - sphinx-gallery    # Only if you are building docs
     - pyvirtualdisplay  # Only if you are building docs
