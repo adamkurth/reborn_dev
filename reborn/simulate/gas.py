@@ -89,7 +89,8 @@ def get_gas_background(pad_geometry, beam, path_length=[0.0, 1.0], gas_type='hel
     Returns:
         List of |ndarray| instances containing intensities.
     """
-    gas_options = ['he', 'helium', 'air']
+    gas_type=gas_type.lower()
+    gas_options = ['he', 'n2', 'air','o2']
     if gas_type not in gas_options:
         raise ValueError(f'Sorry, the only options are {gas_options}. Considering writing your own function for other gases.')
     pads0 = detector.PADGeometryList(pad_geometry).copy()
@@ -112,8 +113,11 @@ def get_gas_background(pad_geometry, beam, path_length=[0.0, 1.0], gas_type='hel
         polarization = pads.polarization_factors(beam)  # calculate the polarization factors
         solid_angles = pads.solid_angles2()  # Approximate solid angles
         q_mags = pads.q_mags(beam)
-        scatt = isotropic_gas_intensity_profile(molecule='He', beam=beam, q_mags=q_mags)  # 1D intensity profile
-        F2 = np.abs(scatt) ** 2 * n_molecules
+        if gas_type=='air':
+            scatt = air_intensity_profile( beam=beam, q_mags=q_mags)  # 1D intensity profile
+        else:
+            scatt = isotropic_gas_intensity_profile(molecule=gas_type, beam=beam, q_mags=q_mags)
+        F2 = np.abs(scatt) * n_molecules
         I = alpha * polarization * solid_angles * F2  # calculate the scattering intensity
         total += I*mask  # sum the results
     if poisson:
