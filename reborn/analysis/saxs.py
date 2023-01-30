@@ -252,3 +252,146 @@ def normalize_profile_stats(stats, q_range=None):
                 (run_psum2.T / s ** 2).T, stats["counts"].copy(),
                 stats["q_bins"].copy()]
     return dict(zip(out_keys, out_vals))
+
+
+class RadialProfiler(ParallelAnalyzer):
+    r"""
+    A parallelized class for creating radial profiles from image data.
+    Standard profiles are computed using fortran code.
+    Bin indices are cached for speed, provided that the |PADGeometry| and |Beam| do not change.
+    """
+    framegetter = None
+    experiment_id = None
+    run_id = None
+    n_bins = None  # Number of bins in radial profile
+    q_range = None  # The range of q magnitudes in the 1D profile.  These correspond to bin centers
+    q_edge_range = None  # Same as above, but corresponds to bin edges not centers
+    bin_centers = None  # q magnitudes corresponding to 1D profile bin centers
+    bin_edges = None  # q magnitudes corresponding to 1D profile bin edges (length is n_bins+1)
+    bin_size = None  # The size of the 1D profile bin in q space
+    initial_frame = None
+    _q_mags = None  # q magnitudes corresponding to diffraction pattern intensities
+    _mask = None  # The default mask, in case no mask is provided upon requesting profiles
+    _fortran_indices = None  # For speed, pre-index arrays
+    _pad_geometry = None  # List of PADGeometry instances
+    _beam = None  # Beam instance for creating q magnitudes
+    radial_sum = None
+    radial_mean = None
+    radial_sdev = None
+    radial_sum2 = None
+    radial_weight_sum = None
+
+    def __init__(self, framegetter=None, **kwargs):
+        r"""
+        Arguments:
+            mask (|ndarray|): Optional.  The arrays will be multiplied by this mask, and the counts per radial bin
+                                will come from this (e.g. use values of 0 and 1 if you want a normal average, otherwise
+                                you get a weighted average).
+            n_bins (int): Number of radial bins you desire.
+            q_range (list-like): The minimum and maximum of the *centers* of the q bins.
+            pad_geometry (|PADGeometryList|):  Optional.  Will be used to generate q magnitudes.  You must
+                                                             provide beam if you provide this.
+            beam (|Beam| instance): Optional, unless pad_geometry is provided.  Wavelength and beam direction are
+                                     needed in order to calculate q magnitudes.
+        """
+        start = kwargs.get('start', 0)
+        stop = kwargs.get('stop', None)
+        step = kwargs.get('step', 1)
+        n_processes = kwargs.get('n_processes', 1)
+        super().__init__(framegetter=framegetter, start=start, stop=stop,
+                         step=step, n_processes=n_processes, **kwargs)
+        self.framegetter = framegetter
+        self.experiment_id = kwargs.get('experiment_id', 'default')
+        self.run_id = kwargs.get('run_id', 0)
+        self._pad_geometry, self._beam, self.initial_frame = get_setup_data(framegetter=self.framegetter, **kwargs)
+        self._q_mags = self._pad_geometry.q_mags(beam=self._beam).astype(np.float64)
+        q_range = kwargs.get('q_range', (0, np.max(self._q_mags)))
+        n_bins = kwargs.get('n_bins', int(np.sqrt(self._q_mags.size) / 4.0))
+        q_range = np.array(q_range)
+        bin_size = (q_range[1] - q_range[0]) / float(n_bins - 1)
+        self.bin_centers = np.linspace(q_range[0], q_range[1], n_bins)
+        self.bin_centers.flags['WRITEABLE'] = False
+        self.bin_edges = np.linspace(q_range[0] - bin_size / 2, q_range[1] + bin_size / 2, n_bins + 1)
+        self.bin_edges.flags['WRITEABLE'] = False
+        self.q_edge_range = np.array([q_range[0] - bin_size / 2, q_range[1] + bin_size / 2])
+        self.q_edge_range.flags['WRITEABLE'] = False
+        self.q_range = q_range
+        self.q_range.flags['WRITEABLE'] = False
+        self.n_bins = n_bins
+        self.bin_size = bin_size
+        mask = kwargs.get('mask', None)
+        if mask is not None:
+            mask = self._pad_geometry.concat_data(mask)
+        else:
+            self._mask = np.ones_like(self._q_mags)
+        self._mask = mask.astype(np.float64)  # Because fortran code is involved
+        self._mask.flags['WRITEABLE'] = False
+        self.radial_sum = []
+        self.radial_mean = []
+        self.radial_sdev = []
+        self.radial_sum2 = []
+        self.radial_weight_sum = []
+
+    def add_frame(self, dat: DataFrame):
+        if dat.validate():
+            data = dat.get_raw_data_flat()
+            mask = dat.get_mask_flat()
+            data = self._pad_geometry.concat_data(data).astype(np.float64)
+            weights = (self._mask * mask).astype(np.float64)
+            n_bins = self.n_bins
+            indices = self._fortran_indices
+            if indices is None:  # Cache for faster computing next time.
+                q = self._q_mags
+                q_min = self.q_range[0]
+                q_max = self.q_range[1]
+                indices = np.zeros(len(q), dtype=np.int32)
+                scatter_f.profile_indices(q, n_bins, q_min, q_max, indices)
+                self._fortran_indices = indices
+            sum_ = np.zeros(n_bins, dtype=np.float64)
+            sum2 = np.zeros(n_bins, dtype=np.float64)
+            wsum = np.zeros(n_bins, dtype=np.float64)
+            avg = np.empty(n_bins, dtype=np.float64)
+            std = np.empty(n_bins, dtype=np.float64)
+            scatter_f.profile_stats_indexed(data, indices, weights, sum_, sum2, wsum)
+            scatter_f.profile_stats_avg(sum_, sum2, wsum, avg, std)
+            self.radial_sum.append(sum_)
+            self.radial_mean.append(avg)
+            self.radial_sdev.append(std)
+            self.radial_sum2.append(sum2)
+            self.radial_weight_sum.append(wsum)
+
+    def concatenate(self, stats):
+        self.radial_sum.extend(stats.radial_sum)
+        self.radial_mean.extend(stats.radial_mean)
+        self.radial_sdev.extend(stats.radial_sdev)
+        self.radial_sum2.extend(stats.radial_sum2)
+        self.radial_weight_sum.extend(stats.radial_weight_sum)
+
+    def to_dict(self):
+        profiler_dict = dict(experiment_id=self.experiment_id,
+                             run_id=self.run_id,
+                             n_bins=self.n_bins,
+                             q_range=self.q_range,
+                             mask=self._mask,
+                             pad_geometry=self._pad_geometry,
+                             beam=self._beam,
+                             radial_sum=self.radial_sum,
+                             radial_mean=self.radial_mean,
+                             radial_sdev=self.radial_sdev,
+                             radial_sum2=self.radial_sum2,
+                             radial_weights_sum=self.radial_weight_sum)
+        return profiler_dict
+
+    def from_dict(self, stats):
+        self.experiment_id = stats['experiment_id']
+        self.run_id = stats['run_id']
+        self.n_bins = stats['n_bins']
+        self.q_range = stats['q_range']
+        self._mask = stats['mask']
+        self._pad_geometry = stats['pad_geometry']
+        self._beam = stats['beam']
+        self.radial_sum = stats['radial_sum']
+        self.radial_mean = stats['radial_mean']
+        self.radial_sdev = stats['radial_sdev']
+        self.radial_sum2 = stats['radial_sum2']
+        self.radial_weight_sum = stats['radial_weights_sum']
