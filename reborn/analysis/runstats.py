@@ -28,7 +28,6 @@ from .. import fileio
 from ..dataframe import DataFrame
 from ..external.pyqtgraph import imview
 from ..fileio.getters import ListFrameGetter
-from ..fortran import scatter_f
 from ..viewers.qtviews.padviews import PADView
 
 

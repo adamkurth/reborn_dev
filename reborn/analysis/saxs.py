@@ -27,6 +27,10 @@ except ImportError:
 from ..detector import RadialProfiler
 from ..external import pyqtgraph as pg
 from .. import utils, fileio
+from .parallel import ParallelAnalyzer
+from .parallel import get_setup_data
+from ..dataframe import DataFrame
+from .. import fortran
 
 debug = False
 
@@ -264,6 +268,7 @@ class RadialProfiler(ParallelAnalyzer):
     experiment_id = None
     run_id = None
     n_bins = None  # Number of bins in radial profile
+    n_frames = None
     q_range = None  # The range of q magnitudes in the 1D profile.  These correspond to bin centers
     q_edge_range = None  # Same as above, but corresponds to bin edges not centers
     bin_centers = None  # q magnitudes corresponding to 1D profile bin centers
@@ -281,7 +286,7 @@ class RadialProfiler(ParallelAnalyzer):
     radial_sum2 = None
     radial_weight_sum = None
 
-    def __init__(self, framegetter=None, **kwargs):
+    def __init__(self, framegetter=None, config=None, **kwargs):
         r"""
         Arguments:
             mask (|ndarray|): Optional.  The arrays will be multiplied by this mask, and the counts per radial bin
@@ -294,15 +299,10 @@ class RadialProfiler(ParallelAnalyzer):
             beam (|Beam| instance): Optional, unless pad_geometry is provided.  Wavelength and beam direction are
                                      needed in order to calculate q magnitudes.
         """
-        start = kwargs.get('start', 0)
-        stop = kwargs.get('stop', None)
-        step = kwargs.get('step', 1)
-        n_processes = kwargs.get('n_processes', 1)
-        super().__init__(framegetter=framegetter, start=start, stop=stop,
-                         step=step, n_processes=n_processes, **kwargs)
-        self.framegetter = framegetter
         self.experiment_id = kwargs.get('experiment_id', 'default')
         self.run_id = kwargs.get('run_id', 0)
+        super().__init__(framegetter=framegetter, config=config, **kwargs)
+        # self.framegetter = framegetter
         self._pad_geometry, self._beam, self.initial_frame = get_setup_data(framegetter=self.framegetter, **kwargs)
         self._q_mags = self._pad_geometry.q_mags(beam=self._beam).astype(np.float64)
         q_range = kwargs.get('q_range', (0, np.max(self._q_mags)))
@@ -320,10 +320,10 @@ class RadialProfiler(ParallelAnalyzer):
         self.n_bins = n_bins
         self.bin_size = bin_size
         mask = kwargs.get('mask', None)
-        if mask is not None:
-            mask = self._pad_geometry.concat_data(mask)
+        if mask is None:
+            mask = np.ones_like(self._q_mags)
         else:
-            self._mask = np.ones_like(self._q_mags)
+            mask = self._pad_geometry.concat_data(mask)
         self._mask = mask.astype(np.float64)  # Because fortran code is involved
         self._mask.flags['WRITEABLE'] = False
         self.radial_sum = []
@@ -331,6 +331,7 @@ class RadialProfiler(ParallelAnalyzer):
         self.radial_sdev = []
         self.radial_sum2 = []
         self.radial_weight_sum = []
+        self.n_frames = 0
 
     def add_frame(self, dat: DataFrame):
         if dat.validate():
@@ -345,31 +346,34 @@ class RadialProfiler(ParallelAnalyzer):
                 q_min = self.q_range[0]
                 q_max = self.q_range[1]
                 indices = np.zeros(len(q), dtype=np.int32)
-                scatter_f.profile_indices(q, n_bins, q_min, q_max, indices)
+                fortran.scatter_f.profile_indices(q, n_bins, q_min, q_max, indices)
                 self._fortran_indices = indices
             sum_ = np.zeros(n_bins, dtype=np.float64)
             sum2 = np.zeros(n_bins, dtype=np.float64)
             wsum = np.zeros(n_bins, dtype=np.float64)
             avg = np.empty(n_bins, dtype=np.float64)
             std = np.empty(n_bins, dtype=np.float64)
-            scatter_f.profile_stats_indexed(data, indices, weights, sum_, sum2, wsum)
-            scatter_f.profile_stats_avg(sum_, sum2, wsum, avg, std)
+            fortran.scatter_f.profile_stats_indexed(data, indices, weights, sum_, sum2, wsum)
+            fortran.scatter_f.profile_stats_avg(sum_, sum2, wsum, avg, std)
             self.radial_sum.append(sum_)
             self.radial_mean.append(avg)
             self.radial_sdev.append(std)
             self.radial_sum2.append(sum2)
             self.radial_weight_sum.append(wsum)
+            self.n_frames += 1
 
     def concatenate(self, stats):
-        self.radial_sum.extend(stats.radial_sum)
-        self.radial_mean.extend(stats.radial_mean)
-        self.radial_sdev.extend(stats.radial_sdev)
-        self.radial_sum2.extend(stats.radial_sum2)
-        self.radial_weight_sum.extend(stats.radial_weight_sum)
+        self.radial_sum.extend(stats['radial_sum'])
+        self.radial_mean.extend(stats['radial_mean'])
+        self.radial_sdev.extend(stats['radial_sdev'])
+        self.radial_sum2.extend(stats['radial_sum2'])
+        self.radial_weight_sum.extend(stats['radial_weights_sum'])
+        self.n_frames += stats['n_frames']
 
     def to_dict(self):
         profiler_dict = dict(experiment_id=self.experiment_id,
                              run_id=self.run_id,
+                             n_frames=self.n_frames,
                              n_bins=self.n_bins,
                              q_range=self.q_range,
                              mask=self._mask,
@@ -385,6 +389,7 @@ class RadialProfiler(ParallelAnalyzer):
     def from_dict(self, stats):
         self.experiment_id = stats['experiment_id']
         self.run_id = stats['run_id']
+        self.n_frames = stats['n_frames']
         self.n_bins = stats['n_bins']
         self.q_range = stats['q_range']
         self._mask = stats['mask']

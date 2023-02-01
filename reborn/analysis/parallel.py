@@ -38,7 +38,8 @@ def get_setup_data(**kwargs):
     if framegetter is None:
         raise ValueError('get_setup_data requires a framegetter')
     if (pad_geometry is None) or (beam is None):
-        frames = random.sample(range(max_iterations), max_iterations)
+        maxiter = int(max_iterations)
+        frames = random.sample(range(maxiter), maxiter)
         for i in frames:
             data = framegetter.get_frame(frame_number=i)
             if data.validate():
