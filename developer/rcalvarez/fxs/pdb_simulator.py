@@ -1,11 +1,15 @@
+import h5py
 import numpy as np
 from scipy.spatial.transform import Rotation
 
+from glob import glob
 from reborn.dataframe import DataFrame
+from reborn.detector import jungfrau4m_pad_geometry_list
 from reborn.fileio.getters import FrameGetter
 from reborn.simulate import clcore
 from reborn.simulate.gas import get_gas_background
 from reborn.simulate.solutions import water_scattering_factor_squared
+from reborn.source import Beam
 from reborn.target import atoms
 from reborn.target import crystal
 
@@ -135,4 +139,26 @@ class Simulator(FrameGetter):
         df = DataFrame(pad_geometry=self.pads,
                        beam=self.beam,
                        raw_data=intensity)
+        return df
+
+
+class Simulated(FrameGetter):
+
+    def __init__(self, h5_path, **kwargs):
+        super().__init__()
+        self.file_list = glob(f'{h5_path}/*.h5')
+        self.poisson = kwargs.get('poisson_noise', False)
+
+    def get_data(self, frame_number=0):
+        with h5py.File(self.file_list[frame_number], 'r') as hf:
+            photon_energy = hf['beam/photon_energy'][()]
+            detector_distance = hf['geometry/detector_distance'][()]
+            intensity = hf['data'][:]
+            if self.poisson:
+                intensity = np.random.poisson(intensity)
+            beam = Beam(photon_energy=photon_energy)
+            pads = jungfrau4m_pad_geometry_list(detector_distance=detector_distance)
+            df = DataFrame(pad_geometry=pads,
+                           beam=beam,
+                           raw_data=intensity)
         return df
