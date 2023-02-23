@@ -22,33 +22,29 @@ module polar_binning
 ! 2022/09/16 (rca): Created module from standalone subroutine.
 ! 2022/12/06 (rca): Fixed polar_mean logic to calculate weighted mean
 !                   correctly. Added subroutine to compute bin indices.
+! 2023/02/23 (rca): Refactored to code to be more logically consistent.
 !**********************************************************************
     implicit none
     contains
 
-    subroutine polar_bin_indices(nq, qbin_size, qmin, np, pbin_size, pmin, qs, phis, q_index, p_index)
-    ! Fetch polar binning index mapping
+    subroutine q_bin_indices(nq, qbin_size, qmin, qs, q_index)
+    ! Fetch polar binning q index mapping
     !
     ! INPUTS:
     ! nq: Number of q bins.
     ! qbin_size: Size of q bin.
     ! qmin: The *center* position of the minimum q bin.
-    ! np: Number of phi bins.
-    ! pbin_size: Size of phi bin.
-    ! pmin: The *center* position of the minimum phi bin.
     ! qs: Flattened 1D array of q vectors that correspond to the above scattering intensities.
-    ! phis: Flattened 1D array of phi angles that correspond to the above scattering intensities.
     !
     ! RETURNS:
     ! q_index: q polar mapping index (value of 0 means out of bounds)
-    ! p_index: phi polar mapping index (value of 0 means out of bounds)
         implicit none
         real(kind=8), parameter :: tp = 8.d0 * datan(1.d0)  ! 2 * pi
-        integer(kind=8), intent(in) :: nq, np
-        real(kind=8), intent(in) :: qbin_size, qmin, pbin_size, pmin, qs(:), phis(:)
-        integer(kind=8), intent(out) :: q_index(size(qs)), p_index(size(phis))
-        integer(kind=8) :: i, pi, qi
-        real(kind=8) :: p, q
+        integer(kind=8), intent(in) :: nq
+        real(kind=8), intent(in) :: qbin_size, qmin, qs(:)
+        integer(kind=8), intent(out) :: q_index(size(qs))
+        integer(kind=8) :: i, qi
+        real(kind=8) :: q
         do i = 1, size(qs)
             q = qs(i)
             qi = int(floor((q - qmin) / qbin_size)) + 1
@@ -62,6 +58,26 @@ module polar_binning
             end if
             q_index(i) = qi
         end do
+    end subroutine q_bin_indices
+
+    subroutine p_bin_indices(np, pbin_size, pmin, phis, p_index)
+    ! Fetch polar binning p index mapping
+    !
+    ! INPUTS:
+    ! np: Number of phi bins.
+    ! pbin_size: Size of phi bin.
+    ! pmin: The *center* position of the minimum phi bin.
+    ! phis: Flattened 1D array of phi angles that correspond to the above scattering intensities.
+    !
+    ! RETURNS:
+    ! p_index: phi polar mapping index (value of 0 means out of bounds)
+        implicit none
+        real(kind=8), parameter :: tp = 8.d0 * datan(1.d0)  ! 2 * pi
+        integer(kind=8), intent(in) :: np
+        real(kind=8), intent(in) :: pbin_size, pmin, phis(:)
+        integer(kind=8), intent(out) :: p_index(size(phis))
+        integer(kind=8) :: i, pi
+        real(kind=8) :: p
         do i = 1, size(phis)
             p = modulo(phis(i), tp)
             pi = int(floor((p - pmin) / pbin_size)) + 1
@@ -75,7 +91,8 @@ module polar_binning
             end if
             p_index(i) = pi
         end do
-    end subroutine polar_bin_indices
+    end subroutine p_bin_indices
+
 
     subroutine polar_bin_avg(nq, qbin_size, qmin, np, pbin_size, pmin, qs, phis, weights, data, mask, pmean, pmask)
     ! Calculate polar-binned mean:
@@ -107,16 +124,16 @@ module polar_binning
         dsum = 0.d0
         wsum = 0.d0
         count = 0
-        call polar_bin_indices(nq, qbin_size, qmin, np, pbin_size, pmin, qs, phis, q_index, p_index)
+        call q_bin_indices(nq, qbin_size, qmin, qs, q_index)
+        call p_bin_indices(np, pbin_size, pmin, phis, p_index)
         do i = 1, size(data)
-!            print *, q_index(i), p_index(i), data(i), weights(i), mask(i)
             if (mask(i) == 0) cycle
             q = q_index(i)
             if (q == 0) cycle
             p = p_index(i)
             if (p == 0) cycle
             ! bin data
-            ii = np * (q-1) + p! + 1
+            ii = np * (q-1) + p
             count(ii) = count(ii) + 1
             dsum(ii) = dsum(ii) + data(i) * weights(i)
             wsum(ii) = wsum(ii) + weights(i)
