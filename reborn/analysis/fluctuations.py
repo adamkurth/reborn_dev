@@ -30,7 +30,7 @@ def correlate(s1, s2=None, cached=False):
     r"""
     Computes correlation function.
     If two signals are provided computes cross correlation.
-    If one singal is provided computes auto correlation.
+    If one signal is provided computes auto correlation.
     If cached, assumes Fourier transforms are already computed.
 
     Computed via Fourier transforms:
@@ -68,9 +68,9 @@ def subtract_masked_data_mean(data, mask):
     data[mask == 0] = 0
     d_sum = np.sum(data, axis=1)
     count = np.sum(mask, axis=1)
-    zs = np.zeros_like(d_sum, dtype=float)
-    data_avg = np.divide(d_sum, count, out=zs, where=count != 0)
-    d = (data.T - data_avg).T
+    d_avg = np.zeros_like(d_sum, dtype=float)
+    np.divide(d_sum, count, out=d_avg, where=count != 0)
+    d = (data.T - d_avg).T
     d[mask == 0] = 0  # re-zero masked pixels
     return d
 
@@ -155,7 +155,6 @@ class FXS(ParallelAnalyzer):
             pad_geometry (|PADGeometryList|): Detector geometry (optional, default is read from data).
         """
         super().__init__(framegetter=framegetter, **kwargs)
-        self.framegetter = framegetter
         self.experiment_id = kwargs.get('experiment_id', 'default')
         self.run_id = kwargs.get('run_id', 0)
         self.polar_assembler = self.setup_polar_pad_assembler(**kwargs)
@@ -261,61 +260,3 @@ class FXS(ParallelAnalyzer):
         else:
             for i, c in enumerate(stats.run_sum_correlations):
                 self.run_sum_correlations[i] += c
-
-
-def kam_analysis(framegetter=None, polar_assembler=None, radial_profiler=None,
-                 start=0, stop=None, nq_bins=100,
-                 np_bins=100, parallel=False, n_processes=None,
-                 process_id=None, verbose=False):
-    if framegetter is None:
-        raise ValueError('framegetter cannot be None')
-    if polar_assembler is None:
-        raise ValueError('polar assembler cannot be None')
-    if radial_profiler is None:
-        raise ValueError('radial profiler cannot be None')
-    if parallel:
-        if Parallel is None:
-            raise ImportError('You need the joblib package to run analysis in parallel mode.')
-        if not isinstance(framegetter, dict):
-            if framegetter.init_params is None:
-                raise ValueError('This FrameGetter does not have init_params attribute needed to make a replica')
-            framegetter = {'framegetter': type(framegetter),
-                           'kwargs': framegetter.init_params}
-        fsa = Parallel(n_jobs=n_processes)(delayed(kam_analysis)(framegetter=framegetter,
-                                                                 polar_assembler=polar_assembler,
-                                                                 radial_profiler=radial_profiler,
-                                                                 start=0,
-                                                                 stop=None,
-                                                                 nq_bins=nq_bins,
-                                                                 np_bins=np_bins,
-                                                                 parallel=False,
-                                                                 n_processes=n_processes,
-                                                                 process_id=i,
-                                                                 verbose=verbose)
-                                           for i in range(n_processes))
-        main_fxs_analysis = fsa[0]
-        for f in fsa[1:]:
-            main_fxs_analysis.merge_fxs(f)
-        return main_fxs_analysis
-    if isinstance(framegetter, dict):
-        framegetter = framegetter['framegetter'](**framegetter['kwargs'])
-    fxs_analysis = FXS(experiment_id=framegetter.experiment_id,
-                       run_id=framegetter.run_id,
-                       polar_assembler=polar_assembler,
-                       radial_profiler=radial_profiler)
-    if stop is None:
-        stop = framegetter.n_frames
-    frame_ids = np.arange(start, stop, dtype=int)
-    if process_id is not None:
-        frame_ids = np.array_split(frame_ids, n_processes)[process_id]
-    for (n, i) in enumerate(frame_ids):
-        if verbose:
-            print(f'Frame {i:3d} ({n / len(frame_ids) * 100:0.2g})')
-            print(f'{i} of {stop} ({i / stop * 100} %)')
-        dataframe = framegetter.get_frame(i)
-        if dataframe is None:
-            continue
-        if dataframe.validate() is False:
-            continue
-        fxs_analysis.add_frame(dataframe)
-    return fxs_analysis

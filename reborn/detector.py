@@ -1723,6 +1723,12 @@ class PolarPADAssembler:
         sa = pad_geometry.solid_angles()
         self.solid_angles = pad_geometry.concat_data(sa)
 
+    def q_vecs(self):
+        return None
+
+    def solid_angles(self):
+        return None
+
     def get_mean(self, data, mask=None, py=False):
         r""" Create the mean polar-binned average intensities.
         Arguments:
