@@ -131,7 +131,8 @@ def get_water_profile(q, temperature=298):
 def water_scattering_factor_squared(q, temperature=298, volume=None):
     """
     Get water scattering profile :math:`|F(q)|^2` via interpolations/smoothing of the data from Hura et al.
-    2003 (Phys Chem 5, 1981) and Clark et al. 2010 (PNAS 107, 14003–14007).  Temperatures from 1-77 C are
+    2003 (Physical Chemistry Chemical Physics 5(10), 2003,pp 1981-1991, https://doi.org/10.1039/B301481A) and 
+    Clark et al. 2010 (PNAS 107, 14003–14007).  Temperatures from 1-77 C are
     included.  Note that the returned values are the scattering factors :math:`|F(q)|^2` per water molecule,
     so you should multiply this by the number of water molecules exposed to the x-ray beam.  The number density of
     water is approximately 33.3679e27 / m^3.  You may optionally provide the volume and the result will be multiplied by
@@ -143,8 +144,7 @@ def water_scattering_factor_squared(q, temperature=298, volume=None):
         volume (float): If provided, the scattering factor will be multiplied by the number of molecules in this volume.
 
     Returns:
-        |ndarray| : The scattering factor :math:`|F(q)|^2` , possibly multiplied by the number of water molecules if you
-                    specified a volume.
+        |ndarray| : The scattering factor :math:`|F(q)|^2` , possibly multiplied by the number of water molecules if you specified a volume.
     """
     # Interpolate profiles according to temperature (weighted average)
     # If out of range, choose nearest temperature
