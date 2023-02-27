@@ -14,11 +14,9 @@
 # along with reborn.  If not, see <https://www.gnu.org/licenses/>.
 
 import numpy as np
-import numba as nb
 from .. import fortran
 
 
-@nb.njit('i8[:](i8, f8, f8, f8[:])')
 def q_bin_indices(n_q_bins, q_bin_size, q_min, qs):
     r""" Polar q bin indices.
     Arguments:
@@ -31,12 +29,11 @@ def q_bin_indices(n_q_bins, q_bin_size, q_min, qs):
         q_index (|ndarray|): q polar mapping index (value of 0 means out of bounds)
     """
     q_index = np.floor((qs - q_min) / q_bin_size)
-    q_index[q_index < 0] = 0
-    q_index[q_index > n_q_bins] = 0
-    return q_index.astype(nb.i8)
+    q_index[q_index < 0] = -1
+    q_index[q_index > n_q_bins] = -1
+    return q_index.astype(int)
 
 
-@nb.njit('i8[:](i8, f8, f8, f8[:])')
 def p_bin_indices(n_p_bins, p_bin_size, p_min, ps):
     r""" Polar p bin indices.
     Arguments:
@@ -54,33 +51,14 @@ def p_bin_indices(n_p_bins, p_bin_size, p_min, ps):
     # ps = phis % 2 * np.pi
     p = ps - np.floor(ps / tp) * tp  # modulo as defined in fortran
     p_index = np.floor((p - p_min) / p_bin_size)
-    p_index[p_index < 0] = 0
-    p_index[p_index > n_p_bins] = 0
-    return p_index.astype(nb.i8)
+    p_index[p_index < 0] = -1
+    p_index[p_index > n_p_bins] = -1
+    return p_index.astype(int)
 
 
-@nb.njit('f8[:, :](i8, i8, i8[:], i8[:], f8[:])')
-def bin_sum(n_q_bins, n_p_bins, q_index, p_index, array):
-    r""" Polar p bin indices.
-    Arguments:
-        n_q_bins (int): number of q bins
-        n_p_bins (int): number of phi bins
-        q_index (|ndarray|): q bin indices
-        p_index (|ndarray|): phi bin indices
-        array (|ndarray|): array to bin
-
-    Returns:
-        a_sum (|ndarray|): binned array
-    """
-    a_sum = np.zeros((n_q_bins, n_p_bins))
-    for a, qi, pi in zip(array, q_index, p_index):
-        a_sum[qi, pi] += a
-    return a_sum
-
-
-def polar_bin_indices(n_q_bins, q_bin_size, q_min,
-                      n_p_bins, p_bin_size, p_min,
-                      qs, ps, py=False):
+def bin_indices(n_q_bins, q_bin_size, q_min,
+                n_p_bins, p_bin_size, p_min,
+                qs, ps, py=False):
     r""" Create the mean polar-binned average intensities.
     Arguments:
         n_q_bins (int): number of q bins
@@ -111,10 +89,36 @@ def polar_bin_indices(n_q_bins, q_bin_size, q_min,
     return q_index.astype(int), p_index.astype(int)
 
 
-def get_polar_bin_mean(n_q_bins, q_bin_size, q_min,
-                       n_p_bins, p_bin_size, p_min,
-                       qs, ps, weights,
-                       data, mask, py=False):
+def bin_sum(n_q_bins, n_p_bins, q_index, p_index, array, py=False):
+    r""" Polar p bin indices.
+    Arguments:
+        n_q_bins (int): number of q bins
+        n_p_bins (int): number of phi bins
+        q_index (|ndarray|): q bin indices
+        p_index (|ndarray|): phi bin indices
+        array (|ndarray|): array to bin
+        py (bool): computes with fortran if set to false
+
+    Returns:
+        a_sum (|ndarray|): binned array
+    """
+    if py:
+        a_sum = np.zeros((n_q_bins, n_p_bins))
+        for a, qi, pi in zip(array, q_index, p_index):
+            a_sum[qi, pi] += a
+    else:  # fortran
+        q_i = q_index + 1
+        p_i = p_index + 1
+        a = fortran.polar_f.polar_binning.bin_sum(n_q_bins, n_p_bins,
+                                                  q_i, p_i, array)
+        a_sum = a.reshape((n_q_bins, n_p_bins)).astype(float)
+    return a_sum
+
+
+def bin_mean(n_q_bins, q_bin_size, q_min,
+             n_p_bins, p_bin_size, p_min,
+             qs, ps, weights,
+             data, mask, py=False):
     r""" Create the mean polar-binned average intensities.
     Arguments:
         n_q_bins (int): number of q bins
@@ -135,28 +139,33 @@ def get_polar_bin_mean(n_q_bins, q_bin_size, q_min,
         polar_mask (|ndarray|): the (n_q_bins x n_phi_bins) array of polar binned mask * weight
     """
     polar_shape = (n_q_bins, n_p_bins)
-    if py:  # python with numba
+    if py:  # python
         polar_mean_data = np.zeros(polar_shape)
         polar_mean_mask = np.zeros(polar_shape)
         q_index = q_bin_indices(n_q_bins, q_bin_size, q_min, qs)
         p_index = p_bin_indices(n_p_bins, p_bin_size, p_min, ps)
-        keepers = (q_index != 0) & (p_index != 0) & (mask != 0)
-        dsum = bin_sum(n_q_bins, n_p_bins, q_index[keepers], p_index[keepers], data[keepers])
-        wsum = bin_sum(n_q_bins, n_p_bins, q_index[keepers], p_index[keepers], weights[keepers])
-        count = bin_sum(n_q_bins, n_p_bins, q_index[keepers], p_index[keepers], mask[keepers]).astype(int)
-        np.divide(dsum, count, out=polar_mean_data, where=count != 0)
-        np.divide(wsum, count, out=polar_mean_mask, where=count != 0)
+        keepers = (q_index >= 0) & (p_index >= 0) & (mask != 0)
+        dsum = bin_sum(n_q_bins, n_p_bins, q_index[keepers],
+                       p_index[keepers], data[keepers], py=py)
+        wsum = bin_sum(n_q_bins, n_p_bins, q_index[keepers],
+                       p_index[keepers], weights[keepers], py=py)
+        csum = bin_sum(n_q_bins, n_p_bins, q_index[keepers],
+                       p_index[keepers], mask[keepers], py=py).astype(int)
+        np.divide(dsum, csum, out=polar_mean_data, where=csum != 0)
+        np.divide(wsum, csum, out=polar_mean_mask, where=csum != 0)
     else:  # fortran
         args = [n_q_bins, q_bin_size, q_min, n_p_bins, p_bin_size, p_min,
-                qs.ravel(), ps.ravel(), weights.ravel(), data.ravel(), mask.astype(int).ravel()]
-        polar_data, polar_mask = fortran.polar_f.polar_binning.polar_bin_avg(*args)
+                qs.ravel(), ps.ravel(), weights.ravel(), data.ravel()]
+        polar_data, polar_mask = fortran.polar_f.polar_binning.bin_mean(*args)
         polar_mean_data = polar_data.reshape(polar_shape).astype(float)
         polar_mean_mask = polar_mask.reshape(polar_shape).astype(float)
     return polar_mean_data, polar_mean_mask
 
 
-def get_polar_stats(data, q, p, weights=None, n_q_bins=100, q_min=0, q_max=3e10, n_p_bins=360, p_min=0,
-                    p_max=3.141592653589793, sum_=None, sum2=None, w_sum=None):
+def stats(data, q, p, weights=None,
+          n_q_bins=100, q_min=0, q_max=3e10,
+          n_p_bins=360, p_min=0, p_max=3.141592653589793,
+          sum_=None, sum2=None, w_sum=None):
     # Check all datatypes
     n_q_bins = int(n_q_bins)
     n_p_bins = int(n_p_bins)
@@ -198,11 +207,12 @@ def get_polar_stats(data, q, p, weights=None, n_q_bins=100, q_min=0, q_max=3e10,
     sum_ = sum_.reshape(n_q_bins, n_p_bins)
     sum2 = sum2.reshape(n_q_bins, n_p_bins)
     w_sum = w_sum.reshape(n_q_bins, n_p_bins)
-    fortran.polar_f.polar_binning.polar_stats(data.T, q.T, p.T, weights.T, n_q_bins, q_min, q_max, n_p_bins, p_min,
-                                              p_max,
-                                              sum_.T, sum2.T, w_sum.T, 1)
+    fortran.polar_f.polar_binning.stats(data.T, q.T, p.T, weights.T,
+                                        n_q_bins, q_min, q_max,
+                                        n_p_bins, p_min, p_max,
+                                        sum_.T, sum2.T, w_sum.T, 1)
     meen = np.empty(shape, dtype=np.float64)
     std = np.empty(shape, dtype=np.float64)
-    fortran.polar_f.polar_binning.polar_stats_avg(sum_.T, sum2.T, w_sum.T, meen.T, std.T)
+    fortran.polar_f.polar_binning.stats_mean(sum_.T, sum2.T, w_sum.T, meen.T, std.T)
     out = dict(mean=meen, sdev=std, sum=sum_, sum2=sum2, weight_sum=w_sum)
     return out

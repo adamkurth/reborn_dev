@@ -60,38 +60,114 @@ data[index % 2 == 0] = 1
 # |   AVG=0               |  AVG=0.5             0|
 # |-----------------------|-----------------------|  2 pi
 
-
-args = [polar_shape[0], q_bin_size, q_min,
-        polar_shape[1], phi_bin_size, phi_min,
-        qs, phis, mask,  # weights
-        data, mask]
-
-
-def test_polar_indices_python_fortran_match():
-    q_index_p, p_index_p = polar.get_polar_bin_indices_python(*args[:-3])
-    q_index_f, p_index_f = polar.get_polar_bin_indices_fortran(*args[:-3])
-    assert q_index_p.all() == q_index_f.all()
-    assert p_index_p.all() == p_index_f.all()
-
-
-def test_polar_simple():
-    print('===================================================HELLO')
-    print(qs)
-    print(phis*3/(2*np.pi))
-    print(data)
-    pmean, pmask = polar.get_polar_bin_mean_fortran(*args)
-    print(pmean)
-    print(pmask)
-    assert np.sum(np.abs(pmean.flat - np.array([0.5, 0.5, 0, 0, 0.5, 0.5]))) == 0 #pmask[0, 1] == 0
-    assert np.sum(np.abs(pmask.flat - np.array([1, 1, 0, 0, 1, 1]))) == 0
-    # assert pmask[1, 1] == 2.0/3.0
+q_index_p, p_index_p = polar.bin_indices(n_q_bins=polar_shape[0],
+                                         q_bin_size=q_bin_size,
+                                         q_min=q_min,
+                                         n_p_bins=polar_shape[1],
+                                         p_bin_size=phi_bin_size,
+                                         p_min=phi_min,
+                                         qs=qs,
+                                         ps=phis,
+                                         py=True)
+q_index_f, p_index_f = polar.bin_indices(n_q_bins=polar_shape[0],
+                                         q_bin_size=q_bin_size,
+                                         q_min=q_min,
+                                         n_p_bins=polar_shape[1],
+                                         p_bin_size=phi_bin_size,
+                                         p_min=phi_min,
+                                         qs=qs,
+                                         ps=phis,
+                                         py=False)
 
 
-def test_polar_bin_mean_fortran_python_match():
-    pmean, pmask = polar.get_polar_bin_mean_python(*args)
-    pmean_f, pmask_f = polar.get_polar_bin_mean_fortran(*args)
+def test_bin_indices_python_fortran_match():
+    for (qp, pp, qf, pf) in zip(q_index_p, p_index_p, q_index_f, p_index_f):
+        assert qp == qf
+        assert pp == pf
+
+
+def test_bin_sum_python_fortran_match():
+    fsum = polar.bin_sum(n_q_bins=polar_shape[0],
+                         n_p_bins=polar_shape[1],
+                         q_index=q_index_f,
+                         p_index=p_index_f,
+                         array=data,
+                         py=False)
+    psum = polar.bin_sum(n_q_bins=polar_shape[0],
+                         n_p_bins=polar_shape[1],
+                         q_index=q_index_p,
+                         p_index=p_index_p,
+                         array=data,
+                         py=True)
+    for (ps, fs) in zip(psum.ravel(), fsum.ravel()):
+        assert ps == fs
+
+
+def test_bin_mean_python_fortran_match():
+    args = [polar_shape[0], q_bin_size, q_min,
+            polar_shape[1], phi_bin_size, phi_min,
+            qs, phis, mask,  # weights
+            data, mask]
+    pmean, pmask = polar.bin_mean(*args, py=True)
+    pmean_f, pmask_f = polar.bin_mean(*args, py=False)
     assert pmean.all() == pmean_f.all()
     assert pmask.all() == pmask_f.all()
+
+
+def test_bin_mean_python():
+    pmean, pmask = polar.bin_mean(n_q_bins=polar_shape[0],
+                                  q_bin_size=q_bin_size,
+                                  q_min=q_min,
+                                  n_p_bins=polar_shape[1],
+                                  p_bin_size=phi_bin_size,
+                                  p_min=phi_min,
+                                  qs=qs,
+                                  ps=phis,
+                                  weights=mask,
+                                  data=data,
+                                  mask=mask,
+                                  py=True)
+    assert pmean[0, 0] == 0.5
+    assert pmean[0, 1] == 0.5
+    assert pmean[0, 2] == 0.0
+    assert pmean[1, 0] == 0.0
+    assert pmean[1, 1] == 0.5
+    assert pmean[1, 2] == 0.5
+    assert pmask[0, 0] == 1.0
+    assert pmask[0, 1] == 1.0
+    assert pmask[0, 2] == 0.0
+    assert pmask[1, 0] == 0.0
+    assert pmask[1, 1] == 1.0
+    assert pmask[1, 2] == 1.0
+
+
+def test_bin_mean_fortran():
+    fmean, fmask = polar.bin_mean(n_q_bins=polar_shape[0],
+                                  q_bin_size=q_bin_size,
+                                  q_min=q_min,
+                                  n_p_bins=polar_shape[1],
+                                  p_bin_size=phi_bin_size,
+                                  p_min=phi_min,
+                                  qs=qs,
+                                  ps=phis,
+                                  weights=mask,
+                                  data=data,
+                                  mask=mask,
+                                  py=False)
+    assert fmean[0, 0] == 0.5
+    assert fmean[0, 1] == 0.5
+    assert fmean[0, 2] == 0.0
+    assert fmean[1, 0] == 0.0
+    assert fmean[1, 1] == 0.5
+    assert fmean[1, 2] == 0.5
+    assert fmask[0, 0] == 1.0
+    assert fmask[1, 2] == 1.0
+    assert fmask[0, 0] == 1.0
+    assert fmask[0, 1] == 1.0
+    assert fmask[0, 2] == 0.0
+    assert fmask[1, 0] == 0.0
+    assert fmask[1, 1] == 1.0
+    assert fmask[1, 2] == 1.0
 
 
 def test_polar_stats():
@@ -107,9 +183,10 @@ def test_polar_stats():
     q, p = np.meshgrid(q, p, indexing='ij')
     q = q.ravel()
     p = p.ravel()
-    stats = polar.get_polar_stats(data, q, p, weights=weights, n_q_bins=nq, q_min=1, q_max=nq, n_p_bins=nphi,
-                                  p_min=1, p_max=nphi, sum_=None, sum2=None, w_sum=None)
-    # print(stats['mean'])
+    stats = polar.stats(data, q, p, weights=weights,
+                        n_q_bins=nq,q_min=1, q_max=nq,
+                        n_p_bins=nphi, p_min=1, p_max=nphi,
+                        sum_=None, sum2=None, w_sum=None)
     assert stats['mean'][0, 0] == 0
     assert stats['mean'][0, 1] == 0
     assert stats['mean'][0, 2] == 2

@@ -1744,7 +1744,7 @@ class PolarPADAssembler:
         args = [self.polar_shape[0], self.q_bin_size, self.q_min,
                 self.polar_shape[1], self.phi_bin_size, self.phi_min,
                 self.q_mags, self.phis, self.solid_angles, data, mask]
-        polar_mean_data, polar_mean_mask = polar.get_polar_bin_mean(*args, py=py)
+        polar_mean_data, polar_mean_mask = polar.bin_mean(*args, py=py)
         return polar_mean_data, polar_mean_mask
 
     def quickstats(self, data, mask=None):
