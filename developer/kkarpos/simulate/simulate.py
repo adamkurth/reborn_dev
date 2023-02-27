@@ -11,6 +11,8 @@ from reborn.source import Beam
 from reborn.target import atoms
 from reborn.target import crystal
 
+import pylab as plt
+
 
 class Simulator(FrameGetter):
     r"""
@@ -30,7 +32,7 @@ class Simulator(FrameGetter):
             pdb (str): PDB id to simulate (this will setup crystal object for you) (Default is None)
             crystal (|CrystalStructure|): Crystal object (only use this if you need to do
                                           something with the crystal, i.e. enable molecular machine etc.)
-            n_particles (int): Number of particles in the simulation. (default is 1)
+            concentration (float): The protein concentration. (default is 10 mg/ml)
             random_seed (int): Seed if reproducible random number are needed (default is None)
             jet (bool): Add solution background from gdvn jet (default is False)
                 jet_thickness (float): Thickness of gdvn jet (default is 1e-6)
@@ -46,6 +48,7 @@ class Simulator(FrameGetter):
             poisson_noise (bool): Add Poisson noise to simulation (default is False)
             header_level (int): the number of header lines to skip in the denss .dat file (default is 0)
             n_radial_bins (int): The number of radial q bins to use when making radial profiles (default is 1000)
+            beamstop_diameter (float): Add a beamstop into the pads, in meters. (Default is 0).
         """
     def __init__(self, pad_geometry, beam, denss_data, pdb, **kwargs):
         super().__init__()
@@ -69,10 +72,16 @@ class Simulator(FrameGetter):
         self.pads = pad_geometry
         self.q_vecs = self.pads.q_vecs(beam=self.beam)
         self.q_mags = self.pads.q_mags(beam=self.beam)
+        self.sa = self.pads.solid_angles()
+        self.pol = self.pads.polarization_factors(beam=beam)
         self.f2phot = self.pads.f2phot(beam=self.beam)
 
-        self.pdb_id = pdb 
+        # add a beamstop mask
+        self.mask = self.pads.ones()
+        self.beamstop_diameter = kwargs.get('beamstop_diameter', 0)
+        self.mask_forward_scatter(beamstop_diameter=self.beamstop_diameter)
 
+        self.pdb_id = pdb 
 
         self.jet = kwargs.get('jet', True)
         if self.jet:
@@ -96,7 +105,7 @@ class Simulator(FrameGetter):
 
         if self.gas:
             gas_type = kwargs.get('gas_type', 'he')
-            gas_path_legnth = kwargs.get('gas_path', 1.0)
+            gas_path_legnth = kwargs.get('gas_path', 1.0)  # typo
             gas_pressure = kwargs.get('gas_pressure', 101325.0)
             gas_temperature = kwargs.get('gas_temperature', 293.15)
             self.gas_background = get_gas_background(pad_geometry=self.pads,
@@ -110,9 +119,13 @@ class Simulator(FrameGetter):
 
         self.n_bins = kwargs.get('n_radial_bins', 1000)
         self.q_mags = self.pads.q_mags(beam=self.beam)
-        self.profiler = RadialProfiler(beam=self.beam, pad_geometry=self.pads, 
+        self.profiler = RadialProfiler(beam=self.beam, pad_geometry=self.pads, mask=self.mask,
                                         n_bins=self.n_bins, 
                                         q_range=np.array([np.min(self.q_mags), np.max(self.q_mags)]))
+
+    def mask_forward_scatter(self, beamstop_diameter):
+        theta = np.arctan(beamstop_diameter/self.pads[0].t_vec[2])
+        self.mask[self.pads.scattering_angles(self.beam) < theta] = 0
 
     def get_n_proteins(self, 
                         concentration,
@@ -153,7 +166,6 @@ class Simulator(FrameGetter):
         intensity = self.get_denss_pad_solution_intensity(denss_file=self.denss_data, 
                                                             denss_header_level=self.header)
 
-        # intensity = 0
         if self.jet:
             intensity += water_scattering_factor_squared(q=self.q_mags,
                                                          temperature=self.water_temperature,
@@ -162,11 +174,13 @@ class Simulator(FrameGetter):
             intensity += water_scattering_factor_squared(q=self.q_mags,
                                                          temperature=self.water_temperature,
                                                          volume=self.droplet_volume)
+
         intensity *= self.f2phot
+
         if self.gas:
             intensity += self.gas_background
         if self.poisson:
-            intensity = np.random.poisson(intensity)
+            intensity += np.random.poisson(intensity)
         df = DataFrame(pad_geometry=self.pads,
                        beam=self.beam,
                        raw_data=intensity)
@@ -176,7 +190,20 @@ class Simulator(FrameGetter):
         return self.profiler.quickstats(self.get_data(frame_number).get_processed_data_flat())
 
 
+    def get_atom_profile(self, atomic_number: int):
 
+        r"""Calculates scattering intensity for single atom
+            
+            Arguments:
+                atomic_number (int): As is sounds, the number of the desired atom
+            Returns:
+                Scattering Intensity [photon count]
+        """
+        # calculate scattering factors for atom
+        scatt = atoms.cmann_henke_scattering_factors(self.q_mags, atomic_number, beam=self.beam)
+        # calculate intensity
+        I = self.f2phot * np.abs(scatt) ** 2
+        return I
 
 
 
