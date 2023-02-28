@@ -1689,9 +1689,9 @@ class PolarPADAssembler:
             n_phi_bins (int): Number of phi bins.
             phi_range (tuple): Minimum and maximum phi bin centers.  If None, the full 2*pi ring is assumed.
         """
-        q_mags = pad_geometry.q_mags(beam=beam)
+        qms = pad_geometry.q_mags(beam=beam)
         if q_range is None:
-            q_range = [0, np.max(q_mags)]
+            q_range = [0, np.max(qms)]
         q_bin_size = (q_range[1] - q_range[0]) / float(n_q_bins - 1)
         q_centers = np.linspace(q_range[0], q_range[1], n_q_bins)
         q_edges = np.linspace(q_range[0] - q_bin_size / 2, q_range[1] + q_bin_size / 2, n_q_bins + 1)
@@ -1716,18 +1716,76 @@ class PolarPADAssembler:
         self.phi_bin_edges = phi_edges
         self.n_phi_bins = n_phi_bins
         self.phi_min = phi_min
-        self.q_mags = q_mags
+        self.qms = qms
         self.phis = pad_geometry.azimuthal_angles(beam=beam)
+        self.beam = beam
         self.pad_geometry = pad_geometry
         self.polar_shape = (n_q_bins, n_phi_bins)
-        sa = pad_geometry.solid_angles()
-        self.solid_angles = pad_geometry.concat_data(sa)
+        self.sa = pad_geometry.solid_angles()
+        self.qi, self.pi = polar.bin_indices(n_q_bins=self.n_q_bins,
+                                             q_bin_size=self.q_bin_size,
+                                             q_min=self.q_min,
+                                             n_p_bins=self.n_phi_bins,
+                                             p_bin_size=self.phi_bin_size,
+                                             p_min=self.phi_min,
+                                             qs=self.qms,
+                                             ps=self.phis,
+                                             py=False)
 
-    def q_vecs(self):
-        return None
+    def bin_sum(self, array, py=False):
+        return polar.bin_sum(n_q_bins=self.n_q_bins,
+                             n_p_bins=self.n_phi_bins,
+                             q_index=self.qi,
+                             p_index=self.pi,
+                             array=array,
+                             py=py)
 
-    def solid_angles(self):
-        return None
+    def q_vecs(self, mask=None, beam=None):
+        bin_qs = np.zeros(self.polar_shape + (3,))
+        if mask is None:
+            mask = self.pad_geometry.ones()
+        if beam is None:
+            beam = self.beam
+        qvs = self.pad_geometry.q_vecs(beam=beam)
+        mask = self.pad_geometry.concat_data(mask)
+        count = self.bin_sum(array=mask).astype(int)
+        x_sum = self.bin_sum(array=qvs[:, 0] * self.sa * mask)
+        y_sum = self.bin_sum(array=qvs[:, 1] * self.sa * mask)
+        z_sum = self.bin_sum(array=qvs[:, 2] * self.sa * mask)
+        np.divide(x_sum, count, out=bin_qs[:, :, 0], where=count != 0)
+        np.divide(y_sum, count, out=bin_qs[:, :, 1], where=count != 0)
+        np.divide(z_sum, count, out=bin_qs[:, :, 2], where=count != 0)
+        return bin_qs
+
+    def q_mags(self, mask=None):
+        if mask is None:
+            mask = self.pad_geometry.ones()
+        bin_qs = np.zeros(self.polar_shape)
+        qsum = self.bin_sum(array=self.qms * self.sa * mask)
+        count = self.bin_sum(array=mask).astype(int)
+        np.divide(qsum, count, out=bin_qs, where=count != 0)
+        return bin_qs
+
+    def solid_angles(self, mask=None):
+        if mask is None:
+            mask = self.pad_geometry.ones()
+        bin_sa = np.zeros(self.polar_shape)
+        ssum = self.bin_sum(array=self.sa * mask)
+        count = self.bin_sum(array=mask).astype(int)
+        np.divide(ssum, count, out=bin_sa, where=count != 0)
+        return bin_sa
+
+    def polarization_factors(self, mask=None, beam=None):
+        if mask is None:
+            mask = self.pad_geometry.ones()
+        if beam is None:
+            beam = self.beam
+        bin_pf = np.zeros(self.polar_shape)
+        pf = self.pad_geometry.polarization_factors(beam=beam)
+        psum = self.bin_sum(array=pf * mask)
+        count = self.bin_sum(array=mask).astype(int)
+        np.divide(psum, count, out=bin_pf, where=count != 0)
+        return bin_pf
 
     def get_mean(self, data, mask=None, py=False):
         r""" Create the mean polar-binned average intensities.
@@ -1743,7 +1801,7 @@ class PolarPADAssembler:
         # calculate average binned pixel
         args = [self.polar_shape[0], self.q_bin_size, self.q_min,
                 self.polar_shape[1], self.phi_bin_size, self.phi_min,
-                self.q_mags, self.phis, self.solid_angles, data, mask]
+                self.qms, self.phis, self.solid_angles, data, mask]
         polar_mean_data, polar_mean_mask = polar.bin_mean(*args, py=py)
         return polar_mean_data, polar_mean_mask
 
