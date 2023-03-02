@@ -3,6 +3,7 @@ import pylab as plt
 import pandas as pd
 import reborn
 import os, sys
+import time
 
 from simulate import Simulator
 from reborn.detector import rayonix_mx340_xfel_pad_geometry_list
@@ -31,7 +32,7 @@ s2_s = "denss_data/cis_v_trans/sim_1-18.3_light_0.2ps_adjusted.pdb2sas.dat"
 # phytochrome
 # s2_s = "denss_data/phytochrome/phytochrome_conf1_2vea_pdb.pdb2mrc2sas.dat"
 # s1_s = "denss_data/phytochrome/phytochrome_conf2_3zq5_pdb.pdb2mrc2sas.dat"
-
+# diff_s = 
 
 
 in_vacuum = False           # Flip if you want to use the in-vacuum profiles
@@ -40,7 +41,7 @@ show_incoming_data = False  # Displays the full radial profiles in the .dat file
 compare_diffs = False       # Compares the difference profiles calculated here vs the ones in the .dat files
 show_det = False            # Shows the 2D detector after the simulation
 plot_snr = True            # Plots the SNR 
-print_beam_params = False    # Prints the parameters from the reborn beam class to the terminal
+print_beam_params = True    # Prints the parameters from the reborn beam class to the terminal
 
 if in_vacuum:
     s1 = s1_v
@@ -56,39 +57,43 @@ def shannon_s(s=2, d=100):
     return 2*np.pi / (s*d)
 
 s = 2 # shannon sampling ratio
-rhod_dmax = 100 #249 # A
+dmax = 100 #249 # A
+# dmax = 249 # A
 
 config = {'detector_distance': 1, # m
             'photon_energy': 8e3 * eV, 
-            'n_radial_bins': int(3.2/shannon_s(s=s, d=rhod_dmax)),
             'sample_delivery_method': "jet",
-            'jet_thickness': 1e-6, # m
+            'jet_thickness': 300e-6, #5e-6, # m
             'droplet_diameter': 40e-6,
-            'n_shots': np.array([1e0, 1e1, 1e3, 1e4]), # Only do 4 at a time or the plot looks screwy
+            'n_shots': np.array([1e3, 1e4, 1e5, 1e6]), # Only do 4 at a time or the plot looks screwy
             'helium': False,    # Flip this if you want to add helium into the mix
             'pdb_id':  "1JFP", #"2VEA"
             'concentration': 10, # mg/ml, the sample concentration
             'binned_pixels': 10, # The detector pixel binning, 1 is no binning
-            'random_seed': 0,    # The random seed for Poisson noise
+            'random_seed': 1,    # The random seed for Poisson noise
             'header_level': header_level, # DENSS file sometimes have headers
             'scale_by_1': 1,       # A manual scale amount applied to the DENSS profiles
-            'scale_by_2': 1,#.062, 
+            'scale_by_2': 1, #.062, 
             'beamstop_diameter': 0,   # m,
-            'poisson_noise': True
+            'poisson_noise': False,
+
             }
 
 pulse_energy = config['photon_energy'] * 1e8
 
-# # Load the data
-# dv = np.loadtxt(diff_v)
-# vs1 = np.loadtxt(s1_v)
-# vs2 = np.loadtxt(s2_v)
+dv = np.loadtxt(diff_v)
+vs1 = np.loadtxt(s1_v)
+vs2 = np.loadtxt(s2_v)
 ds = np.loadtxt(diff_s, skiprows=0)
 ss1 = np.loadtxt(s1, skiprows=1)
 ss2 = np.loadtxt(s2, skiprows=1)
 # ss1[:,1] *= 1.062
 
+
+
 if show_incoming_data:
+    # # Load the data
+
     # If you want to see and compare the profiles in solution wrt the profiles in vacuum
     fig, ax = plt.subplots(1,1, tight_layout=True)
     # ax[0].plot(vs1[:,0], vs1[:,1], label='state 1')
@@ -103,8 +108,11 @@ if show_incoming_data:
 # Set up the detector and beam
 pads = rayonix_mx340_xfel_pad_geometry_list(detector_distance=config['detector_distance'])
 pads = pads.binned(config['binned_pixels'])
-beam = Beam(photon_energy=config['photon_energy']) #pulse_energy=pulse_energy)#, 
+beam = Beam(pulse_energy=pulse_energy)#, 
+config['n_radial_bins'] = int(np.max(pads.q_mags(beam))*1e-10/shannon_s(s=s, d=dmax))
 qrange = np.linspace(0, np.max(pads.q_mags(beam)), config['n_radial_bins']) * 1e-10
+
+
 
 # Define the sample delivery method
 if config['sample_delivery_method'] == 'jet':
@@ -146,22 +154,37 @@ if print_beam_params:
     print(f"Wavelength: \t\t {fg.beam.wavelength * 1e9:0.3f} nm")
     print(f"Photon Number Fluence: \t {fg.beam.photon_number_fluence:0.3e} photons/m^2")
 
+# diff = fg.get_data(0) - fg_s2.get_data(0)
 
 
-# Grab the radial profiles
+# Grab the radial profiles, no weights
 rad_s1 = fg.get_radial(0)
 rad_s2 = fg_s2.get_radial(0)
+rad_s1_w = fg.get_radial(0, weights=fg.f2phot)
+rad_s2_w = fg_s2.get_radial(0, weights=fg_s2.f2phot)
 
 # Gather the quantities needed for the SNR calculations
-mean_diff = rad_s1['mean'] - rad_s2['mean'] # Standard state 1 - state 2 mean difference
+# mean_diff = rad_s1['mean'] - rad_s2['mean'] # Standard state 1 - state 2 mean difference
 sum_diff = rad_s1['sum'] - rad_s2['sum']    # The differences of the summed profiles
 prof_sum = rad_s1['sum'] + rad_s2['sum']    # The total state 1 + state 2 profile
 
+mean_diff = rad_s1_w['mean'] - rad_s2_w['mean']
+
+tdiff = ss1[:,1]-ss2[:,1]
+tqr = ss1[:,0]
+tdiff *= np.max(np.abs(mean_diff)) / np.max(np.abs(tdiff))
+
 if compare_diffs:
+
+    md = mean_diff.copy()
+    tdiff = ss1[:,1]-ss2[:,1]
+    tdiff /= np.max(np.abs(tdiff))
+    md /= np.max(np.abs(md))
+
     # If requested, will compare the difference profiles calculated here against Tom's
     fig, ax = plt.subplots()
-    ax.plot(qrange, mean_diff, label='mine')
-    ax.plot(ss1[:,0], ss2[:,1]-ss1[:,1], label='toms')
+    ax.plot(ss1[:,0], tdiff, label='toms')
+    ax.plot(qrange, md, label='mine')
     fig.legend()
     plt.show()
 
@@ -211,14 +234,15 @@ if plot_snr:
         fill = (mean_diff + err_diff[count]['err'], mean_diff - err_diff[count]['err'])
         plt.fill_between(qrange, fill[0], fill[1], 
                               color='gray', edgecolor='gray', alpha=colors[count],
-                              label=f"Error for {int(err_diff[count]['n_shots']):.2e} shots")
+                              label=f"Error for {int(err_diff[count]['n_shots']):.0e} shots")
         count += 1
     fill = (mean_diff + err_diff[-1]['err'], mean_diff - err_diff[-1]['err'])
     plt.fill_between(qrange, fill[0], fill[1], 
                           color='lightsteelblue', edgecolor='lightsteelblue', alpha=0.8,
-                          label=f"Error for {int(err_diff[-1]['n_shots']):.2e} shots")
+                          label=f"Error for {int(err_diff[-1]['n_shots']):.0e} shots")
 
     plt.plot(qrange, mean_diff, '--', color='black', label='Difference Profile')
+    plt.plot(tqr, tdiff, '--', color='orange', label='Ground Truth (scaled)')
     plt.xlim(qrange[0], qrange[-1])
     plt.ylim(-np.max(mean_diff)*(1-0.9), np.max(mean_diff)*(1+0.35))
     plt.xlabel(r"q = 4 $\pi$ $\sin\theta$ / $\lambda$  $[\AA^{-1}]$", fontsize=14)

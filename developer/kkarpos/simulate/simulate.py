@@ -180,30 +180,17 @@ class Simulator(FrameGetter):
         if self.gas:
             intensity += self.gas_background
         if self.poisson:
-            intensity += np.random.poisson(intensity)
+            intensity = np.random.poisson(intensity)
+            # intensity = np.sum(np.random.poisson(lam=intensity, size=(1,) + np.shape(intensity)), axis=0).astype(np.double)
         df = DataFrame(pad_geometry=self.pads,
                        beam=self.beam,
                        raw_data=intensity)
         return df
 
-    def get_radial(self, frame_number=0):
-        return self.profiler.quickstats(self.get_data(frame_number).get_processed_data_flat())
+    def get_radial(self, frame_number=0, weights=None):
+        dat = self.get_data(frame_number).get_processed_data_flat()
+        return self.profiler.quickstats(dat, weights=weights)#self.f2phot)
 
-
-    def get_atom_profile(self, atomic_number: int):
-
-        r"""Calculates scattering intensity for single atom
-            
-            Arguments:
-                atomic_number (int): As is sounds, the number of the desired atom
-            Returns:
-                Scattering Intensity [photon count]
-        """
-        # calculate scattering factors for atom
-        scatt = atoms.cmann_henke_scattering_factors(self.q_mags, atomic_number, beam=self.beam)
-        # calculate intensity
-        I = self.f2phot * np.abs(scatt) ** 2
-        return I
 
 
 
