@@ -128,3 +128,17 @@ class Molecule(object):
         v = Scatter3D()
         v.add_points(self.coordinates)
         v.show()
+
+    def remove_hydrogen_atoms(self):
+        if self.atomic_numbers is None:
+            a = self.atomic_symbols != 'h'
+            b = self.atomic_symbols != 'H'
+            c = np.logical_or(a, b)
+        else:
+            c = self.atomic_numbers > 1
+        if isinstance(self.atomic_symbols, np.ndarray):
+            self.atomic_symbols = self.atomic_symbols[c]
+        if isinstance(self.atomic_numbers, np.ndarray):
+            self.atomic_numbers = self.atomic_numbers[c]
+        if isinstance(self.coordinates, np.ndarray):
+            self.coordinates = self.coordinates[c, :]
