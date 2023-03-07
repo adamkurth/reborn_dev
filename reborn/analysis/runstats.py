@@ -31,6 +31,15 @@ from ..fileio.getters import ListFrameGetter
 from ..viewers.qtviews.padviews import PADView
 
 
+def default_padstats_config():
+    r""" Get a default padstats config dictionary to specify logging, checkpoints, messaging, debugging, and the method
+    by which the results from multiple processes are reduced.
+    """
+    config = dict(log_file=None, checkpoint_file=None, checkpoint_interval=500, message_prefix="", debug=True,
+                  reduce_from_checkpoints=True)
+    return config
+
+
 class PixelHistogram:
 
     count = 0  #: Number of frames contributing to the histogram.
@@ -468,7 +477,14 @@ def view_histogram(stats):
     x = np.linspace(mn, mx, nb)
     histdat = stats['histogram']
     h = np.mean(stats['histogram'], axis=0)
+    mean_histplot = pg.plot(x, np.log10(h+1))
+    mean_histplot.setLabel('bottom', 'Intensity Value')
+    mean_histplot.setLabel('left', 'Counts')
+    mean_histplot.setTitle('Total Histogram (All Pixels)')
     histplot = pg.plot(x, np.log10(h+1))
+    mean_histplot.setLabel('bottom', 'Intensity Value')
+    mean_histplot.setLabel('left', 'Counts')
+    mean_histplot.setTitle('Histogram (One Pixel)')
     imv = imview(np.log10(histdat+1), fs_lims=[mn, mx], fs_label='Intensity', ss_label='Flat Pixel Index',
            title='Intensity Histogram')
     line = imv.add_line(vertical=True, movable=True)
