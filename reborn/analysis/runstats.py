@@ -275,7 +275,7 @@ class PADStats(ParallelAnalyzer):
         stats['step'] = self.step
         stats['wavelengths'] = self.wavelengths
         if self.histogrammer is not None:
-            self.logger.debug(f'Histrogram shape: {np.shape(self.histogrammer.histogram)}')
+            # self.logger.debug(f'Histrogram shape: {np.shape(self.histogrammer.histogram)}')
             stats['histogram'] = self.histogrammer.histogram
             stats['histogram_params'] = self.histogram_params
         if self.gain is not None:
