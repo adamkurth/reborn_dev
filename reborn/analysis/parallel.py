@@ -59,9 +59,10 @@ class ParallelAnalyzer(ABC):
         if each frame is processed independently.  The normal use case is to accumulate results from many frames in a
         run.  You must create a subclass as follows:
 
-        - Put all needed configuration parameters into a single dictionary and provide the dictionary on instantiation.
-        - Define the **to_dict** method, which puts all information needed to restore the state of analysis into a
-          dictionary.  See method docs for more details.
+        - Put all needed configuration parameters into a single dictionary and provide the dictionary on instantiation
+          using the "config" keyword argument.
+        - Define the **to_dict** method, which creates a dictionary that contains all information needed to restore the
+          state of analysis.  See method docs for more details.
         - Define the **from_dict** method, which restores the state of analysis.  See method docs for more detail.
         - Define the **add_frame** method.  This is the core of the processing pipeline; it does all needed actions
           associated with the addition of a |DataFrame| to the compiled results.  See method docs for more detail.
@@ -80,7 +81,7 @@ class ParallelAnalyzer(ABC):
         - **message_prefix**: Prefix to log messages.  For example: "Run 7: "
         - **clear_logs**: Log files keep growing by default.  Set this to true if you want them to be cleared.
         - **checkpoint_file**: The base filepath for checkpoint files (e.g.
-          "/results/checkpoints/run0010.pkl").  Processor IDs will be appended as necessary.  If this is set to None,
+          "./results/checkpoints/run0010.pkl").  Processor IDs will be appended as necessary.  If this is set to None,
           no checkpoints will be created, and parallel processing might fail.  Be careful to ensure that you will not
           be processing different runs with the same checkpoint files!!!
         - **checkpoint_interval**: How often to save checkpoints.
@@ -186,9 +187,9 @@ class ParallelAnalyzer(ABC):
         filename = self.config.get('log_file')
         if filename is not None:
             if len(filename) < 4 or filename[-4:] != '.log':
-                filename += '.log'
+                filename += 'main.log'
             if self.process_id > 0:
-                filename = filename.replace('.log', f'_{self.process_id:02d}.log')
+                filename = filename.replace('main.log', f'{self.process_id:02d}.log')
             os.makedirs(os.path.dirname(filename), exist_ok=True)
             if self.config.get('clear_logs', False):
                 if os.path.exists(filename):
@@ -216,7 +217,7 @@ class ParallelAnalyzer(ABC):
         'checkpoint_interval' """
         checkpoint_file = self.config.get('checkpoint_file', None)
         if checkpoint_file is not None:
-            checkpoint_file += f'_checkpoint_{self.n_processes}_{self.process_id}'
+            checkpoint_file += f'checkpoint_{self.n_processes}_{self.process_id}'
             os.makedirs(os.path.dirname(checkpoint_file), exist_ok=True)
             logging.info(f"Checkpoint file base: {checkpoint_file}")
         self.reduce_from_checkpoints = self.config.get("reduce_from_checkpoints", True)
@@ -273,7 +274,7 @@ class ParallelAnalyzer(ABC):
                 self.logger.info(f'Loading checkpoint file {c}')
                 stats = self.load(c)
                 if self.start != stats['start'] or self.stop != stats['stop'] or self.step != stats['step']:
-                    self.logger.warning('The start/stop/step of the checkpoint are mismatched with this job')
+                    self.logger.warning(f'The start/stop/step of the checkpoint ({stats["start"]}/{stats["stop"]}/{stats["step"]}) are mismatched with this job ({self.start}/{self.stop}/{self.step})')
                 idx = int(c.split('_')[-1])
                 self.from_dict(stats)
                 self.logger.info(f'Starting at frame {idx}')
@@ -303,7 +304,7 @@ class ParallelAnalyzer(ABC):
 
         Returns either a dictionary of results, or a string that indicates the path to the results file.  In the
         case of parallel processing, each worker process creates a file containing results, and the main process then
-        combines all of the worker results vie the concatenate method."""
+        combines all of the worker results via the concatenate method."""
         if not self.super_initialized:
             raise Exception('Super was not initialized.  Subclass needs the line super().__init__('
                             'framegetter=framegetter, config=config, **kwargs) at the beginning of __init__')
@@ -357,7 +358,7 @@ class ParallelAnalyzer(ABC):
     def _process_parallel(self):
         if Parallel is None:
             raise ImportError('You need the joblib package to run padstats in parallel mode.')
-        framegetter = self.framegetter.factory()
+        framegetter = self.framegetter.factory()  # A factory to create new FrameGetter instances (replicas)
         self.logger.info(f"Launching {self.n_processes} parallel processes")
         n = self.n_processes
         kwargs = dict(framegetter=framegetter, start=self.start, stop=self.stop, step=self.step,
@@ -372,9 +373,6 @@ class ParallelAnalyzer(ABC):
             if isinstance(stats, str):
                 self.logger.info(f"Loading checkpoint file {stats}")
                 stats = self.load_dictionary(stats)
-            if stats is None:
-                self.logger.info(f"No results from process {i}")
-                continue
             # if stats['n_frames'] == 0:
             #     self.logger.info(f"No results from process {i}")
             #     continue
