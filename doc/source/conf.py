@@ -54,6 +54,7 @@ rst_epilog = """
 .. |DataFrame|  replace:: :class:`DataFrame <reborn.dataframe.DataFrame>`
 .. |PADView|  replace:: :class:`PADView <reborn.viewers.qtviews.PADView>`
 .. |RadialProfiler|  replace:: :class:`RadialProfiler <reborn.detector.RadialProfiler>`
+.. |Molecule|  replace:: :class:`Molecule <reborn.target.molecule.Molecule>`
 
 .. |ndarray|  replace:: :class:`ndarray <numpy.ndarray>`
 .. |slice|  replace:: `slice <https://docs.python.org/dev/library/functions.html#slice>`__

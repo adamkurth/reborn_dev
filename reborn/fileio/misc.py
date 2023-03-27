@@ -44,8 +44,8 @@ def load_xyz(fname):
     Arguments:
         fname (str): Path to the xyz file.
 
-    Returns: dict with keys "position_vecs" and "atomic_numbers"
+    Returns: |Molecule|
     """
     r = np.genfromtxt(fname, skip_header=2)[:, 1:] * 1e-10
     z = target.atoms.atomic_symbols_to_numbers(np.genfromtxt(fname, skip_header=2, dtype=str)[:, :1].ravel())
-    return {'atomic_numbers': z, 'position_vecs': r}
+    return target.molecule.Molecule(coordinates=r, atomic_numbers=z)

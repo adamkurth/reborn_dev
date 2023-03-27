@@ -39,10 +39,10 @@ geom = reborn.detector.jungfrau4m_pad_geometry_list(detector_distance=0.07, binn
 q_vecs = geom.q_vecs(beam=beam)
 # %%
 # Load the atomic coordinates and species from an "xyz" file:
-xyz = reborn.fileio.misc.load_xyz('files/C60.xyz')
-r_vecs = xyz['position_vecs']
-z = xyz['atomic_numbers']
-n_atoms = len(z)
+mol = reborn.fileio.misc.load_xyz('files/C60.xyz')
+r_vecs = mol.coordinates
+z = mol.atomic_numbers
+n_atoms = mol.n_atoms
 # %%
 # Pre-allocating GPU arrays helps speed up computations:
 q_vecs_gpu = simcore.to_device(q_vecs)
