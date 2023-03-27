@@ -47,5 +47,5 @@ def load_xyz(fname):
     Returns: dict with keys "position_vecs" and "atomic_numbers"
     """
     r = np.genfromtxt(fname, skip_header=2)[:, 1:] * 1e-10
-    z = target.atoms.atomic_symbols_to_numbers(np.genfromtxt('files/C60.xyz', skip_header=2, dtype=str)[:, :1].ravel())
+    z = target.atoms.atomic_symbols_to_numbers(np.genfromtxt(fname, skip_header=2, dtype=str)[:, :1].ravel())
     return {'atomic_numbers': z, 'position_vecs': r}
