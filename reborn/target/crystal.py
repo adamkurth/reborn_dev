@@ -41,7 +41,7 @@ temp_dir = os.path.join(tempfile.gettempdir(), 'reborn')
 os.makedirs(temp_dir, exist_ok=True)
 
 
-def get_pdb_file(pdb_id, save_path=temp_dir, silent=False):
+def get_pdb_file(pdb_id, save_path=temp_dir, silent=False, use_cache=True):
     r"""
     Download a PDB file from the PDB web server and return the path to the downloaded file.  There is a data directory
     included with reborn that includes a few PDB files for testing purposes - if the requested PDB file exists there,
@@ -56,6 +56,7 @@ def get_pdb_file(pdb_id, save_path=temp_dir, silent=False):
         save_path (string): Path to the downloaded file.  The default is the current working directory, which depends
                             on where you run your code.
         silent (bool): Set to true if you do not want any text printed to stdout.
+        use_cache (bool): Try to find file in reborn's cache / standard data.  Default: True.
 
     Returns:
         string : Path to PDB file
@@ -77,8 +78,9 @@ def get_pdb_file(pdb_id, save_path=temp_dir, silent=False):
         return pdb_path
 
     # Check if the file is cached in reborn
-    if os.path.exists(pdb_data_path+'/'+pdb_id):
-        return pdb_data_path+'/'+pdb_id
+    if use_cache:
+        if os.path.exists(pdb_data_path+'/'+pdb_id):
+            return pdb_data_path+'/'+pdb_id
 
     # Finally, try to download from web if all else fails
     if not os.path.isfile(pdb_path):
