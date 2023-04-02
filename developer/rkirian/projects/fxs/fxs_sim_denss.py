@@ -43,6 +43,7 @@ map_resolution = 0.2e-9  # Minimum resolution for 3D density map
 map_oversample = 2  # Oversampling factor for 3D density map
 unit_cell_size = 200e-10  # Unit cell size (assume P1, cubic)
 pdb_file = '1jb0.pdb'
+solvent = True
 # pdb_file = '1SS8'
 # pdb_file = '3IYF' #'1PCQ' '2LYZ'
 # pdb_file = 'BDNA25_sp.pdb'
@@ -56,12 +57,11 @@ gpu_double_precision = True
 gpu_group_size = 32
 poisson = False
 
-
 ######################################################################
-# Files
+# PDB Files
 ########################################################################
-out = reborn.target.crystal.get_pdb_file(pdb_file, save_path='.', use_cache=False)
-print(out)
+if not os.path.exists(pdb_file):
+    out = reborn.target.crystal.get_pdb_file(pdb_file, save_path='.', use_cache=False)
 
 #########################################################################
 # Derived parameters
@@ -80,11 +80,15 @@ q_mags = pads.q_mags(beam=beam)
 solid_angles = pads.solid_angles()
 polarization_factors = pads.polarization_factors(beam=beam)
 
-################## reborn density map
+######################################################
+# reborn density map
+#####################################################
+# Even if we are using a DENSS map, we still need this for the configuration of samplings, etc.  Shouldn't be
+# necessary; it's a crutch for now...
 print('reborn map')
 # We are working in the crystal basis here, even though there are no crystals involved.  But we have modified
 # the unit cell to be orthogonal, and the spacegroup to have no symmetry, which emulates a typical cartesian grid.
-cryst = crystal.CrystalStructure(pdb_file, spacegroup='P1',
+cryst = crystal.CrystalStructure(pdb_file, create_bio_assembly=True, spacegroup='P1',
                                  unitcell=(unit_cell_size, unit_cell_size, unit_cell_size, rad90, rad90, rad90))
 dmap = crystal.CrystalDensityMap(cryst, map_resolution, map_oversample)
 voxel = unit_cell_size / dmap.cshape[0]
@@ -93,19 +97,48 @@ print('voxel', voxel)
 print('side', side)
 print('n', side/voxel)
 f = cryst.molecule.get_scattering_factors(beam=beam)
-x = cryst.unitcell.r2x(cryst.molecule.get_centered_coordinates())  # Atom coordinates in crystal basis
+x = cryst.unitcell.r2x(cryst.molecule.get_centered_coordinates())  # Atom coordinates in **crystal basis**
 rho = dmap.place_atoms_in_map(x, f, mode='nearest')  # FIXME: replace 'nearest' with Cromer Mann densities
-f_dens_water = atoms.xraylib_scattering_density('H2O', water_density, photon_energy, approximate=True)
-# rho[rho != 0] -= f_dens_water * dmap.voxel_volume  # FIXME: Need a better model for solvent envelope
+if solvent:
+    f_dens_water = atoms.xraylib_scattering_density('H2O', water_density, photon_energy, approximate=True)
+    rho[rho != 0] -= f_dens_water * dmap.voxel_volume  # FIXME: Need a better model for solvent envelope
 rho = fftshift(rho)
 print('sum rho', np.sum(rho))
 pg.image(np.sum(rho.real, axis=2), title='reborn')
 # pg.mkQApp().exec_()
 
-################### DENSS density map
+######################################################
+# DENSS density map
+#######################################################
 mrc_file = pdb_file + ".mrc"
 if 1: #not os.path.exists(mrc_file):
-    pdb2mrc = saxs.PDB2MRC(pdb=saxs.PDB(pdb_file), voxel=voxel*1e10, side=side*1e10)
+    pdb = saxs.PDBmod(pdb_file, bio_assembly=1)
+    # n = int(cryst.molecule.coordinates.shape[0] / pdb.coords.shape[0])
+    # if n > 1:
+    #     pdb.coords = cryst.molecule.coordinates*1e10
+    #     pdb.atomnum = np.concatenate([pdb.atomnum]*n)
+    #     pdb.atomname = np.concatenate([pdb.atomname]*n)
+    #     pdb.atomalt = np.concatenate([pdb.atomalt]*n)
+    #     pdb.resname = np.concatenate([pdb.resname]*n)
+    #     pdb.resnum = np.concatenate([pdb.resnum]*n)
+    #     pdb.chain = np.concatenate([pdb.chain]*n)
+    #     pdb.occupancy = np.concatenate([pdb.occupancy]*n)
+    #     pdb.b = np.concatenate([pdb.b]*n)
+    #     pdb.atomtype = np.concatenate([pdb.atomtype]*n)
+    #     pdb.charge = np.concatenate([pdb.charge]*n)
+    #     pdb.nelectrons = np.concatenate([pdb.nelectrons]*n)
+    #     # pdb.radius = np.concatenate([pdb.radius]*n)
+    #     pdb.vdW = np.concatenate([pdb.vdW]*n)
+    #     pdb.unique_volume = np.concatenate([pdb.unique_volume]*n)
+    #     pdb.unique_radius = np.concatenate([pdb.unique_radius]*n)
+    #     pdb.numH = np.concatenate([pdb.numH]*n)
+    #     pdb.natoms = pdb.natoms * n
+    #     print(pdb.coords.shape)
+    # print(cryst.molecule.coordinates.shape)
+    # print(pdb.coords[0, :])
+    # print(cryst.molecule.coordinates[0, :]*1e10)
+    # sys.exit()
+    pdb2mrc = saxs.PDB2MRC(pdb=pdb, voxel=voxel*1e10, side=side*1e10)
     pdb2mrc.scale_radii()
     pdb2mrc.make_grids()
     pdb2mrc.calculate_resolution()
@@ -116,8 +149,10 @@ if 1: #not os.path.exists(mrc_file):
     print('voxel', pdb2mrc.dx)
     print('side', pdb2mrc.side)
     print('n', pdb2mrc.side / pdb2mrc.dx)
-    # rho = pdb2mrc.rho_insolvent #/ pdb2mrc.dV
-    rho = pdb2mrc.rho_invacuo #/ pdb2mrc.dV
+    if solvent:
+        rho = pdb2mrc.rho_insolvent #/ pdb2mrc.dV
+    else:
+        rho = pdb2mrc.rho_invacuo #/ pdb2mrc.dV
     print('sum rho', np.sum(rho))
     side = pdb2mrc.side
     # saxs.write_mrc(rho, side, mrc_file)
@@ -127,10 +162,9 @@ print('denss map')
 pg.image(np.sum(rho.real, axis=2), title='denss')
 pg.mkQApp().exec_()
 
-###################
-
-sys.exit()
-
+####################################################
+# Prepare GPU etc.
+######################################################
 F = fftshift(fftn(rho))
 I = np.abs(F) ** 2
 rho_cell = fftshift(rho)
@@ -152,7 +186,7 @@ print('Density map grid size: (%d, %d, %d)' % tuple(dmap.shape))
 ###########################################################################
 # Water droplet with protein, 2D PAD simulation
 ##########################################################################
-class DropletGetter(FrameGetter):
+class Simulator(FrameGetter):
     def __init__(self):
         super().__init__()
         self.n_frames = 1e6
@@ -174,7 +208,7 @@ class DropletGetter(FrameGetter):
             I = np.random.poisson(I)
         df = dataframe.DataFrame(pad_geometry=pads, beam=beam, raw_data=I)
         return df
-fg = DropletGetter()
+fg = Simulator()
 pv = PADView(frame_getter=fg)
 pv.start()
 sys.exit()

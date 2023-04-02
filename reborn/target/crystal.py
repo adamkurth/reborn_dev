@@ -382,8 +382,11 @@ class CrystalStructure(object):
             no_warnings (bool): Suppress warnings concerning ambiguities in symmetry operations
             expand_ncs_coordinates (bool): Duplicate asymmetric unit to include non-crystallographic symmetry (NCS)
                                            partners.
-            create_bio_assembly (int): Duplicate asymmetric unit to include biological assembly model. The integer specifies the desired biological assembly to create. See the BIOMOLECULE label of the REMARK section of the PDB (accurate as of Jun 2022)
-            tight_packing (bool): Choose whether or not to enable a physical arrangement of the asymmetric unit symmetry partners - No difference for inifinite crystals but makes sense for a finite crystal.
+            create_bio_assembly (int): Duplicate asymmetric unit to include biological assembly model. The integer
+                specifies the desired biological assembly to create. See the BIOMOLECULE label of the REMARK section
+                of the PDB (accurate as of Jun 2022)
+            tight_packing (bool): Choose whether or not to enable a physical arrangement of the asymmetric unit symmetry
+                partners such that each molecular center of mass fits within the unit cell.  Useful for finite crystals.
             unitcell (Unit Cell class): Specify a unit cell manually if needed.
             spacegroup (Space Group class): Specify a space group manually if needed.
         """
