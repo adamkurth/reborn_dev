@@ -221,14 +221,14 @@ static dsfloat4 q_pad(
 
 // Given a bunch of vectors q, sum the amplitudes from a collection of atoms for a given scattering vector:
 //
-//    SUM_i f_i * exp(-i*q.(r_i+U))
+//    SUM_i f_i * exp(-i*q.(R r_i+U))
 //
-// ** There is one complication: we attempt to speed up the summation by making workers move atomic coordinates
+// ** We attempt to speed up the summation by making workers move atomic coordinates
 // and scattering factors to a local memory buffer in parallel, in hopes of faster computation (is it really faster?)
 static dsfloat2 phase_factor(
     const dsfloat4 q,         // Scattering vector
-    const dsfloat16 R,        // Rotation applied to positions
-    const dsfloat4 U,         // Shift added to positions (after rotation)
+    const dsfloat16 R,        // Rotation applied to positions, before translation
+    const dsfloat4 U,         // Shift added to positions, after rotation
     global const dsfloat *r,  // Atomic coordinates
     global const dsfloat2 *f, // Atomic scattering factors
     const int n_atoms,        // Number of atoms
@@ -272,11 +272,7 @@ static dsfloat2 phase_factor(
 }
 
 
-// Given a bunch of vectors q, sum the amplitudes from a collection of atoms for a given scattering vector:
-//
-//    SUM_i f_i * exp(-i*q.(r_i+U))
-//
-// ** This does not attempt to use the local memory trick (as in phase_factor_qrf)
+// Same as phase_factor, but does not attempt to speed up via local memory cache
 static dsfloat2 phase_factor_global(
     const dsfloat4 q,         // Scattering vector
     const dsfloat16 R,        // Rotation applied to positions
@@ -325,7 +321,7 @@ kernel void divide_nonzero_inplace_real(global dsfloat *A, global const dsfloat 
     if (gi < n){if (B[gi] != 0){A[gi] /= B[gi];}}
 }
 
-// Sum the amplitudes from a collection of atoms for given scattering vectors: SUM_i f_i * exp(i*q.r_i)
+// Sum the amplitudes from a collection of atoms for given scattering vectors: SUM_i f_i * exp(i*q.(R r_i + U))
 // This variant allows for an arbitrary collection of scattering vectors
 kernel void phase_factor_qrf(
     global const dsfloat *q,  // Scattering vectors
@@ -354,10 +350,8 @@ kernel void phase_factor_qrf(
     if (gi < n_pixels){a[gi] = a[gi]*add + a_sum;}
 }
 
-// Sum the amplitudes from a collection of atoms for given scattering vectors: SUM_i f_i * exp(i*q.r_i)
-// This variant allows for an arbitrary collection of scattering vectors
-// This variant does not attempt to speed up the calculation by moving chunks to local memory.  The speedup
-// due to using local memory appears to be small (~10% on Rick's laptop with onboard intel GPU).
+// Same as phase_factor_qrf, but does not attempt to speed up via local memory cache.
+// The speedup due to using local memory appears to be small (~10% on Rick's laptop with onboard intel GPU).
 kernel void phase_factor_qrf_global(
     global const dsfloat *q,  // Scattering vectors
     global const dsfloat *r,  // Atomic postion vectors

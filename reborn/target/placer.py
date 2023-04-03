@@ -152,8 +152,44 @@ def particles_in_a_sphere(sphere_diameter, n_particles, particle_diameter, max_a
     return pos_vecs
 
 
+def particles_in_a_cylinder(cylinder_diameter, cylinder_length, n_particles, particle_diameter, max_attempts=1e6):
+    r"""
+    Place particles randomly in a cylindrical volume.  Assume particles are spheres and they cannot touch any other
+    particle.  Also assumes that surface of spherical particles cannot extend beyond the surface of the containing
+    cylinder (thus, the maximum distance of a particle from the axis is cylinder_diameter/2 - particle_diameter/2).
 
+    Args:
+        cylinder_diameter (float): Diameter of the bounding sphere, within which particle positions must lie (but without
+                                 the particle surface extending beyond this bounding sphere).
+        n_particles (int): Number of particles to fit in the bounding sphere.
+        particle_diameter (float): Diameter of the particles that must fit in the sphere.
+        max_attempts (int): Optional. How many times to try to place a sphere before giving up.  Default: 1e6.
 
-
-
-
+    Returns:
+        |ndarray| : The array of vectors with particle positions.
+    """
+    # Note: the particle cannot extend beyond the cylinder, so we set the diameter of the bounding circle to be
+    # reduced in size by one particle diameter.
+    rmax = (cylinder_diameter - particle_diameter) / 2
+    rmax2 = rmax ** 2
+    lmax = cylinder_length - particle_diameter
+    pd2 = particle_diameter ** 2
+    if particle_diameter > cylinder_diameter:
+        raise ValueError("Particle diameter is larger than sphere diameter.")
+    pos_vecs = np.zeros((n_particles, 3))
+    for i in range(n_particles):
+        for a in range(int(max_attempts)):
+            vec = (np.random.rand(2) - 0.5)*2*rmax  # Random position ranging from -r to +r
+            vmag2 = np.sum(vec**2)  # Distance of this position from axis
+            if vmag2 > rmax2:  # Check if it's in the circle
+                continue
+            vec = np.array([vec[0], vec[1], np.random.rand()*lmax])
+            if i > 0:  # No neighbors for the first particle
+                mindist2 = np.min(np.sum((pos_vecs[0:i] - vec)**2, axis=-1))  # Check closest neighbor (distance squared)
+                if mindist2 < pd2:
+                    continue
+            break  # If we made it here, success!
+        pos_vecs[i, :] = vec
+        if a == int(max_attempts) - 1:
+            print('Failed to place all particles!!')
+    return pos_vecs

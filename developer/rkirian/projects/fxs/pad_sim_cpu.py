@@ -4,12 +4,15 @@ from time import time
 import numpy as np
 from numpy.fft import fftn, ifftn, fftshift, ifftshift
 from scipy.spatial.transform import Rotation
+import matplotlib.pyplot as plt
 import pyqtgraph as pg
-from reborn import utils, source, detector, dataframe, const
+import reborn.utils
+from reborn import source, detector, dataframe, const
+from reborn.misc.interpolate import trilinear_interpolation
+from reborn.simulate.form_factors import sphere_form_factor
 from reborn.target import crystal, atoms, placer
 from reborn.fileio.getters import FrameGetter
 from reborn.simulate import solutions, gas, clcore
-from reborn.viewers.qtviews import view_pad_data
 import saxstats.saxstats as saxstats  # This is Tom's DENSS package
 
 ###################################################################
@@ -26,45 +29,44 @@ rad90 = np.pi/2
 ##########################################################################
 # Configurations
 #######################################################################
-poisson = 0  # Include Poisson noise
+poisson = 1  # Include Poisson noise
 protein = 1  # Include protein contrast in diffraction amplitudes
-one_particle = 1  # Fix particle counts to one per drop
+one_particle = 0  # Fix particle counts to one per drop
 droplet = 0  # Include droplet diffraction
+sheet = 1  # Include sheet background (assume drop diameter is sheet thickness)
 correct_sa = 0  # Correct for solid angles (helpful for viewing multiple detectors with different pixel sizes)
-atomistic = 0  # Do the all-atom protein simulation
+# atomistic = 0  # Do the all-atom protein simulation
 gas_background = 0  # Include gas background
-solvent_contrast = 0  # Include solvent contrast (water)
+solvent_contrast = 1  # Include solvent contrast (water)
 bulk_water = 0  # Include bulk water background
-use_cached_files = 0  # Cache files for speed
+use_cached_files = 1  # Cache files for speed
 view_framegetter = 1  # View diffraction
-view_density_projections = 1  # View reborn and DENSS densities (projected sum)
+view_density_projections = 0  # View reborn and DENSS densities (projected sum)
 pad_geometry_file = [detector.epix100_geom_file, detector.jungfrau4m_geom_file]  # Can be list of detectors
 pad_binning = [2, 2]  # For speed, bin the pixels
 detector_distance = [2.4, 0.5]  # Average distances of detectors
 beamstop_size = 5e-3  # Mask beamstop region
 photon_energy = 7000 * eV  # All units are SI
-pulse_energy = 0.5e-3
+pulse_energy = 1e-3
 drop_radius = 100e-9 / 2  # Average droplet radius
 drop_radius_fwhm = 0  # FWHM of droplet radius distribution (tophat distribution at present)
-beam_diameter = 0.11e-6  # FWHM of x-ray beam (tophat profile at present)
-map_resolution = 0.6e-9  # Minimum resolution for 3D density map.  Beware of overloading GPU memory...
-map_oversample = 2  # Oversampling factor for 3D density map.  Beware of overloading GPU memory...
+beam_diameter = 110e-9  # FWHM of x-ray beam (tophat profile at present)
+map_resolution = 8e-10  # Minimum resolution for 3D density map.  Beware of overloading GPU memory...
+map_oversample = 4  # Oversampling factor for 3D density map.  Beware of overloading GPU memory...
 cell = 200e-10  # Unit cell size (assume P1, cubic).  Fake unit cell affects the density map.
-pdb_file = ['1jb0', '1SS8', '3IYF', '1PCQ', '2LYZ', 'BDNA25_sp.pdb'][0]
+pdb_file = '1jb0'  #'1SS8', '3IYF', '1PCQ', '2LYZ', 'BDNA25_sp.pdb'
 protein_concentration = 10  # Protein concentration in mg/ml = kg/m^3
 # Parameters for gas background calculation.  Give the full path through which x-rays interact with the gas.
 gas_params = {'path_length': [0, None], 'gas_type': 'he', 'pressure': 100e-6, 'n_simulation_steps': 5,
               'temperature': 293}
 random_seed = 2022  # Seed for random number generator (choose None to make it random)
-gpu_double_precision = False
-gpu_group_size = 32
 
 #######################################################################
 # Fetch files
 ########################################################################
 if not os.path.exists(pdb_file):
     pdb_file = crystal.get_pdb_file(pdb_file, save_path='.', use_cache=False)
-    print('Using PDB file:', pdb_file)
+    print('Fetched PDB file:', pdb_file)
 
 #########################################################################
 # Derived parameters
@@ -84,6 +86,9 @@ for i in range(len(pad_geometry_file)):
     geom += p
 mask = geom.beamstop_mask(beam=beam, min_radius=beamstop_size)
 q_mags = geom.q_mags(beam=beam)
+if sheet:
+    droplet = 0
+liq_volume = 0
 
 ###############################################################
 # Density map via reborn
@@ -104,7 +109,7 @@ if view_density_projections:
 ##################################################################
 # Improved density map via DENSS
 #################################################################
-mrc_file = pdb_file + ".mrc"
+mrc_file = f"{pdb_file}_{solvent_contrast}_{map_resolution*1e10}_{map_oversample}.mrc"
 if not os.path.exists(mrc_file):
     pdb = saxstats.PDBmod(pdb_file, bio_assembly=1)
     voxel = cell / dmap.cshape[0]
@@ -124,9 +129,10 @@ if not os.path.exists(mrc_file):
     rho = ifftshift(rho)
     side = pdb2mrc.side
     if use_cached_files:
-        print('Loading', mrc_file)
+        print('Writing', mrc_file)
         saxstats.write_mrc(rho, side, mrc_file)
 else:
+    print('Loading', mrc_file)
     rho, side = saxstats.read_mrc(mrc_file)
 if view_density_projections:
     pg.image(np.sum(rho.real, axis=2), title='denss')
@@ -135,13 +141,11 @@ if view_density_projections:
 ##################################################################
 # Prepare arrays for simulations
 ###################################################################
-F = fftshift(fftn(rho))
+F = fftshift(fftn(rho)).copy()
 rho_cell = fftshift(rho)
-gpucore = clcore.ClCore(double_precision=gpu_double_precision, group_size=gpu_group_size)
-F_gpu = gpucore.to_device(F)
-q_vecs_gpu = gpucore.to_device(geom.q_vecs(beam=beam))
-q_mags_gpu = gpucore.to_device(geom.q_mags(beam=beam))
-amps_gpu = gpucore.to_device(shape=geom.n_pixels, dtype=gpucore.complex_t)
+q_vecs = geom.q_vecs(beam=beam)
+q_mags = geom.q_mags(beam=beam)
+amps = np.zeros(geom.n_pixels, dtype=complex)
 q_min = dmap.q_min
 q_max = dmap.q_max
 protein_number_density = protein_concentration/cryst.molecule.get_molecular_weight()
@@ -183,44 +187,135 @@ class DropletGetter(FrameGetter):
         super().__init__()
         self.n_frames = int(1e6)
     def get_data(self, frame_number=0):
-        t = time()
         np.random.seed(int(frame_number))
-        dd = drop_radius*2 + (np.random.rand()-0.5)*drop_radius_fwhm
-        nppd = int(protein_number_density*4/3*np.pi*(dd/2)**3)
+        t = time()
+        dd = drop_radius * 2 + (np.random.rand() - 0.5) * drop_radius_fwhm
+        if droplet:
+            vol = 4 / 3 * np.pi * (dd / 2) ** 3
+        else:
+            vol = np.pi * (dd / 2) ** 2 * dd
+        nppd = int(protein_number_density * vol)
         if one_particle:
             nppd = 1
-        print(nppd, 'particles')
-        p_vecs = placer.particles_in_a_sphere(sphere_diameter=dd, n_particles=nppd, particle_diameter=protein_diameter)
-        a_gpu = amps_gpu * 0
+        print(nppd, 'particles in the drop')
+        if droplet:
+            p_vecs = placer.particles_in_a_sphere(sphere_diameter=dd, n_particles=nppd, particle_diameter=protein_diameter)
+        else:
+            p_vecs = placer.particles_in_a_cylinder(cylinder_diameter=dd, cylinder_length=dd, n_particles=nppd, particle_diameter=protein_diameter)
+        amps = np.zeros(q_vecs.shape[0], dtype=complex)
         if protein:
             for p in range(nppd):
                 R = Rotation.random().as_matrix()
                 U = p_vecs[p, :]
-                if atomistic:
-                    gpucore.phase_factor_qrf(q_vecs_gpu, r_vecs, f, R=R, U=U, a=a_gpu, add=True)
-                else:
-                    gpucore.mesh_interpolation(F_gpu, q_vecs_gpu, N=dmap.shape, q_min=q_min, q_max=q_max,
-                                               R=R, U=U, a=a_gpu, add=True)
-        if droplet > 0:
-            gpucore.sphere_form_factor(r=dd / 2, q=q_mags_gpu, a=a_gpu, dens=f_dens_water, add=True)
-        pattern = f2p * np.abs(a_gpu.get()) ** 2
+                q = np.dot(q_vecs, R)
+                a = trilinear_interpolation(F, q, x_min=q_min, x_max=q_max)
+                a *= np.exp(-1j * (np.dot(q, U.T)))
+                amps += a
+        print('Simulated protein amplitudes in', time() - t, 'seconds')
+        if droplet:
+            amps += f_dens_water * sphere_form_factor(radius=dd / 2, q_mags=q_mags)
+        intensities = f2p * np.abs(amps) ** 2
         if gas_background:
-            pattern += gasbak
+            intensities += gasbak
         if bulk_water:
-            pattern += 4*np.pi*(dd/2)**3/3 * waterprof
+            intensities += 4 * np.pi * (dd / 2) ** 3 / 3 * waterprof
         if poisson:
-            pattern = np.random.poisson(pattern)
+            intensities = np.random.poisson(intensities)
         if correct_sa:
-            pattern *= 1e6 / geom.solid_angles()
-        print(time() - t, 'seconds')
-        df = dataframe.DataFrame(pad_geometry=geom, beam=beam, raw_data=pattern, mask=mask)
+            intensities *= 1e6 / geom.solid_angles()
+        print('Simulated intensities in', time() - t, 'seconds')
+        df = dataframe.DataFrame(pad_geometry=geom, beam=beam, raw_data=intensities, mask=mask)
         return df
-
 fg = DropletGetter()
-df = fg.get_next_frame()
 if view_framegetter:
     hl = False
     if poisson:
         hl = True
     pv = fg.get_padview(hold_levels=hl)
     pv.start()
+
+################################################################################
+# FXS Simulation
+################################################################################
+lam = beam.wavelength
+res = 20e-10  # Autocorrelation ring resolution
+q = 2 * np.pi / res
+s = 2  # Oversampling
+d = protein_diameter  # Size of the object
+dq = 2*np.pi/d/s
+theta = 2 * np.arcsin(q * lam / 4 / np.pi)
+dtheta = lam / s / protein_diameter / np.cos(theta/2) # Angular step in theta
+qperp = q * np.cos(theta/2)  # Component of qvec perpendicular to beam
+dphi = dq / qperp
+n_phi = int(2*np.pi/dphi)  # Num. bins in ring
+n_phi += (n_phi % 2)  # Make it even
+dphi = 2*np.pi/n_phi  # Update dphi to integer phis
+print('Nphi:', n_phi)
+phi = np.arange(n_phi) * dphi
+st = np.sin(theta)
+sa = st * dphi * dtheta  # Ring bin solid angle
+f2p = const.r_e**2 * beam.photon_number_fluence * sa  # Dropped polarization factor
+q_vecs = 2 * np.pi / lam * np.vstack(
+    [st * np.cos(phi), st * np.sin(phi), (1 - np.cos(theta)) * np.ones(n_phi)]).T.copy()
+q_mags = reborn.utils.vec_mag(q_vecs)
+a_ring = np.zeros(n_phi, dtype=complex)
+acf_sum_noisy = np.zeros(n_phi)
+acf_sum = np.zeros(n_phi)
+waterprof = solutions.water_scattering_factor_squared(q=q)
+waterprof *= f2p * solutions.water_number_density()
+n_shots = 100000
+t = time()
+for i in range(n_shots):
+    doprint = False
+    if ((i + 1) % 10**np.ceil(np.log10(i+1))) == 0:
+        doprint = True
+    if doprint:
+        print(f"Shot {i+1} @ {time()-t} seconds.")
+    dd = drop_radius * 2 + (np.random.rand() - 0.5) * drop_radius_fwhm
+    if droplet:
+        vol = 4 / 3 * np.pi * (dd / 2) ** 3
+    else:
+        vol = np.pi * (dd / 2) ** 2 * dd
+    nppd = int(protein_number_density * vol)
+    if one_particle:
+        nppd = 1
+    if droplet:
+        p_vecs = placer.particles_in_a_sphere(sphere_diameter=dd, n_particles=nppd, particle_diameter=protein_diameter)
+    else:
+        p_vecs = placer.particles_in_a_cylinder(cylinder_diameter=dd, cylinder_length=dd, n_particles=nppd,
+                                                particle_diameter=protein_diameter)
+    amps = np.zeros(q_vecs.shape[0], dtype=complex)
+    if protein:
+        for p in range(nppd):
+            R = Rotation.random().as_matrix()
+            U = p_vecs[p, :]
+            q = np.dot(q_vecs, R)
+            a = trilinear_interpolation(F, q, x_min=q_min, x_max=q_max)
+            a *= np.exp(-1j * (np.dot(q, U.T)))
+            amps += a
+    if droplet:
+        amps += f_dens_water * sphere_form_factor(radius=dd / 2, q_mags=q_mags)
+    intensities = f2p * np.abs(amps) ** 2
+    if bulk_water:
+        intensities += waterprof * vol
+    if gas_background:
+        print('No gas background set up for FXS sims because of polarization factor handling')
+        intensities += gasbak
+    I_ring = intensities
+    I_ring_noisy = np.random.poisson(I_ring).astype(np.float64)
+    if doprint:
+        print(f"{nppd} particles, {np.sum(I_ring)} photons in ring ({np.sum(I_ring)/n_phi} per pixel)")
+    I_ring -= np.mean(I_ring)
+    acf_sum += np.real(np.fft.ifft(np.abs(np.fft.fft(I_ring)) ** 2))
+    I_ring_noisy -= np.mean(I_ring_noisy)
+    acf_sum_noisy += np.real(np.fft.ifft(np.abs(np.fft.fft(I_ring_noisy)) ** 2))
+
+m = int(n_phi / 2)
+plt.plot(phi[1:m] * 180 / np.pi, acf_sum[1:m], '-k')
+acf_sum_noisy += np.mean(acf_sum[1:m]) - np.mean(acf_sum_noisy[1:m])  # set the noisy mean to match noise-free mean
+plt.plot(phi[1:m] * 180 / np.pi, acf_sum_noisy[1:m], '.r')
+plt.title(f'PSI, {res*1e10} $\AA$, {n_shots} shots')
+plt.xlabel(r'$\Delta \phi$ (degrees)')
+plt.ylabel(r'$C(q, q, \Delta\phi)$')
+plt.show(block=True)
+print('Done')

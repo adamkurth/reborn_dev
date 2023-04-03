@@ -167,7 +167,7 @@ class PADView(QtCore.QObject):
         if len(logger.handlers) > 0:
             return
         logger.propagate = False
-        level = logging.DEBUG
+        level = logging.INFO
         logger.setLevel(level)
         formatter = " - ".join(["%(asctime)s", "%(levelname)s", "%(name)s", "%(message)s"])
         formatter = logging.Formatter(formatter)
