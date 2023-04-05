@@ -372,6 +372,7 @@ class LCLSFrameGetter(fileio.getters.FrameGetter):
                             "beam": beam,
                             "idx": idx,
                             "cachedir": cachedir}
+        pad_detectors = [pad_detectors] if isinstance(pad_detectors, dict) else pad_detectors
         self.run_number = run_number
         self.data_string = f'exp={experiment_id}:run={run_number}:smd'
         debug_message('datastring', self.data_string)
