@@ -487,7 +487,7 @@ class CrystalStructure(object):
         else:
             create_bio_assembly = 0
 
-        if create_bio_assembly:
+        if create_bio_assembly and len(dic['bio_rotations']) > 0:
             # The few lines of code below is to make a list of the start and end indices that we will then use 
             # to access the appropriate rotation, translation operations stored in 
             # dic['bio_rotations'] and dic['bio_translations'].
