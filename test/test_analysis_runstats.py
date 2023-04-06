@@ -13,7 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with reborn.  If not, see <https://www.gnu.org/licenses/>.
 
-import numpy as np
 from reborn import detector, source, dataframe, temp_dir
 from reborn.analysis import runstats
 from reborn.fileio.getters import ListFrameGetter
@@ -32,11 +31,11 @@ def test_padstats():
     histparams = dict(bin_min=0, bin_max=10, n_bins=11, n_pixels=geom.n_pixels)
     config = dict(histogram_params=histparams)
     stats = runstats.padstats(framegetter=fg, config=config)
-    assert(isinstance(stats, dict))
-    assert(stats['sum'].flat[0] == 3)
+    assert isinstance(stats, dict)
+    assert stats["sum"].flat[0] == 3
     # runstats.view_padstats(stats)
-    filepath = temp_dir + '/stats.npz'
+    filepath = temp_dir + "/stats.npz"
     runstats.save_padstats(stats, filepath)
     stats2 = runstats.load_padstats(filepath)
-    assert(isinstance(stats, dict))
-    assert(stats['sum'].flat[0] == stats2['sum'].flat[0])
+    assert isinstance(stats, dict)
+    assert stats["sum"].flat[0] == stats2["sum"].flat[0]

@@ -162,8 +162,8 @@ class ParallelAnalyzer(ABC):
         r""" Setup logger.  This is affected by the config dictionary keys 'debug', 'message_prefix', 'log_file' """
         # Sometimes we want to prefix a run number or experiment ID (for example).
         message_prefix = self.config.get("message_prefix", None)
-        if message_prefix is None:
-            print("Provide a message prefix by adding the 'message_prefix' to the config dictionary.")
+        # if message_prefix is None:
+        #     print("Provide a message prefix by adding the 'message_prefix' to the config dictionary.")
         # Where to put the log file.
         logger = logging.getLogger(name=self.analyzer_name)
         self.logger = logger

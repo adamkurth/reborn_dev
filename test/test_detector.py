@@ -18,22 +18,27 @@ import tempfile
 from reborn import detector
 from reborn import source
 import numpy as np
+
 np.random.seed(0)
 tempdir = tempfile.gettempdir()
 
 
 def test_slice_funcs():
-    assert (isinstance(detector._slice_to_tuple(slice(1, 2, 3)), tuple))
-    assert (detector._slice_to_tuple(slice(1, 2, 3))[0] == 1)
-    assert (detector._slice_to_tuple(slice(1, 2, 3))[1] == 2)
-    assert (detector._slice_to_tuple(slice(1, 2, 3))[2] == 3)
-    assert (isinstance(detector._slice_to_tuple((1, 2, slice(1, 2, 3))), tuple))
-    assert (isinstance(detector._slice_to_tuple(((1, 2, 3), (1, 2, None))), tuple))
-    assert (isinstance(detector._slice_to_tuple((slice(1, 2, 3), slice(1, 2, None)))[0][0], int))
-    assert (isinstance(detector._tuple_to_slice(slice(1, 2, 3)), slice))
-    assert (isinstance(detector._tuple_to_slice((1, 2, 3)), slice))
-    assert (isinstance(detector._tuple_to_slice(((1, 2, 3), (1, 2, None))), tuple))
-    assert (isinstance(detector._tuple_to_slice((slice(1, 2, 3), slice(1, 2, None)))[0], slice))
+    assert isinstance(detector._slice_to_tuple(slice(1, 2, 3)), tuple)
+    assert detector._slice_to_tuple(slice(1, 2, 3))[0] == 1
+    assert detector._slice_to_tuple(slice(1, 2, 3))[1] == 2
+    assert detector._slice_to_tuple(slice(1, 2, 3))[2] == 3
+    assert isinstance(detector._slice_to_tuple((1, 2, slice(1, 2, 3))), tuple)
+    assert isinstance(detector._slice_to_tuple(((1, 2, 3), (1, 2, None))), tuple)
+    assert isinstance(
+        detector._slice_to_tuple((slice(1, 2, 3), slice(1, 2, None)))[0][0], int
+    )
+    assert isinstance(detector._tuple_to_slice(slice(1, 2, 3)), slice)
+    assert isinstance(detector._tuple_to_slice((1, 2, 3)), slice)
+    assert isinstance(detector._tuple_to_slice(((1, 2, 3), (1, 2, None))), tuple)
+    assert isinstance(
+        detector._tuple_to_slice((slice(1, 2, 3), slice(1, 2, None)))[0], slice
+    )
 
 
 def test_slicing():
@@ -48,10 +53,10 @@ def test_slicing():
     pads[0].parent_data_shape = (2, 512, 1024)
     pads[1].parent_data_shape = (2, 512, 1024)
     pads.validate()
-    save_file = tempdir + '/sliced.geom'
+    save_file = tempdir + "/sliced.geom"
     pads.save_json(save_file)
     pads2 = detector.load_pad_geometry_list(save_file)
-    assert (pads == pads2)
+    assert pads == pads2
     data = np.arange(pads.n_pixels)
     data = pads.reshape(data)
     assert np.max(np.abs(np.array(data.shape) - np.array([2, 512, 1024]))) == 0
@@ -64,18 +69,19 @@ def test_slicing():
     data_split3 = pads3.split_data(data.copy())
     assert np.max(np.abs(data_split3[0] - data_split[0])) == 0
 
+
 def make_pad_list():
-    r""" Simply check the creation of a pad list. """
+    r"""Simply check the creation of a pad list."""
     pad_geom = []
     pad = detector.PADGeometry()
-    pad.t_vec = [0, .01, .5]
+    pad.t_vec = [0, 0.01, 0.5]
     pad.fs_vec = [100e-6, 0, 0]
     pad.ss_vec = [0, 100e-6, 0]
     pad.n_fs = 100
     pad.n_ss = 150
     pad_geom.append(pad)
     pad = detector.PADGeometry()
-    pad.t_vec = [0, -.01, .5]
+    pad.t_vec = [0, -0.01, 0.5]
     pad.fs_vec = [100e-6, 0, 0]
     pad.ss_vec = [0, 100e-6, 0]
     pad.n_fs = 100
@@ -89,11 +95,14 @@ def test_solid_angles():
     pad = detector.PADGeometry()
     assert pad.t_vec is None
     pad = detector.PADGeometry(pixel_size=100e-6, distance=1, shape=(100, 100))
-    assert np.max(pad.solid_angles1() - pad.solid_angles2())/np.max(pad.solid_angles2()) < 1e-6
+    assert (
+        np.max(pad.solid_angles1() - pad.solid_angles2()) / np.max(pad.solid_angles2())
+        < 1e-6
+    )
 
 
 def test_save_pad():
-    file_name = os.path.join(tempdir, 'test.json')
+    file_name = os.path.join(tempdir, "test.json")
     pad1 = detector.PADGeometry(pixel_size=100e-6, distance=1, shape=(100, 100))
     pad1.save_json(file_name)
     pad2 = detector.PADGeometry()
@@ -103,7 +112,7 @@ def test_save_pad():
 
 
 def test_save_pad_list():
-    file_name = os.path.join(tempdir, 'test.json')
+    file_name = os.path.join(tempdir, "test.json")
     pads1 = make_pad_list()
     detector.save_pad_geometry_list(file_name, pads1)
     pads2 = detector.load_pad_geometry_list(file_name)
@@ -136,19 +145,21 @@ def test_PADAssembler():
     assembler = detector.PADAssembler(pad_geom)
     dat = [p.ones() for p in pad_geom]
     ass = assembler.assemble_data(dat)
-    assert(np.min(ass) == 0)
-    assert(np.max(ass) == 1)
+    assert np.min(ass) == 0
+    assert np.max(ass) == 1
 
 
 def test_radial_profiler_01():
     pad_geom = detector.PADGeometry(shape=(3, 3), distance=1.0, pixel_size=100e-6)
-    q_mags = pad_geom.q_mags(beam_vec=[0, 0, 1], wavelength=1.0e-10)
-    print(q_mags)
+    beam = source.Beam(wavelength=1.0e-10)
+    # q_mags = pad_geom.q_mags(beam_vec=[0, 0, 1], wavelength=1.0e-10)
     # q_mags = [8885765.80967349 6283185.28361764 8885765.80967349 6283185.28361764 0. 6283185.28361764
     #           8885765.80967349 6283185.28361764 8885765.80967349]
     dat = np.ones([3, 3])
-    rad = detector.RadialProfiler(q_mags=q_mags, mask=None, n_bins=3, q_range=[0, 9283185])
-    print(rad.bin_edges)
+    rad = detector.RadialProfiler(
+        pad_geometry=pad_geom, beam=beam, mask=None, n_bins=3, q_range=[0, 9283185]
+    )
+    # print(rad.bin_edges)
     # rad.bin_edges = [-2320796.25  2320796.25  6962388.75 11603981.25]
     profile = rad.get_sum_profile(dat)  # Sums over
     assert profile[0] == 1
@@ -182,14 +193,14 @@ def test_radial_profiler_01():
 
 def test_radial_profiler_02():
     pad_geom = make_pad_list()
-    beam = [0, 0, 1]
-    wav = 1.5e-10
-    q_mags = np.ravel([p.q_mags(beam_vec=beam, wavelength=wav) for p in pad_geom])
-    rad = detector.RadialProfiler(q_mags=q_mags, mask=None, n_bins=100, q_range=None)
+    beam = source.Beam(wavelength=1.5e-10)
+    rad = detector.RadialProfiler(
+        pad_geometry=pad_geom, beam=beam, mask=None, n_bins=100, q_range=None
+    )
     data = np.linspace(0, 1, pad_geom.n_pixels)
     prof = rad.get_mean_profile(data)
-    assert(np.max(prof) <= 1)
-    assert(np.min(prof) >= 0)
+    assert np.max(prof) <= 1
+    assert np.min(prof) >= 0
 
 
 def test_radial_profiler_03():
@@ -199,9 +210,11 @@ def test_radial_profiler_03():
     data = pads.random()
     prof1 = rad.get_mean_profile(data)
     prof2 = rad.get_profile_statistic(data, statistic=np.mean)
-    prof3, _ = detector.get_radial_profile(data, beam, pads, n_bins=100, statistic=np.mean)
-    assert(np.max(np.abs(prof1-prof2)) < 1e-10)
-    assert(np.max(np.abs(prof3-prof2)) < 1e-10)
+    prof3, _ = detector.get_radial_profile(
+        data, beam, pads, n_bins=100, statistic=np.mean
+    )
+    assert np.max(np.abs(prof1 - prof2)) < 1e-10
+    assert np.max(np.abs(prof3 - prof2)) < 1e-10
 
 
 # def test_radial_profiler_04():
@@ -214,25 +227,23 @@ def test_radial_profiler_03():
 
 
 def test_vector_math():
-
     pad = detector.PADGeometry(shape=(2, 2), distance=0.1, pixel_size=1e-3)
     vecs = pad.position_vecs()
     j, i = pad.vectors_to_indices(vecs, insist_in_pad=False)
     jj, ii = np.indices(pad.shape())
-    assert(np.max(np.abs(j - jj.ravel())) < 1e-6)
-    assert (np.max(np.abs(i - ii.ravel())) < 1e-6)
+    assert np.max(np.abs(j - jj.ravel())) < 1e-6
+    assert np.max(np.abs(i - ii.ravel())) < 1e-6
     j, i = pad.vectors_to_indices(vecs, insist_in_pad=True, round=True)
-    assert(np.max(np.abs(j - jj.ravel())) == 0)
-    assert (np.max(np.abs(i - ii.ravel())) == 0)
+    assert np.max(np.abs(j - jj.ravel())) == 0
+    assert np.max(np.abs(i - ii.ravel())) == 0
 
 
 def test_saving():
-
     shapes = [np.array((100, 101)) for _ in range(8)]
     masks = [np.round(np.random.random(shapes[i]) * 0.6).astype(int) for i in range(8)]
     assert np.sum(masks[0]) > 0
-    file_name_1 = os.path.join(tempdir, 'unpacked.mask')
-    file_name_2 = os.path.join(tempdir, 'packed.mask')
+    file_name_1 = os.path.join(tempdir, "unpacked.mask")
+    file_name_2 = os.path.join(tempdir, "packed.mask")
     detector.save_pad_masks(file_name_1, masks, packbits=False)
     detector.save_pad_masks(file_name_2, masks)
     unpacked = detector.load_pad_masks(file_name_1)
@@ -251,82 +262,86 @@ def test_standard_pads():
     epix = detector.epix10k_pad_geometry_list()
     jungfrau = detector.jungfrau4m_pad_geometry_list()
     mpccd = detector.mpccd_pad_geometry_list()
-    assert(isinstance(cspad, detector.PADGeometryList))
-    assert(isinstance(cspad2x2, detector.PADGeometryList))
-    assert (isinstance(pnccd, detector.PADGeometryList))
-    assert (isinstance(epix, detector.PADGeometryList))
-    assert (isinstance(jungfrau, detector.PADGeometryList))
-    assert (isinstance(mpccd, detector.PADGeometryList))
+    assert isinstance(cspad, detector.PADGeometryList)
+    assert isinstance(cspad2x2, detector.PADGeometryList)
+    assert isinstance(pnccd, detector.PADGeometryList)
+    assert isinstance(epix, detector.PADGeometryList)
+    assert isinstance(jungfrau, detector.PADGeometryList)
+    assert isinstance(mpccd, detector.PADGeometryList)
 
 
 def test_padlist():
-    beam = source.Beam(photon_energy=9000*1.602e-19)
+    beam = source.Beam(photon_energy=9000 * 1.602e-19)
     pads = detector.cspad_pad_geometry_list()
     pads2 = detector.epix10k_pad_geometry_list()
     padlist = detector.PADGeometryList(pads)
     padlist2 = detector.PADGeometryList(pads2)
     padlist3 = padlist.copy()
-    file_name = os.path.join(tempdir, 'test.json')
+    file_name = os.path.join(tempdir, "test.json")
     padlist3.save_json(file_name)
     padlist4 = detector.load_pad_geometry_list(file_name)
     padlist5 = detector.PADGeometryList(padlist)
-    assert(padlist != padlist2)
-    assert(padlist.hash != padlist2.hash)
-    assert(padlist.hash == padlist3.hash)
-    assert(len(padlist) == 64)
-    assert(padlist3 == padlist)
-    assert(padlist3 == padlist4)
-    assert(padlist.validate() is True)
-    assert(padlist.position_vecs().shape[1] == 3)
-    assert(padlist.s_vecs().shape[1] == 3)
-    assert(padlist.ds_vecs(beam).shape[1] == 3)
-    assert(padlist.q_vecs(beam).shape[1] == 3)
-    assert(padlist.q_mags(beam).size == padlist.n_pixels)
-    assert(padlist.solid_angles().size == padlist.n_pixels)
-    assert(padlist.polarization_factors(beam).size == padlist.n_pixels)
-    assert(padlist.random().size == padlist.n_pixels)
-    assert(isinstance(padlist5, list))
-    assert(isinstance(padlist, detector.PADGeometryList))
+    assert padlist != padlist2
+    assert padlist.hash != padlist2.hash
+    assert padlist.hash == padlist3.hash
+    assert len(padlist) == 64
+    assert padlist3 == padlist
+    assert padlist3 == padlist4
+    assert padlist.validate() is True
+    assert padlist.position_vecs().shape[1] == 3
+    assert padlist.s_vecs().shape[1] == 3
+    assert padlist.ds_vecs(beam).shape[1] == 3
+    assert padlist.q_vecs(beam).shape[1] == 3
+    assert padlist.q_mags(beam).size == padlist.n_pixels
+    assert padlist.solid_angles().size == padlist.n_pixels
+    assert padlist.polarization_factors(beam).size == padlist.n_pixels
+    assert padlist.random().size == padlist.n_pixels
+    assert isinstance(padlist5, list)
+    assert isinstance(padlist, detector.PADGeometryList)
+
 
 def test_loading():
     json_geom = detector.epix10k_geom_file
     pads = detector.PADGeometryList()
     pads.load(json_geom)
-    assert(len(pads) != 1)
+    assert len(pads) != 1
+
 
 def test_groups():
     p = detector.PADGeometryList()
     pads1 = detector.cspad_pad_geometry_list()
     pads2 = detector.epix10k_pad_geometry_list()
-    p.add_group(pads1, group_name='cspad')
-    p.add_group(pads2, group_name='epix')
-    pads1g = p.get_group('cspad')
-    assert(pads1[0] == pads1g[0])
-    assert(pads1[5] == pads1g[5])
+    p.add_group(pads1, group_name="cspad")
+    p.add_group(pads2, group_name="epix")
+    pads1g = p.get_group("cspad")
+    assert pads1[0] == pads1g[0]
+    assert pads1[5] == pads1g[5]
     groups = p.get_all_groups()
-    assert(groups[0][0] == pads1[0])
+    assert groups[0][0] == pads1[0]
     gn = p.get_group_names()
-    assert(gn[0] == 'cspad')
-    assert(gn[1] == 'epix')
+    assert gn[0] == "cspad"
+    assert gn[1] == "epix"
+
 
 def test_names():
     pads = detector.cspad_2x2_pad_geometry_list()
-    pads[0].name = 'hello'
-    pads[1].name = 'hello'
-    pads[2].name = '3'
+    pads[0].name = "hello"
+    pads[1].name = "hello"
+    pads[2].name = "3"
     pads.assign_names()
-    assert(pads[0].name == '0')
-    assert(pads[1].name == '1')
-    assert(pads[2].name == '2')
+    assert pads[0].name == "0"
+    assert pads[1].name == "1"
+    assert pads[2].name == "2"
+
 
 def test_masks():
     pads = detector.cspad_2x2_pad_geometry_list()
     mask1 = [p.ones() for p in pads]
     mask2 = [p.ones() for p in pads]
     mask1[0][0, 0] = 0
-    f1 = tempdir+'/one.mask'
-    f2 = tempdir+'/two.mask'
+    f1 = tempdir + "/one.mask"
+    f2 = tempdir + "/two.mask"
     detector.save_pad_masks(f1, mask1)
     detector.save_pad_masks(f2, mask2)
     mask3 = detector.load_pad_masks([f1, f2])
-    assert(mask3[0][0, 0] == 0)
+    assert mask3[0][0, 0] == 0

@@ -18,7 +18,6 @@ from reborn.target import crystal
 
 
 def test_nonzero_u_vec():
-
     # Note that the following is found in the pdb file 1lsp.pdb
     # We have a non-zero U vector.
 
@@ -39,42 +38,40 @@ def test_nonzero_u_vec():
     # REMARK 290     WHERE NNN -> OPERATOR NUMBER
     # REMARK 290           MMM -> TRANSLATION VECTOR
 
-    W_correct = [np.array([[ 1., 0.,0.],
-                           [ 0., 1.,0.],
-                           [ 0., 0.,1.]]),
-                 np.array([[-1., 0., 0.],
-                           [ 0.,-1., 0.],
-                           [ 0., 0., 1.]]),
-                 np.array([[-1., 0., 0.],
-                           [ 0., 1., 0.],
-                           [ 0., 0.,-1.]]),
-                 np.array([[ 1., 0., 0.],
-                           [ 0.,-1., 0.],
-                           [ 0., 0.,-1.]])]
-    Z_correct = [np.array([0, 0, 0]),
-                 np.array([0, 0, 0]),
-                 np.array([0.5, 0.5, 0]),
-                 np.array([0.5, 0.5, 0])]
+    W_correct = [
+        np.array([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]),
+        np.array([[-1.0, 0.0, 0.0], [0.0, -1.0, 0.0], [0.0, 0.0, 1.0]]),
+        np.array([[-1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, -1.0]]),
+        np.array([[1.0, 0.0, 0.0], [0.0, -1.0, 0.0], [0.0, 0.0, -1.0]]),
+    ]
+    Z_correct = [
+        np.array([0, 0, 0]),
+        np.array([0, 0, 0]),
+        np.array([0.5, 0.5, 0]),
+        np.array([0.5, 0.5, 0]),
+    ]
 
-    pdb_file = crystal.get_pdb_file('1lsp')
+    pdb_file = crystal.get_pdb_file("1lsp")
 
     cryst = crystal.CrystalStructure(pdb_file, no_warnings=True)
 
     dic = crystal.pdb_to_dict(pdb_file)
-    S = dic['scale_matrix']
+    S = dic["scale_matrix"]
     Sinv = np.linalg.inv(S)
-    U = dic['scale_translation']
+    U = dic["scale_translation"]
     W = []
     Z1 = []
     Z2 = []
     Z3 = []
-    for i in range(len(dic['spacegroup_translations'])):
-        T = dic['spacegroup_translations'][i]
-        R = dic['spacegroup_rotations'][i]
+    for i in range(len(dic["spacegroup_translations"])):
+        T = dic["spacegroup_translations"][i]
+        R = dic["spacegroup_rotations"][i]
         W.append(np.dot(S, np.dot(R, Sinv)))
-        Z1.append(np.dot(S, T) + U) # Either this or the next option should be correct
-        Z2.append(np.dot(S, T) + np.dot(np.eye(3)-W, U))
-        Z3.append(np.dot(S, T))     # This is supposed to be wrong, but it gives the correct result
+        Z1.append(np.dot(S, T) + U)  # Either this or the next option should be correct
+        Z2.append(np.dot(S, T) + np.dot(np.eye(3) - W, U))
+        Z3.append(
+            np.dot(S, T)
+        )  # This is supposed to be wrong, but it gives the correct result
 
     # The following two tests fail:
     # for i in range(4):
@@ -86,5 +83,7 @@ def test_nonzero_u_vec():
     for i in range(4):
         assert np.max(np.abs(Z3[i] - Z_correct[i])) < 1e-3
         assert np.max(np.abs(W[i] - W_correct[i])) < 1e-3
-        assert np.max(np.abs(cryst.spacegroup.sym_translations[i] - Z_correct[i])) < 1e-3
+        assert (
+            np.max(np.abs(cryst.spacegroup.sym_translations[i] - Z_correct[i])) < 1e-3
+        )
         assert np.max(np.abs(cryst.spacegroup.sym_rotations[i] - W_correct[i])) < 1e-3

@@ -16,8 +16,9 @@
 from reborn.source import Beam
 import os
 
+
 def test_json():
-    fname = 'test.beam'
+    fname = "test.beam"
     b1 = Beam()
     b1.save_json(fname)
     b2 = Beam()
@@ -26,4 +27,4 @@ def test_json():
     d1 = b1.to_dict()
     d2 = b2.to_dict()
     for k in list(d1.keys()):
-        assert(d1[k] == d2[k])
+        assert d1[k] == d2[k]

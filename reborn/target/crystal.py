@@ -1267,7 +1267,7 @@ def place_atoms_in_map(x_vecs, atom_fs, sigma, s, orth_mat, map_x_vecs, f_map, f
         f_map += atom_fs[n] * f_map_tmp/w_tot
 
 
-def pdb_to_dict(pdb_file_path, ignore_waters=False):
+def pdb_to_dict(pdb_file_path, ignore_waters=False, verbose=False):
     r"""Return a dictionary with a subset of PDB information.  If there are multiple atomic
     models, only the first will be extracted.  Units are the standard PDB units: angstrom and degrees.
 
@@ -1407,7 +1407,8 @@ def pdb_to_dict(pdb_file_path, ignore_waters=False):
                 atomic_coordinates = np.vstack([atomic_coordinates, np.zeros((atomic_coordinates.shape[0], 3))])
 
     if smtry_index == 0:
-        warn('No spacegroup operations found.')
+        if verbose:
+            warn('No spacegroup operations found.')
         spacegroup_rotations.append(np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]]))
         spacegroup_translations.append(np.array([0, 0, 0]))
     else:

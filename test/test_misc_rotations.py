@@ -17,9 +17,11 @@ import numpy as np
 import scipy
 from reborn.misc.rotate import Rotate3D, Rotate3Dvkfft, have_gpu
 from scipy.stats import special_ortho_group
+
 # from reborn.math import kabsch  # Legacy
 # import reborn.math.kabsch  # Legacy
 from reborn.misc.rotate import kabsch
+
 
 def makegaussians(w, g, s, n):
     x = np.linspace(-0.5 * (1.0 - 1.0 / n), 0.5 * (1.0 - 1.0 / n), num=n)
@@ -28,9 +30,12 @@ def makegaussians(w, g, s, n):
         xgauss = np.exp(-0.5 * ((x - g[ig, 0]) / s) ** 2)
         ygauss = np.exp(-0.5 * ((x - g[ig, 1]) / s) ** 2)
         zgauss = np.exp(-0.5 * ((x - g[ig, 2]) / s) ** 2)
-        d += w[ig] * np.tile(np.reshape(xgauss, (n, 1, 1)), (1, n, n)) * \
-             np.tile(np.reshape(ygauss, (1, n, 1)), (n, 1, n)) * \
-             np.tile(np.reshape(zgauss, (1, 1, n)), (n, n, 1))
+        d += (
+            w[ig]
+            * np.tile(np.reshape(xgauss, (n, 1, 1)), (1, n, n))
+            * np.tile(np.reshape(ygauss, (1, n, 1)), (n, 1, n))
+            * np.tile(np.reshape(zgauss, (1, 1, n)), (n, n, 1))
+        )
     return d
 
 
@@ -71,12 +76,24 @@ def test_01():
                 gi = ir.apply(gi)
                 r3df.rotation(ir)
                 if t == np.complex128 or t == np.complex64:
-                    error = np.max(np.abs(r3df.f - makegaussians(wr, gr, sigma, N)
-                                          - 1j * makegaussians(wi, gi, sigma, N))) / d_max
-                    assert (error < 1e-4)  # Weak tests; only checks if something is horribly wrong
+                    error = (
+                        np.max(
+                            np.abs(
+                                r3df.f
+                                - makegaussians(wr, gr, sigma, N)
+                                - 1j * makegaussians(wi, gi, sigma, N)
+                            )
+                        )
+                        / d_max
+                    )
+                    assert (
+                        error < 1e-4
+                    )  # Weak tests; only checks if something is horribly wrong
                 else:
-                    error = np.max(np.abs(r3df.f - makegaussians(wr, gr, sigma, N))) / d_max
-                    assert (error < 1e-4)  # Weak test
+                    error = (
+                        np.max(np.abs(r3df.f - makegaussians(wr, gr, sigma, N))) / d_max
+                    )
+                    assert error < 1e-4  # Weak test
 
 
 def test_kabsch():
@@ -88,16 +105,16 @@ def test_kabsch():
 
     np.random.seed(42)
 
-    small = 1.0e-12 # Error we want the result to be smaller than
+    small = 1.0e-12  # Error we want the result to be smaller than
 
     # Generate a random A matrix
-    A = np.random.rand(3,3)
+    A = np.random.rand(3, 3)
 
     # Generate a random rotation matrix
     R = special_ortho_group.rvs(dim=3)
 
     # Rotate A
-    A_home = np.dot(R,A)
+    A_home = np.dot(R, A)
 
     # Take the transpose because the scipy align_vectors function assumes shape of (N,3),
     # i.e. the vectors are assumed to be stacked horizontally.
@@ -107,5 +124,4 @@ def test_kabsch():
     # Now run the Kabsch algorithm and convert the output to a rotation matrix
     R_est = kabsch(A, A_home)
 
-    assert (np.sum(np.abs(R - R_est)) < small)
-
+    assert np.sum(np.abs(R - R_est)) < small

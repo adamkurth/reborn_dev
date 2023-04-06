@@ -223,7 +223,6 @@ class SphericalDroplets:
         self.N = len(self.r)
         self.I_R_precompute = np.zeros((self.N,len(self.q)))
         for i in range(self.N):
-            print(i)
             self.I_R_precompute[i,:] = (sphere_form_factor(radius=self.r[i], q_mags=self.q, check_divide_by_zero=True))**2
 
 
@@ -236,7 +235,6 @@ class SphericalDroplets:
         A_save = np.zeros(self.N)
         error_vec = np.zeros(self.N)
         for i in range(self.N):
-            print(i)
             I_R = self.I_R_precompute[i,:]
             A = np.sum(I_D[w] * I_R[w]) / np.sum(I_R[w]**2)
             diff_sq = (A*I_R[w] - I_D[w])**2

@@ -28,4 +28,4 @@ def test_ylmIntegration():
                 f[j, :] = sph_harm(m, l, intylm.phi[:], intylm.theta[j])
             ylmc = intylm.calc_ylmcoef(f)
             ylmc[l, m] -= 1.0
-            assert (np.max(np.abs(ylmc)) < small)
+            assert np.max(np.abs(ylmc)) < small

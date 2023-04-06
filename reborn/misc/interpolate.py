@@ -366,7 +366,7 @@ def trilinear_insertions(densities, vectors, insert_vals, corners=None, deltas=N
     return None
 
 
-def trilinear_insert(data_coord, data_val, x_min, x_max, n_bin, mask, boundary_mode="truncate"):
+def trilinear_insert(data_coord, data_val, x_min, x_max, n_bin, mask, boundary_mode="truncate", verbose=True):
     r"""
     Trilinear insertion on a regular grid with arbitrarily positioned sample points.
 
@@ -419,12 +419,14 @@ def trilinear_insert(data_coord, data_val, x_min, x_max, n_bin, mask, boundary_m
         raise ValueError('data_coord needs to be an Nx3 array.')
 
     if np.sum(x_min <= np.min(data_coord, axis=0)) != 3:
-        print('Warning: Values in data_coord is less than one or more of the limits specified in x_min. \n' +
+        if verbose:
+            print('Warning: Values in data_coord is less than one or more of the limits specified in x_min. \n' +
               'I.e., one or more points are outside the insertion volume. \n' +
               'If this is intended, please disregard this message. \n' +
               'Else consider doing the following: np.min(data_coord, axis=0) and compare against x_min to see.\n')
     if np.sum(x_max >= np.max(data_coord, axis=0)) != 3:
-        print('Warning: Values in data_coord is greater than one or more of the limits specified in x_max. \n' +
+        if verbose:
+            print('Warning: Values in data_coord is greater than one or more of the limits specified in x_max. \n' +
               'I.e., one or more points are outside the insertion volume. \n' +
               'If this is intended, please disregard this message. \n' +
               'Else consider doing the following: np.min(data_coord, axis=0) and compare against x_min to see.\n')

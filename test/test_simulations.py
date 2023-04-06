@@ -21,11 +21,10 @@ from reborn.simulate.examples import lysozyme_pdb_file
 from reborn.target import crystal
 from scipy import constants as const
 
-hc = const.h*const.c
+hc = const.h * const.c
 
 
 def test_mappings():
-
     # There are many ways to simulate crystal patterns.  Here we chack that we get the same results for the molecular
     # transform in the crystal basis and in the "lab" basis.  We also check simulations based on interpolation from
     # a 3D lookup table.

@@ -19,7 +19,7 @@ from reborn import fortran
 
 
 def test_01():
-    assert(isinstance(fortran.utils_f, ModuleType))
+    assert isinstance(fortran.utils_f, ModuleType)
 
 
 def test_02():
@@ -32,16 +32,20 @@ def test_02():
     w_sum = np.zeros(n_bins)
     q_min = 0.5  # Bins are |___0.5___|___1.5___|___2.5___|
     q_max = 2.5
-    fortran.scatter_f.profile_stats(pattern, q, weights, n_bins, q_min, q_max, sum_, sum2, w_sum)
-    assert(np.max(np.abs(sum_ - np.array([8, 2, 17]))) == 0)
+    fortran.scatter_f.profile_stats(
+        pattern, q, weights, n_bins, q_min, q_max, sum_, sum2, w_sum
+    )
+    assert np.max(np.abs(sum_ - np.array([8, 2, 17]))) == 0
     indices = np.empty(6, dtype=np.int32)
     fortran.scatter_f.profile_indices(q, n_bins, q_min, q_max, indices)
     sum_1 = sum_.copy()
     sum_ = np.zeros(n_bins)
     sum2 = np.zeros(n_bins)
     w_sum = np.zeros(n_bins)
-    fortran.scatter_f.profile_stats_indexed(pattern, indices, weights, sum_, sum2, w_sum)
-    assert(np.max(np.abs(sum_ - sum_1)) == 0)
+    fortran.scatter_f.profile_stats_indexed(
+        pattern, indices, weights, sum_, sum2, w_sum
+    )
+    assert np.max(np.abs(sum_ - sum_1)) == 0
 
 
 def test_03():
@@ -50,9 +54,13 @@ def test_03():
     conv = np.empty_like(dat)
     n = 1
     fortran.peaks_f.boxconv(dat.T, conv.T, n, shape[0], shape[1])
-    ans = np.array([[4., 6., 6., 6., 4.],
-                    [6., 9., 9., 9., 6.],
-                    [6., 9., 9., 9., 6.],
-                    [6., 9., 9., 9., 6.],
-                    [4., 6., 6., 6., 4.]])
-    assert(np.sum(np.abs(ans-conv)) == 0)
+    ans = np.array(
+        [
+            [4.0, 6.0, 6.0, 6.0, 4.0],
+            [6.0, 9.0, 9.0, 9.0, 6.0],
+            [6.0, 9.0, 9.0, 9.0, 6.0],
+            [6.0, 9.0, 9.0, 9.0, 6.0],
+            [4.0, 6.0, 6.0, 6.0, 4.0],
+        ]
+    )
+    assert np.sum(np.abs(ans - conv)) == 0
