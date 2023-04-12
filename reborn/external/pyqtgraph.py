@@ -30,15 +30,14 @@ images = []
 
 def image(*args, **kargs):
     """
-    Create and return an :class:`ImageWindow <pyqtgraph.ImageWindow>`
-    (this is just a window with :class:`ImageView <pyqtgraph.ImageView>` widget inside), show image data inside.
-    Will show 2D or 3D image data.
-    Accepts a *title* argument to set the title of the window.
-    All other arguments are used to show data. (see :func:`ImageView.setImage() <pyqtgraph.ImageView.setImage>`)
+    Create and return an :class:`ImageWindow <pyqtgraph.ImageWindow>` class instance (this is just a window with an
+    :class:`ImageView <pyqtgraph.ImageView>` widget inside) and show image data.  Will show 2D or 3D image data.
+    Accepts a title argument to set the title of the window.  All other arguments are used to show data. (see
+    :func:`ImageView.setImage() <pyqtgraph.ImageView.setImage>`)
 
     Note:
         This is a direct copy of the equivalent (undocumented?) function in |pyqtgraph|, except that it adds the
-        *view* argument so that you can easily put your image in a plot axis.
+        view argument so that you can easily put your image in a plot axis.
     """
     pg.mkQApp()
     w = ImageWindow(*args, **kargs)
@@ -47,10 +46,12 @@ def image(*args, **kargs):
     return w
 
 
+
+
 def imview(image, *args, hold=False, **kwargs):
     r""" Makes an ImageView widget but adds some functionality that I commonly need.  A PlotItem is used as the
     view so that there are axes, and by default the aspect ratio is unlocked so that the image is stretched to fill
-    the view.  The default colormap is set to 'flame'. The hold option keeps the window open, so that your script
+    the view.  The default colormap is set to "flame". The hold option keeps the window open, so that your script
     will not exit and close your window a few milliseconds after opening it.  A Qt application is created if need be,
     which avoids a common runtime error. """
     app = pg.mkQApp()

@@ -11,6 +11,7 @@ fi
 cd ../doc || exit
 home=$(pwd)
 cd latex/dipole || exit
+echo '================= LaTeX =================='
 make all
 cd "$home" || exit
 PYTHONPATH=$(pwd)/source:$PYTHONPATH
@@ -18,6 +19,7 @@ export PYTHONPATH  # Needed for qtgallery
 pwd
 [ -d source/api ] && rm -r source/api
 #[ -d source/auto_examples ] && rm -r source/auto_examples
+echo '================= sphinx-apidoc =================='
 sphinx-apidoc --maxdepth 10 --output-dir source/api ../reborn \
  ../reborn/math ../reborn/data ../reborn/fortran ../reborn/simulate/atoms.py ../reborn/simulate/numbacore.py
 # FIXME: How do we properly change the title of the auto-generated API page?  Below we do it brute-force...
@@ -26,7 +28,9 @@ echo 'Package API' > source/api/modules.rst
 echo '===========' >> source/api/modules.rst
 cat tmp.rst >> source/api/modules.rst
 rm tmp.rst &> /dev/null
+echo '=================== doctest ======================='
 make doctest
+echo '=================== html ======================='
 make html
 cp -r source/files build/html
 sed -i.bak '/>*Submodules</d' build/html/api/modules.html
