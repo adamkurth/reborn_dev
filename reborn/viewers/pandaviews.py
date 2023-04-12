@@ -99,7 +99,7 @@ class DataFrameModel(QtCore.QAbstractTableModel):
             print("NEW DYNAMIC FILTER MODEL")
             self._pre_dyn_filter_df = self.df.copy()
         else:
-            # Already dynamically filtering, so don't override that
+            # Already dynamically filtering.  Do not override.
             print("SAME DYNAMIC FILTER MODEL")
             pass
 
@@ -199,10 +199,8 @@ class DataFrameModel(QtCore.QAbstractTableModel):
         self._resort = partial(self.sort, col_ix, order)
 
     def filter(self, col_ix, needle):
-        """Filter DataFrame view.  Case Insenstive.
-        Fitlers the DataFrame view to include only rows whos value in col
-        contains the needle. EX: a needle of "Ab" will show rows with
-        "absolute" and "REABSOLVE".
+        """Filter DataFrame view.  Case Insenstive.  Filters the DataFrame view to include only rows whos value in col
+        contains the needle. Example: a needle of "Ab" will show rows with "absolute" and "REABSOLVE".
 
         Args:
             col_ix (int)
@@ -620,7 +618,7 @@ class DataFrameItemDelegate(qwgt.QStyledItemDelegate):
     def paint(self, painter, option, index):
         d = index.data(DataFrameModel.RawDataRole)
         if isinstance(d, WidgetedCell):
-            # Don't paint, create editor instead
+            # Do not paint.  Create editor instead.
             return None
         else:
             return super(DataFrameItemDelegate, self).paint(painter, option, index)
@@ -823,8 +821,7 @@ class DataFrameWidget(qwgt.QTableView):
 
     @df.setter
     def df(self, dataFrame):
-        # Use the "hard setting" of the dataframe because anyone who's interacting with the
-        #  DataFrameWidget (ie, end user) would be setting this
+        # Use the hard setting of the dataframe because anyone interacting with DataFrameWidget would be setting this
         self._data_model.set_dataframe(dataFrame)
 
     def keyPressEvent(self, event):
@@ -946,17 +943,3 @@ def view_pandas_dataframe(df):
     app = DataFrameApp(None, df)
     app.show()
     _app.exec_()
-
-
-# if __name__ == '__main__':
-#     # Create a quick example
-#     _app = qwgt.QApplication(sys.argv)
-#     from analysis.compile_metadata import get_pandas_dataframe
-#     from analysis.lib.dfwidget import DataFrameApp
-#
-#     df = get_pandas_dataframe()
-#     #df = pandas.DataFrame(df) #, columns=['AAA','BBB','CCC','DDD','EEE','FFF','GGG','HHH','III'])
-#
-#     app = DataFrameApp(df)
-#     app.show()
-#     _app.exec_()

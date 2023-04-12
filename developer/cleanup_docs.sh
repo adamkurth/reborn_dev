@@ -13,5 +13,5 @@ latexdir=$docdir/latex
 cd $latexdir/dipole
 make clean
 cd $latexdir/blocks
-make clean
+
 echo done
