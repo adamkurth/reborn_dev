@@ -12,6 +12,7 @@ import pandas
 pdb = '1LYZ'
 # geom = detector.cspad_pad_geometry_list(detector_distance=0.1)
 geom = detector.rayonix_mx340_xfel_pad_geometry_list(detector_distance=0.1)
+geom = detector.epix100_pad_geometry_list(detector_distance=0.01)
 # print(geom)
 # geom = crystfel.geometry_file_to_pad_geometry_list('../lcls/cxix53120/calib/jungfrau.geom')
 # geom.translate([0, 0, 0.1])
@@ -45,10 +46,10 @@ class MyFrameGetter(FrameGetter):
             self.df = df
         df = self.df
         df.set_raw_data(np.random.poisson(np.double(self.I) * (1 + 0.5 * np.random.rand())))
-        if frame_number > 3:
-            m = df.get_pad_geometry()[0].ones()
-            m[0:500, 0:500] = 0
-            df.set_mask(m)
+        # if frame_number > 3:
+        #     m = df.get_pad_geometry()[0].ones()
+        #     m[0:500, 0:500] = 0
+        #     df.set_mask(m)
         # df.set_dataset_id(pdb)
         return df
 def processor(dat):
@@ -63,13 +64,14 @@ frame_getter = MyFrameGetter()
 # frame_getter.pandas_dataframe = pandas.DataFrame({'1': np.arange(1000)*2, '2': np.sin(np.arange(
 #     1000)/100)})
 # frame_getter.view(debug_level=1)
-pv = PADView(frame_getter=frame_getter, debug_level=2) #, dataframe_preprocessor=processor)
+pv = PADView(frame_getter=frame_getter, debug_level=1) #, dataframe_preprocessor=processor)
 # pv.edit_ring_radii()
 # pv = PADView(data=frame_getter.get_first_frame().get_raw_data_list(), debug_level=2)
 # pv = PADView(data={'pad_data': frame_getter.get_first_frame().get_raw_data_list()}, debug_level=2)
 # pv.save_screenshot('/home/rkirian/Downloads/test.jpg')
 # pv.run_plugin('view_pandas_table')
-pv.run_plugin('snr_mask')
+# pv.run_plugin('snr_mask')
+pv.run_plugin('widgets/display_editor')
 # pv.run_plugin('shift_detector')
 # pv.run_plugin('levels')
 # pv.add_rings(q_mags=3.567e10)

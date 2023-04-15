@@ -14,7 +14,6 @@
 # along with reborn.  If not, see <https://www.gnu.org/licenses/>.
 
 from time import time
-from reborn.viewers.qtviews.padviews import get_caller
 from pyqtgraph.Qt import QtCore
 import pyqtgraph.Qt.QtWidgets as qwgt
 from reborn.analysis.masking import snr_mask
@@ -80,7 +79,6 @@ class Widget(qwgt.QWidget):
         self.setLayout(self.layout)
 
     def apply_snr_filter(self):
-        self.padview.debug(get_caller(), 1)
         dataframe = self.padview.dataframe
         geom = dataframe.get_pad_geometry()
         beam = dataframe.get_beam()

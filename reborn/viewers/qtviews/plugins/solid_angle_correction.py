@@ -18,7 +18,7 @@ from reborn import detector
 
 def plugin(self):
     r""" Plugin for PADView. """
-    data = detector.concat_pad_data(self.get_pad_display_data())
+    data = detector.concat_pad_data(self.get_pad_display_data()).astype(float)
     sang = detector.concat_pad_data([p.solid_angles() for p in self.dataframe.get_pad_geometry()])  # These are solid angles
     data /= sang*1e6  # FIXME: Why is this factor needed?  Why doesn't pyqtgraph display the data correctly without it?
-    self.set_pad_display_data(data, auto_levels=True, update_display=True)
+    self.set_pad_display_data(data, percentiles=(2, 98), update_display=True)

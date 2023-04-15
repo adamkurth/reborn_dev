@@ -25,9 +25,7 @@ import reborn
 concat = reborn.detector.concat_pad_data
 
 class Plugin():
-
     widget = None
-
     def __init__(self, padview):
         self.widget = Widget(padview)
         m = max(self.widget.get_levels())
@@ -111,7 +109,7 @@ class Widget(qwgt.QWidget):
         # self.debug(get_caller(), 1)
         self.histogram.gradient.loadPreset(preset)
         self.histogram.setImageItems(self.images)
-        pg.qwgt.QApplication.processEvents()
+        qwgt.QApplication.processEvents()
 
     def set_levels_by_percentiles(self, percents=(1, 99), colormap=None):
         r""" Set upper and lower levels according to percentiles.  This is based on :func:`numpy.percentile`. """
@@ -125,7 +123,7 @@ class Widget(qwgt.QWidget):
         r""" Get the minimum and maximum levels of the current image display. """
         return self.histogram.item.getLevels()
 
-    def set_levels(self, min_value=None, max_value=None, levels=None, percentiles=None, colormap=None):
+    def set_levels(self, levels=None, percentiles=None, colormap=None):
         r""" Set the minimum and maximum levels, same as sliding the yellow sliders on the histogram tool. """
         # self.debug(get_caller(), 1)
         if colormap is not None:
@@ -134,7 +132,7 @@ class Widget(qwgt.QWidget):
             min_value = levels[0]
             max_value = levels[1]
         if (min_value is None) or (max_value is None):
-            self.set_levels_by_percentiles(percents=percentiles)
+            self.set_levels(percentiles=percentiles)
         else:
             self.histogram.item.setLevels(float(min_value), float(max_value))
 
