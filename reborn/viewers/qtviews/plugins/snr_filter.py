@@ -14,7 +14,6 @@
 # along with reborn.  If not, see <https://www.gnu.org/licenses/>.
 
 from time import time
-from reborn.viewers.qtviews.padviews import get_caller
 from pyqtgraph.Qt import QtCore
 import pyqtgraph.Qt.QtWidgets as qwgt
 from reborn.analysis.peaks import boxsnr
@@ -75,7 +74,7 @@ class Widget(qwgt.QWidget):
         self.setLayout(self.layout)
 
     def apply_snr_filter(self):
-        self.padview.debug(get_caller(), 1)
+        self.padview.debug("apply_snr_filter", 1)
         dataframe = self.padview.dataframe
         inner = self.inner_spinbox.value()
         center = self.center_spinbox.value()
@@ -100,5 +99,5 @@ class Widget(qwgt.QWidget):
         self.padview.dataframe = dataframe
         self.padview.update_display()
         if self.update_colorbar_button.isChecked():
-            self.padview.set_levels(0, 10)
+            self.padview.set_levels(levels=(0, 10))
         self.padview.debug('%g seconds' % (time()-t,))

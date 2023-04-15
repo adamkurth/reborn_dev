@@ -112,7 +112,7 @@ class Widget(qwgt.QWidget):
     def toggle_play(self):
         if self.play.text() == "Play":
             self.play.setText("Pause")
-            self.play_timer.start(1000/float(self.rate.text()))
+            self.play_timer.start(int(1000/float(self.rate.text())))
             print("Play")
         elif self.play.text() == "Pause":
             self.play.setText("Play")

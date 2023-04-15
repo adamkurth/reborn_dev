@@ -105,11 +105,13 @@ class PADView(QtCore.QObject):
     show_true_fast_scans = False
     apply_filters = True
     plugins = None
-    auto_percentiles = None
     _fixed_title = False
     _dataframe_preprocessor = None
-    fixed_levels = None
-    hold_levels = True
+    default_levels = [None, None]
+    default_percentiles = [2, 98]
+    mirror_levels = False
+    levels_ignore_masked = True
+    previous_levels = [0, 1]  # Levels just before PADs are updated
     _is_updating_display_data = False
     _tic_times = []
 
@@ -167,7 +169,7 @@ class PADView(QtCore.QObject):
         if len(logger.handlers) > 0:
             return
         logger.propagate = False
-        level = logging.INFO
+        level = logging.DEBUG
         logger.setLevel(level)
         formatter = " - ".join(["%(asctime)s", "%(levelname)s", "%(name)s", "%(message)s"])
         formatter = logging.Formatter(formatter)
@@ -176,7 +178,7 @@ class PADView(QtCore.QObject):
         console_handler.setLevel(level=level)
         logger.addHandler(console_handler)
 
-    def debug(self, msg, level=1):
+    def debug(self, msg="", level=1):
         r"""
         Print debug messages according to the self.debug variable.
 
@@ -334,11 +336,13 @@ class PADView(QtCore.QObject):
         add_menu(analysis_menu, 'Scattering profile...', connect=lambda: self.run_plugin('scattering_profile'))
         plugin_menu = self.menubar.addMenu('Plugins')
         self.plugin_names = []
-        for plg in sorted(glob.glob(os.path.join(plugin_path, '*.py'))):
-            plugin_name = os.path.basename(plg).replace('.py', '')
+        for plg in sorted(glob.glob(plugin_path+'/**/*.py', recursive=True)):
+            plugin_name = plg.replace(plugin_path, '')[1:]  #os.path.basename(plg).replace('.py', '')
+            if '__init__' in plugin_name:
+                continue
             self.plugin_names.append(plugin_name)
             self.debug('\tSetup plugin ' + plugin_name)
-            add_menu(plugin_menu, plugin_name.replace('_', ' '),
+            add_menu(plugin_menu, plugin_name, #.replace('_', ' '),
                      connect=functools.partial(self.run_plugin, plugin_name))
 
     def set_shortcut(self, shortcut, func):
@@ -404,26 +408,73 @@ class PADView(QtCore.QObject):
         r""" Get the minimum and maximum levels of the current image display. """
         return self.histogram.item.getLevels()
 
-    def set_levels(self, min_value=None, max_value=None, levels=None, percentiles=None, colormap=None):
-        r""" Set the minimum and maximum levels, same as sliding the yellow sliders on the histogram tool. """
+    def set_levels(self, levels=(None, None), percentiles=(None, None), colormap=None):
+        r"""
+        This method handles setting levels (i.e. mapping the upper and lower bounds of detector pixel values to the
+        span of the color table).
+
+        If no arguments are provided, the default settings are used.
+
+        Level setting is a somewhat complicated matter.  For both the upper and lower bounds, there are 5 ways that
+        we presently set the levels of the display data.  In order of priority, highest first:
+
+          1) Set the level to the particular value specified in the levels keyword argument of this method.
+          2) Set the level to the value corresponding to the Nth percentile of the current display data,
+             using the percentiles keyword argument.
+          3) Set the level to the particular value specified in the "default_levels" attribute of this class instance.
+          4) Set the level to the percentile specified in the "default_percentiles" attribute of this class instance.
+          5) Do nothing; leave the level unchanged.
+
+        An additional option is to mirror the levels: i.e. set the levels to range from [-x, +x].  This is controlled
+        via the "mirror_levels" attribute.
+
+        When determining levels from percentiles, it is possible to ignore masked pixels.  This is controlled by the
+        attribute "levels_ignore_masked".
+
+        Arguments:
+            levels (tuple of floats): Fixed-value levels.  Default is (None, None).
+            percentiles (tuple of floats): Percentiles for determining levels.  Values should be 0-100.  Default is
+                                           (None, None)
+            colormap:  For convenience, you may also specify a new colormap.  This is passed to "set_colormap".
+        """
         self.debug("set_levels")
-        if levels is not None:
-            min_value = levels[0]
-            max_value = levels[1]
-        if (min_value is None) or (max_value is None):
-            self.set_levels_by_percentiles(percents=percentiles)
-        else:
-            self.histogram.item.setLevels(min_value, max_value)
+        data = self.get_pad_display_data(as_list=False)
+        if data is None:
+            return
+        if self.levels_ignore_masked:
+            mask = self.dataframe.get_mask_flat()
+            data = data[np.where(mask)]
+        new_levels = [None, None]
+        for i in range(2):
+            # Top priority: requested fixed level
+            v = levels[i]
+            self.debug(f"fixed level = {v}")
+            # Second priority: requested percentile
+            if v is None and percentiles[i] is not None:
+                v = np.percentile(data, percentiles[i])
+                self.debug(f"percentile = {percentiles[i]}")
+            # Third priority: default fixed level
+            if v is None:
+                v = self.default_levels[i]
+                self.debug(f"default fixed level = {v}")
+            # Fourth priority: default percentile
+            if v is None and self.default_percentiles[i] is not None:
+                    v = np.percentile(data, self.default_percentiles[i])
+                    self.debug(f"default percentile level = {self.default_percentiles[i]}")
+            # Fifth priority: do not change the level.  Keep the current levels.
+            if v is None:
+                v = self.previous_levels[i]
+                self.debug(f"previous level = {v}")
+            new_levels[i] = v
+        # Special override: Mirror levels if requested.  I.e. set the range to span [-abs(max), +abs(max)]
+        if self.mirror_levels:
+            self.debug(f"mirror levels")
+            a = np.max(np.abs(np.array(new_levels)))
+            new_levels[0] = -a
+            new_levels[1] = a
+        self.histogram.item.setLevels(new_levels[0], new_levels[1])
         if colormap is not None:
             self.set_colormap(colormap)
-
-    def set_levels_by_percentiles(self, percents=(1, 99), colormap=None):
-        r""" Set upper and lower levels according to percentiles.  This is based on :func:`numpy.percentile`. """
-        self.debug("set_levels_by_percentiles")
-        d = detector.concat_pad_data(self.get_pad_display_data())
-        lower = np.percentile(d, percents[0])
-        upper = np.percentile(d, percents[1])
-        self.set_levels(lower, upper, colormap=colormap)
 
     def add_rectangle_roi(self, pos=(0, 0), size=None):
         r""" Adds a |pyqtgraph| RectROI """
@@ -768,24 +819,17 @@ class PADView(QtCore.QObject):
         self.dataframe.set_mask(None)
         self.update_masks()
 
-    def get_pad_display_data(self):
+    def get_pad_display_data(self, as_list=True):
         self.debug("get_pad_display_data", level=3)
         if self.dataframe is not None:
-            return self.dataframe.get_processed_data_list()
+            if as_list:
+                return self.dataframe.get_processed_data_list()
+            return self.dataframe.get_processed_data_flat()
 
-    def set_pad_display_data(self, data, auto_levels=False, update_display=True, levels=None, percentiles=None,
+    def set_pad_display_data(self, data, update_display=True, levels=(None, None), percentiles=(None, None),
                              colormap=None):
         self.debug("set_pad_display_data")
         self.dataframe.set_processed_data(data)
-        if percentiles is not None:
-            self.auto_percentiles = percentiles
-        if auto_levels:
-            if self.auto_percentiles is None:
-                self.auto_percentiles = (2, 98)
-        if levels:
-            self.fixed_levels = levels
-        if colormap:
-            self.set_colormap(colormap)
         if update_display:
             self.update_pads()
         if (levels is not None) or (percentiles is not None):
@@ -818,15 +862,14 @@ class PADView(QtCore.QObject):
         self.update_pads()
         # self.update_masks()
         self.setup_histogram_tool()
-        self.set_levels_by_percentiles()
+        self.set_levels(percentiles=(2, 98))
 
     def update_pads(self):
         r""" Update only the PAD data that is displayed, including colormap.  Usually you should run update_display
         instead of this. """
         self.debug("update_pads")
         self.tic('Updating PAD displays.')
-        if self.hold_levels:
-            levels = self.get_levels()
+        levels = self.get_levels()
         data = self.get_pad_display_data()
         if data is None:
             self.debug('get_pad_display_data returned None!')
@@ -835,15 +878,16 @@ class PADView(QtCore.QObject):
             self.setup_image_items()
         for (i, d) in enumerate(data):
             self.pad_image_items[i].setImage(np.nan_to_num(d))
-        if self.auto_percentiles is not None:
-            self.debug('auto_percentiles')
-            self.set_levels_by_percentiles(percents=self.auto_percentiles)
-        if self.fixed_levels is not None:
-            self.debug('fixed_levels')
-            self.set_levels(self.fixed_levels[0], self.fixed_levels[1])
-        if self.hold_levels:
-            self.debug('hold_levels')
-            self.set_levels(levels[0], levels[1])
+        self.set_levels()
+        # if self.auto_percentiles is not None:
+        #     self.debug('auto_percentiles')
+        #     self.set_levels(percentiles=self.auto_percentiles)
+        # if self.fixed_levels is not None:
+        #     self.debug('fixed_levels')
+        #     self.set_levels(self.fixed_levels[0], self.fixed_levels[1])
+        # if self.hold_levels:
+        #     self.debug('hold_levels')
+        #     self.set_levels(levels[0], levels[1])
         self.tic('Updating histogram')
         self.histogram.regionChanged()
         self.toc()
@@ -1328,6 +1372,7 @@ class PADView(QtCore.QObject):
         module_path = __package__+'.plugins.'+module_name
         if module_path[-3:] == '.py':
             module_path = module_path[:-3]
+        module_path = module_path.replace('/', '.')
         self.debug('\tImporting plugin: %s' % module_path)
         module = importlib.import_module(module_path)  # Attempt to import
         if self.plugins is None: self.plugins = {}
@@ -1363,7 +1408,7 @@ class PADView(QtCore.QObject):
                 self.debug('\tShowing widget.')
             if hasattr(plugin_instance, 'action'):
                 self.plugins[module_name + '.action'] = plugin_instance.action  # Get the widget and cache it.
-                self.debug('\tConfigureing action method.')
+                self.debug('\tConfiguring action method.')
             return
         self.debug('\tPlugin module has no functions or classes defined.')
         return
