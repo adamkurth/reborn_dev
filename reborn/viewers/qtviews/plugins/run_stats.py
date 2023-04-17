@@ -94,22 +94,33 @@ class Widget(qwgt.QWidget):
         start = int(self.start_frame_spinbox.value())
         stop = int(self.stop_frame_spinbox.value())
         step = int(self.step_frame_spinbox.value())
-        config = dict(log_file=tmp+'/runstats.log',
-                      checkpoint_interval=250,
-                      checkpoint_file=tmp+'/runstats/',
-                      message_prefix="PADView:runstats")
+        config = dict()
+        # config = dict(log_file=tmp+'/runstats/logs/',
+        #               checkpoint_interval=250,
+        #               checkpoint_file=tmp+'/runstats/checkpoints/',
+        #               message_prefix="PADView:runstats")
         self.start_button.setEnabled(False)
         self.show_button.setEnabled(False)
         self.stop_button.setEnabled(True)
         self.worker = Worker(self, framegetter=self.padview.frame_getter, start=start, stop=stop, step=step,
                              n_processes=n_processes, config=config)
         self.worker.start()
+        # while self.worker.processing:
+        #     QtCore.QThread.sleep(1)
+        # self.start_button.setEnabled(True)
+        # self.show_button.setEnabled(True)
+        # self.stop_button.setEnabled(False)
+        # self.timer = QtCore.QTimer(100)
+        # self.timer.timeout.connect(self.padstats_completed)
+        print('Started worker')
         # self.stats = padstats(framegetter=self.padview.frame_getter, start=start, stop=stop, step=step,
         #                      n_processes=n_processes, config=config)
+
+    def padstats_completed(self):
         self.start_button.setEnabled(True)
         self.show_button.setEnabled(True)
         self.stop_button.setEnabled(False)
-        print('Worker done')
+        print('Worker is done')
 
     def show_padstats(self):
         self.padview.debug('show_padstats')
@@ -141,12 +152,13 @@ class Worker(QtCore.QThread):
         # self.parent.show_button.setEnabled(False)
         # self.parent.stop_button.setEnabled(True)
         self.parent.stats = padstats(*self.args, **self.kwargs)
+        self.parent.padstats_completed()
         # self.parent.start_button.setEnabled(True)
         # self.parent.show_button.setEnabled(True)
         # self.parent.stop_button.setEnabled(False)
         print('DEBUG:pad_stats:Worker: Thread is done')
         self.quit()
-        print('quit')
+        # print('terminated')
         # self.parent.sig_worker_done.emit()
         # self.parent.show_padstats()
         # self.quit()
