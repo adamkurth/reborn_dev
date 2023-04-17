@@ -16,9 +16,9 @@ config["pad_detectors"] = [
     {
         "pad_id": "epix10k2M",
         #'motions': [0, 0, 2],
-        "motions": {"epics_pv": "detector_z"},
-        "geometry": None,
-        "mask": None,
+        "motions": {"epics_pv": "detector_z", 'vector':[0, 0, 1e-3]},
+        "geometry": "calib/p183_v23-gkk.geom",
+        "mask": ["calib/edges.mask"],
     }
 ]
 
