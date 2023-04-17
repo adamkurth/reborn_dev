@@ -30,4 +30,4 @@ class Plugin():
         data = self.profiler.subtract_profile(padview.get_pad_display_data(),
                                               mask=padview.dataframe.get_mask_list(), statistic='mean')
         padview.debug('Done (%g seconds)' % (time()-t), 1)
-        padview.set_pad_display_data(data, auto_levels=True, update_display=True)
+        padview.set_pad_display_data(data, update_display=True)

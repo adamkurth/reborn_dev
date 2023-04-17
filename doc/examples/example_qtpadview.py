@@ -85,7 +85,7 @@ del pv
 #         beam = padview.dataframe.get_beam()
 #         geom = padview.dataframe.get_pad_geometry()
 #         data /= geom.polarization_factors(beam=beam)
-#         padview.set_pad_display_data(data, auto_levels=True, update_display=True)
+#         padview.set_pad_display_data(data, update_display=True)
 
 # %%
 # A more advanced plugin can also offer a separate Qt widget.  This is the case for the masking utility in PADView:
