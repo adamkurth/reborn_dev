@@ -191,7 +191,7 @@ class PADView(QtCore.QObject):
                 3: extremely verbose
         Returns: None
         """
-        if level >= self.debug_level:
+        if level <= self.debug_level:
             self.logger.debug(msg)
 
     @property

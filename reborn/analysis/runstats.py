@@ -448,25 +448,32 @@ def padstats_framegetter(stats):
             d.set_beam(beam)
         d.set_mask(mask)
         d.set_raw_data(b)
+        d.set_dataset_id("PADSTATS")
         dfs.append(d)
     return ListFrameGetter(dfs)
 
 
-def view_padstats(stats, histogram=False):
+def view_padstats(stats, histogram=False, start=True, main=True):
     r""" View the output of padstats.
 
     Arguments:
         stats (dict): Output dictionary from padstats.
+        histogram (bool): Show the histogram
+        start (bool): Choose if the PADView app should be started (executed)
+        main (bool): Choose if the window should be a Qt main window.
     """
     if histogram:
-        view_histogram(stats)
+        view_histogram(stats, start=start, main=main)
     else:
         fg = padstats_framegetter(stats)
-        pv = PADView(frame_getter=fg, percentiles=(1, 99))
-        pv.start()
+        pv = PADView(frame_getter=fg, start=start, main=main)
+        pv.show()
+        if start:
+            pv.start()
+    return pv
 
 
-def view_histogram(stats):
+def view_histogram(stats, start=True, main=True):
     r""" View the output of padstats with histogram enabled. """
     geom = stats['pad_geometry']
     mn = stats['histogram_params']['bin_min']
@@ -497,7 +504,7 @@ def view_histogram(stats):
     flat_indices = np.arange(0, geom.n_pixels)
     flat_indices = stats['pad_geometry'].split_data(flat_indices)
     fg = padstats_framegetter(stats)
-    pv = PADView(frame_getter=fg, percentiles=(1, 99))
+    pv = PADView(frame_getter=fg, main=main)
 
     def set_line_index(evt):
         if evt is None:
@@ -513,7 +520,10 @@ def view_histogram(stats):
         pass
     line.sigPositionChanged.connect(update_histplot)
     pv.proxy2 = pg.SignalProxy(pv.viewbox.scene().sigMouseMoved, rateLimit=30, slot=set_line_index)
-    pv.start()
+    pv.show()
+    if start:
+        pv.start()
+    return pv
 
 
 # This is too slow.
