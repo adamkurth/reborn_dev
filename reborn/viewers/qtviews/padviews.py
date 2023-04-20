@@ -879,15 +879,6 @@ class PADView(QtCore.QObject):
         for (i, d) in enumerate(data):
             self.pad_image_items[i].setImage(np.nan_to_num(d))
         self.set_levels()
-        # if self.auto_percentiles is not None:
-        #     self.debug('auto_percentiles')
-        #     self.set_levels(percentiles=self.auto_percentiles)
-        # if self.fixed_levels is not None:
-        #     self.debug('fixed_levels')
-        #     self.set_levels(self.fixed_levels[0], self.fixed_levels[1])
-        # if self.hold_levels:
-        #     self.debug('hold_levels')
-        #     self.set_levels(levels[0], levels[1])
         self.tic('Updating histogram')
         self.histogram.regionChanged()
         self.toc()
