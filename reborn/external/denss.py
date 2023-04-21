@@ -27,31 +27,28 @@ def create_density_map(
     )
     dmap = crystal.CrystalDensityMap(cryst, map_resolution, map_oversampling)
     pdb = saxstats.PDB(pdb_file)
-
     n = pdb.natoms
     s = int(cryst.molecule.n_atoms/n)
+    assert(cryst.molecule.n_atoms/n % 1 == 0)
     if s > 1:
-        pdb.atomnum = np.concatentate([pdb.atomnum]*s)
-        pdb.atomname = np.concatentate([pdb.atomname]*s)
-        pdb.atomalt = np.concatentate([pdb.atomalt]*s)
-        pdb.resname = np.concatentate([pdb.resname]*s)
-        pdb.resnum = np.concatentate([pdb.resnum]*s)
-        pdb.chain = np.concatentate([pdb.chain]*s)
-        pdb.coords = np.concatentate([pdb.coords]*s)
-        pdb.occupancy = np.concatentate([pdb.occupancy]*s)
-        pdb.b = np.concatentate([pdb.b]*s)
-        pdb.atomtype = np.concatentate([pdb.atomtype]*s)
-        pdb.charge = np.concatentate([pdb.charge]*s)
-        pdb.nelectrons = np.concatentate([pdb.nelectrons]*s)
-        pdb.radius = np.concatentate([pdb.radius]*s)
-        pdb.vdW = np.concatentate([pdb.vdW]*s)
-        pdb.unique_volume = np.concatentate([pdb.unique_volume]*s)
-        pdb.unique_radius = np.concatentate([pdb.unique_radius]*s)
-        #set a variable with H radius to be used for exvol radii optimization
-        #set a variable for number of hydrogens bonded to atoms
-        # pdb.exvolHradius = radius['H']
-        pdb.numH = np.concatentate([pdb.numH]*s)
-
+        pdb.natoms = cryst.molecule.n_atoms
+        pdb.atomnum = np.concatenate([pdb.atomnum]*s)
+        pdb.atomname = np.concatenate([pdb.atomname]*s)
+        pdb.atomalt = np.concatenate([pdb.atomalt]*s)
+        pdb.resname = np.concatenate([pdb.resname]*s)
+        pdb.resnum = np.concatenate([pdb.resnum]*s)
+        pdb.chain = np.concatenate([pdb.chain]*s)  # FIXME: Unique names needed here?
+        pdb.coords = cryst.molecule.coordinates*1e10
+        pdb.occupancy = np.concatenate([pdb.occupancy]*s)
+        pdb.b = np.concatenate([pdb.b]*s)
+        pdb.atomtype = np.concatenate([pdb.atomtype]*s)
+        pdb.charge = np.concatenate([pdb.charge]*s)
+        pdb.nelectrons = np.concatenate([pdb.nelectrons]*s)
+        pdb.radius = np.zeros(n*s) #np.concatenate([pdb.radius]*s)
+        pdb.vdW = np.concatenate([pdb.vdW]*s)
+        pdb.unique_volume = np.zeros(n*s) #np.concatenate([pdb.unique_volume]*s)
+        pdb.unique_radius = np.zeros(n*s) #np.concatenate([pdb.unique_radius]*s)
+        pdb.numH = np.concatenate([pdb.numH]*s)
     voxel = cell / dmap.cshape[0]
     side = dmap.shape[0] * voxel
     pdb2mrc = saxstats.PDB2MRC(pdb=pdb, voxel=voxel * 1e10, side=side * 1e10)
@@ -63,10 +60,9 @@ def create_density_map(
     pdb2mrc.calculate_hydration_shell()
     pdb2mrc.calc_rho_with_modified_params(pdb2mrc.params)
     if solvent_contrast:
+        print("solvent")
         rho = pdb2mrc.rho_insolvent
     else:
         rho = pdb2mrc.rho_invacuo
-    # rho = ifftshift(rho)
     side = pdb2mrc.side
-    rho = np.fft.ifftshift(rho.real)
-    return rho, side
+    return rho, side*1e-10

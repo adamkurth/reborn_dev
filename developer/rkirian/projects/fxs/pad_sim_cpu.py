@@ -40,9 +40,9 @@ conf = dict(
     # correct_sa = 0,  # Correct for solid angles (helpful for viewing multiple detectors with different pixel sizes)
     # atomistic = 0  # Do the all-atom protein simulation
     gas_background=0,  # Include gas background
-    solvent_contrast=0,  # Include solvent contrast (water)
+    solvent_contrast=1,  # Include solvent contrast (water)
     bulk_water=0,  # Include bulk water background
-    use_cached_files=1,  # Cache files for speed
+    use_cached_files=0,  # Cache files for speed
     pad_geometry_file=[
         "epix100_geometry.json",
         "jungfrau4m_geometry.json",
@@ -55,10 +55,10 @@ conf = dict(
     drop_radius=100e-9 / 2,  # Average droplet radius
     drop_radius_fwhm=0,  # FWHM of droplet radius distribution (tophat distribution at present)
     beam_diameter=110e-9,  # FWHM of x-ray beam (tophat profile at present)
-    map_resolution=2e-10,  # Minimum resolution for 3D density map.
+    map_resolution=4e-10,  # Minimum resolution for 3D density map.
     map_oversample=4,  # Oversampling factor for 3D density map.
-    pdb_file="LargeCluster2nm.pdb",  # '1jb0' '1SS8' '3IYF' '1PCQ' '2LYZ' 'BDNA25_sp.pdb'
-    particle_name="2nm Soot",  # Naming for plots
+    pdb_file="1jb0", #"LargeCluster2nm.pdb",  # '1jb0' '1SS8' '3IYF' '1PCQ' '2LYZ' 'BDNA25_sp.pdb'
+    particle_name="PSI Trimer",  # Naming for plots
     protein_concentration=20,  # Protein concentration in mg/ml = kg/m^3
     # Parameters for gas background calculation.  Give the full path through which x-rays interact with the gas.
     gas_params={
@@ -68,7 +68,7 @@ conf = dict(
         "n_simulation_steps": 5,
         "temperature": 293,
     },
-    random_seed=None,  # 2022  # Seed for random number generator (choose None to make it random)
+    random_seed=2022,  # Seed for random number generator (choose None to make it random)
     fxs_ring_resolution=8e-10,  # Autocorrelation ring resolution
     fxs_ring_oversampling=2,
     fxs_n_shots=100000,
@@ -161,32 +161,32 @@ if view_density_projections:
 ##################################################################
 # Improved density map via DENSS
 #################################################################
-mrc_file = f"{conf['pdb_file']}_{conf['solvent_contrast']}_{conf['map_resolution']*1e10}_{conf['map_oversample']}.mrc"
-if not os.path.exists(mrc_file):
-    pdb = saxstats.PDBmod(conf["pdb_file"], bio_assembly=1)
-    voxel = cell / dmap.cshape[0]
-    side = dmap.shape[0] * voxel
-    pdb2mrc = saxstats.PDB2MRC(pdb=pdb, voxel=voxel * 1e10, side=side * 1e10)
-    pdb2mrc.scale_radii()
-    pdb2mrc.make_grids()
-    pdb2mrc.calculate_resolution()
-    pdb2mrc.calculate_invacuo_density()
-    pdb2mrc.calculate_excluded_volume()
-    pdb2mrc.calculate_hydration_shell()
-    pdb2mrc.calc_rho_with_modified_params(pdb2mrc.params)
-    if conf["solvent_contrast"]:
-        rho = pdb2mrc.rho_insolvent
-    else:
-        rho = pdb2mrc.rho_invacuo
-    # rho = ifftshift(rho)
-    side = pdb2mrc.side
-    if conf["use_cached_files"]:
-        print("Writing", mrc_file)
-        saxstats.write_mrc(rho, side, mrc_file)
-else:
-    print("Loading", mrc_file)
-    rho, side = saxstats.read_mrc(mrc_file)
-rho = ifftshift(rho.real)
+# mrc_file = f"{conf['pdb_file']}_{conf['solvent_contrast']}_{conf['map_resolution']*1e10}_{conf['map_oversample']}.mrc"
+# if not os.path.exists(mrc_file):
+#     pdb = saxstats.PDBmod(conf["pdb_file"], bio_assembly=1)
+#     voxel = cell / dmap.cshape[0]
+#     side = dmap.shape[0] * voxel
+#     pdb2mrc = saxstats.PDB2MRC(pdb=pdb, voxel=voxel * 1e10, side=side * 1e10)
+#     pdb2mrc.scale_radii()
+#     pdb2mrc.make_grids()
+#     pdb2mrc.calculate_resolution()
+#     pdb2mrc.calculate_invacuo_density()
+#     pdb2mrc.calculate_excluded_volume()
+#     pdb2mrc.calculate_hydration_shell()
+#     pdb2mrc.calc_rho_with_modified_params(pdb2mrc.params)
+#     if conf["solvent_contrast"]:
+#         rho = pdb2mrc.rho_insolvent
+#     else:
+#         rho = pdb2mrc.rho_invacuo
+#     # rho = ifftshift(rho)
+#     side = pdb2mrc.side
+#     if conf["use_cached_files"]:
+#         print("Writing", mrc_file)
+#         saxstats.write_mrc(rho, side, mrc_file)
+# else:
+#     print("Loading", mrc_file)
+#     rho, side = saxstats.read_mrc(mrc_file)
+# rho = ifftshift(rho.real)
 rho, side = denss.create_density_map(
     pdb_file=conf["pdb_file"],
     solvent_contrast=conf["solvent_contrast"],
@@ -202,9 +202,7 @@ if view_density_projections:
 ##################################################################
 # Prepare arrays for simulations
 ###################################################################
-# rho = ifftshift(rho)
-F = fftshift(fftn(rho)).copy()
-rho_cell = fftshift(rho)
+F = fftshift(fftn(ifftshift(rho)))
 q_vecs = geom.q_vecs(beam=beam)
 q_mags = geom.q_mags(beam=beam)
 amps = np.zeros(geom.n_pixels, dtype=complex)
@@ -342,7 +340,7 @@ class PADGetter(FrameGetter):
                 q = np.dot(
                     q_vecs, R
                 )  # Rotate the protein (equivalent rotation on q, which is inverse of r rotation)
-                a = trilinear_interpolation(F, q, x_min=q_min, x_max=q_max)
+                a = trilinear_interpolation(F.T, q, x_min=q_min, x_max=q_max)
                 a *= np.exp(-1j * (np.dot(q, U.T)))  # Shift the protein
                 amps += a
         print("Simulated protein amplitudes in", time() - t, "seconds")
@@ -439,7 +437,7 @@ for i in range(n_shots):
             R = Rotation.random().as_matrix()
             U = p_vecs[p, :]
             q = np.dot(q_vecs, R)
-            a = trilinear_interpolation(F, q, x_min=q_min, x_max=q_max)
+            a = trilinear_interpolation(F.T, q, x_min=q_min, x_max=q_max)
             a *= np.exp(-1j * (np.dot(q, U.T)))
             amps += a
     if conf["droplet"]:
