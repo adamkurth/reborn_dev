@@ -27,10 +27,52 @@ from .. import utils, detector, source, fileio, const, dataframe
 from . import crystfel, cheetah
 try:
     import psana
+    from Detector import DetectorTypes
 except ImportError:
     psana = None
 from ..config import configs
 debug = configs['debug']
+
+# these are the known area (pad) detectors, see:
+# https://github.com/lcls-psana/Detector/blob/master/src/DetectorTypes.py
+lcls_area_detectors = {"Opal1000", "Tm6740", "pnCCD",
+                       "Princeton", "Fccd", "Cspad",
+                       "Xamps", "Cspad2x2", "Fexamp",
+                       "Phasics", "Timepix", "Opal2000",
+                       "Opal4000", "Opal1600", "Opal8000",
+                       "Fli", "Quartz4A150", "DualAndor",
+                       "Andor", "OrcaFl40", "Epix",
+                       "Rayonix", "EpixSampler", "Pimax",
+                       "Fccd960", "Epix10k", "Epix10ka",
+                       "Epix10ka2M", "Epix10kaQuad", "Epix100a",
+                       "EpixS", "Gotthard", "ControlsCamera",
+                       "Archon", "Jungfrau", "Zyla",
+                       "Pixis", "Uxi", "StreakC7700",
+                       "Archon", "iStar", "Alvium"}
+# make case-insensitive
+known_lcls_area_detectors = {d.casefold(): d for d in lcls_area_detectors}
+# psana typically returns 3d arrays
+# we want to follow reborn PADGeometryList conventions, see:
+#           pad_to_asic_data_split(data, n, m)
+known_detector_splits = {"cspad": (1, 2),
+                         "epix100a": (2, 2),
+                         "epix10k2m": (2, 2)}
+# known reborn PADGeometryLists
+known_reborn_geometries = {"cspad": detector.cspad_pad_geometry_list(detector_distance=1),
+                           "pncdd": detector.pnccd_pad_geometry_list(detector_distance=1),
+                           "epix100a": detector.epix100_pad_geometry_list(detector_distance=1),
+                           "epix10k2m": detector.epix10k_pad_geometry_list(detector_distance=1),
+                           "jungfrau": detector.jungfrau4m_pad_geometry_list(detector_distance=1),
+                           "rayonix": detector.rayonix_mx340_xfel_pad_geometry_list(detector_distance=1)}
+# this is to prevent hard-coding experimental values
+# into the LCLSFrameGetter. Could be used as a global
+# config, but I would not recommend that.
+known_geometry_binnings = {"cspad": None,
+                           "pncdd": None,
+                           "epix100a": None,
+                           "epix10k2m": None,
+                           "jungfrau": None,
+                           "rayonix": 2}
 
 
 def debug_message(*args, caller=True, **kwargs):
@@ -166,6 +208,7 @@ class EpicsTranslationStageMotion:
         self.detector = psana.Detector(epics_pv)
         self.vector = np.array(vector)
         self.epics_pv = epics_pv
+
     def modify_geometry(self, pad_geometry, event):
         r""" Modify the PADGeometryList.
 
@@ -188,6 +231,7 @@ class TranslationMotion:
             vector (|ndarray|): The translation to apply to the PADGeometry
         """
         self.vector = np.array(vector)
+
     def modify_geometry(self, pad_geometry, event):
         r""" Modify the PADGeometryList.
 
@@ -210,11 +254,11 @@ class AreaDetector(object):
     splitter = None
     motions = None  # Allow for some translation operations based on epics pvs
     _home_geometry = None  # This is the initial geometry, before translations/rotations
-    _funky_cheetah_cspad = False
     adu_per_photon = None
 
-    def __init__(self, pad_id=None, geometry=None, mask=None, data_type='calib', motions=None, run_number=1, 
-                        adu_per_photon=None, **kwargs):
+    def __init__(self, pad_id=None, geometry=None,
+                 mask=None, data_type='calib', motions=None,
+                 run_number=1, adu_per_photon=None, **kwargs):
         r"""
         Instantiate with same arguments you would use to instantiate a psana.Detector instance.
         Usually this means to supply a psana.DataSource instance.
@@ -227,18 +271,32 @@ class AreaDetector(object):
             motions (dict): Special dictionaries to describe motorized motions of the detector
 
         """
-        debug_message('AreaDetector')
+        debug_message(f'AreaDetector with kwargs: {kwargs}')
+        # check detector id is recognized (regardless of case)
+        if pad_id.casefold() not in known_lcls_area_detectors:
+            print(f'Given pad_id: {pad_id} is unknown.\n'
+                  f'Please check what you are doing.\n'
+                  f'This return back non-real data.\n')
+        else:
+            # get pad id as psana recognizes it
+            pad_id = known_lcls_area_detectors[pad_id.casefold()]
+        # this is a function that returns a detector object
+        # psana uses this circular naming convention for some reason
+        # in our case we want an AreaDetector, see:
+        # https://github.com/lcls-psana/Detector/blob/master/src/AreaDetector.py
         self.detector = psana.Detector(pad_id, **kwargs)
+        if isinstance(self.detector, DetectorTypes.MissingDet):  # psana missing detector class
+            raise TypeError(f'Detector {pad_id} is missing.'
+                            f'Known psana detectors:\n\n{lcls_area_detectors}\n\n')
         self.detector_type = self.get_detector_type()
+
+        if self.detector_type.casefold() in known_detector_splits:
+            split_n, split_m = known_detector_splits[self.detector_type]
+            self.splitter = lambda data: pad_to_asic_data_split(data, split_n, split_m)
+
         self.data_type = data_type
         self.motions = []
         self.setup_motions(motions)
-        if self.detector_type == 'cspad':
-            self.splitter = lambda data: pad_to_asic_data_split(data, 1, 2)
-        if self.detector_type == 'epix10k2m':
-            self.splitter = lambda data: pad_to_asic_data_split(data, 2, 2)
-        if self.detector_type == 'epix100a':
-            self.splitter = lambda data: pad_to_asic_data_split(data, 2, 2)
 
         if isinstance(geometry, str):
             try:  # Check if it is a reborn geometry file
@@ -249,23 +307,27 @@ class AreaDetector(object):
                 geometry = crystfel.geometry_file_to_pad_geometry_list(geometry)
                 if (self.detector_type == 'cspad') and geometry.parent_data_shape[0] == 1480:
                     geometry = crystfel.fix_cspad_cheetah_indexing(geometry)
-                    # self._funky_cheetah_cspad = True
-                    # self.splitter = None
                     print('Your CrystFEL geometry assumes the psana data has been re-shuffled by Cheetah!!')
         if geometry is None:
-            if self.detector_type == 'rayonix':
-                geom = detector.rayonix_mx340_xfel_pad_geometry_list(detector_distance=1)
-                geometry = geom.binned(2)
-            else:
+            _detector_type = self.detector_type.casefold()
+            # try to use reborn geometry
+            if _detector_type in known_reborn_geometries:
+                geometry = known_reborn_geometries[_detector_type]
+            # check to see if we will bin the geometry
+            if _detector_type in known_geometry_binnings:
+                _bin_value = known_geometry_binnings[_detector_type]
+                if _bin_value is not None:
+                    geometry = geometry.binned(2)
+            else:  # try to use geometry from psana
                 geometry = get_pad_geometry_from_psana(self.detector, run_number, self.splitter)
         self._home_geometry = geometry.copy()
         debug_message('Initial (home) geometry', self._home_geometry)
-        # print(self._home_geometry)
         self.mask = mask
-        if isinstance(mask, str) or (isinstance(mask, list) and isinstance(mask[0], str)):
+        if isinstance(mask, (str, list)) and isinstance(mask[0], str):
             self.mask = detector.load_pad_masks(mask)
         if self.mask is None:
             self.mask = [p.ones() for p in self._home_geometry]
+        self.adu_per_photon = adu_per_photon
 
     def setup_motions(self, motions):
         debug_message('setup_motions', motions)
@@ -329,20 +391,23 @@ class AreaDetector(object):
             data = np.double(self.detector.raw(event))
         elif self.data_type == 'photons':
             if self.adu_per_photon is None:
-                print('You did not set adu_per_photon; setting it to some garbage number.')
+                print('adu_per_photon not set\n'
+                      'setting it to some garbage number.')
                 self.adu_per_photon = 35
             data = np.double(self.detector.photons(event, adu_per_photon=self.adu_per_photon))
         else:
             data = None
-        if not isinstance(data, np.ndarray):
-            data = [g.zeros() for g in self.get_pad_geometry(event)]
-        else:
+        if isinstance(data, np.ndarray):
             data = self.split_pad(data)
+        else:
+            print('Data could not found or was not understood.'
+                  'Setting all pixels to 0, this is not real data.')
+            data = [g.zeros() for g in self.get_pad_geometry(event)]
         return data
 
     def get_pixel_coordinates(self, run_number):
         """ Get pixel coordinates from psana. Returns None for rayonix."""
-        if self.detector_type == 'rayonix':
+        if self.detector_type.casefold() == 'rayonix':
             x, y, z = [None, None, None]
         else:
             x, y, z = get_pad_pixel_coordinates(self.detector, run_number, self.splitter)
@@ -361,18 +426,11 @@ class LCLSFrameGetter(fileio.getters.FrameGetter):
     event_ids = None
 
     def __init__(self, experiment_id, run_number, pad_detectors, max_events=1e6, psana_dir=None, beam=None, idx=True,
-                 evr='evr0', cachedir=None, **kwargs):
+                 evr='evr0', cachedir='.', **kwargs):
         debug_message('Initializing superclass')
         super().__init__(**kwargs)  # initialize the superclass
-        self.init_params = {"experiment_id": experiment_id,
-                            "run_number": run_number,
-                            "pad_detectors": pad_detectors,
-                            "max_events": max_events,
-                            "psana_dir": psana_dir,
-                            "beam": beam,
-                            "idx": idx,
-                            "cachedir": cachedir}
         pad_detectors = [pad_detectors] if isinstance(pad_detectors, dict) else pad_detectors
+        self.experiment_id = experiment_id
         self.run_number = run_number
         self.data_string = f'exp={experiment_id}:run={run_number}:smd'
         debug_message('datastring', self.data_string)
@@ -380,18 +438,16 @@ class LCLSFrameGetter(fileio.getters.FrameGetter):
             self.data_string += f'dir={psana_dir}'
         self.data_source = psana.DataSource(self.data_string)
         if cachedir is not None:
-            cachefile = cachedir+f'/event_ids_{run_number:04d}.pkl'
             os.makedirs(cachedir, exist_ok=True)
+            cachefile = f'{cachedir}/event_ids_{run_number:04d}.pkl'
             if os.path.exists(cachefile):
                 debug_message('Loading cached event Ids:', cachefile)
                 self.event_ids = fileio.misc.load_pickle(cachefile)
         if self.event_ids is None:
             self.event_ids = []
-            for nevent, evt in enumerate(self.data_source.events()):
-                # if (nevent >= max_events) and (cachedir is None):
-                #     break
+            for evt in self.data_source.events():
                 evtId = evt.get(psana.EventId)
-                self.event_ids.append((evtId.time()[0], evtId.time()[1], evtId.fiducials()))
+                self.event_ids.append(evtId.time() + (evtId.fiducials(),))
             if cachedir is not None:
                 debug_message('Caching event Ids:', cachefile)
                 fileio.misc.save_pickle(self.event_ids, cachefile)
@@ -403,8 +459,8 @@ class LCLSFrameGetter(fileio.getters.FrameGetter):
             self.data_string = self.data_string.replace(':smd', ':idx')
         debug_message('datastring', self.data_string)
         self.data_source = psana.DataSource(self.data_string)
-        self.run = self.data_source.runs().__next__()
-        self.events = self.run.events()
+        self.run = self.data_source.runs().__next__()  # iterator for runs, get current run
+        self.events = self.run.events()  # iterator for events in run
         self.previous_frame = 0
         self.ebeam_detector = psana.Detector('EBeam')
         try:
@@ -423,8 +479,8 @@ class LCLSFrameGetter(fileio.getters.FrameGetter):
         # sometimes the index file is missing (e.g. due to DAQ crash or data migration).  So we accommodate
         # the 'smd' mode in addition to the 'idx' mode:
         event = None
+        ts = self.event_ids[frame_number]
         if self.has_indexing:
-            ts = self.event_ids[frame_number]
             event = self.run.event(psana.EventTime(int((ts[0] << 32) | ts[1]), ts[2]))
         else:
             if frame_number == self.previous_frame + 1:
@@ -432,7 +488,6 @@ class LCLSFrameGetter(fileio.getters.FrameGetter):
             else:
                 if not frame_number == 0:
                     debug_message('Skipping frames in the smd mode will be quite slow...')
-                ts = self.event_ids[frame_number]
                 self.data_source = psana.DataSource(self.data_string)
                 self.run = self.data_source.runs().__next__()
                 self.events = self.run.events()
@@ -454,20 +509,20 @@ class LCLSFrameGetter(fileio.getters.FrameGetter):
         try:
             photon_energy = self.ebeam_detector.get(event).ebeamPhotonEnergy()*const.eV
         except AttributeError:
-            debug_message(f'Run {self.run_number} frame {frame_number} causes ebeamPhotonEnergy failure, skipping this '
-                     f'shot.')
+            debug_message(f'Run {self.run_number} frame {frame_number} causes '
+                          f'ebeamPhotonEnergy failure, skipping this shot.')
         geometry = detector.PADGeometryList()
         pad_data = []
         pad_mask = []
         for det in self.detectors:
-            geom = det.get_pad_geometry(event)
-            data = det.get_data_split(event)
+            g = det.get_pad_geometry(event)
+            d = det.get_data_split(event)
             mask = det.mask
-            geometry.extend(geom)
-            pad_data.extend(data)
+            geometry.extend(g)
+            pad_data.extend(d)
             pad_mask.extend([m for m in mask if m is not None])
         df = dataframe.DataFrame()
-        df.set_dataset_id(self.data_string)
+        df.set_dataset_id(f'{self.experiment_id}:{self.run_number}')
         df.set_frame_id(ts)
         df.set_frame_index(frame_number)
         if photon_energy is not None:
