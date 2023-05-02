@@ -44,14 +44,14 @@ def create_density_map(
         pdb.atomtype = np.concatenate([pdb.atomtype]*s)
         pdb.charge = np.concatenate([pdb.charge]*s)
         pdb.nelectrons = np.concatenate([pdb.nelectrons]*s)
-        pdb.radius = np.zeros(n*s) #np.concatenate([pdb.radius]*s)
+        pdb.radius = None #np.zeros(n*s) #np.concatenate([pdb.radius]*s)
         pdb.vdW = np.concatenate([pdb.vdW]*s)
-        pdb.unique_volume = np.zeros(n*s) #np.concatenate([pdb.unique_volume]*s)
-        pdb.unique_radius = np.zeros(n*s) #np.concatenate([pdb.unique_radius]*s)
+        pdb.unique_volume = None #np.zeros(n*s) #np.concatenate([pdb.unique_volume]*s)
+        pdb.unique_radius = None #np.zeros(n*s) #np.concatenate([pdb.unique_radius]*s)
         pdb.numH = np.concatenate([pdb.numH]*s)
     voxel = cell / dmap.cshape[0]
     side = dmap.shape[0] * voxel
-    pdb2mrc = saxstats.PDB2MRC(pdb=pdb, voxel=voxel * 1e10, side=side * 1e10)
+    pdb2mrc = saxstats.PDB2MRC(pdb=pdb, voxel=voxel * 1e10, side=side * 1e10)#, resolution=voxel/2)
     pdb2mrc.scale_radii()
     pdb2mrc.make_grids()
     pdb2mrc.calculate_resolution()
@@ -60,9 +60,9 @@ def create_density_map(
     pdb2mrc.calculate_hydration_shell()
     pdb2mrc.calc_rho_with_modified_params(pdb2mrc.params)
     if solvent_contrast:
-        print("solvent")
         rho = pdb2mrc.rho_insolvent
     else:
         rho = pdb2mrc.rho_invacuo
     side = pdb2mrc.side
-    return rho, side*1e-10
+    extra_info = {'n_bio_assembly_partners': s}
+    return rho, side*1e-10, extra_info

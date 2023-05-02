@@ -33,7 +33,7 @@ rad90 = np.pi / 2
 conf = dict(
     poisson=1,  # Include Poisson noise
     protein=1,  # Include protein contrast in diffraction amplitudes
-    create_bio_assembly=True,
+    create_bio_assembly=1,  # Expand atomic coordinates to include the biomolecular assembly (e.g. virus structure)
     one_particle=1,  # Fix particle counts to one per drop
     droplet=0,  # Include droplet diffraction
     sheet=0,  # Include sheet background (assume drop diameter is sheet thickness)
@@ -160,34 +160,8 @@ if view_density_projections:
 
 ##################################################################
 # Improved density map via DENSS
-#################################################################
-# mrc_file = f"{conf['pdb_file']}_{conf['solvent_contrast']}_{conf['map_resolution']*1e10}_{conf['map_oversample']}.mrc"
-# if not os.path.exists(mrc_file):
-#     pdb = saxstats.PDBmod(conf["pdb_file"], bio_assembly=1)
-#     voxel = cell / dmap.cshape[0]
-#     side = dmap.shape[0] * voxel
-#     pdb2mrc = saxstats.PDB2MRC(pdb=pdb, voxel=voxel * 1e10, side=side * 1e10)
-#     pdb2mrc.scale_radii()
-#     pdb2mrc.make_grids()
-#     pdb2mrc.calculate_resolution()
-#     pdb2mrc.calculate_invacuo_density()
-#     pdb2mrc.calculate_excluded_volume()
-#     pdb2mrc.calculate_hydration_shell()
-#     pdb2mrc.calc_rho_with_modified_params(pdb2mrc.params)
-#     if conf["solvent_contrast"]:
-#         rho = pdb2mrc.rho_insolvent
-#     else:
-#         rho = pdb2mrc.rho_invacuo
-#     # rho = ifftshift(rho)
-#     side = pdb2mrc.side
-#     if conf["use_cached_files"]:
-#         print("Writing", mrc_file)
-#         saxstats.write_mrc(rho, side, mrc_file)
-# else:
-#     print("Loading", mrc_file)
-#     rho, side = saxstats.read_mrc(mrc_file)
-# rho = ifftshift(rho.real)
-rho, side = denss.create_density_map(
+##################################################################
+rho, side, _ = denss.create_density_map(
     pdb_file=conf["pdb_file"],
     solvent_contrast=conf["solvent_contrast"],
     cell=cell,
