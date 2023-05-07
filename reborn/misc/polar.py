@@ -103,9 +103,21 @@ def bin_sum(n_q_bins, n_p_bins, q_index, p_index, array, py=False):
         a_sum (|ndarray|): binned array
     """
     if py:
-        a_sum = np.zeros((n_q_bins, n_p_bins))
-        for a, qi, pi in zip(array, q_index, p_index):
-            a_sum[qi, pi] += a
+        a_sum = np.zeros((n_q_bins + 1, n_p_bins + 1))
+        # for a, qi, pi in zip(array, q_index, p_index):
+        #     a_sum[qi, pi] += a
+        order = np.lexsort((q_index, p_index))
+        row = q_index[order]
+        col = p_index[order]
+        data = array[order]
+        unique_mask = np.append(True, ((row[1:] != row[:-1]) |
+                                       (col[1:] != col[:-1])))
+        unique_indices, = np.nonzero(unique_mask)
+        qi = row[unique_mask]
+        pi = col[unique_mask]
+        a = np.add.reduceat(data, unique_indices)
+        a_sum[qi, pi] = a
+        a_sum = a_sum[0:-1, 0:-1]
     else:  # fortran
         q_i = q_index + 1
         p_i = p_index + 1

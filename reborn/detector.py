@@ -1706,6 +1706,10 @@ class PolarPADAssembler:
             n_phi_bins (int): Number of phi bins.
             phi_range (tuple): Minimum and maximum phi bin centers.  If None, the full 2*pi ring is assumed.
         """
+        # if isinstance(pad_geometry, None):
+        #     raise ValueError('PADGeometry is required.')
+        # if isinstance(beam, None):
+        #     raise ValueError('Beam is required.')
         qms = pad_geometry.q_mags(beam=beam)
         if q_range is None:
             q_range = [0, np.max(qms)]
@@ -1748,6 +1752,31 @@ class PolarPADAssembler:
                                              qs=self.qms,
                                              ps=self.phis,
                                              py=False)
+
+    @classmethod
+    def from_resolution(cls, pad_geometry, beam, sample_diameter, oversample=2):
+        r"""
+        Instantiate PolarPADAssembler the correct way, with resolution and oversample ratio.
+
+        Arguments:
+            pad_geometry (|PADGeometryList|): PAD Geometry.
+            beam (|Beam|): Beam information.
+            sample_diameter (float): Size of sample (L).
+            oversample (int): Oversmaple ratio (s=2 is default).
+        """
+        qms = pad_geometry.q_mags(beam=beam)
+        qm = qms.max()
+        qn = qms.min()
+        dq = 2 * np.pi / (sample_diameter * oversample)
+        qs = np.arange(qn, qm, dq)
+        theta = 2 * np.arcsin(qm * beam.wavelength / (4 * np.pi))
+        qperp = qm * np.cos(theta / 2)  # component of q-vector perpendicular to beam
+        dphi = dq / qperp  # phi step size
+        n_q = int(qs.size)  # number of q bins for Shannon sampling
+        n_p = int(2 * np.pi / dphi)  # number of phi bins for Shannon sampling
+        n_p += n_p % 2  # make it even
+        return cls(pad_geometry=pad_geometry, beam=beam, n_q_bins=n_q,
+                   q_range=(qn, qm), n_phi_bins=n_p, phi_range=(0, 2 * np.pi))
 
     def bin_sum(self, array, py=False):
         return polar.bin_sum(n_q_bins=self.n_q_bins,
