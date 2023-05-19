@@ -86,7 +86,7 @@ class FrameGetter(ABC):
     _kwargs = None
     postprocessors = []
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
         pass
 
     def __new__(cls, *args, **kwargs):
