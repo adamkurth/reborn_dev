@@ -1,4 +1,5 @@
 import sys
+import os
 import numpy as np
 import pyqtgraph as pg
 import matplotlib.pyplot as plt
@@ -46,8 +47,15 @@ protein_concentration = 10  #  Concentration of protein (mg/ml, which is same as
 # pad = reborn.detector.PADGeometry(distance=detector_distance, shape=detector_shape, pixel_size=pixel_size)
 
 # added by adam
-
-geom_dictonary = crystfel.load_crystfel_geometry("/Users/adamkurth/Documents/vscode/CXFEL_Image_Analysis/CXFEL/reborn/developer/rkirian/projects/water/adam/Eiger4M.geom")
+cwd = os.getcwd()
+base_dir_index = cwd.find('reborn_dev')
+if base_dir_index != -1:
+    base_dir_path = cwd[:base_dir_index + len('reborn_dev')]
+    geom_file_path = os.path.join(base_dir_path, "developer/rkirian/projects/water/adam/Eiger4M.geom")
+else:
+    print("Base directory 'reborn_dev' not found in the current working directory")
+    
+geom_dictonary = crystfel.load_crystfel_geometry(geom_file_path)
 pad = crystfel.geometry_dict_to_pad_geometry_list(geom_dictonary)[0]
 
 # end of added by adam
