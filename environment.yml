@@ -13,17 +13,17 @@ dependencies:
   - pyqtgraph           # Only if you want to use the Qt GUIs (reborn.viewers.qtviews)
   - pyopengl            # Only if you need 3D graphics
   - xraylib             # Only if you need scattering factors
-  - joblib              # Only if you need parallelized pipelines
+  - joblib            cd   # Only if you need parallelized pipelines
   - pandas              # Only if you need tabular data displays
-  - sphinx              # Only if you are building docs
-  - memory_profiler     # Only if you are building docs
+  # - sphinx              # Only if you are building docs
+  # - memory_profiler     # Only if you are building docs
   - fortran-compiler    # Only if you do not already have gfortran installed
-  - ocl-icd-system      # Only if you installed pyopencl and do not manage ICDs manually
-  - pip                 # Only if you are building docs
+  # - ocl-icd-system      # Only if you installed pyopencl and do not manage ICDs manually
+  # - pip                 # Only if you are building docs
 #  - pocl               # Possibly helpful to run unit tests without a GPU
 #  - ocl_icd_wrapper_apple  # Possibly helpful for GPU simulations on Apple computers
 #  - make               # Only if you are building docs on Apple or Windows computers
-  - pip:                # Some packages only install via pip...
-    - sphinx_rtd_theme  # Only if you are building docs
-    - sphinx-gallery    # Only if you are building docs
-    - pyvirtualdisplay  # Only if you are building docs
+  # - pip:                # Some packages only install via pip...
+  #   - sphinx_rtd_theme  # Only if you are building docs
+  #   - sphinx-gallery    # Only if you are building docs
+  #   - pyvirtualdisplay  # Only if you are building docs

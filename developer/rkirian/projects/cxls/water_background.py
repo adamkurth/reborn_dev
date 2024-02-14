@@ -2,11 +2,23 @@ import sys
 import numpy as np
 import pyqtgraph as pg
 import matplotlib.pyplot as plt
+import h5py
 import reborn
 from reborn.simulate import solutions, form_factors
 from reborn.viewers.qtviews import PADView
 from reborn.detector import RadialProfiler
 from scipy import constants as const
+
+from reborn.external import crystfel # crystfel.py interested in load_crystfel_geometry and geometry_dict_to_pad_geometry_list
+
+def save_h5(data, filepath):
+    with h5py.File(filepath, 'w') as f:
+        f.create_dataset('data', data=data)
+
+def load_mask(filepath):
+    with h5py.File(filepath, 'r') as f:
+        mask = f['mask_file'][:]
+    return mask
 
 r_e = const.value('classical electron radius')
 eV = const.value('electron volt')
@@ -14,7 +26,8 @@ eV = const.value('electron volt')
 ##########################################################
 # Configuration (everything in SI units)
 #############################################################
-detector_shape = [2167, 2167]
+# detector_shape = [2167, 2167]
+detector_shape = [4371, 4150] # for Eiger4M
 pixel_size = 75e-6
 detector_distance = 0.1  # Sample to detector distance
 sample_thickness = 100e-6  # Assuming a sheet of liquid of this thickness
@@ -30,7 +43,15 @@ protein_concentration = 10  #  Concentration of protein (mg/ml, which is same as
 ###############################################################################################
 # The above parameters are configurable.  Don't add new config parameters below this point!
 #########################################################################################
-pad = reborn.detector.PADGeometry(distance=detector_distance, shape=detector_shape, pixel_size=pixel_size)
+# pad = reborn.detector.PADGeometry(distance=detector_distance, shape=detector_shape, pixel_size=pixel_size)
+
+# added by adam
+
+geom_dictonary = crystfel.load_crystfel_geometry("/Users/adamkurth/Documents/vscode/CXFEL_Image_Analysis/CXFEL/reborn/developer/rkirian/projects/water/adam/Eiger4M.geom")
+pad = crystfel.geometry_dict_to_pad_geometry_list(geom_dictonary)[0]
+
+# end of added by adam
+
 beam = reborn.source.Beam(photon_energy=photon_energy, diameter_fwhm=beam_diameter, pulse_energy=n_photons*photon_energy)
 mask = pad.beamstop_mask(beam=beam, min_angle=beam_divergence)
 n_water_molecules = sample_thickness * np.pi * (beam.diameter_fwhm/2)**2 * solutions.water_number_density()
@@ -55,6 +76,8 @@ profiler = RadialProfiler(pad_geometry=pad, beam=beam, n_bins=500, q_range=(0, n
 prof = profiler.get_mean_profile(I)
 I = pad.reshape(I)
 I *= mask.astype(int)
+
+
 
 if 'noplots' not in sys.argv:
 

@@ -1,0 +1,5 @@
+{
+    "yaml.schemas": {
+        "https://gitlab.com/gitlab-org/gitlab/-/raw/master/app/assets/javascripts/editor/schema/ci.json": "file:///Users/adamkurth/Documents/vscode/CXFEL_Image_Analysis/CXFEL/reborn/.gitlab-ci.yml"
+    }
+}
